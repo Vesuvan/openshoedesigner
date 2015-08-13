@@ -1,0 +1,27 @@
+
+*~
+LastMaker
+
+# /
+/rawWWW
+/WWW
+/build
+/bin_linux
+/bin_debug
+/Debug_Linux
+/Debug_Linux
+/Debug
+/Release
+
+/*.zip
+
+# /doc4developer/
+/doc/doxygen/html
+/doc/doxygen/latex
+
+# /doc4user/
+/doc/*.aux
+/doc/*.toc
+/doc/*.pdf
+/doc/*.backup
+/doc/*.dvi
