@@ -32,18 +32,17 @@
 
 Bone::Bone()
 {
-	p1.Set(-0.1, 0, 0);
-	p2.Set(0.1, 0, 0);
-	r1 = 0.2;
-	r2 = 0.2;
+	r1 = 0.0;
+	r2 = 0.0;
 }
 
 Bone::~Bone()
 {
 }
 
-void Bone::Render(void) const
+void Bone::Render(void)
 {
+	if(r1 == 0.0 && r2 == 0.0) return;
 	float d = (p2 - p1).Abs();
 	float r = fabs(r1 - r2);
 	int n;

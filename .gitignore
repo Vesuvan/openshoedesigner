@@ -1,8 +1,9 @@
 
 *~
-LastMaker
+LastGenerator
 
 # /
+/extra
 /rawWWW
 /WWW
 /build
@@ -25,3 +26,4 @@ LastMaker
 /doc/*.pdf
 /doc/*.backup
 /doc/*.dvi
+

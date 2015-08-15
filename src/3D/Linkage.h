@@ -40,12 +40,12 @@ public:
 	Linkage();
 	virtual ~Linkage();
 
-	const Linkage* AddChild(Linkage* const child);
-	const Linkage* AddChild(void);
-	const Linkage* AddChild(Vector3 const &position);
+	Linkage* AddChild(Linkage* child);
+//	Linkage* AddChild(void);
+//	Linkage* AddChild(Vector3 const &position);
 
 	void Paint(void);
-	virtual void Render(void);
+	virtual void Render(void)=0;
 
 	AffineTransformMatrix matrix;
 	Vector3 color;

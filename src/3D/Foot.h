@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameMain.cpp
+// Name               : Foot.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 11.08.2015
+// Created            : 13.08.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,30 +24,54 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "FrameMain.h"
+#ifndef FOOT_H_
+#define FOOT_H_
+#include "Bone.h"
 
-FrameMain::FrameMain(wxWindow* parent) :
-		GUIFrameMain(parent)
-{
-	foot.Setup();
-	m_canvas->SetBones(&foot);
-}
+/*!\class Foot
+ * \brief ...
+ *
+ * ...
+ */
 
-FrameMain::~FrameMain()
-{
-}
+class Foot {
+public:
+	Foot();
+	virtual ~Foot();
+	void Render(void) const;
 
-bool FrameMain::TransferDataFromWindow()
-{
-	return true;
-}
+	void Setup(void);
 
-bool FrameMain::TransferDataToWindow()
-{
-	return true;
-}
+private:
+	Bone* Tibia; /// Schienbein
+	Bone* Fibula; /// Wadenbein
+	Bone* Talus; /// Sprungbein
+	Bone* Talus2; /// Sprungbein (Extrabone)
+	Bone* Calcaneus; /// Fersenbein
+	Bone* Cuboideum; /// Wuerfelbein
+	Bone* Naviculare; /// Kahnbein
+	Bone* Cuneiforme1; /// Keilbein 1
+	Bone* Cuneiforme2; /// Keilbein 2
+	Bone* Cuneiforme3; /// Keilbein 3
+	Bone* Metatarsalis1; /// Mittelfussknochen 1
+	Bone* Metatarsalis2; /// Mittelfussknochen 2
+	Bone* Metatarsalis3; /// Mittelfussknochen 3
+	Bone* Metatarsalis4; /// Mittelfussknochen 4
+	Bone* Metatarsalis5; /// Mittelfussknochen 5
+	Bone* PhalanxI1;
+	Bone* PhalanxI2;
+	Bone* PhalanxI3;
+	Bone* PhalanxI4;
+	Bone* PhalanxI5;
+	Bone* PhalanxII1;
+	Bone* PhalanxII2;
+	Bone* PhalanxII3;
+	Bone* PhalanxII4;
+	Bone* PhalanxII5;
+	Bone* PhalanxIII1;
+	Bone* PhalanxIII2;
+	Bone* PhalanxIII3;
+	Bone* PhalanxIII4;
+};
 
-void FrameMain::OnQuit(wxCommandEvent& event)
-{
-	Close();
-}
+#endif /* FOOT_H_ */

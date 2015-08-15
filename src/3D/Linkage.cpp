@@ -52,8 +52,8 @@ void Linkage::Paint(void)
 {
 	glPushMatrix();
 	glMultMatrixd(matrix.a);
+	::glColor3f(color.x, color.y, color.z);
 	Render();
-
 	Linkage* temp = children;
 	while(temp != NULL){
 		temp->Paint();
@@ -62,7 +62,7 @@ void Linkage::Paint(void)
 	glPopMatrix();
 }
 
-const Linkage * Linkage::AddChild(Linkage* const child)
+Linkage * Linkage::AddChild(Linkage* child)
 {
 	if(this->children == NULL){
 		this->children = child;
@@ -75,61 +75,58 @@ const Linkage * Linkage::AddChild(Linkage* const child)
 	return child;
 }
 
-const Linkage* Linkage::AddChild(void)
-{
-	Linkage* temp = new Linkage;
-	AddChild(temp);
-	return temp;
-}
+//Linkage* Linkage::AddChild(void)
+//{
+//	Linkage* temp = new Linkage;
+//	AddChild(temp);
+//	return temp;
+//}
+//
+//Linkage * Linkage::AddChild(const Vector3& position)
+//{
+//	Linkage* temp = new Linkage;
+//	temp->matrix.TranslateGlobal(position.x, position.y, position.z);
+//	AddChild(temp);
+//	return temp;
+//}
 
-const Linkage * Linkage::AddChild(const Vector3& position)
-{
-	Linkage* temp = new Linkage;
-	temp->matrix.TranslateGlobal(position.x, position.y, position.z);
-	AddChild(temp);
-	return temp;
-}
-
-void Linkage::Render(void)
-{
-	float sx, sy, sz;
-	sx = 0.01;
-	sy = 0.01;
-	sz = 0.01;
-
-	::glBegin(GL_QUADS);
-
-	::glColor3f(color.x, color.y, color.z);
-
-	::glNormal3f(1, 0, 0);
-	::glVertex3f(sx, sy, sz);
-	::glVertex3f(sx, 0, sz);
-	::glVertex3f(sx, 0, 0);
-	::glVertex3f(sx, sy, 0);
-	::glNormal3f(-1, 0, 0);
-	::glVertex3f(0, sy, sz);
-	::glVertex3f(0, sy, 0);
-	::glVertex3f(0, 0, 0);
-	::glVertex3f(0, 0, sz);
-	::glNormal3f(0, 1, 0);
-	::glVertex3f(sx, sy, sz);
-	::glVertex3f(sx, sy, 0);
-	::glVertex3f(0, sy, 0);
-	::glVertex3f(0, sy, sz);
-	::glNormal3f(0, -1, 0);
-	::glVertex3f(sx, 0, sz);
-	::glVertex3f(0, 0, sz);
-	::glVertex3f(0, 0, 0);
-	::glVertex3f(sx, 0, 0);
-	::glNormal3f(0, 0, 1);
-	::glVertex3f(sx, sy, sz);
-	::glVertex3f(0, sy, sz);
-	::glVertex3f(0, 0, sz);
-	::glVertex3f(sx, 0, sz);
-	::glNormal3f(0, 0, -1);
-	::glVertex3f(sx, sy, 0);
-	::glVertex3f(sx, 0, 0);
-	::glVertex3f(0, 0, 0);
-	::glVertex3f(0, sy, 0);
-	::glEnd();
-}
+//void Linkage::Render(void)
+//{
+//	float sx, sy, sz;
+//	sx = 0.01;
+//	sy = 0.01;
+//	sz = 0.01;
+//
+//	::glBegin(GL_QUADS);
+//	::glNormal3f(1, 0, 0);
+//	::glVertex3f(sx, sy, sz);
+//	::glVertex3f(sx, 0, sz);
+//	::glVertex3f(sx, 0, 0);
+//	::glVertex3f(sx, sy, 0);
+//	::glNormal3f(-1, 0, 0);
+//	::glVertex3f(0, sy, sz);
+//	::glVertex3f(0, sy, 0);
+//	::glVertex3f(0, 0, 0);
+//	::glVertex3f(0, 0, sz);
+//	::glNormal3f(0, 1, 0);
+//	::glVertex3f(sx, sy, sz);
+//	::glVertex3f(sx, sy, 0);
+//	::glVertex3f(0, sy, 0);
+//	::glVertex3f(0, sy, sz);
+//	::glNormal3f(0, -1, 0);
+//	::glVertex3f(sx, 0, sz);
+//	::glVertex3f(0, 0, sz);
+//	::glVertex3f(0, 0, 0);
+//	::glVertex3f(sx, 0, 0);
+//	::glNormal3f(0, 0, 1);
+//	::glVertex3f(sx, sy, sz);
+//	::glVertex3f(0, sy, sz);
+//	::glVertex3f(0, 0, sz);
+//	::glVertex3f(sx, 0, sz);
+//	::glNormal3f(0, 0, -1);
+//	::glVertex3f(sx, sy, 0);
+//	::glVertex3f(sx, 0, 0);
+//	::glVertex3f(0, 0, 0);
+//	::glVertex3f(0, sy, 0);
+//	::glEnd();
+//}

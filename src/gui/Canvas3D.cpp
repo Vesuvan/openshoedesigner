@@ -37,7 +37,7 @@ Canvas3D::~Canvas3D()
 
 }
 
-void Canvas3D::SetBones(Bone* const bone)
+void Canvas3D::SetBones(Foot* const bone)
 {
 	this->bone = bone;
 }

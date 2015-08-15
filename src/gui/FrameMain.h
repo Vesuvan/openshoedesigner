@@ -46,7 +46,7 @@ public:
 	virtual void OnQuit(wxCommandEvent& event);
 
 private:
-	Bone root;
+	Foot foot;
 
 };
 

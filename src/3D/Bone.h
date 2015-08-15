@@ -44,7 +44,7 @@ public:
 	float r1;
 	float r2;
 
-	void Render(void) const;
+	void Render(void);
 
 private:
 	void Normal(const Vector3 v) const;

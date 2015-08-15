@@ -35,19 +35,19 @@
 
 #include "../3D/OpenGLCanvas.h"
 #include "../3D/Vector3.h"
-#include "../3D/Bone.h"
+#include "../3D/Foot.h"
 
 class Canvas3D:public OpenGLCanvas {
 public:
 	Canvas3D(wxFrame* parent);
 	virtual ~Canvas3D();
 
-	void SetBones(Bone* const bone);
+	void SetBones(Foot* const bone);
 
 	void Render();
 
 private:
-	Bone* bone;
+	Foot* bone;
 };
 
 #endif /* CANVAS3D_H_ */
