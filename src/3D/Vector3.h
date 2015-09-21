@@ -156,7 +156,7 @@ public:
 	}
 
 	//! Calculates the dot product (inner product) of two vectors.
-	float Dot(const Vector3& b)
+	float Dot(const Vector3& b) const
 	{
 		return (x * b.x + y * b.y + z * b.z);
 	}

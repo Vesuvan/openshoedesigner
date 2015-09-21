@@ -30,11 +30,11 @@ Canvas3D::Canvas3D(wxFrame* parent) :
 		OpenGLCanvas(parent)
 {
 	bone = NULL;
+	volume = NULL;
 }
 
 Canvas3D::~Canvas3D()
 {
-
 }
 
 void Canvas3D::SetBones(Foot* const bone)
@@ -42,37 +42,33 @@ void Canvas3D::SetBones(Foot* const bone)
 	this->bone = bone;
 }
 
+void Canvas3D::SetVolume(Volume* const volume)
+{
+	this->volume = volume;
+}
+
 void Canvas3D::Render()
 {
 
 	glBegin (GL_LINES);
 	glNormal3f(0, -0.707, 0.707);
-	glColor3f(0.5, 0.0, 0.0);
-	glVertex3f(-1, -1, 0);
-	glVertex3f(1, -1, 0);
-
-	glNormal3f(0, 0.707, 0.707);
-	glColor3f(0.3, 0.3, 0.3);
-	glVertex3f(-1, 1, 0);
-	glVertex3f(1, 1, 0);
+	glColor3f(0.8, 0.0, 0.0);
+	glVertex3f(-0.3, 0, 0);
+	glVertex3f(0.3, 0, 0);
 
 	glNormal3f(-0.707, 0.0, 0.707);
-	glColor3f(0.0, 0.5, 0.0);
-	glVertex3f(-1, -1, 0);
-	glVertex3f(-1, 1, 0);
-
-	glNormal3f(0.707, 0.0, 0.707);
-	glColor3f(0.3, 0.3, 0.3);
-	glVertex3f(1, -1, 0);
-	glVertex3f(1, 1, 0);
+	glColor3f(0.0, 0.8, 0.0);
+	glVertex3f(0, -0.3, 0);
+	glVertex3f(0, 0.3, 0);
 
 	glNormal3f(0.0, 0.0, 1.0);
 	glColor3f(0.0, 0.0, 0.8);
-	glVertex3f(0, 0, 0);
-	glVertex3f(0, 0, 1);
+	glVertex3f(0, 0, -0.3);
+	glVertex3f(0, 0, 0.3);
 
 	glEnd();
 
 	if(bone != NULL) bone->Render();
+	if(volume != NULL) volume->Render();
 
 }

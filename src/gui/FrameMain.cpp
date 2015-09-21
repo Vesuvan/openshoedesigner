@@ -30,7 +30,10 @@ FrameMain::FrameMain(wxWindow* parent) :
 		GUIFrameMain(parent)
 {
 	foot.Setup();
+	volume.SetSize(0.3, 0.2, 0.2, 0.01);
+	volume.matrix.TranslateGlobal(-0.075, -0.075, -0.12);
 	m_canvas->SetBones(&foot);
+	m_canvas->SetVolume(&volume);
 }
 
 FrameMain::~FrameMain()

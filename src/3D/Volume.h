@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Canvas3D.h
+// Name               : Volume.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 11.08.2015
+// Created            : 19.08.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,32 +24,43 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CANVAS3D_H_
-#define CANVAS3D_H_
+#ifndef VOLUME_H_
+#define VOLUME_H_
+#include "AffineTransformMatrix.h"
+#include "Vector3.h"
 
-/*!\class Canvas3D
+/*!\class Volume
  * \brief ...
  *
  * ...
  */
 
-#include "../3D/OpenGLCanvas.h"
-#include "../3D/Vector3.h"
-#include "../3D/Foot.h"
-#include "../3D/Volume.h"
-
-class Canvas3D:public OpenGLCanvas {
+class Volume {
 public:
-	Canvas3D(wxFrame* parent);
-	virtual ~Canvas3D();
+	Volume();
+	virtual ~Volume();
 
-	void SetBones(Foot* const bone);
-	void SetVolume(Volume* const volume);
-	void Render();
+	void SetCount(unsigned int nx, unsigned int ny, unsigned int nz,
+			float resolution);
+	void SetSize(float x, float y, float z, float resolution);
 
+	void Clear(void);
+	void Render(void);
+
+	AffineTransformMatrix matrix;
+	Vector3 color;
 private:
-	Foot* bone;
-	Volume* volume;
+
+	float * value;
+
+	unsigned int Nx;
+	unsigned int Ny;
+	unsigned int Nz;
+	unsigned int N;
+	float dx;
+	float dy;
+	float dz;
+
 };
 
-#endif /* CANVAS3D_H_ */
+#endif /* VOLUME_H_ */

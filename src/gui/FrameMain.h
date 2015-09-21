@@ -47,6 +47,7 @@ public:
 
 private:
 	Foot foot;
+	Volume volume;
 
 };
 
