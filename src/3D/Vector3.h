@@ -42,6 +42,7 @@ public:
 			x(px), y(py), z(pz)
 	{
 	}
+
 	Vector3(wxString string)
 	{
 		this->FromString(string);

@@ -27,6 +27,7 @@
 #ifndef VOLUME_H_
 #define VOLUME_H_
 #include "AffineTransformMatrix.h"
+#include "Triangle.h"
 #include "Vector3.h"
 
 /*!\class Volume
@@ -45,10 +46,21 @@ public:
 	void SetSize(float x, float y, float z, float resolution);
 
 	void Clear(void);
+
+	void AddSphere(Vector3 p1, float r1, float k1);
+	void AddCylinder(const Vector3 &p1, const Vector3 &p2, const float r1,
+			const float k1);
+	void AddCylinder(const Vector3 &p1, const Vector3 &p2, const float r1,
+			const float r2, const float k1);
+	void AddCylinder(const Vector3 &p1, const Vector3 &p2, const float r1,
+			const float r2, const float k1, const float k2);
+
+	void MarchingCubes(float limit = 0.5);
 	void Render(void);
 
 	AffineTransformMatrix matrix;
 	Vector3 color;
+	ArrayOfTriangle triangles;
 private:
 
 	float * value;
