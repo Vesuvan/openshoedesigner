@@ -28,6 +28,7 @@
 
 #include <GL/gl.h>
 #include <math.h>
+#include <wx/textfile.h>
 #include <wx/wx.h>
 
 #include "wx/string.h"
@@ -87,17 +88,41 @@ void Volume::Clear(void)
 		value[i] = 0.0;
 }
 
-void Volume::AddSphere(Vector3 p1, float r1, float k1)
+void Volume::AddHalfplane(const Vector3& p1, float d0, float k0)
 {
 	unsigned int nx, ny, nz;
-	float d;
 	Vector3 p(0, 0, 0);
-	Vector3 h1 = matrix.Inverse().Transform(p1);
+	float kh = -log(2 * M_E - 1) / k0;
+
 	unsigned int c = 0;
 	for(nz = 0; nz < Nz; nz++){
 		for(ny = 0; ny < Ny; ny++){
 			for(nx = 0; nx < Nx; nx++){
-				d = 1 - 1 / (1 + exp(-k1 * ((p - h1).Abs() - r1)));
+				float d = matrix.Transform(p).Dot(p1);
+				value[c] += 1 - 1 / (1 + exp(kh * (d - d0)));
+				c++;
+				p.x += dx;
+			}
+			p.x = 0.0;
+			p.y += dy;
+		}
+		p.y = 0.0;
+		p.z += dz;
+	}
+}
+
+void Volume::AddSphere(const Vector3 &p1, float r1, float k1)
+{
+	unsigned int nx, ny, nz;
+	Vector3 h1 = matrix.Inverse().Transform(p1);
+	Vector3 p(0, 0, 0);
+	unsigned int c = 0;
+	float kh = -log(2 * M_E - 1) / k1;
+
+	for(nz = 0; nz < Nz; nz++){
+		for(ny = 0; ny < Ny; ny++){
+			for(nx = 0; nx < Nx; nx++){
+				float d = 1 - 1 / (1 + exp(kh * ((p - h1).Abs() - r1)));
 				value[c] += d;
 				c++;
 				p.x += dx;
@@ -113,16 +138,212 @@ void Volume::AddSphere(Vector3 p1, float r1, float k1)
 void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 		const float k1)
 {
+	unsigned int nx, ny, nz;
+	Vector3 h1 = matrix.Inverse().Transform(p1);
+	Vector3 h2 = matrix.Inverse().Transform(p2);
+	Vector3 n = h2 - h1;
+	float nd = n.Abs();
+	float kh = -log(2 * M_E - 1) / k1;
+
+	n.Normalize();
+	Vector3 p(0, 0, 0);
+	unsigned int c = 0;
+	for(nz = 0; nz < Nz; nz++){
+		for(ny = 0; ny < Ny; ny++){
+			for(nx = 0; nx < Nx; nx++){
+
+				float r = n.Dot(p - h1);
+				if(r < 0) r = 0;
+				if(r > nd) r = nd;
+				Vector3 h = h1 + n * r;
+				float d = (p - h).Abs() - r1;
+
+				value[c] += 1 - 1 / (1 + exp(kh * d));
+				c++;
+				p.x += dx;
+			}
+			p.x = 0.0;
+			p.y += dy;
+		}
+		p.y = 0.0;
+		p.z += dz;
+	}
 }
 
 void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 		const float r2, const float k1)
 {
+	Vector3 h1 = matrix.Inverse().Transform(p1);
+	Vector3 h2 = matrix.Inverse().Transform(p2);
+	Vector3 n = h2 - h1;
+	float nd = n.Abs();
+	if(nd == 0){
+		AddSphere(p1, fmax(r1, r2), k1);
+		return;
+	}
+	if(nd + r2 <= r1){
+		AddSphere(p1, r1, k1);
+		return;
+	}
+	if(nd + r1 <= r2){
+		AddSphere(p2, r2, k1);
+		return;
+	}
+
+	n.Normalize();
+
+//	float a = 1 / (1 + (2 * r1 * r2 - r1 * r1 - r2 * r2) / (nd * nd));
+//	float b = (r1 * r2 - r1 * r1) / nd;
+
+// x2 = x1*a
+// y2 = x1*b
+
+	float s0 = (r1 * r1 - r1 * r2) / nd;
+	float h0 = r1 * sqrt(2 * r1 * r2 + nd * nd - r1 * r1 - r2 * r2) / nd;
+	// Coordinatesystemtransformation:
+	float a11 = 1 / nd;
+	float a12 = -s0 / (h0 * nd);
+//	float a21 = (r1 - r2) / nd;
+//	float a22 = (r2 * s0 - r1 * s0 + nd * r1) / (h0 * nd);
+	float a21 = 0;
+	float a22 = r1 / h0;
+
+	float kh = -log(2 * M_E - 1) / k1;
+	Vector3 p(0, 0, 0);
+	unsigned int c = 0;
+	unsigned int nx, ny, nz;
+	for(nz = 0; nz < Nz; nz++){
+		for(ny = 0; ny < Ny; ny++){
+			for(nx = 0; nx < Nx; nx++){
+				float x = n.Dot(p - h1);
+				Vector3 h = h1 + n * x;
+				float y = (p - h).Abs();
+				float x2 = x * a11 + y * a12;
+				float y2 = x * a21 + y * a22;
+				float d = y2;
+
+				if(x2 < 0) d = (p - h1).Abs();
+				if(x2 > 1) d = (p - h2).Abs();
+//				if(x2 >= 0) d = sqrt(
+//						(x2 - nd * a) * (x2 - nd * a) + y2 * y2);
+				float r;
+				if(x2 < 0){
+					r = r1;
+				}else{
+					if(x2 < 1){
+						r = r1 + (r2 - r1) * x2;
+					}else{
+						r = r2;
+					}
+				}
+				d -= r;
+				//d = 1 - 1 / (1 + exp(-k1 * d));
+				d = 1 - 1 / (1 + exp(kh * d));
+				value[c] += d;
+				c++;
+				p.x += dx;
+			}
+			p.x = 0.0;
+			p.y += dy;
+		}
+		p.y = 0.0;
+		p.z += dz;
+	}
 }
 
 void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 		const float r2, const float k1, const float k2)
 {
+	Vector3 h1 = matrix.Inverse().Transform(p1);
+	Vector3 h2 = matrix.Inverse().Transform(p2);
+	Vector3 n = h2 - h1;
+	float nd = n.Abs();
+	if(nd == 0){
+		AddSphere(p1, fmax(r1, r2), k1);
+		return;
+	}
+	if(nd + r2 <= r1){
+		AddSphere(p1, r1, k1);
+		return;
+	}
+	if(nd + r1 <= r2){
+		AddSphere(p2, r2, k1);
+		return;
+	}
+
+	n.Normalize();
+
+	//	float a = 1 / (1 + (2 * r1 * r2 - r1 * r1 - r2 * r2) / (nd * nd));
+	//	float b = (r1 * r2 - r1 * r1) / nd;
+
+	// x2 = x1*a
+	// y2 = x1*b
+
+	float dlimit = fmax(fmax(dx, dy), dz);
+
+	float s0 = (r1 * r1 - r1 * r2) / nd;
+	float h0 = r1 * sqrt(2 * r1 * r2 + nd * nd - r1 * r1 - r2 * r2) / nd;
+	// Coordinatesystemtransformation:
+	float a11 = 1 / nd;
+	float a12 = -s0 / (h0 * nd);
+	//	float a21 = (r1 - r2) / nd;
+	//	float a22 = (r2 * s0 - r1 * s0 + nd * r1) / (h0 * nd);
+	float a21 = 0;
+	float a22 = r1 / h0;
+
+	float kh = -log(2 * M_E - 1);
+	Vector3 p(0, 0, 0);
+	unsigned int c = 0;
+	unsigned int nx, ny, nz;
+	for(nz = 0; nz < Nz; nz++){
+		for(ny = 0; ny < Ny; ny++){
+			for(nx = 0; nx < Nx; nx++){
+				float x = n.Dot(p - h1);
+				Vector3 h = h1 + n * x;
+				float y = (p - h).Abs();
+				float x2 = x * a11 + y * a12;
+				float y2 = x * a21 + y * a22;
+				float d = y2;
+
+				if(x2 < 0) d = (p - h1).Abs();
+				if(x2 > 1) d = (p - h2).Abs();
+				//				if(x2 >= 0) d = sqrt(
+				//						(x2 - nd * a) * (x2 - nd * a) + y2 * y2);
+				float r;
+				if(x2 < 0){
+					r = r1;
+				}else{
+					if(x2 < 1){
+						r = r1 + (r2 - r1) * x2;
+					}else{
+						r = r2;
+					}
+				}
+				float k;
+//				if(x2 < 0){
+//					k = k1;
+//				}else{
+//					if(x2 < 1){
+				k = k1 + (k2 - k1) * x2;
+//					}else{
+//						k = k2;
+//					}
+//				}
+				if(k < dlimit) k = dlimit;
+
+				d -= r;
+				//d = 1 - 1 / (1 + exp(-k1 * d));
+				d = 1 - 1 / (1 + exp(kh * d / k));
+				value[c] += d;
+				c++;
+				p.x += dx;
+			}
+			p.x = 0.0;
+			p.y += dy;
+		}
+		p.y = 0.0;
+		p.z += dz;
+	}
 }
 
 static int8_t tri[3072] =
@@ -307,6 +528,15 @@ static uint16_t edge[256] =
 
 void Volume::MarchingCubes(float limit)
 {
+//	setlocale(LC_ALL, "C"); // To get a 3.1415 instead 3,1415 or else on every computer.
+//	wxTextFile temp(_T("~/octave/oneslice.m"));
+//	if(!temp.Exists())
+//		temp.Create();
+//	else
+//		temp.Open();
+//	temp.Clear();
+//	temp.AddLine(_T("M=[ ..."));
+
 	triangles.Clear();
 	if(value == NULL) return;
 	Vector3 p(0, 0, 0);
@@ -314,6 +544,9 @@ void Volume::MarchingCubes(float limit)
 	for(k = 0; k < Nz - 1; k++){
 		for(j = 0; j < Ny - 1; j++){
 			for(i = 0; i < Nx - 1; i++){
+//				if(k == 60) temp.AddLine(
+//						wxString::Format(_T("%.3f,..."), value[c]));
+
 				double v0 = value[c];
 				double v1 = value[c + 1];
 				double v2 = value[c + Nx];
@@ -495,8 +728,18 @@ void Volume::MarchingCubes(float limit)
 	}
 	for(n = 0; n < triangles.GetCount(); n++)
 		triangles[n].CalculateNormal();
+//	temp.AddLine(_T("];"));
+//	temp.AddLine(_T("M=reshape(M,149,[]);"));
+//	temp.AddLine(_T("%M=M-min(min(M));"));
+//	temp.AddLine(_T("%M=M/max(max(M));"));
+//	temp.AddLine(
+//			_T(
+//					"[X,Y] = ndgrid(linspace(0,0.3,149)-0.075,linspace(0,0.2,99)-0.075);"));
+//	temp.Write();
+//	setlocale(LC_ALL, "");
 
 }
+
 void Volume::Render(void)
 {
 
@@ -509,7 +752,7 @@ void Volume::Render(void)
 		glBegin(GL_POINTS);
 
 		Vector3 p(0, 0, 0);
-		unsigned int i, j, k, n, c = 0;
+		unsigned int i, j, k, c = 0;
 		for(k = 0; k < Nz - 1; k++){
 			for(j = 0; j < Ny - 1; j++){
 				for(i = 0; i < Nx - 1; i++){

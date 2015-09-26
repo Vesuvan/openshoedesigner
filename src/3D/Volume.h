@@ -47,7 +47,8 @@ public:
 
 	void Clear(void);
 
-	void AddSphere(Vector3 p1, float r1, float k1);
+	void AddHalfplane(const Vector3 &p1, float d0, float k0);
+	void AddSphere(const Vector3 &p1, float r1, float k1);
 	void AddCylinder(const Vector3 &p1, const Vector3 &p2, const float r1,
 			const float k1);
 	void AddCylinder(const Vector3 &p1, const Vector3 &p2, const float r1,
@@ -72,7 +73,6 @@ private:
 	float dx;
 	float dy;
 	float dz;
-
 };
 
 #endif /* VOLUME_H_ */
