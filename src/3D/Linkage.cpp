@@ -48,6 +48,16 @@ Linkage::~Linkage()
 	}
 }
 
+void Linkage::Accept(LinkageVisitor& visitor)
+{
+	Process(visitor);
+	Linkage* temp = children;
+	while(temp != NULL){
+		temp->Accept(visitor);
+		temp = temp->next;
+	}
+}
+
 void Linkage::Paint(void)
 {
 	glPushMatrix();
@@ -74,6 +84,7 @@ Linkage * Linkage::AddChild(Linkage* child)
 	}
 	return child;
 }
+
 
 //Linkage* Linkage::AddChild(void)
 //{

@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Bone.h
+// Name               : LinkageVisitor.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 12.08.2015
+// Created            : 27.09.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,32 +24,22 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef BONE_H_
-#define BONE_H_
-#include "LinkageVisitor.h"
-#include "Linkage.h"
-/*!\class Bone
- * \brief ...
- *
- * ...
+#ifndef LINKAGEVISITOR_H_
+#define LINKAGEVISITOR_H_
+
+/*!\class LinkageVisitor
+ * \brief Visitor class for 3D object collections
+ * Abstract Visitor class for the Linkage class.
+ * Inherit this to a class that will operate on the objects in the tree.
  */
 
-class Bone:public Linkage {
+class LinkageVisitor {
 public:
-	Bone();
-	virtual ~Bone();
+	virtual ~LinkageVisitor();
 
-	Vector3 p1;
-	Vector3 p2;
-	float r1;
-	float r2;
-
-	void Render(void);
-	void Process(LinkageVisitor &visitor);
-
-private:
-	void Normal(const Vector3 v) const;
-	void Vertex(const Vector3 v) const;
+	// One ugly thing about the Visitor pattern is, that this class has to
+	// know the Bone class.
+	virtual void Visit(class Bone &) = 0;
 };
 
-#endif /* BONE_H_ */
+#endif /* LINKAGEVISITOR_H_ */

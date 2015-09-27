@@ -26,13 +26,15 @@
 
 #ifndef LINKAGE_H_
 #define LINKAGE_H_
+
 #include "AffineTransformMatrix.h"
 #include "Vector3.h"
 
+class LinkageVisitor;
+
 /*!\class Linkage
- * \brief ...
- *
- * ...
+ * \brief Administrative class for 3D object collections
+ * Also provides a LinkageVisitor for traversing the object trees.
  */
 
 class Linkage {
@@ -43,6 +45,10 @@ public:
 	Linkage* AddChild(Linkage* child);
 //	Linkage* AddChild(void);
 //	Linkage* AddChild(Vector3 const &position);
+
+
+	void Accept(LinkageVisitor & visitor);
+	virtual void Process(LinkageVisitor & visitor) = 0;
 
 	void Paint(void);
 	virtual void Render(void)=0;

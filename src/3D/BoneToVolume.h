@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Foot.h
+// Name               : BoneToVolume.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 13.08.2015
+// Created            : 27.09.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,57 +24,31 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef FOOT_H_
-#define FOOT_H_
-#include "Bone.h"
-#include "Volume.h"
+#ifndef BONETOVOLUME_H_
+#define BONETOVOLUME_H_
 
-/*!\class Foot
+/*!\class BoneToVolume
  * \brief ...
  *
  * ...
  */
 
-class Foot {
+#include "LinkageVisitor.h"
+#include "Volume.h"
+#include "Bone.h"
+
+class BoneToVolume:public LinkageVisitor {
 public:
-	Foot();
-	virtual ~Foot();
-	void Render(void) const;
+	BoneToVolume();
+	virtual ~BoneToVolume();
 
-	void AddToVolume(Volume * vol);
-
-	void Setup(void);
+	void SetVolume(Volume * volume);
+	void Visit(Bone &bone);
 
 private:
-	Bone* Tibia; /// Schienbein
-	Bone* Fibula; /// Wadenbein
-	Bone* Talus; /// Sprungbein
-	Bone* Talus2; /// Sprungbein (Extrabone)
-	Bone* Calcaneus; /// Fersenbein
-	Bone* Cuboideum; /// Wuerfelbein
-	Bone* Naviculare; /// Kahnbein
-	Bone* Cuneiforme1; /// Keilbein 1
-	Bone* Cuneiforme2; /// Keilbein 2
-	Bone* Cuneiforme3; /// Keilbein 3
-	Bone* Metatarsalis1; /// Mittelfussknochen 1
-	Bone* Metatarsalis2; /// Mittelfussknochen 2
-	Bone* Metatarsalis3; /// Mittelfussknochen 3
-	Bone* Metatarsalis4; /// Mittelfussknochen 4
-	Bone* Metatarsalis5; /// Mittelfussknochen 5
-	Bone* PhalanxI1;
-	Bone* PhalanxI2;
-	Bone* PhalanxI3;
-	Bone* PhalanxI4;
-	Bone* PhalanxI5;
-	Bone* PhalanxII1;
-	Bone* PhalanxII2;
-	Bone* PhalanxII3;
-	Bone* PhalanxII4;
-	Bone* PhalanxII5;
-	Bone* PhalanxIII1;
-	Bone* PhalanxIII2;
-	Bone* PhalanxIII3;
-	Bone* PhalanxIII4;
+
+	Volume * volume;
+
 };
 
-#endif /* FOOT_H_ */
+#endif /* BONETOVOLUME_H_ */

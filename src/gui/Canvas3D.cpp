@@ -25,6 +25,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "Canvas3D.h"
+#include <GL/gl.h>
 
 Canvas3D::Canvas3D(wxFrame* parent) :
 		OpenGLCanvas(parent)
@@ -50,7 +51,7 @@ void Canvas3D::SetVolume(Volume* const volume)
 void Canvas3D::Render()
 {
 
-	glBegin (GL_LINES);
+	glBegin(GL_LINES);
 	glNormal3f(0, -0.707, 0.707);
 	glColor3f(0.8, 0.0, 0.0);
 	glVertex3f(-0.3, 0, 0);
@@ -66,6 +67,29 @@ void Canvas3D::Render()
 	glVertex3f(0, 0, -0.3);
 	glVertex3f(0, 0, 0.3);
 
+	glEnd();
+
+	unsigned int n;
+	glColor3f(1, 0, 0);
+	glBegin(GL_LINE_LOOP);
+	for(n = 0; n < 64; n++){
+		glVertex3d(0, 0.04 * cos(M_PI / 32 * (double) n),
+				0.04 * sin(M_PI / 32 * (double) n));
+	}
+	glEnd();
+	glColor3f(0, 1, 0);
+	glBegin(GL_LINE_LOOP);
+	for(n = 0; n < 64; n++){
+		glVertex3d(0.04 * cos(M_PI / 32 * (double) n), 0,
+				0.04 * sin(M_PI / 32 * (double) n));
+	}
+	glEnd();
+	glColor3f(0, 0, 1);
+	glBegin(GL_LINE_LOOP);
+	for(n = 0; n < 64; n++){
+		glVertex3d(0.04 * cos(M_PI / 32 * (double) n),
+				0.04 * sin(M_PI / 32 * (double) n), 0);
+	}
 	glEnd();
 
 	if(bone != NULL) bone->Render();

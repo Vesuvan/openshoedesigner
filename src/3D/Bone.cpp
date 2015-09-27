@@ -25,7 +25,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "Bone.h"
-
+#include "LinkageVisitor.h"
 #include <GL/gl.h>
 
 #include <math.h>
@@ -186,4 +186,10 @@ void Bone::Normal(const Vector3 v) const
 void Bone::Vertex(const Vector3 v) const
 {
 	::glVertex3f(v.x, v.y, v.z);
+}
+
+void Bone::Process(LinkageVisitor& visitor)
+{
+	// GoF visitor pattern
+	visitor.Visit(*this);
 }

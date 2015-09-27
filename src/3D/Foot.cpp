@@ -26,6 +26,8 @@
 
 #include "Foot.h"
 
+#include "BoneToVolume.h"
+
 Foot::Foot()
 {
 	Tibia = new Bone;
@@ -107,6 +109,13 @@ Foot::~Foot()
 void Foot::Render(void) const
 {
 	Tibia->Paint();
+}
+
+void Foot::AddToVolume(Volume* vol)
+{
+	BoneToVolume b2v;
+	b2v.SetVolume(vol);
+	Tibia->Accept(b2v);
 }
 
 void Foot::Setup(void)
