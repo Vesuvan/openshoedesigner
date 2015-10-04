@@ -25,14 +25,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "FrameMain.h"
+#include "IDs.h"
 
 FrameMain::FrameMain(wxWindow* parent) :
 		GUIFrameMain(parent)
 {
-	foot.Setup();
-	volume.SetSize(0.35, 0.2, 0.2, 0.005);
+	volume.SetSize(0.35, 0.2, 0.2, 0.015);
 	volume.matrix.TranslateGlobal(-0.075, -0.075, -0.12);
-	volume.Clear();
 
 //	volume.AddHalfplane(Vector3(0, 0, 1), -0.10, 0.01);
 //	volume.AddSphere(Vector3(0, 0.10, 0), 0.02, 0.1);
@@ -40,12 +39,14 @@ FrameMain::FrameMain(wxWindow* parent) :
 //	volume.AddCylinder(Vector3(0.0, 0, 0.0), Vector3(0.05 * 1, 0, -0.00), 0.04,
 //			0.04, 0.02,0.04);
 
+	m_canvas->SetVolume(&volume);
+
 	m_canvas->SetBones(&foot);
 
+	volume.Clear();
+	foot.Setup(&setup);
 	foot.AddToVolume(&volume);
-
-	volume.MarchingCubes(0.50);
-	m_canvas->SetVolume(&volume);
+	volume.MarchingCubes(0.45);
 
 //		m_canvas->stereoMode = stereoAnaglyph;
 	m_canvas->eyeDistance = 0.005;
@@ -56,11 +57,16 @@ FrameMain::FrameMain(wxWindow* parent) :
 	m_canvas->rightEyeG = 0;
 	m_canvas->rightEyeB = 0;
 
+	dialogLastPosition = new FrameLastPosition(this, &setup);
 
+	this->Connect(ID_UPDATELAST, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::Update));
 }
 
 FrameMain::~FrameMain()
 {
+	this->Disconnect(ID_UPDATELAST, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::Update));
 }
 
 bool FrameMain::TransferDataFromWindow()
@@ -76,4 +82,22 @@ bool FrameMain::TransferDataToWindow()
 void FrameMain::OnQuit(wxCommandEvent& event)
 {
 	Close();
+}
+
+void FrameMain::OnToolClicked(wxCommandEvent& event)
+{
+	if(m_toolBar->GetToolState(ID_LASTPOSITION)){
+		dialogLastPosition->Show();
+	}else{
+		dialogLastPosition->Hide();
+	}
+}
+
+void FrameMain::Update(wxCommandEvent& event)
+{
+	foot.Setup(&setup);
+	volume.Clear();
+	foot.AddToVolume(&volume);
+	volume.MarchingCubes(0.45);
+	Refresh();
 }

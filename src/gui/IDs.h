@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameMain.h
+// Name               : IDs.h
 // Purpose            : 
-// Thread Safe        : Yes
+// Thread Safe        : No
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 11.08.2015
+// Created            : 10.01.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,39 +24,15 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef FRAMEMAIN_H_
-#define FRAMEMAIN_H_
+#ifndef IDS_H_
+#define IDS_H_
 
-/*!\class FrameMain
- * \brief ...
- *
- * ...
+/*!\class IDs
+ * \brief List of command IDs
+ * This headerfile contains a list of command IDs. These are used to comminucate
+ * from the child windows to the main window.
  */
 
-#include "FrameLastPosition.h"
-#include "gui.h"
+#define ID_UPDATELAST			(wxID_HIGHEST+1)
 
-class FrameMain:public GUIFrameMain {
-public:
-	FrameMain(wxWindow* parent);
-	virtual ~FrameMain();
-
-	bool TransferDataFromWindow();
-	bool TransferDataToWindow();
-
-	void Update(wxCommandEvent& event);
-
-	virtual void OnQuit(wxCommandEvent& event);
-	virtual void OnToolClicked(wxCommandEvent& event);
-
-	FrameLastPosition * dialogLastPosition;
-
-	FootParameters setup;
-
-private:
-	Foot foot;
-	Volume volume;
-
-};
-
-#endif /* FRAMEMAIN_H_ */
+#endif /* IDS_H_ */

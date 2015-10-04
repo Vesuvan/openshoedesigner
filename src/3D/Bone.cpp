@@ -34,6 +34,8 @@ Bone::Bone()
 {
 	r1 = 0.0;
 	r2 = 0.0;
+	rotx = 0.0;
+	roty = 0.0;
 }
 
 Bone::~Bone()
@@ -54,7 +56,7 @@ void Bone::Render(void)
 	float v = 0.0;
 	float dw = 2.0 * M_PI / M;
 	float w = 0.0;
-	if(d < r){
+	if(d <= r){
 
 		if(r1 > r2){
 			v = 0;
@@ -192,4 +194,29 @@ void Bone::Process(LinkageVisitor& visitor)
 {
 	// GoF visitor pattern
 	visitor.Visit(*this);
+}
+
+void Bone::Setup(void)
+{
+	if(parent == NULL){
+		matrix = AffineTransformMatrix::Identity();
+	}else{
+		matrix = parent->matrix;
+	}
+	matrix.TranslateLocal(anchor.x, anchor.y, anchor.z);
+	matrix = matrix
+			* AffineTransformMatrix::RotateAroundVector(Vector3(1, 0, 0),
+					rotx / 2);
+	matrix = matrix
+			* AffineTransformMatrix::RotateAroundVector(Vector3(0, 1, 0),
+					roty / 2);
+	matrix.TranslateLocal(link.x, link.y, link.z);
+	matrix = matrix
+			* AffineTransformMatrix::RotateAroundVector(Vector3(1, 0, 0),
+					rotx / 2);
+	matrix = matrix
+			* AffineTransformMatrix::RotateAroundVector(Vector3(0, 1, 0),
+					roty / 2);
+	p1 = matrix.Transform(Vector3(0, 0, 0));
+	p2 = matrix.Transform(bone);
 }

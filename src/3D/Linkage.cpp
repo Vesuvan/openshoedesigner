@@ -29,6 +29,7 @@
 
 Linkage::Linkage()
 {
+	parent = NULL;
 	children = NULL;
 	next = NULL;
 	color.Set(0.8, 0.5, 0.1);
@@ -61,7 +62,7 @@ void Linkage::Accept(LinkageVisitor& visitor)
 void Linkage::Paint(void)
 {
 	glPushMatrix();
-	glMultMatrixd(matrix.a);
+//	glMultMatrixd(matrix.a);
 	::glColor3f(color.x, color.y, color.z);
 	Render();
 	Linkage* temp = children;
@@ -76,15 +77,16 @@ Linkage * Linkage::AddChild(Linkage* child)
 {
 	if(this->children == NULL){
 		this->children = child;
+		this->children->parent = this;
 	}else{
 		Linkage* temp2 = this->children;
 		while(temp2->next != NULL)
 			temp2 = temp2->next;
 		temp2->next = child;
+		temp2->next->parent = this;
 	}
 	return child;
 }
-
 
 //Linkage* Linkage::AddChild(void)
 //{

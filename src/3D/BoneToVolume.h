@@ -39,16 +39,13 @@
 
 class BoneToVolume:public LinkageVisitor {
 public:
-	BoneToVolume();
+	BoneToVolume(Volume * volume);
 	virtual ~BoneToVolume();
 
-	void SetVolume(Volume * volume);
 	void Visit(Bone &bone);
 
 private:
-
 	Volume * volume;
-
 };
 
 #endif /* BONETOVOLUME_H_ */

@@ -46,7 +46,6 @@ public:
 //	Linkage* AddChild(void);
 //	Linkage* AddChild(Vector3 const &position);
 
-
 	void Accept(LinkageVisitor & visitor);
 	virtual void Process(LinkageVisitor & visitor) = 0;
 
@@ -56,6 +55,8 @@ public:
 	AffineTransformMatrix matrix;
 	Vector3 color;
 
+protected:
+	Linkage* parent;
 private:
 	Linkage* next;
 	Linkage* children;

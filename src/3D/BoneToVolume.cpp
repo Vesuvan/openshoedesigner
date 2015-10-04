@@ -26,23 +26,17 @@
 
 #include "BoneToVolume.h"
 #include <stdlib.h>
-BoneToVolume::BoneToVolume()
+BoneToVolume::BoneToVolume(Volume * volume)
 {
-	volume = NULL;
+	this->volume = volume;
 }
 
 BoneToVolume::~BoneToVolume()
 {
 }
 
-void BoneToVolume::SetVolume(Volume* volume)
-{
-	this->volume = volume;
-}
-
 void BoneToVolume::Visit(Bone& bone)
 {
 	if(volume == NULL) return;
-
-	volume->AddCylinder(bone.p1, bone.p2, bone.r1, bone.r2, 0.01);
+	volume->AddCylinder(bone.p1, bone.p2, bone.r1, bone.r2, 0.010);
 }

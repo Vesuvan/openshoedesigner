@@ -27,6 +27,7 @@
 #ifndef FOOT_H_
 #define FOOT_H_
 #include "Bone.h"
+#include "FootParameters.h"
 #include "Volume.h"
 
 /*!\class Foot
@@ -42,8 +43,10 @@ public:
 	void Render(void) const;
 
 	void AddToVolume(Volume * vol);
+	void Setup(FootParameters * param);
 
-	void Setup(void);
+private:
+	void InitBones(void);
 
 private:
 	Bone* Tibia; /// Schienbein

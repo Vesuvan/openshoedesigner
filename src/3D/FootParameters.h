@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameMain.h
+// Name               : FootParameters.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 11.08.2015
+// Created            : 29.09.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,39 +24,30 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef FRAMEMAIN_H_
-#define FRAMEMAIN_H_
+#ifndef FOOTPARAMETERS_H_
+#define FOOTPARAMETERS_H_
 
-/*!\class FrameMain
- * \brief ...
+/*!\class FootParameters
+ * \brief Parameters describing the shape of the last
+ * Objects of this class keep a list of all the parameters describing
+ * the bones. Furthermore the skin surrounding the bones is describes.
+ * The third group of parameters describes the angles of the bones, thus
+ * the position of the foot.
  *
- * ...
+ * The foots position is not part of the dataset, but has to be kept here,
+ * because the functions generating the last need these informations as
+ * well.
  */
 
-#include "FrameLastPosition.h"
-#include "gui.h"
-
-class FrameMain:public GUIFrameMain {
+class FootParameters {
 public:
-	FrameMain(wxWindow* parent);
-	virtual ~FrameMain();
+	FootParameters();
+	virtual ~FootParameters();
 
-	bool TransferDataFromWindow();
-	bool TransferDataToWindow();
-
-	void Update(wxCommandEvent& event);
-
-	virtual void OnQuit(wxCommandEvent& event);
-	virtual void OnToolClicked(wxCommandEvent& event);
-
-	FrameLastPosition * dialogLastPosition;
-
-	FootParameters setup;
-
-private:
-	Foot foot;
-	Volume volume;
-
+	float angle_1X;
+	float angle_1Y;
+	float angle_2X;
+	float angle_3Y;
 };
 
-#endif /* FRAMEMAIN_H_ */
+#endif /* FOOTPARAMETERS_H_ */

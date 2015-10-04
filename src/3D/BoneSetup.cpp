@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameMain.h
+// Name               : BoneSetup.cpp
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 11.08.2015
+// Created            : 03.10.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,39 +24,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef FRAMEMAIN_H_
-#define FRAMEMAIN_H_
+#include "BoneSetup.h"
 
-/*!\class FrameMain
- * \brief ...
- *
- * ...
- */
+BoneSetup::BoneSetup()
+{
+}
 
-#include "FrameLastPosition.h"
-#include "gui.h"
+BoneSetup::~BoneSetup()
+{
+}
 
-class FrameMain:public GUIFrameMain {
-public:
-	FrameMain(wxWindow* parent);
-	virtual ~FrameMain();
-
-	bool TransferDataFromWindow();
-	bool TransferDataToWindow();
-
-	void Update(wxCommandEvent& event);
-
-	virtual void OnQuit(wxCommandEvent& event);
-	virtual void OnToolClicked(wxCommandEvent& event);
-
-	FrameLastPosition * dialogLastPosition;
-
-	FootParameters setup;
-
-private:
-	Foot foot;
-	Volume volume;
-
-};
-
-#endif /* FRAMEMAIN_H_ */
+void BoneSetup::Visit(Bone& bone)
+{
+	bone.Setup();
+}

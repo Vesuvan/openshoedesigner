@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameMain.h
+// Name               : FrameLastPosition.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 11.08.2015
+// Created            : 04.10.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,39 +24,29 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef FRAMEMAIN_H_
-#define FRAMEMAIN_H_
+#ifndef FRAMELASTPOSITION_H_
+#define FRAMELASTPOSITION_H_
 
-/*!\class FrameMain
+/*!\class FrameLastPosition
  * \brief ...
  *
  * ...
  */
 
-#include "FrameLastPosition.h"
 #include "gui.h"
 
-class FrameMain:public GUIFrameMain {
+class FrameLastPosition:public GUIFrameLastPosition {
 public:
-	FrameMain(wxWindow* parent);
-	virtual ~FrameMain();
+	FrameLastPosition(wxWindow* parent, FootParameters * param);
+	virtual ~FrameLastPosition();
 
-	bool TransferDataFromWindow();
 	bool TransferDataToWindow();
 
-	void Update(wxCommandEvent& event);
-
-	virtual void OnQuit(wxCommandEvent& event);
-	virtual void OnToolClicked(wxCommandEvent& event);
-
-	FrameLastPosition * dialogLastPosition;
-
-	FootParameters setup;
+	virtual void OnScroll(wxScrollEvent& event);
+	virtual void OnText(wxCommandEvent& event);
 
 private:
-	Foot foot;
-	Volume volume;
-
+	FootParameters * param;
 };
 
-#endif /* FRAMEMAIN_H_ */
+#endif /* FRAMELASTPOSITION_H_ */
