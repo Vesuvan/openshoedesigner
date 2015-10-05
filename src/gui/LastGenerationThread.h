@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : IDs.h
+// Name               : LastGenerationThread.h
 // Purpose            : 
-// Thread Safe        : No
+// Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 10.01.2015
+// Created            : 05.10.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,17 +24,32 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef IDS_H_
-#define IDS_H_
+#ifndef LASTGENERATIONTHREAD_H_
+#define LASTGENERATIONTHREAD_H_
 
-/*!\class IDs
- * \brief List of command IDs
- * This headerfile contains a list of command IDs. These are used to comminucate
- * from the child windows to the main window.
+#include <wx/thread.h>
+#include <wx/frame.h>
+#include "../3D/Foot.h"
+#include "../3D/Volume.h"
+
+/*!\class LastGenerationThread
+ * \brief ...
+ *
+ * ...
  */
 
-#define ID_UPDATELAST			(wxID_HIGHEST+1)
-#define ID_UPDATEBUTTONS		(wxID_HIGHEST+2)
-#define ID_VOLUMEDONE			(wxID_HIGHEST+3)
+class LastGenerationThread:public wxThread {
+public:
+	LastGenerationThread(wxFrame * frame, Foot * foot, Volume * volume);
+	virtual ~LastGenerationThread();
 
-#endif /* IDS_H_ */
+	virtual void *Entry();
+	virtual void OnExit();
+
+public:
+	wxFrame * frame;
+	Foot * foot;
+	Volume * volume;
+};
+
+#endif /* LASTGENERATIONTHREAD_H_ */

@@ -41,7 +41,7 @@ public:
 	virtual ~FrameLastPosition();
 
 	bool TransferDataToWindow();
-
+	virtual void OnClose(wxCloseEvent& event);
 	virtual void OnScroll(wxScrollEvent& event);
 	virtual void OnText(wxCommandEvent& event);
 

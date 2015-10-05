@@ -86,6 +86,13 @@ bool FrameLastPosition::TransferDataToWindow()
 	return true;
 }
 
+void FrameLastPosition::OnClose(wxCloseEvent& event)
+{
+	this->Hide();
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEBUTTONS);
+	ProcessEvent(selectEvent);
+}
+
 void FrameLastPosition::OnText(wxCommandEvent& event)
 {
 	TransferDataFromWindow();

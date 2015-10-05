@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : IDs.h
+// Name               : LastGenerationThread.cpp
 // Purpose            : 
-// Thread Safe        : No
+// Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 10.01.2015
+// Created            : 05.10.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,17 +24,36 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef IDS_H_
-#define IDS_H_
+#include "LastGenerationThread.h"
+#include "IDs.h"
 
-/*!\class IDs
- * \brief List of command IDs
- * This headerfile contains a list of command IDs. These are used to comminucate
- * from the child windows to the main window.
- */
+LastGenerationThread::LastGenerationThread(wxFrame* frame, Foot * foot,
+		Volume * volume) :
+		wxThread(wxTHREAD_JOINABLE)
+{
+	this->frame = frame;
+	this->foot = foot;
+	this->volume = volume;
+}
 
-#define ID_UPDATELAST			(wxID_HIGHEST+1)
-#define ID_UPDATEBUTTONS		(wxID_HIGHEST+2)
-#define ID_VOLUMEDONE			(wxID_HIGHEST+3)
+LastGenerationThread::~LastGenerationThread()
+{
+}
 
-#endif /* IDS_H_ */
+void* LastGenerationThread::Entry()
+{
+	volume->Clear();
+	if(TestDestroy()) return NULL;
+	foot->AddToVolume(volume);
+	if(TestDestroy()) return NULL;
+	volume->MarchingCubes(0.45);
+
+	wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, ID_VOLUMEDONE);
+	wxPostEvent(frame, event);
+
+	return NULL;
+}
+
+void LastGenerationThread::OnExit()
+{
+}

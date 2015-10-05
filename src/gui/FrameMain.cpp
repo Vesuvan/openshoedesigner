@@ -30,8 +30,8 @@
 FrameMain::FrameMain(wxWindow* parent) :
 		GUIFrameMain(parent)
 {
-	volume.SetSize(0.35, 0.2, 0.2, 0.015);
-	volume.matrix.TranslateGlobal(-0.075, -0.075, -0.12);
+	volume.SetSize(0.40, 0.3, 0.4, 0.005);
+	volume.matrix.TranslateGlobal(-0.1, -0.15, -0.3);
 
 //	volume.AddHalfplane(Vector3(0, 0, 1), -0.10, 0.01);
 //	volume.AddSphere(Vector3(0, 0.10, 0), 0.02, 0.1);
@@ -57,16 +57,30 @@ FrameMain::FrameMain(wxWindow* parent) :
 	m_canvas->rightEyeG = 0;
 	m_canvas->rightEyeB = 0;
 
+	thread = NULL;
+
 	dialogLastPosition = new FrameLastPosition(this, &setup);
 
 	this->Connect(ID_UPDATELAST, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::Update));
+			wxCommandEventHandler(FrameMain::UpdateLast));
+	this->Connect(ID_VOLUMEDONE, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::Repaint));
+	this->Connect(ID_UPDATEBUTTONS, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::UpdateButtons));
 }
 
 FrameMain::~FrameMain()
 {
+	if(thread != NULL){
+		thread->Wait();
+		delete thread;
+	}
+	this->Disconnect(ID_UPDATEBUTTONS, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::UpdateButtons));
+	this->Disconnect(ID_VOLUMEDONE, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::Repaint));
 	this->Disconnect(ID_UPDATELAST, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::Update));
+			wxCommandEventHandler(FrameMain::UpdateLast));
 }
 
 bool FrameMain::TransferDataFromWindow()
@@ -76,12 +90,18 @@ bool FrameMain::TransferDataFromWindow()
 
 bool FrameMain::TransferDataToWindow()
 {
+	m_menuSetup->Check(ID_STEREO3D, m_canvas->stereoMode != stereoOff);
 	return true;
 }
 
 void FrameMain::OnQuit(wxCommandEvent& event)
 {
 	Close();
+}
+
+void FrameMain::UpdateButtons(wxCommandEvent& event)
+{
+	m_toolBar->ToggleTool(ID_LASTPOSITION, dialogLastPosition->IsShown());
 }
 
 void FrameMain::OnToolClicked(wxCommandEvent& event)
@@ -93,11 +113,41 @@ void FrameMain::OnToolClicked(wxCommandEvent& event)
 	}
 }
 
-void FrameMain::Update(wxCommandEvent& event)
+void FrameMain::UpdateLast(wxCommandEvent& event)
 {
 	foot.Setup(&setup);
-	volume.Clear();
-	foot.AddToVolume(&volume);
-	volume.MarchingCubes(0.45);
+
+	if(thread == NULL){
+		thread = new LastGenerationThread(this, &foot, &volume);
+		thread->Create();
+		thread->Run();
+	}
+
 	Refresh();
+}
+void FrameMain::Repaint(wxCommandEvent& event)
+{
+	thread->Wait();
+	delete thread;
+	thread = NULL;
+	Refresh();
+}
+
+void FrameMain::OnToggleStereo3D(wxCommandEvent& event)
+{
+	if(m_canvas->stereoMode == stereoOff){
+		m_canvas->stereoMode = stereoAnaglyph;
+	}else{
+		m_canvas->stereoMode = stereoOff;
+	}
+	m_menuSetup->Check(ID_STEREO3D, m_canvas->stereoMode != stereoOff);
+	Refresh();
+}
+
+void FrameMain::OnSetupStereo3D(wxCommandEvent& event)
+{
+}
+
+void FrameMain::OnSetupUnits(wxCommandEvent& event)
+{
 }

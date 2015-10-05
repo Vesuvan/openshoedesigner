@@ -30,16 +30,19 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #define wxID_QUIT 1000
-#define ID_FOOTDEFINITION 1001
-#define ID_LASTPOSITION 1002
-#define ID_SLIDER1Y 1003
-#define ID_TEXT1Y 1004
-#define ID_SLIDER1X 1005
-#define ID_TEXT1X 1006
-#define ID_SLIDER2X 1007
-#define ID_TEXT2X 1008
-#define ID_SLIDER3Y 1009
-#define ID_TEXT3Y 1010
+#define ID_STEREO3D 1001
+#define ID_SETUPSTEREO3D 1002
+#define ID_SETUPUNITS 1003
+#define ID_FOOTDEFINITION 1004
+#define ID_LASTPOSITION 1005
+#define ID_SLIDER1Y 1006
+#define ID_TEXT1Y 1007
+#define ID_SLIDER1X 1008
+#define ID_TEXT1X 1009
+#define ID_SLIDER2X 1010
+#define ID_TEXT2X 1011
+#define ID_SLIDER3Y 1012
+#define ID_TEXT3Y 1013
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class GUIFrameMain
@@ -51,12 +54,16 @@ class GUIFrameMain : public wxFrame
 	protected:
 		wxMenuBar* m_menubar;
 		wxMenu* m_menuFile;
+		wxMenu* m_menuSetup;
 		wxStatusBar* m_statusBar1;
 		Canvas3D * m_canvas;
 		wxToolBar* m_toolBar;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnQuit( wxCommandEvent& event ) = 0;
+		virtual void OnToggleStereo3D( wxCommandEvent& event ) = 0;
+		virtual void OnSetupStereo3D( wxCommandEvent& event ) = 0;
+		virtual void OnSetupUnits( wxCommandEvent& event ) = 0;
 		virtual void OnToolClicked( wxCommandEvent& event ) = 0;
 		
 	
@@ -113,6 +120,7 @@ class GUIFrameLastPosition : public wxFrame
 		wxTextCtrl* m_textCtrl3Y;
 		
 		// Virtual event handlers, overide them in your derived class
+		virtual void OnClose( wxCloseEvent& event ) = 0;
 		virtual void OnScroll( wxScrollEvent& event ) = 0;
 		virtual void OnText( wxCommandEvent& event ) = 0;
 		

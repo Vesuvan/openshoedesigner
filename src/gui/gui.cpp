@@ -24,6 +24,24 @@ GUIFrameMain::GUIFrameMain( wxWindow* parent, wxWindowID id, const wxString& tit
 	
 	m_menubar->Append( m_menuFile, wxT("&File") );
 	
+	m_menuSetup = new wxMenu();
+	wxMenuItem* m_menuItemStereo3D;
+	m_menuItemStereo3D = new wxMenuItem( m_menuSetup, ID_STEREO3D, wxString( wxT("Toggle Stereo &3D") ) + wxT('\t') + wxT("CTRL+3"), wxT("Toggle 3D view on/off."), wxITEM_CHECK );
+	m_menuSetup->Append( m_menuItemStereo3D );
+	
+	wxMenuItem* m_separator1;
+	m_separator1 = m_menuSetup->AppendSeparator();
+	
+	wxMenuItem* m_menuItemSetupStereo3D;
+	m_menuItemSetupStereo3D = new wxMenuItem( m_menuSetup, ID_SETUPSTEREO3D, wxString( wxT("Setup &Stereo3D") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuSetup->Append( m_menuItemSetupStereo3D );
+	
+	wxMenuItem* m_menuItemSetupUnits;
+	m_menuItemSetupUnits = new wxMenuItem( m_menuSetup, ID_SETUPUNITS, wxString( wxT("Setup &Units") ) + wxT('\t') + wxT("CTRL+U"), wxEmptyString, wxITEM_NORMAL );
+	m_menuSetup->Append( m_menuItemSetupUnits );
+	
+	m_menubar->Append( m_menuSetup, wxT("&Setup") );
+	
 	this->SetMenuBar( m_menubar );
 	
 	m_statusBar1 = this->CreateStatusBar( 1, wxST_SIZEGRIP, wxID_ANY );
@@ -43,6 +61,9 @@ GUIFrameMain::GUIFrameMain( wxWindow* parent, wxWindowID id, const wxString& tit
 	
 	// Connect Events
 	this->Connect( m_menuItemQuit->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnQuit ) );
+	this->Connect( m_menuItemStereo3D->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnToggleStereo3D ) );
+	this->Connect( m_menuItemSetupStereo3D->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupStereo3D ) );
+	this->Connect( m_menuItemSetupUnits->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupUnits ) );
 	this->Connect( ID_FOOTDEFINITION, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToolClicked ) );
 	this->Connect( ID_LASTPOSITION, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToolClicked ) );
 }
@@ -51,6 +72,9 @@ GUIFrameMain::~GUIFrameMain()
 {
 	// Disconnect Events
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnQuit ) );
+	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnToggleStereo3D ) );
+	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupStereo3D ) );
+	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupUnits ) );
 	this->Disconnect( ID_FOOTDEFINITION, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToolClicked ) );
 	this->Disconnect( ID_LASTPOSITION, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToolClicked ) );
 }
@@ -94,7 +118,7 @@ GUIFrameLastPosition::GUIFrameLastPosition( wxWindow* parent, wxWindowID id, con
 	
 	sbSizer1->Add( bSizer3, 0, wxEXPAND, 5 );
 	
-	m_slider1Y = new wxSlider( this, ID_SLIDER1Y, 0, -180, 180, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
+	m_slider1Y = new wxSlider( this, ID_SLIDER1Y, 0, -100, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
 	sbSizer1->Add( m_slider1Y, 0, wxALL|wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizer4;
@@ -253,6 +277,7 @@ GUIFrameLastPosition::GUIFrameLastPosition( wxWindow* parent, wxWindowID id, con
 	this->Layout();
 	
 	// Connect Events
+	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameLastPosition::OnClose ) );
 	m_slider1Y->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GUIFrameLastPosition::OnScroll ), NULL, this );
 	m_slider1Y->Connect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GUIFrameLastPosition::OnScroll ), NULL, this );
 	m_slider1Y->Connect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( GUIFrameLastPosition::OnScroll ), NULL, this );
@@ -298,6 +323,7 @@ GUIFrameLastPosition::GUIFrameLastPosition( wxWindow* parent, wxWindowID id, con
 GUIFrameLastPosition::~GUIFrameLastPosition()
 {
 	// Disconnect Events
+	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameLastPosition::OnClose ) );
 	m_slider1Y->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GUIFrameLastPosition::OnScroll ), NULL, this );
 	m_slider1Y->Disconnect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GUIFrameLastPosition::OnScroll ), NULL, this );
 	m_slider1Y->Disconnect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( GUIFrameLastPosition::OnScroll ), NULL, this );

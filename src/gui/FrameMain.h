@@ -35,6 +35,7 @@
 
 #include "FrameLastPosition.h"
 #include "gui.h"
+#include "LastGenerationThread.h"
 
 class FrameMain:public GUIFrameMain {
 public:
@@ -44,13 +45,18 @@ public:
 	bool TransferDataFromWindow();
 	bool TransferDataToWindow();
 
-	void Update(wxCommandEvent& event);
+	void UpdateLast(wxCommandEvent& event);
+	void UpdateButtons(wxCommandEvent& event);
+	void Repaint(wxCommandEvent& event);
 
 	virtual void OnQuit(wxCommandEvent& event);
 	virtual void OnToolClicked(wxCommandEvent& event);
+	virtual void OnToggleStereo3D(wxCommandEvent& event);
+	virtual void OnSetupStereo3D(wxCommandEvent& event);
+	virtual void OnSetupUnits(wxCommandEvent& event);
 
 	FrameLastPosition * dialogLastPosition;
-
+	LastGenerationThread * thread;
 	FootParameters setup;
 
 private:
