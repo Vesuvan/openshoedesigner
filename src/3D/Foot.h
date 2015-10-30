@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Name               : Foot.h
-// Purpose            : 
+// Purpose            : Footbones and skin parameters
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
@@ -31,9 +31,11 @@
 #include "Volume.h"
 
 /*!\class Foot
- * \brief ...
+ * \brief Footbones and skin parameters
  *
- * ...
+ * Stores the footbones and skin parameters.
+ *
+ * Upon calling Setup with a FootParameters object, the parameters of bones and skin are recalculated.
  */
 
 class Foot {

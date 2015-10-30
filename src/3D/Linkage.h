@@ -33,8 +33,10 @@
 class LinkageVisitor;
 
 /*!\class Linkage
- * \brief Administrative class for 3D object collections
- * Also provides a LinkageVisitor for traversing the object trees.
+ * \brief Linked 3D object trees
+ *
+ *
+ * Utilizes LinkageVisitor for traversing the object tree.
  */
 
 class Linkage {

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Triangle.h
-// Purpose            :
+// Name               : FileSTL.h
+// Purpose            : Reads a STL File
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
@@ -24,42 +24,41 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TRIANGLE_H_
-#define TRIANGLE_H_
+#ifndef FILESTL_H_
+#define FILESTL_H_
 
-#include "Vector3.h"
-#include <wx/dynarray.h>
+#include "GeometryFileAbstract.h"
 #include <wx/string.h>
+#include <wx/wfstream.h>
+#include <wx/txtstrm.h>
+#include <wx/datstrm.h>
 
-class AffineTransformMatrix;
-
-/*!\class Triangle
- * \ingroup Base3D
- * \brief Simple triangle
+/*!\class FileSTL
+ * \ingroup File3D
+ * \brief Stereolithography files
  *
- * Holds the data for a simple triangle. Three vertices with three normal vectors.
+ * STL is a very widespread file format to exchange geometry data
+ * between CAD programms. This class reads a STL file and stores its
+ * triangles.
  */
 
-class Triangle {
-	// Constructor/Destructor:
+class FileSTL:public GeometryFileAbstract {
+	// Constructor/ Destructor
 public:
-	Triangle();
-	Triangle(wxString string);
+	FileSTL();
+	virtual ~FileSTL();
 
-	//Member variables:
-	Vector3 p[3]; //!< Position of vertices.
-	Vector3 n[3]; //!< Normal vectors.
-	Vector3 c[3]; //!< Color vectors.
+	// Member variables
+public:
 
 	//Methods:
-	wxString ToString(void) const;
-	void FromString(wxString const &string);
-
-	void Paint(bool useNormals = true, bool useColors = false) const;
-	void CalculateNormal();
-	void ApplyTransformation(const AffineTransformMatrix &matrix);
-
+public:
+	bool ReadFile(wxString fileName);
+	bool ReadStream(wxInputStream & stream);
+	static void WriteStream(wxOutputStream & stream, Geometry & g);
+private:
+	bool ReadStreamBinary(wxInputStream & stream, bool hasRead5Byte = false);
+	bool ReadStreamAscii(wxInputStream & stream, bool hasRead5Byte = false);
 };
-WX_DECLARE_OBJARRAY(Triangle, ArrayOfTriangle);
 
-#endif /* TRIANGLE_H_ */
+#endif /* FILESTL_H_ */

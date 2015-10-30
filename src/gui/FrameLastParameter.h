@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : StdInclude.h
-// Purpose            : Takes care of precompiled header issues
+// Name               : FrameLastParameter.h
+// Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 21.05.2009
-// Copyright          : (C) 2009 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 04.10.2015
+// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,19 +24,27 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef STDINC_H_
-#define STDINC_H_
+#ifndef FRAMELASTPARAMETER_H_
+#define FRAMELASTPARAMETER_H_
 
-// For compilers that support precompilation, includes "wx/wx.h".
+/*!\class FrameLastParameter
+ * \brief GUI for setting up a last
+ */
 
-#include <wx/wxprec.h>
+#include "gui.h"
 
-#ifdef __BORLANDC__
-#pragma hdrstop
-#endif
+class FrameLastParameter:public GUIFrameLastParameter {
+public:
+	FrameLastParameter(wxWindow* parent, FootParameters * param);
+	virtual ~FrameLastParameter();
 
-#ifndef WX_PRECOMP
-#include <wx/wx.h>
-#endif
+	bool TransferDataToWindow();
+	virtual void OnClose(wxCloseEvent& event);
+	virtual void OnScroll(wxScrollEvent& event);
+	virtual void OnText(wxCommandEvent& event);
 
-#endif /* STDINC_H_ */
+private:
+	FootParameters * param;
+};
+
+#endif /* FRAMELASTPARAMETER_H_ */

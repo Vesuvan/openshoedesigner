@@ -44,7 +44,7 @@ public:
 	float r1;
 	float r2;
 
-		float rotx,roty;
+	float rotx, roty;
 
 	Vector3 anchor;
 	Vector3 link;
@@ -55,6 +55,7 @@ public:
 
 	void Process(LinkageVisitor &visitor);
 private:
+
 	void Normal(const Vector3 v) const;
 	void Vertex(const Vector3 v) const;
 };

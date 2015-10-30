@@ -33,7 +33,10 @@
  * ...
  */
 
-#include "FrameLastPosition.h"
+#include "FrameLastParameter.h"
+#include "FrameFootParameter.h"
+#include "FrameWalkcycleSupport.h"
+
 #include "gui.h"
 #include "LastGenerationThread.h"
 
@@ -46,16 +49,28 @@ public:
 	bool TransferDataToWindow();
 
 	void UpdateLast(wxCommandEvent& event);
-	void UpdateButtons(wxCommandEvent& event);
+	void UpdateGUI(wxCommandEvent& event);
 	void Repaint(wxCommandEvent& event);
 
 	virtual void OnQuit(wxCommandEvent& event);
-	virtual void OnToolClicked(wxCommandEvent& event);
+	virtual void OnSetupFoot(wxCommandEvent& event);
+	virtual void OnSetupLast(wxCommandEvent& event);
+	virtual void OnDefineWalkCycle(wxCommandEvent& event);
+	virtual void OnSaveLast(wxCommandEvent& event);
+	virtual void OnSaveInsole(wxCommandEvent& event);
+	virtual void OnSaveShoe(wxCommandEvent& event);
+	virtual void OnSaveCutaway(wxCommandEvent& event);
+	virtual void OnPackZip(wxCommandEvent& event);
 	virtual void OnToggleStereo3D(wxCommandEvent& event);
+	virtual void OnViewChange(wxCommandEvent& event);
 	virtual void OnSetupStereo3D(wxCommandEvent& event);
 	virtual void OnSetupUnits(wxCommandEvent& event);
+	virtual void OnToolClicked(wxCommandEvent& event);
 
-	FrameLastPosition * dialogLastPosition;
+	FrameLastParameter * dialogLastParameter;
+	FrameFootParameter * dialogFootParameter;
+	FrameWalkcycleSupport * dialogWalkcycleSupport;
+
 	LastGenerationThread * thread;
 	FootParameters setup;
 

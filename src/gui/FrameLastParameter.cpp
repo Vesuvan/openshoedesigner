@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameLastPosition.cpp
+// Name               : FrameLastParameter.cpp
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
@@ -24,24 +24,24 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "FrameLastPosition.h"
+#include "FrameLastParameter.h"
 
 #include <math.h>
 
 #include "IDs.h"
 
-FrameLastPosition::FrameLastPosition(wxWindow* parent, FootParameters * param) :
-		GUIFrameLastPosition(parent)
+FrameLastParameter::FrameLastParameter(wxWindow* parent, FootParameters * param) :
+		GUIFrameLastParameter(parent)
 {
 	this->param = param;
 	TransferDataToWindow();
 }
 
-FrameLastPosition::~FrameLastPosition()
+FrameLastParameter::~FrameLastParameter()
 {
 }
 
-void FrameLastPosition::OnScroll(wxScrollEvent& event)
+void FrameLastParameter::OnScroll(wxScrollEvent& event)
 {
 	switch(event.GetId()){
 	case ID_SLIDER1X:
@@ -69,7 +69,7 @@ void FrameLastPosition::OnScroll(wxScrollEvent& event)
 	ProcessEvent(selectEvent);
 }
 
-bool FrameLastPosition::TransferDataToWindow()
+bool FrameLastParameter::TransferDataToWindow()
 {
 	m_slider1X->SetValue(param->angle_1X / M_PI * 180);
 	m_slider1Y->SetValue(param->angle_1Y / M_PI * 180);
@@ -86,14 +86,14 @@ bool FrameLastPosition::TransferDataToWindow()
 	return true;
 }
 
-void FrameLastPosition::OnClose(wxCloseEvent& event)
+void FrameLastParameter::OnClose(wxCloseEvent& event)
 {
 	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEBUTTONS);
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
 	ProcessEvent(selectEvent);
 }
 
-void FrameLastPosition::OnText(wxCommandEvent& event)
+void FrameLastParameter::OnText(wxCommandEvent& event)
 {
 	TransferDataFromWindow();
 	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATELAST);

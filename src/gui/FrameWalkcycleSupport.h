@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameLastPosition.h
-// Purpose            : 
+// Name               : FrameWalkcycleSupport.h
+// Purpose            : GUI for setting up the walkcycle supports
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 04.10.2015
+// Created            : 29.10.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,29 +24,22 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef FRAMELASTPOSITION_H_
-#define FRAMELASTPOSITION_H_
+#ifndef FRAMEWALKCYCLESUPPORT_H_
+#define FRAMEWALKCYCLESUPPORT_H_
 
-/*!\class FrameLastPosition
- * \brief ...
- *
- * ...
+/*!\class FrameWalkcycleSupport
+ * \brief GUI for setting up the walkcycle supports
  */
 
 #include "gui.h"
 
-class FrameLastPosition:public GUIFrameLastPosition {
+class FrameWalkcycleSupport:public GUIFrameWalkcycleSupport {
 public:
-	FrameLastPosition(wxWindow* parent, FootParameters * param);
-	virtual ~FrameLastPosition();
+	FrameWalkcycleSupport(wxWindow* parent);
+	virtual ~FrameWalkcycleSupport();
 
-	bool TransferDataToWindow();
 	virtual void OnClose(wxCloseEvent& event);
-	virtual void OnScroll(wxScrollEvent& event);
-	virtual void OnText(wxCommandEvent& event);
 
-private:
-	FootParameters * param;
 };
 
-#endif /* FRAMELASTPOSITION_H_ */
+#endif /* FRAMEWALKCYCLESUPPORT_H_ */

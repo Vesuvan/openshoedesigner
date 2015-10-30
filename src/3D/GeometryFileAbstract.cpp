@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : StdInclude.h
-// Purpose            : Takes care of precompiled header issues
+// Name               : GeometryFileAbstract.cpp
+// Purpose            : Abstract class for geometry loaded from a file.
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 21.05.2009
-// Copyright          : (C) 2009 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 11.06.2011
+// Copyright          : (C) 2011 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,19 +24,36 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef STDINC_H_
-#define STDINC_H_
+#include "GeometryFileAbstract.h"
 
-// For compilers that support precompilation, includes "wx/wx.h".
+#include <GL/gl.h>
 
-#include <wx/wxprec.h>
+GeometryFileAbstract::GeometryFileAbstract()
+{
+	color.Set(0.8, 0.8, 0.8);
+}
 
-#ifdef __BORLANDC__
-#pragma hdrstop
-#endif
+GeometryFileAbstract::~GeometryFileAbstract()
+{
+}
 
-#ifndef WX_PRECOMP
-#include <wx/wx.h>
-#endif
+void GeometryFileAbstract::Paint(void) const
+{
+	size_t i;
+	::glPushMatrix();
+	::glMultMatrixd(matrix.a);
+	for(i = 0; i < geometry.Count(); i++){
+		geometry[i].Paint();
+	}
+	::glPopMatrix();
+}
 
-#endif /* STDINC_H_ */
+bool GeometryFileAbstract::ReadFile(wxString fileName)
+{
+	return false;
+}
+
+bool GeometryFileAbstract::WriteFile(wxString fileName) const
+{
+	return false;
+}

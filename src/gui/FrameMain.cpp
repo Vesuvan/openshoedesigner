@@ -46,7 +46,7 @@ FrameMain::FrameMain(wxWindow* parent) :
 	volume.Clear();
 	foot.Setup(&setup);
 	foot.AddToVolume(&volume);
-	volume.MarchingCubes(0.45);
+	volume.MarchingCubes(0.5);
 
 //		m_canvas->stereoMode = stereoAnaglyph;
 	m_canvas->eyeDistance = 0.005;
@@ -59,14 +59,16 @@ FrameMain::FrameMain(wxWindow* parent) :
 
 	thread = NULL;
 
-	dialogLastPosition = new FrameLastPosition(this, &setup);
+	dialogLastParameter = new FrameLastParameter(this, &setup);
+	dialogFootParameter = new FrameFootParameter(this);
+	dialogWalkcycleSupport = new FrameWalkcycleSupport(this);
 
 	this->Connect(ID_UPDATELAST, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::UpdateLast));
 	this->Connect(ID_VOLUMEDONE, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::Repaint));
-	this->Connect(ID_UPDATEBUTTONS, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::UpdateButtons));
+	this->Connect(ID_UPDATEGUI, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::UpdateGUI));
 }
 
 FrameMain::~FrameMain()
@@ -75,8 +77,8 @@ FrameMain::~FrameMain()
 		thread->Wait();
 		delete thread;
 	}
-	this->Disconnect(ID_UPDATEBUTTONS, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::UpdateButtons));
+	this->Disconnect(ID_UPDATEGUI, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::UpdateGUI));
 	this->Disconnect(ID_VOLUMEDONE, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::Repaint));
 	this->Disconnect(ID_UPDATELAST, wxEVT_COMMAND_MENU_SELECTED,
@@ -90,7 +92,7 @@ bool FrameMain::TransferDataFromWindow()
 
 bool FrameMain::TransferDataToWindow()
 {
-	m_menuSetup->Check(ID_STEREO3D, m_canvas->stereoMode != stereoOff);
+	m_menuView->Check(ID_STEREO3D, m_canvas->stereoMode != stereoOff);
 	return true;
 }
 
@@ -99,17 +101,23 @@ void FrameMain::OnQuit(wxCommandEvent& event)
 	Close();
 }
 
-void FrameMain::UpdateButtons(wxCommandEvent& event)
+void FrameMain::UpdateGUI(wxCommandEvent& event)
 {
-	m_toolBar->ToggleTool(ID_LASTPOSITION, dialogLastPosition->IsShown());
+	m_toolBar->ToggleTool(ID_TOOLSETUPLAST, dialogLastParameter->IsShown());
+	m_toolBar->ToggleTool(ID_TOOLSETUPFOOT, dialogFootParameter->IsShown());
 }
 
 void FrameMain::OnToolClicked(wxCommandEvent& event)
 {
-	if(m_toolBar->GetToolState(ID_LASTPOSITION)){
-		dialogLastPosition->Show();
+	if(m_toolBar->GetToolState(ID_TOOLSETUPLAST)){
+		dialogLastParameter->Show();
 	}else{
-		dialogLastPosition->Hide();
+		dialogLastParameter->Hide();
+	}
+	if(m_toolBar->GetToolState(ID_TOOLSETUPFOOT)){
+		dialogFootParameter->Show();
+	}else{
+		dialogFootParameter->Hide();
 	}
 }
 
@@ -140,7 +148,7 @@ void FrameMain::OnToggleStereo3D(wxCommandEvent& event)
 	}else{
 		m_canvas->stereoMode = stereoOff;
 	}
-	m_menuSetup->Check(ID_STEREO3D, m_canvas->stereoMode != stereoOff);
+	m_menuView->Check(ID_STEREO3D, m_canvas->stereoMode != stereoOff);
 	Refresh();
 }
 
@@ -149,5 +157,44 @@ void FrameMain::OnSetupStereo3D(wxCommandEvent& event)
 }
 
 void FrameMain::OnSetupUnits(wxCommandEvent& event)
+{
+}
+
+void FrameMain::OnSetupFoot(wxCommandEvent& event)
+{
+	dialogFootParameter->Show();
+}
+
+void FrameMain::OnSetupLast(wxCommandEvent& event)
+{
+	dialogLastParameter->Show();
+}
+
+void FrameMain::OnDefineWalkCycle(wxCommandEvent& event)
+{
+	dialogWalkcycleSupport->Show();
+}
+
+void FrameMain::OnSaveLast(wxCommandEvent& event)
+{
+}
+
+void FrameMain::OnSaveInsole(wxCommandEvent& event)
+{
+}
+
+void FrameMain::OnSaveShoe(wxCommandEvent& event)
+{
+}
+
+void FrameMain::OnSaveCutaway(wxCommandEvent& event)
+{
+}
+
+void FrameMain::OnPackZip(wxCommandEvent& event)
+{
+}
+
+void FrameMain::OnViewChange(wxCommandEvent& event)
 {
 }

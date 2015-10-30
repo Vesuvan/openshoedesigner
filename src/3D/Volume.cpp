@@ -26,12 +26,11 @@
 
 #include "Volume.h"
 
+#include "../StdInclude.h"
+//#include <wx/textfile.h>
+//#include <wx/string.h>
 #include <GL/gl.h>
 #include <math.h>
-#include <wx/textfile.h>
-#include <wx/wx.h>
-
-#include "wx/string.h"
 
 Volume::Volume()
 {
@@ -59,7 +58,7 @@ void Volume::SetCount(unsigned int nx, unsigned int ny, unsigned int nz,
 	this->Ny = ny;
 	this->Nz = nz;
 	this->N = nx * ny * nz;
-	value = new float[this->N];
+	value = new double[this->N];
 	dx = resolution;
 	dy = resolution;
 	dz = resolution;
@@ -73,7 +72,7 @@ void Volume::SetSize(float x, float y, float z, float resolution)
 	Ny = (unsigned int) ceil(y / resolution);
 	Nz = (unsigned int) ceil(z / resolution);
 	this->N = Nx * Ny * Nz;
-	value = new float[this->N];
+	value = new double[this->N];
 	dx = resolution;
 	dy = resolution;
 	dz = resolution;
@@ -144,7 +143,7 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 	Vector3 n = h2 - h1;
 	float nd = n.Abs();
 	float kh = -log(2 * M_E - 1) / k1;
-
+	Vector3 h;
 	n.Normalize();
 	Vector3 p(0, 0, 0);
 	unsigned int c = 0;
@@ -155,7 +154,7 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 				float r = n.Dot(p - h1);
 				if(r < 0) r = 0;
 				if(r > nd) r = nd;
-				Vector3 h = h1 + n * r;
+				h = h1 + n * r;
 				float d = (p - h).Abs() - r1;
 
 				value[c] += 1 - 1 / (1 + exp(kh * d));
@@ -176,7 +175,7 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 	Vector3 h1 = matrix.Inverse().Transform(p1);
 	Vector3 h2 = matrix.Inverse().Transform(p2);
 	Vector3 n = h2 - h1;
-	float nd = n.Abs();
+	double nd = n.Abs();
 	if(nd == 0){
 		AddSphere(p1, fmax(r1, r2), k1);
 		return;
@@ -198,40 +197,41 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 // x2 = x1*a
 // y2 = x1*b
 
-	float s0 = (r1 * r1 - r1 * r2) / nd;
-	float h0 = r1 * sqrt(2 * r1 * r2 + nd * nd - r1 * r1 - r2 * r2) / nd;
+	double s0 = (r1 * r1 - r1 * r2) / nd;
+	double h0 = r1 * sqrt(2 * r1 * r2 + nd * nd - r1 * r1 - r2 * r2) / nd;
 	// Coordinatesystemtransformation:
-	float a11 = 1 / nd;
-	float a12 = -s0 / (h0 * nd);
+	double a11 = 1 / nd;
+	double a12 = -s0 / (h0 * nd);
 //	float a21 = (r1 - r2) / nd;
 //	float a22 = (r2 * s0 - r1 * s0 + nd * r1) / (h0 * nd);
-	float a21 = 0;
-	float a22 = r1 / h0;
+	double a21 = 0;
+	double a22 = r1 / h0;
 
-	float kh = -log(2 * M_E - 1) / k1;
+	double kh = -log(2 * M_E - 1) / k1;
 	Vector3 p(0, 0, 0);
+	Vector3 h;
 	unsigned int c = 0;
 	unsigned int nx, ny, nz;
 	for(nz = 0; nz < Nz; nz++){
 		for(ny = 0; ny < Ny; ny++){
 			for(nx = 0; nx < Nx; nx++){
-				float x = n.Dot(p - h1);
-				Vector3 h = h1 + n * x;
-				float y = (p - h).Abs();
-				float x2 = x * a11 + y * a12;
-				float y2 = x * a21 + y * a22;
-				float d = y2;
+				double x = n.Dot(p - h1);
+				h = n * x + h1;
+				double y = (p - h).Abs();
+				double x2 = fma(x, a11, y * a12);
+				double y2 = fma(x, a21, y * a22);
+				double d = y2;
 
 				if(x2 < 0) d = (p - h1).Abs();
 				if(x2 > 1) d = (p - h2).Abs();
 //				if(x2 >= 0) d = sqrt(
 //						(x2 - nd * a) * (x2 - nd * a) + y2 * y2);
-				float r;
+				double r;
 				if(x2 < 0){
 					r = r1;
 				}else{
 					if(x2 < 1){
-						r = r1 + (r2 - r1) * x2;
+						r = fma(x2, r2 - r1, r1); // = r1 + (r2 - r1) * x2;
 					}else{
 						r = r2;
 					}
@@ -273,33 +273,34 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 
 	n.Normalize();
 
-	//	float a = 1 / (1 + (2 * r1 * r2 - r1 * r1 - r2 * r2) / (nd * nd));
-	//	float b = (r1 * r2 - r1 * r1) / nd;
+//	float a = 1 / (1 + (2 * r1 * r2 - r1 * r1 - r2 * r2) / (nd * nd));
+//	float b = (r1 * r2 - r1 * r1) / nd;
 
-	// x2 = x1*a
-	// y2 = x1*b
+// x2 = x1*a
+// y2 = x1*b
 
 	float dlimit = fmax(fmax(dx, dy), dz);
 
 	float s0 = (r1 * r1 - r1 * r2) / nd;
 	float h0 = r1 * sqrt(2 * r1 * r2 + nd * nd - r1 * r1 - r2 * r2) / nd;
-	// Coordinatesystemtransformation:
+// Coordinatesystemtransformation:
 	float a11 = 1 / nd;
 	float a12 = -s0 / (h0 * nd);
-	//	float a21 = (r1 - r2) / nd;
-	//	float a22 = (r2 * s0 - r1 * s0 + nd * r1) / (h0 * nd);
+//	float a21 = (r1 - r2) / nd;
+//	float a22 = (r2 * s0 - r1 * s0 + nd * r1) / (h0 * nd);
 	float a21 = 0;
 	float a22 = r1 / h0;
 
 	float kh = -log(2 * M_E - 1);
 	Vector3 p(0, 0, 0);
+	Vector3 h;
 	unsigned int c = 0;
 	unsigned int nx, ny, nz;
 	for(nz = 0; nz < Nz; nz++){
 		for(ny = 0; ny < Ny; ny++){
 			for(nx = 0; nx < Nx; nx++){
 				float x = n.Dot(p - h1);
-				Vector3 h = h1 + n * x;
+				h = h1 + n * x;
 				float y = (p - h).Abs();
 				float x2 = x * a11 + y * a12;
 				float y2 = x * a21 + y * a22;
@@ -537,9 +538,22 @@ void Volume::MarchingCubes(float limit)
 //	temp.Clear();
 //	temp.AddLine(_T("M=[ ..."));
 
-	triangles.Clear();
+	geometry.Clear();
 	if(value == NULL) return;
 	Vector3 p(0, 0, 0);
+	Vector3 p0;
+	Vector3 p1;
+	Vector3 p2;
+	Vector3 p3;
+	Vector3 p4;
+	Vector3 p5;
+	Vector3 p6;
+	Vector3 p7;
+	Vector3 p8;
+	Vector3 p9;
+	Vector3 p10;
+	Vector3 p11;
+	Triangle t;
 	unsigned int i, j, k, n, c = 0;
 	for(k = 0; k < Nz - 1; k++){
 		for(j = 0; j < Ny - 1; j++){
@@ -564,20 +578,11 @@ void Volume::MarchingCubes(float limit)
 				if(v5 > limit) v |= 32;
 				if(v6 > limit) v |= 64;
 				if(v7 > limit) v |= 128;
-
-				Vector3 p0;
-				Vector3 p1;
-				Vector3 p2;
-				Vector3 p3;
-				Vector3 p4;
-				Vector3 p5;
-				Vector3 p6;
-				Vector3 p7;
-				Vector3 p8;
-				Vector3 p9;
-				Vector3 p10;
-				Vector3 p11;
-
+				if(v == 0 || v == 255){
+					p.x += dx;
+					c++;
+					continue;
+				}
 				uint16_t h = edge[v];
 				if(h & ((uint16_t) 1 << 0)){
 					float x = (limit - v0) / (v1 - v0);
@@ -664,7 +669,6 @@ void Volume::MarchingCubes(float limit)
 					p11.z += dz * x;
 				}
 
-				Triangle t;
 				h = v * 12;
 				for(n = 0; n < 12; n++){
 					if(tri[h] == -1) break;
@@ -711,7 +715,7 @@ void Volume::MarchingCubes(float limit)
 //						break;
 //					}
 
-					if(n % 3 == 2) triangles.Add(t);
+					if(n % 3 == 2) geometry.AddTriangle(t, false);
 					h++;
 				}
 
@@ -726,8 +730,8 @@ void Volume::MarchingCubes(float limit)
 		p.y = 0;
 		p.z += dz;
 	}
-	for(n = 0; n < triangles.GetCount(); n++)
-		triangles[n].CalculateNormal();
+//	for(n = 0; n < triangles.GetCount(); n++)
+//		triangles[n].CalculateNormal();
 //	temp.AddLine(_T("];"));
 //	temp.AddLine(_T("M=reshape(M,149,[]);"));
 //	temp.AddLine(_T("%M=M-min(min(M));"));
@@ -745,7 +749,7 @@ void Volume::Render(void)
 
 	glPushMatrix();
 	glMultMatrixd(matrix.a);
-	glColor4f(color.x, color.y, color.z,0.8);
+	glColor4f(color.x, color.y, color.z, 0.8);
 
 	if(false){
 		glPointSize(2.0);
@@ -777,19 +781,21 @@ void Volume::Render(void)
 	}
 
 	if(true){
-		glBegin(GL_TRIANGLES);
-		unsigned int n;
-		for(n = 0; n < triangles.GetCount(); n++){
-			glNormal3f(triangles[n].n[0].x, triangles[n].n[0].y,
-					triangles[n].n[0].z);
-			glVertex3f(triangles[n].p[0].x, triangles[n].p[0].y,
-					triangles[n].p[0].z);
-			glVertex3f(triangles[n].p[1].x, triangles[n].p[1].y,
-					triangles[n].p[1].z);
-			glVertex3f(triangles[n].p[2].x, triangles[n].p[2].y,
-					triangles[n].p[2].z);
-		}
-		glEnd();
+		geometry.useColor = geometryColorNone;
+		geometry.Paint();
+//		glBegin(GL_TRIANGLES);
+//		unsigned int n;
+//		for(n = 0; n < triangles.GetCount(); n++){
+//			glNormal3f(triangles[n].n[0].x, triangles[n].n[0].y,
+//					triangles[n].n[0].z);
+//			glVertex3f(triangles[n].p[0].x, triangles[n].p[0].y,
+//					triangles[n].p[0].z);
+//			glVertex3f(triangles[n].p[1].x, triangles[n].p[1].y,
+//					triangles[n].p[1].z);
+//			glVertex3f(triangles[n].p[2].x, triangles[n].p[2].y,
+//					triangles[n].p[2].z);
+//		}
+//		glEnd();
 	}
 
 	glPopMatrix();

@@ -29,12 +29,12 @@
 
 /*!\class IDs
  * \brief List of command IDs
- * This headerfile contains a list of command IDs. These are used to comminucate
+ * This headerfile contains a list of command IDs. These are used to communicate
  * from the child windows to the main window.
  */
 
 #define ID_UPDATELAST			(wxID_HIGHEST+1)
-#define ID_UPDATEBUTTONS		(wxID_HIGHEST+2)
+#define ID_UPDATEGUI			(wxID_HIGHEST+2)
 #define ID_VOLUMEDONE			(wxID_HIGHEST+3)
 
 #endif /* IDS_H_ */

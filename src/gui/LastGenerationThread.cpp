@@ -46,7 +46,7 @@ void* LastGenerationThread::Entry()
 	if(TestDestroy()) return NULL;
 	foot->AddToVolume(volume);
 	if(TestDestroy()) return NULL;
-	volume->MarchingCubes(0.45);
+	volume->MarchingCubes(0.5);
 
 	wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, ID_VOLUMEDONE);
 	wxPostEvent(frame, event);

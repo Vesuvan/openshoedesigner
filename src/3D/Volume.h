@@ -26,19 +26,22 @@
 
 #ifndef VOLUME_H_
 #define VOLUME_H_
+
 #include "AffineTransformMatrix.h"
-#include "Triangle.h"
+#include "Geometry.h"
 #include "Vector3.h"
 
 /*!\class Volume
- * \brief ...
+ * \brief Marching Cube Volume
  *
- * ...
+ * Sets up a density map by using morph-objects.
+ * Applies the marching cubes algorithm to convert the density map into a surface.
  */
 
 class Volume {
 public:
 	Volume();
+	//TODO: Add copy constructor, becaus it has a pointer.
 	virtual ~Volume();
 
 	void SetCount(unsigned int nx, unsigned int ny, unsigned int nz,
@@ -61,10 +64,10 @@ public:
 
 	AffineTransformMatrix matrix;
 	Vector3 color;
-	ArrayOfTriangle triangles;
+	Geometry geometry;
 private:
 
-	float * value;
+	double * value;
 
 	unsigned int Nx;
 	unsigned int Ny;

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Name               : Foot.cpp
-// Purpose            : 
+// Purpose            : Footbones and skin parameters
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
@@ -124,7 +124,7 @@ void Foot::AddToVolume(Volume * vol)
 
 void Foot::Setup(FootParameters * param)
 {
-
+	// Passe the parameters down to each bone.
 	Talus->roty = param->angle_1Y;
 	Talus->rotx = param->angle_1X;
 	Calcaneus->rotx = param->angle_2X;
@@ -133,6 +133,8 @@ void Foot::Setup(FootParameters * param)
 	PhalanxI3->roty = param->angle_3Y;
 	PhalanxI4->roty = param->angle_3Y;
 	PhalanxI5->roty = param->angle_3Y;
+
+	// Run the BoneSetup visitor to recalculate each single bone.
 	BoneSetup set;
 	Tibia->Accept(set);
 }

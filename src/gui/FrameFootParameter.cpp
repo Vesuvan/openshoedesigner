@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : StdInclude.h
-// Purpose            : Takes care of precompiled header issues
+// Name               : FrameFootParameter.cpp
+// Purpose            : GUI for setting up the foots parameter
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 21.05.2009
-// Copyright          : (C) 2009 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 29.10.2015
+// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,19 +24,23 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef STDINC_H_
-#define STDINC_H_
+#include "FrameFootParameter.h"
+#include "IDs.h"
 
-// For compilers that support precompilation, includes "wx/wx.h".
+FrameFootParameter::FrameFootParameter(wxWindow* parent):GUIFrameFootParameter(parent)
+{
+	// TODO Auto-generated constructor stub
+	
+}
 
-#include <wx/wxprec.h>
+FrameFootParameter::~FrameFootParameter()
+{
+	// TODO Auto-generated destructor stub
+}
 
-#ifdef __BORLANDC__
-#pragma hdrstop
-#endif
-
-#ifndef WX_PRECOMP
-#include <wx/wx.h>
-#endif
-
-#endif /* STDINC_H_ */
+void FrameFootParameter::OnClose(wxCloseEvent& event)
+{
+	this->Hide();
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
+	ProcessEvent(selectEvent);
+}

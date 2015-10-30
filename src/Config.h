@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : StdInclude.h
-// Purpose            : Takes care of precompiled header issues
+// Name               : Config.h
+// Purpose            : Global configuration
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 21.05.2009
-// Copyright          : (C) 2009 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 21.02.2010
+// Copyright          : (C) 2010 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,19 +24,19 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef STDINC_H_
-#define STDINC_H_
+/*  Configuration file. Major switches that change the code
+ *  and the structure can be found here (_DEBUG_ for example).
+ */
 
-// For compilers that support precompilation, includes "wx/wx.h".
+#ifndef CONFIG_H_
+#define CONFIG_H_
 
-#include <wx/wxprec.h>
+#define _LASTGENERATOR_VERSION "0.1"
+#define _LASTGENERATOR_AUTHORS "Tobias Schaefer"
+#define _LASTGENERATOR_USEMULTITHREADING 0
 
-#ifdef __BORLANDC__
-#pragma hdrstop
-#endif
+//#define _DEBUGMODE
+//#define _USE_3DPICKING
+//#define _USE_6DOFCONTROLLER
 
-#ifndef WX_PRECOMP
-#include <wx/wx.h>
-#endif
-
-#endif /* STDINC_H_ */
+#endif /* CONFIG_H_ */

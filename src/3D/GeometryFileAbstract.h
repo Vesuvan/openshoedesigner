@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Canvas3D.h
-// Purpose            : 
+// Name               : GeometryFileAbstract.h
+// Purpose            : Abstract class for geometry loaded from a file
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 11.08.2015
-// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 11.06.2011
+// Copyright          : (C) 2011 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,32 +24,36 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CANVAS3D_H_
-#define CANVAS3D_H_
+#ifndef GEOMETRYFILEABSTRACT_H_
+#define GEOMETRYFILEABSTRACT_H_
 
-/*!\class Canvas3D
- * \brief ...
- *
- * ...
+#include "Geometry.h"
+#include <wx/string.h>
+
+/*!\class GeometryFileAbstract
+ * \ingroup File3D
+ * \brief Abstract class for 3D files
  */
 
-#include "../3D/OpenGLCanvas.h"
-#include "../3D/Foot.h"
-#include "../3D/Volume.h"
-#include "../3D/Vector3.h"
-
-class Canvas3D:public OpenGLCanvas {
+class GeometryFileAbstract {
+	// Constructor/ Destructor
 public:
-	Canvas3D(wxWindow* parent);
-	virtual ~Canvas3D();
+	GeometryFileAbstract();
+	virtual ~GeometryFileAbstract();
 
-	void SetBones(Foot* const bone);
-	void SetVolume(Volume* const volume);
-	void Render();
+	// Member variables
+public:
+	wxString filename; ///< Last read / written file
+	AffineTransformMatrix matrix;
+	ArrayOfGeometry geometry;
+	wxString error; ///> Errorstring, empty if no errors occured
+	Vector3 color; ///> Color of object, if no color is provided by the geometry itself.
 
-private:
-	Foot* bone;
-	Volume* volume;
+	//Methods:
+public:
+	void Paint(void) const;
+	virtual bool ReadFile(wxString fileName);
+	virtual bool WriteFile(wxString fileName) const;
 };
 
-#endif /* CANVAS3D_H_ */
+#endif /* GEOMETRYFILEABSTRACT_H_ */

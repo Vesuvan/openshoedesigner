@@ -27,7 +27,7 @@
 #include "Canvas3D.h"
 #include <GL/gl.h>
 
-Canvas3D::Canvas3D(wxFrame* parent) :
+Canvas3D::Canvas3D(wxWindow* parent) :
 		OpenGLCanvas(parent)
 {
 	bone = NULL;

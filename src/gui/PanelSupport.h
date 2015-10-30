@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : StdInclude.h
-// Purpose            : Takes care of precompiled header issues
+// Name               : PanelSupport.h
+// Purpose            : Panel for setting the walkcycle supports
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 21.05.2009
-// Copyright          : (C) 2009 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 27.10.2015
+// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,19 +24,36 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef STDINC_H_
-#define STDINC_H_
 
-// For compilers that support precompilation, includes "wx/wx.h".
+#ifndef PANELSUPPORT_H_
+#define PANELSUPPORT_H_
 
-#include <wx/wxprec.h>
+#include <wx/panel.h>
+#include <wx/dcclient.h>
 
-#ifdef __BORLANDC__
-#pragma hdrstop
-#endif
+class PanelSupport:public wxPanel {
+	// Costructor/ Destructor
+public:
+	PanelSupport(wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos =
+			wxDefaultPosition, const wxSize& size = wxDefaultSize, long style =
+			wxTAB_TRAVERSAL);
+	virtual ~PanelSupport();
 
-#ifndef WX_PRECOMP
-#include <wx/wx.h>
-#endif
+	// Member Variables
+public:
 
-#endif /* STDINC_H_ */
+private:
+
+	//Methods
+public:
+
+private:
+
+	void OnPaint(wxPaintEvent& event);
+	void OnSize(wxSizeEvent &event);
+
+	void OnMotion(wxMouseEvent& event);
+	void OnLeftDown(wxMouseEvent& event);
+};
+
+#endif /* PANELSUPPORT_H_ */
