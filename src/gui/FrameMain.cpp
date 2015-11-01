@@ -25,7 +25,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "FrameMain.h"
+
 #include "IDs.h"
+#include "../3D/FileSTL.h"
+//#include <wx/file.h>
+#include <wx/filedlg.h>
+#include <wx/wfstream.h>
+#include <wx/filename.h>
 
 FrameMain::FrameMain(wxWindow* parent) :
 		GUIFrameMain(parent)
@@ -237,6 +243,17 @@ void FrameMain::OnEditWalkCycle(wxCommandEvent& event)
 
 void FrameMain::OnSaveLast(wxCommandEvent& event)
 {
+	wxFileDialog dialog(this, _("Save last..."), _T(""), _T(""),
+			_("STL file (*.stl)|*.stl|All files|*.*"),
+			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+	if(dialog.ShowModal() == wxID_OK){
+		wxFileName fileName;
+		fileName = dialog.GetPath();
+		wxFFileOutputStream outStream(fileName.GetFullPath());
+		FileSTL temp;
+		temp.WriteStream(outStream, volume.geometry);
+	}
 }
 
 void FrameMain::OnSaveInsole(wxCommandEvent& event)
