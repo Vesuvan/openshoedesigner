@@ -26,35 +26,43 @@
 #include <wx/slider.h>
 #include <wx/textctrl.h>
 #include <wx/statbox.h>
+#include <wx/button.h>
 #include <wx/panel.h>
 #include <wx/notebook.h>
 #include "PanelSupport.h"
+#include "PanelWalkcycle.h"
 #include <wx/checkbox.h>
+#include "PanelPlotSimple.h"
+#include <wx/choice.h>
+#include "PanelPattern.h"
 
 ///////////////////////////////////////////////////////////////////////////
 
 #define wxID_QUIT 1000
 #define ID_SETUPFOOT 1001
 #define ID_SETUPLAST 1002
-#define ID_STEREO3D 1003
-#define ID_SHOWBONES 1004
-#define ID_SHOWLAST 1005
-#define ID_SHOWINSOLE 1006
-#define ID_SHOWSHOE 1007
-#define ID_SHOWCUTAWAY 1008
-#define ID_SHOWFLOOR 1009
-#define ID_SETUPSTEREO3D 1010
-#define ID_SETUPUNITS 1011
-#define ID_TOOLSETUPFOOT 1012
-#define ID_TOOLSETUPLAST 1013
-#define ID_SLIDER1Y 1014
-#define ID_TEXT1Y 1015
-#define ID_SLIDER1X 1016
-#define ID_TEXT1X 1017
-#define ID_SLIDER2X 1018
-#define ID_TEXT2X 1019
-#define ID_SLIDER3Y 1020
-#define ID_TEXT3Y 1021
+#define ID_EDITPATTERN 1003
+#define ID_EDITWALKCYCLE 1004
+#define ID_STEREO3D 1005
+#define ID_SHOWBONES 1006
+#define ID_SHOWLAST 1007
+#define ID_SHOWINSOLE 1008
+#define ID_SHOWSOLE 1009
+#define ID_SHOWUPPER 1010
+#define ID_SHOWCUTAWAY 1011
+#define ID_SHOWFLOOR 1012
+#define ID_SETUPSTEREO3D 1013
+#define ID_SETUPUNITS 1014
+#define ID_TOOLSETUPFOOT 1015
+#define ID_TOOLSETUPLAST 1016
+#define ID_SLIDER1Y 1017
+#define ID_TEXT1Y 1018
+#define ID_SLIDER1X 1019
+#define ID_TEXT1X 1020
+#define ID_SLIDER2X 1021
+#define ID_TEXT2X 1022
+#define ID_SLIDER3Y 1023
+#define ID_TEXT3Y 1024
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class GUIFrameMain
@@ -79,7 +87,8 @@ class GUIFrameMain : public wxFrame
 		virtual void OnQuit( wxCommandEvent& event ) = 0;
 		virtual void OnSetupFoot( wxCommandEvent& event ) = 0;
 		virtual void OnSetupLast( wxCommandEvent& event ) = 0;
-		virtual void OnDefineWalkCycle( wxCommandEvent& event ) = 0;
+		virtual void OnEditPattern( wxCommandEvent& event ) = 0;
+		virtual void OnEditWalkCycle( wxCommandEvent& event ) = 0;
 		virtual void OnSaveLast( wxCommandEvent& event ) = 0;
 		virtual void OnSaveInsole( wxCommandEvent& event ) = 0;
 		virtual void OnSaveShoe( wxCommandEvent& event ) = 0;
@@ -165,12 +174,18 @@ class GUIFrameFootParameter : public wxFrame
 	private:
 	
 	protected:
-		wxNotebook* m_notebook1;
-		wxPanel* m_panel1;
-		wxPanel* m_panel2;
+		wxNotebook* m_notebook;
+		wxPanel* m_panelMeasurements;
+		
+		wxButton* m_buttonCalculate;
+		wxPanel* m_panelBoneLength;
+		wxPanel* m_panelBoneDiameter;
+		wxPanel* m_panelSkin;
+		wxPanel* m_panelLeg;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnClose( wxCloseEvent& event ) = 0;
+		virtual void OnCalculate( wxCommandEvent& event ) = 0;
 		
 	
 	public:
@@ -189,9 +204,10 @@ class GUIFrameWalkcycleSupport : public wxFrame
 	
 	protected:
 		PanelSupport* m_panelSupport;
-		PanelSupport* m_panelCycle;
+		PanelWalkcycle* m_panelCycle;
 		wxCheckBox* m_checkBoxLockAnkle;
-		PanelSupport* m_panelData;
+		PanelPlotSimple* m_panelPlot;
+		wxChoice* m_choice;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnClose( wxCloseEvent& event ) = 0;
@@ -201,6 +217,35 @@ class GUIFrameWalkcycleSupport : public wxFrame
 		
 		GUIFrameWalkcycleSupport( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Walkcycle Support"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 630,453 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
 		~GUIFrameWalkcycleSupport();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class GUIFramePattern
+///////////////////////////////////////////////////////////////////////////////
+class GUIFramePattern : public wxFrame 
+{
+	private:
+	
+	protected:
+		PanelPattern* m_panel;
+		wxStaticText* m_staticText17;
+		wxChoice* m_choice2;
+		wxStaticText* m_staticText18;
+		wxChoice* m_choice3;
+		wxStaticText* m_staticText19;
+		wxSlider* m_slider5;
+		wxStaticText* m_staticText20;
+		wxSlider* m_slider6;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnClose( wxCloseEvent& event ) = 0;
+		
+	
+	public:
+		
+		GUIFramePattern( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Pattern"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
+		~GUIFramePattern();
 	
 };
 

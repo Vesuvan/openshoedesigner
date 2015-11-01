@@ -34,7 +34,8 @@
  */
 
 #define ID_UPDATELAST			(wxID_HIGHEST+1)
-#define ID_UPDATEGUI			(wxID_HIGHEST+2)
-#define ID_VOLUMEDONE			(wxID_HIGHEST+3)
+#define ID_UPDATE3DVIEW			(wxID_HIGHEST+2)
+#define ID_UPDATEGUI			(wxID_HIGHEST+3)
+#define ID_THREADLASTDONE		(wxID_HIGHEST+4)
 
 #endif /* IDS_H_ */

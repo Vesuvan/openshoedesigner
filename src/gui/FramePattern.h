@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameFootParameter.cpp
-// Purpose            : GUI for setting up the foots parameter
-// Thread Safe        : Yes
+// Name               : FramePattern.h
+// Purpose            :
+// Thread Safe        : No
 // Platform dependent : No
-// Compiler Options   :
-// Author             : Tobias Schaefer
-// Created            : 29.10.2015
+// Compiler Options   : -lm
+// Author             : toby
+// Created            : 31.10.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,27 +24,24 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "FrameFootParameter.h"
-#include "IDs.h"
+#ifndef FRAMEPATTERN_H_
+#define FRAMEPATTERN_H_
 
-FrameFootParameter::FrameFootParameter(wxWindow* parent):GUIFrameFootParameter(parent)
-{
-	// TODO Auto-generated constructor stub
-	
-}
+/*!\class FramePattern
+ * \brief ...
+ *
+ * ...
+ */
 
-FrameFootParameter::~FrameFootParameter()
-{
-	// TODO Auto-generated destructor stub
-}
+#include "gui.h"
 
-void FrameFootParameter::OnClose(wxCloseEvent& event)
-{
-	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
-	ProcessEvent(selectEvent);
-}
+class FramePattern:public GUIFramePattern {
+public:
+	FramePattern(wxWindow* parent);
+	virtual ~FramePattern();
 
-void FrameFootParameter::OnCalculate(wxCommandEvent& event)
-{
-}
+	virtual void OnClose(wxCloseEvent& event);
+
+};
+
+#endif /* FRAMEPATTERN_H_ */

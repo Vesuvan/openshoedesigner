@@ -38,9 +38,13 @@ GUIFrameMain::GUIFrameMain( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_menuItemSetupLast = new wxMenuItem( m_menuShoe, ID_SETUPLAST, wxString( wxT("Setup &Last") ) , wxEmptyString, wxITEM_CHECK );
 	m_menuShoe->Append( m_menuItemSetupLast );
 	
-	wxMenuItem* m_menuItemDefineWalkCycle;
-	m_menuItemDefineWalkCycle = new wxMenuItem( m_menuShoe, wxID_ANY, wxString( wxT("Define &Walkcycle Support") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menuShoe->Append( m_menuItemDefineWalkCycle );
+	wxMenuItem* m_menuItemEditPattern;
+	m_menuItemEditPattern = new wxMenuItem( m_menuShoe, ID_EDITPATTERN, wxString( wxT("Edit &Pattern") ) , wxEmptyString, wxITEM_CHECK );
+	m_menuShoe->Append( m_menuItemEditPattern );
+	
+	wxMenuItem* m_menuItemEditWalkCycle;
+	m_menuItemEditWalkCycle = new wxMenuItem( m_menuShoe, ID_EDITWALKCYCLE, wxString( wxT("Define &Walkcycle Support") ) , wxEmptyString, wxITEM_CHECK );
+	m_menuShoe->Append( m_menuItemEditWalkCycle );
 	
 	m_menubar->Append( m_menuShoe, wxT("&Shoe") );
 	
@@ -90,9 +94,13 @@ GUIFrameMain::GUIFrameMain( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_menuItemShowInsole = new wxMenuItem( m_menuView, ID_SHOWINSOLE, wxString( wxT("Show &Insole") ) , wxEmptyString, wxITEM_CHECK );
 	m_menuView->Append( m_menuItemShowInsole );
 	
-	wxMenuItem* m_menuItemShowShoe;
-	m_menuItemShowShoe = new wxMenuItem( m_menuView, ID_SHOWSHOE, wxString( wxT("Show &Shoe") ) , wxEmptyString, wxITEM_CHECK );
-	m_menuView->Append( m_menuItemShowShoe );
+	wxMenuItem* m_menuIItemShowSole;
+	m_menuIItemShowSole = new wxMenuItem( m_menuView, ID_SHOWSOLE, wxString( wxT("Show &Sole") ) , wxEmptyString, wxITEM_CHECK );
+	m_menuView->Append( m_menuIItemShowSole );
+	
+	wxMenuItem* m_menuItemShowUpper;
+	m_menuItemShowUpper = new wxMenuItem( m_menuView, ID_SHOWUPPER, wxString( wxT("Show &Upper") ) , wxEmptyString, wxITEM_CHECK );
+	m_menuView->Append( m_menuItemShowUpper );
 	
 	wxMenuItem* m_menuItemShowCutaway;
 	m_menuItemShowCutaway = new wxMenuItem( m_menuView, ID_SHOWCUTAWAY, wxString( wxT("Show &Cutaway Block") ) , wxEmptyString, wxITEM_CHECK );
@@ -136,7 +144,8 @@ GUIFrameMain::GUIFrameMain( wxWindow* parent, wxWindowID id, const wxString& tit
 	this->Connect( m_menuItemQuit->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnQuit ) );
 	this->Connect( m_menuItemSetupFoot->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupFoot ) );
 	this->Connect( m_menuItemSetupLast->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupLast ) );
-	this->Connect( m_menuItemDefineWalkCycle->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnDefineWalkCycle ) );
+	this->Connect( m_menuItemEditPattern->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnEditPattern ) );
+	this->Connect( m_menuItemEditWalkCycle->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnEditWalkCycle ) );
 	this->Connect( m_menuItemSaveLast->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveLast ) );
 	this->Connect( m_menuItemSaveInsole->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveInsole ) );
 	this->Connect( m_menuItemSaveShoe->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveShoe ) );
@@ -146,7 +155,8 @@ GUIFrameMain::GUIFrameMain( wxWindow* parent, wxWindowID id, const wxString& tit
 	this->Connect( m_menuItemShowBones->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
 	this->Connect( m_menuItemShowLast->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
 	this->Connect( m_menuItemShowInsole->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
-	this->Connect( m_menuItemShowShoe->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
+	this->Connect( m_menuIItemShowSole->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
+	this->Connect( m_menuItemShowUpper->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
 	this->Connect( m_menuItemShowCutaway->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
 	this->Connect( m_menuItemShowFloor->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
 	this->Connect( m_menuItemSetupStereo3D->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupStereo3D ) );
@@ -161,13 +171,15 @@ GUIFrameMain::~GUIFrameMain()
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnQuit ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupFoot ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupLast ) );
-	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnDefineWalkCycle ) );
+	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnEditPattern ) );
+	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnEditWalkCycle ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveLast ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveInsole ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveShoe ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveCutaway ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnPackZip ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnToggleStereo3D ) );
+	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
@@ -474,25 +486,45 @@ GUIFrameFootParameter::GUIFrameFootParameter( wxWindow* parent, wxWindowID id, c
 	wxBoxSizer* bSizer11;
 	bSizer11 = new wxBoxSizer( wxVERTICAL );
 	
-	m_notebook1 = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_panel1 = new wxPanel( m_notebook1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	m_notebook1->AddPage( m_panel1, wxT("a page"), false );
-	m_panel2 = new wxPanel( m_notebook1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	m_notebook1->AddPage( m_panel2, wxT("a page"), false );
+	m_notebook = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_panelMeasurements = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer16;
+	bSizer16 = new wxBoxSizer( wxVERTICAL );
 	
-	bSizer11->Add( m_notebook1, 1, wxEXPAND | wxALL, 5 );
+	
+	bSizer16->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	m_buttonCalculate = new wxButton( m_panelMeasurements, wxID_ANY, wxT("Calculate Data"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer16->Add( m_buttonCalculate, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+	
+	m_panelMeasurements->SetSizer( bSizer16 );
+	m_panelMeasurements->Layout();
+	bSizer16->Fit( m_panelMeasurements );
+	m_notebook->AddPage( m_panelMeasurements, wxT("Measurements"), true );
+	m_panelBoneLength = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_notebook->AddPage( m_panelBoneLength, wxT("Bone Length"), false );
+	m_panelBoneDiameter = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_notebook->AddPage( m_panelBoneDiameter, wxT("Bone Diameter"), false );
+	m_panelSkin = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_notebook->AddPage( m_panelSkin, wxT("Skin Density"), false );
+	m_panelLeg = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_notebook->AddPage( m_panelLeg, wxT("Leg"), false );
+	
+	bSizer11->Add( m_notebook, 1, wxEXPAND | wxALL, 5 );
 	
 	this->SetSizer( bSizer11 );
 	this->Layout();
 	
 	// Connect Events
 	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameFootParameter::OnClose ) );
+	m_buttonCalculate->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameFootParameter::OnCalculate ), NULL, this );
 }
 
 GUIFrameFootParameter::~GUIFrameFootParameter()
 {
 	// Disconnect Events
 	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameFootParameter::OnClose ) );
+	m_buttonCalculate->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameFootParameter::OnCalculate ), NULL, this );
 }
 
 GUIFrameWalkcycleSupport::GUIFrameWalkcycleSupport( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
@@ -509,9 +541,9 @@ GUIFrameWalkcycleSupport::GUIFrameWalkcycleSupport( wxWindow* parent, wxWindowID
 	bSizer15 = new wxBoxSizer( wxVERTICAL );
 	
 	wxStaticBoxSizer* sbSizer4;
-	sbSizer4 = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("label") ), wxVERTICAL );
+	sbSizer4 = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("Walkcycle") ), wxVERTICAL );
 	
-	m_panelCycle = new PanelSupport(this);
+	m_panelCycle = new PanelWalkcycle(this);
 	sbSizer4->Add( m_panelCycle, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
 	
 	m_checkBoxLockAnkle = new wxCheckBox( this, wxID_ANY, wxT("Lock Ankle"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -520,10 +552,16 @@ GUIFrameWalkcycleSupport::GUIFrameWalkcycleSupport( wxWindow* parent, wxWindowID
 	bSizer15->Add( sbSizer4, 1, wxEXPAND, 5 );
 	
 	wxStaticBoxSizer* sbSizer5;
-	sbSizer5 = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("label") ), wxVERTICAL );
+	sbSizer5 = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("Forces, Moments") ), wxVERTICAL );
 	
-	m_panelData = new PanelSupport(this);
-	sbSizer5->Add( m_panelData, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
+	m_panelPlot = new PanelPlotSimple(this);
+	sbSizer5->Add( m_panelPlot, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
+	
+	wxString m_choiceChoices[] = { wxT("Kneeline"), wxT("Force"), wxT("Moment"), wxT("Crossforce") };
+	int m_choiceNChoices = sizeof( m_choiceChoices ) / sizeof( wxString );
+	m_choice = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceNChoices, m_choiceChoices, 0 );
+	m_choice->SetSelection( 0 );
+	sbSizer5->Add( m_choice, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
 	
 	bSizer15->Add( sbSizer5, 1, wxEXPAND, 5 );
 	
@@ -540,4 +578,66 @@ GUIFrameWalkcycleSupport::~GUIFrameWalkcycleSupport()
 {
 	// Disconnect Events
 	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameWalkcycleSupport::OnClose ) );
+}
+
+GUIFramePattern::GUIFramePattern( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizer14;
+	bSizer14 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_panel = new PanelPattern(this);
+	bSizer14->Add( m_panel, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
+	
+	wxBoxSizer* bSizer15;
+	bSizer15 = new wxBoxSizer( wxVERTICAL );
+	
+	m_staticText17 = new wxStaticText( this, wxID_ANY, wxT("Preset:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText17->Wrap( -1 );
+	bSizer15->Add( m_staticText17, 0, wxALL, 5 );
+	
+	wxString m_choice2Choices[] = { wxT("Custom Design") };
+	int m_choice2NChoices = sizeof( m_choice2Choices ) / sizeof( wxString );
+	m_choice2 = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choice2NChoices, m_choice2Choices, 0 );
+	m_choice2->SetSelection( 0 );
+	bSizer15->Add( m_choice2, 0, wxALL|wxEXPAND, 5 );
+	
+	m_staticText18 = new wxStaticText( this, wxID_ANY, wxT("Style:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText18->Wrap( -1 );
+	bSizer15->Add( m_staticText18, 0, wxALL, 5 );
+	
+	wxString m_choice3Choices[] = { wxT("Standard") };
+	int m_choice3NChoices = sizeof( m_choice3Choices ) / sizeof( wxString );
+	m_choice3 = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choice3NChoices, m_choice3Choices, 0 );
+	m_choice3->SetSelection( 0 );
+	bSizer15->Add( m_choice3, 0, wxALL|wxEXPAND, 5 );
+	
+	m_staticText19 = new wxStaticText( this, wxID_ANY, wxT("Height:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText19->Wrap( -1 );
+	bSizer15->Add( m_staticText19, 0, wxALL, 5 );
+	
+	m_slider5 = new wxSlider( this, wxID_ANY, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
+	bSizer15->Add( m_slider5, 0, wxALL|wxEXPAND, 5 );
+	
+	m_staticText20 = new wxStaticText( this, wxID_ANY, wxT("Factor:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText20->Wrap( -1 );
+	bSizer15->Add( m_staticText20, 0, wxALL, 5 );
+	
+	m_slider6 = new wxSlider( this, wxID_ANY, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
+	bSizer15->Add( m_slider6, 0, wxALL|wxEXPAND, 5 );
+	
+	bSizer14->Add( bSizer15, 0, 0, 5 );
+	
+	this->SetSizer( bSizer14 );
+	this->Layout();
+	
+	// Connect Events
+	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFramePattern::OnClose ) );
+}
+
+GUIFramePattern::~GUIFramePattern()
+{
+	// Disconnect Events
+	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFramePattern::OnClose ) );
 }

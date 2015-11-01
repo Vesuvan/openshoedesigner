@@ -30,7 +30,7 @@
 FrameMain::FrameMain(wxWindow* parent) :
 		GUIFrameMain(parent)
 {
-	volume.SetSize(0.40, 0.3, 0.4, 0.005);
+	volume.SetSize(0.40, 0.3, 0.4, 0.0075);
 	volume.matrix.TranslateGlobal(-0.1, -0.15, -0.3);
 
 //	volume.AddHalfplane(Vector3(0, 0, 1), -0.10, 0.01);
@@ -62,10 +62,13 @@ FrameMain::FrameMain(wxWindow* parent) :
 	dialogLastParameter = new FrameLastParameter(this, &setup);
 	dialogFootParameter = new FrameFootParameter(this);
 	dialogWalkcycleSupport = new FrameWalkcycleSupport(this);
+	dialogPattern = new FramePattern(this);
+
+	TransferDataToWindow();
 
 	this->Connect(ID_UPDATELAST, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::UpdateLast));
-	this->Connect(ID_VOLUMEDONE, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::Update3DView));
+	this->Connect(ID_THREADLASTDONE, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::Repaint));
 	this->Connect(ID_UPDATEGUI, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::UpdateGUI));
@@ -79,20 +82,45 @@ FrameMain::~FrameMain()
 	}
 	this->Disconnect(ID_UPDATEGUI, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::UpdateGUI));
-	this->Disconnect(ID_VOLUMEDONE, wxEVT_COMMAND_MENU_SELECTED,
+	this->Disconnect(ID_THREADLASTDONE, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::Repaint));
 	this->Disconnect(ID_UPDATELAST, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::UpdateLast));
-}
-
-bool FrameMain::TransferDataFromWindow()
-{
-	return true;
+			wxCommandEventHandler(FrameMain::Update3DView));
 }
 
 bool FrameMain::TransferDataToWindow()
 {
+	m_toolBar->ToggleTool(ID_TOOLSETUPLAST, dialogLastParameter->IsShown());
+	m_toolBar->ToggleTool(ID_TOOLSETUPFOOT, dialogFootParameter->IsShown());
+
+	m_menuFoot->Check(ID_SETUPFOOT, dialogFootParameter->IsShown());
+	m_menuShoe->Check(ID_SETUPLAST, dialogLastParameter->IsShown());
+	m_menuShoe->Check(ID_EDITPATTERN, dialogPattern->IsShown());
+	m_menuShoe->Check(ID_EDITWALKCYCLE, dialogWalkcycleSupport->IsShown());
+
 	m_menuView->Check(ID_STEREO3D, m_canvas->stereoMode != stereoOff);
+
+	m_menuView->Check(ID_SHOWBONES, m_canvas->showBones);
+	m_menuView->Check(ID_SHOWLAST, m_canvas->showLast);
+	m_menuView->Check(ID_SHOWINSOLE, m_canvas->showInsole);
+	m_menuView->Check(ID_SHOWSOLE, m_canvas->showSole);
+	m_menuView->Check(ID_SHOWUPPER, m_canvas->showUpper);
+	m_menuView->Check(ID_SHOWCUTAWAY, m_canvas->showCutaway);
+	m_menuView->Check(ID_SHOWFLOOR, m_canvas->showFloor);
+
+	return true;
+}
+
+bool FrameMain::TransferDataFromWindow()
+{
+	m_canvas->showBones = m_menuView->IsChecked(ID_SHOWBONES);
+	m_canvas->showLast = m_menuView->IsChecked(ID_SHOWLAST);
+	m_canvas->showInsole = m_menuView->IsChecked(ID_SHOWINSOLE);
+	m_canvas->showUpper = m_menuView->IsChecked(ID_SHOWUPPER);
+	m_canvas->showSole = m_menuView->IsChecked(ID_SHOWSOLE);
+	m_canvas->showCutaway = m_menuView->IsChecked(ID_SHOWCUTAWAY);
+	m_canvas->showFloor = m_menuView->IsChecked(ID_SHOWFLOOR);
+
 	return true;
 }
 
@@ -103,25 +131,35 @@ void FrameMain::OnQuit(wxCommandEvent& event)
 
 void FrameMain::UpdateGUI(wxCommandEvent& event)
 {
-	m_toolBar->ToggleTool(ID_TOOLSETUPLAST, dialogLastParameter->IsShown());
-	m_toolBar->ToggleTool(ID_TOOLSETUPFOOT, dialogFootParameter->IsShown());
+	TransferDataToWindow();
+}
+
+void FrameMain::OnEditPattern(wxCommandEvent& event)
+{
+	if(dialogPattern->IsShown()){
+		dialogPattern->Hide();
+	}else{
+		dialogPattern->Show();
+	}
+	TransferDataToWindow();
 }
 
 void FrameMain::OnToolClicked(wxCommandEvent& event)
 {
-	if(m_toolBar->GetToolState(ID_TOOLSETUPLAST)){
-		dialogLastParameter->Show();
-	}else{
-		dialogLastParameter->Hide();
-	}
 	if(m_toolBar->GetToolState(ID_TOOLSETUPFOOT)){
 		dialogFootParameter->Show();
 	}else{
 		dialogFootParameter->Hide();
 	}
+	if(m_toolBar->GetToolState(ID_TOOLSETUPLAST)){
+		dialogLastParameter->Show();
+	}else{
+		dialogLastParameter->Hide();
+	}
+	TransferDataToWindow();
 }
 
-void FrameMain::UpdateLast(wxCommandEvent& event)
+void FrameMain::Update3DView(wxCommandEvent& event)
 {
 	foot.Setup(&setup);
 
@@ -135,9 +173,11 @@ void FrameMain::UpdateLast(wxCommandEvent& event)
 }
 void FrameMain::Repaint(wxCommandEvent& event)
 {
-	thread->Wait();
-	delete thread;
-	thread = NULL;
+	if(thread != NULL){
+		thread->Wait();
+		delete thread;
+		thread = NULL;
+	}
 	Refresh();
 }
 
@@ -162,17 +202,37 @@ void FrameMain::OnSetupUnits(wxCommandEvent& event)
 
 void FrameMain::OnSetupFoot(wxCommandEvent& event)
 {
-	dialogFootParameter->Show();
+
+	if(dialogFootParameter->IsShown()){
+		dialogFootParameter->Hide();
+	}else{
+		dialogFootParameter->Show();
+	}
+
+	TransferDataToWindow();
 }
 
 void FrameMain::OnSetupLast(wxCommandEvent& event)
 {
-	dialogLastParameter->Show();
+
+	if(dialogLastParameter->IsShown()){
+		dialogLastParameter->Hide();
+	}else{
+		dialogLastParameter->Show();
+	}
+
+	TransferDataToWindow();
 }
 
-void FrameMain::OnDefineWalkCycle(wxCommandEvent& event)
+void FrameMain::OnEditWalkCycle(wxCommandEvent& event)
 {
-	dialogWalkcycleSupport->Show();
+	if(dialogWalkcycleSupport->IsShown()){
+		dialogWalkcycleSupport->Hide();
+	}else{
+		dialogWalkcycleSupport->Show();
+	}
+
+	TransferDataToWindow();
 }
 
 void FrameMain::OnSaveLast(wxCommandEvent& event)
@@ -197,4 +257,6 @@ void FrameMain::OnPackZip(wxCommandEvent& event)
 
 void FrameMain::OnViewChange(wxCommandEvent& event)
 {
+	TransferDataFromWindow();
+	Refresh();
 }

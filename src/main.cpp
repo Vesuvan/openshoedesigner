@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Name               : main.cpp
-// Purpose            : Main entry point.
+// Purpose            : Main entry point
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
@@ -27,12 +27,15 @@
 #include "main.h"
 #include <cstdlib>
 
-// The line that starts it all.
 IMPLEMENT_APP(LastGenerator)
 
 LastGenerator::LastGenerator()
 {
 	frame = NULL;
+}
+
+LastGenerator::~LastGenerator()
+{
 }
 
 bool LastGenerator::OnInit()

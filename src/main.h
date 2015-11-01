@@ -37,6 +37,7 @@ class LastGenerator:public wxApp {
 	// Constructor
 public:
 	LastGenerator();
+	virtual ~LastGenerator();
 	// Member variables
 public:
 	FrameMain* frame;

@@ -48,7 +48,7 @@ void* LastGenerationThread::Entry()
 	if(TestDestroy()) return NULL;
 	volume->MarchingCubes(0.5);
 
-	wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, ID_VOLUMEDONE);
+	wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, ID_THREADLASTDONE);
 	wxPostEvent(frame, event);
 
 	return NULL;

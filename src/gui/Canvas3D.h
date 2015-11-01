@@ -47,6 +47,15 @@ public:
 	void SetVolume(Volume* const volume);
 	void Render();
 
+	bool showBones;
+	bool showLast;
+	bool showInsole;
+	bool showSole;
+	bool showUpper;
+	bool showCutaway;
+	bool showFloor;
+
+
 private:
 	Foot* bone;
 	Volume* volume;

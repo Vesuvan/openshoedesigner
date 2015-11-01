@@ -237,9 +237,25 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 					}
 				}
 				d -= r;
+				d *= kh;
+
+				if(d > -2){
+					if(d > 2){
+						d = 1.0;
+					}else{
+						d = d * 0.25 + 0.5;
+					}
+					value[c] += d;
+				}
 				//d = 1 - 1 / (1 + exp(-k1 * d));
-				d = 1 - 1 / (1 + exp(kh * d));
-				value[c] += d;
+//				if(d > -5){
+//					if(d > 5){
+//						d = 1.0;
+//					}else{
+//						d = 1 - 1 / (1 + exp(d));
+//					}
+//					value[c] += d;
+//				}
 				c++;
 				p.x += dx;
 			}

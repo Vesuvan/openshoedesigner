@@ -32,6 +32,14 @@ Canvas3D::Canvas3D(wxWindow* parent) :
 {
 	bone = NULL;
 	volume = NULL;
+
+	showBones = false;
+	showLast = true;
+	showInsole = true;
+	showSole = true;
+	showUpper = false;
+	showCutaway = true;
+	showFloor = false;
 }
 
 Canvas3D::~Canvas3D()
@@ -92,7 +100,18 @@ void Canvas3D::Render()
 	}
 	glEnd();
 
-	if(bone != NULL) bone->Render();
-	if(volume != NULL) volume->Render();
+	if(showFloor){
+		glColor3f(0.4, 0.4, 0.4);
+		glBegin(GL_QUADS);
+		glNormal3f(0, 0, 1);
+		glVertex3f(-0.5, -0.5, -0.1);
+		glVertex3f(0.5, -0.5, -0.1);
+		glVertex3f(0.5, 0.5, -0.1);
+		glVertex3f(-0.5, 0.5, -0.1);
+		glEnd();
+	}
+
+	if(showBones && bone != NULL) bone->Render();
+	if(showLast && volume != NULL) volume->Render();
 
 }

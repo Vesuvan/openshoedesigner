@@ -36,6 +36,7 @@
 #include "FrameLastParameter.h"
 #include "FrameFootParameter.h"
 #include "FrameWalkcycleSupport.h"
+#include "FramePattern.h"
 
 #include "gui.h"
 #include "LastGenerationThread.h"
@@ -45,17 +46,18 @@ public:
 	FrameMain(wxWindow* parent);
 	virtual ~FrameMain();
 
-	bool TransferDataFromWindow();
 	bool TransferDataToWindow();
+	bool TransferDataFromWindow();
 
-	void UpdateLast(wxCommandEvent& event);
+	void Update3DView(wxCommandEvent& event);
 	void UpdateGUI(wxCommandEvent& event);
 	void Repaint(wxCommandEvent& event);
 
 	virtual void OnQuit(wxCommandEvent& event);
 	virtual void OnSetupFoot(wxCommandEvent& event);
 	virtual void OnSetupLast(wxCommandEvent& event);
-	virtual void OnDefineWalkCycle(wxCommandEvent& event);
+	virtual void OnEditPattern(wxCommandEvent& event);
+	virtual void OnEditWalkCycle(wxCommandEvent& event);
 	virtual void OnSaveLast(wxCommandEvent& event);
 	virtual void OnSaveInsole(wxCommandEvent& event);
 	virtual void OnSaveShoe(wxCommandEvent& event);
@@ -67,17 +69,17 @@ public:
 	virtual void OnSetupUnits(wxCommandEvent& event);
 	virtual void OnToolClicked(wxCommandEvent& event);
 
-	FrameLastParameter * dialogLastParameter;
-	FrameFootParameter * dialogFootParameter;
-	FrameWalkcycleSupport * dialogWalkcycleSupport;
+	FrameLastParameter* dialogLastParameter;
+	FrameFootParameter* dialogFootParameter;
+	FrameWalkcycleSupport* dialogWalkcycleSupport;
+	FramePattern* dialogPattern;
 
-	LastGenerationThread * thread;
+	LastGenerationThread* thread;
 	FootParameters setup;
 
 private:
 	Foot foot;
 	Volume volume;
-
 };
 
 #endif /* FRAMEMAIN_H_ */

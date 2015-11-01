@@ -39,7 +39,7 @@ public:
 	virtual ~FrameFootParameter();
 
 	virtual void OnClose(wxCloseEvent& event);
-
+	virtual void OnCalculate(wxCommandEvent& event);
 };
 
 #endif /* FRAMEFOOTPARAMETER_H_ */

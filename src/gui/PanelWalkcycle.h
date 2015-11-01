@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameFootParameter.cpp
-// Purpose            : GUI for setting up the foots parameter
-// Thread Safe        : Yes
+// Name               : PanelWalkcycle.h
+// Purpose            :
+// Thread Safe        : No
 // Platform dependent : No
-// Compiler Options   :
-// Author             : Tobias Schaefer
-// Created            : 29.10.2015
+// Compiler Options   : -lm
+// Author             : toby
+// Created            : 30.10.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,27 +24,39 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "FrameFootParameter.h"
-#include "IDs.h"
+#ifndef PANELWALKCYCLE_H_
+#define PANELWALKCYCLE_H_
 
-FrameFootParameter::FrameFootParameter(wxWindow* parent):GUIFrameFootParameter(parent)
-{
-	// TODO Auto-generated constructor stub
-	
-}
+/*!\class PanelWalkcycle
+ * \brief ...
+ *
+ * ...
+ */
 
-FrameFootParameter::~FrameFootParameter()
-{
-	// TODO Auto-generated destructor stub
-}
+#include <wx/panel.h>
 
-void FrameFootParameter::OnClose(wxCloseEvent& event)
-{
-	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
-	ProcessEvent(selectEvent);
-}
+class PanelWalkcycle:public wxPanel {
+public:
+	PanelWalkcycle(wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos =
+			wxDefaultPosition, const wxSize& size = wxDefaultSize, long style =
+			wxTAB_TRAVERSAL);
+	virtual ~PanelWalkcycle();
 
-void FrameFootParameter::OnCalculate(wxCommandEvent& event)
-{
-}
+	// Member Variables
+public:
+
+private:
+
+	//Methods
+public:
+
+private:
+
+	void OnPaint(wxPaintEvent& event);
+	void OnSize(wxSizeEvent &event);
+
+	void OnMotion(wxMouseEvent& event);
+	void OnLeftDown(wxMouseEvent& event);
+};
+
+#endif /* PANELWALKCYCLE_H_ */

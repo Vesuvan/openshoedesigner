@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameFootParameter.cpp
-// Purpose            : GUI for setting up the foots parameter
-// Thread Safe        : Yes
+// Name               : FramePattern.cpp
+// Purpose            :
+// Thread Safe        : No
 // Platform dependent : No
-// Compiler Options   :
-// Author             : Tobias Schaefer
-// Created            : 29.10.2015
+// Compiler Options   : -lm
+// Author             : toby
+// Created            : 31.10.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -23,28 +23,24 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 ///////////////////////////////////////////////////////////////////////////////
+#include "FramePattern.h"
 
-#include "FrameFootParameter.h"
 #include "IDs.h"
 
-FrameFootParameter::FrameFootParameter(wxWindow* parent):GUIFrameFootParameter(parent)
+FramePattern::FramePattern(wxWindow* parent) :
+		GUIFramePattern(parent)
 {
-	// TODO Auto-generated constructor stub
 	
 }
 
-FrameFootParameter::~FrameFootParameter()
+FramePattern::~FramePattern()
 {
 	// TODO Auto-generated destructor stub
 }
 
-void FrameFootParameter::OnClose(wxCloseEvent& event)
+void FramePattern::OnClose(wxCloseEvent& event)
 {
 	this->Hide();
 	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
 	ProcessEvent(selectEvent);
-}
-
-void FrameFootParameter::OnCalculate(wxCommandEvent& event)
-{
 }

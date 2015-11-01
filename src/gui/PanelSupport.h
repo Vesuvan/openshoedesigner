@@ -28,8 +28,13 @@
 #ifndef PANELSUPPORT_H_
 #define PANELSUPPORT_H_
 
+/*!\class PanelSupport
+ * \brief ...
+ *
+ * ...
+ */
+
 #include <wx/panel.h>
-#include <wx/dcclient.h>
 
 class PanelSupport:public wxPanel {
 	// Costructor/ Destructor

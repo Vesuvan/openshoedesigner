@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameFootParameter.cpp
-// Purpose            : GUI for setting up the foots parameter
-// Thread Safe        : Yes
+// Name               : PanelPattern.h
+// Purpose            :
+// Thread Safe        : No
 // Platform dependent : No
-// Compiler Options   :
-// Author             : Tobias Schaefer
-// Created            : 29.10.2015
+// Compiler Options   : -lm
+// Author             : toby
+// Created            : 31.10.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,27 +24,40 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "FrameFootParameter.h"
-#include "IDs.h"
+#ifndef PANELPATTERN_H_
+#define PANELPATTERN_H_
 
-FrameFootParameter::FrameFootParameter(wxWindow* parent):GUIFrameFootParameter(parent)
-{
-	// TODO Auto-generated constructor stub
-	
-}
+/*!\class PanelPattern
+ * \brief ...
+ *
+ * ...
+ */
 
-FrameFootParameter::~FrameFootParameter()
-{
-	// TODO Auto-generated destructor stub
-}
+#include <wx/panel.h>
 
-void FrameFootParameter::OnClose(wxCloseEvent& event)
-{
-	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
-	ProcessEvent(selectEvent);
-}
+class PanelPattern:public wxPanel {
+public:
+	PanelPattern(wxWindow* parent, wxWindowID id = wxID_ANY,
+			const wxPoint& pos = wxDefaultPosition, const wxSize& size =
+					wxDefaultSize, long style =
+			wxTAB_TRAVERSAL);
+	virtual ~PanelPattern();
 
-void FrameFootParameter::OnCalculate(wxCommandEvent& event)
-{
-}
+	// Member Variables
+public:
+
+private:
+
+	//Methods
+public:
+
+private:
+
+	void OnPaint(wxPaintEvent& event);
+	void OnSize(wxSizeEvent &event);
+
+	void OnMotion(wxMouseEvent& event);
+	void OnLeftDown(wxMouseEvent& event);
+};
+
+#endif /* PANELPATTERN_H_ */

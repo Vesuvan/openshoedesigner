@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : PanelSupport.cpp
-// Purpose            : Panel for setting the walkcycle supports
-// Thread Safe        : Yes
+// Name               : PanelWalkcycle.cpp
+// Purpose            :
+// Thread Safe        : No
 // Platform dependent : No
-// Compiler Options   :
-// Author             : Tobias Schaefer
-// Created            : 27.10.2015
+// Compiler Options   : -lm
+// Author             : toby
+// Created            : 30.10.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -23,43 +23,42 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 ///////////////////////////////////////////////////////////////////////////////
-
-#include "PanelSupport.h"
+#include "PanelWalkcycle.h"
 
 #include <wx/dcclient.h>
-#include <wx/log.h>
 
-PanelSupport::PanelSupport(wxWindow* parent, wxWindowID id, const wxPoint& pos,
-		const wxSize& size, long style) :
+PanelWalkcycle::PanelWalkcycle(wxWindow* parent, wxWindowID id,
+		const wxPoint& pos, const wxSize& size, long style) :
 		wxPanel(parent, id, pos, size, style)
 {
-
+	
 	this->SetBackgroundColour(wxColour(200, 200, 200));
 
 	// Connect Events
 	this->Connect(wxEVT_LEFT_DOWN,
-			wxMouseEventHandler(PanelSupport::OnLeftDown));
-	this->Connect(wxEVT_MOTION, wxMouseEventHandler(PanelSupport::OnMotion));
-	this->Connect(wxEVT_PAINT, wxPaintEventHandler(PanelSupport::OnPaint));
-	this->Connect(wxEVT_SIZE, wxSizeEventHandler(PanelSupport::OnSize));
+			wxMouseEventHandler(PanelWalkcycle::OnLeftDown));
+	this->Connect(wxEVT_MOTION, wxMouseEventHandler(PanelWalkcycle::OnMotion));
+	this->Connect(wxEVT_PAINT, wxPaintEventHandler(PanelWalkcycle::OnPaint));
+	this->Connect(wxEVT_SIZE, wxSizeEventHandler(PanelWalkcycle::OnSize));
 }
 
-PanelSupport::~PanelSupport()
+PanelWalkcycle::~PanelWalkcycle()
 {
 	// Disconnect Events
 	this->Disconnect(wxEVT_LEFT_DOWN,
-			wxMouseEventHandler(PanelSupport::OnLeftDown));
-	this->Disconnect(wxEVT_MOTION, wxMouseEventHandler(PanelSupport::OnMotion));
-	this->Disconnect(wxEVT_PAINT, wxPaintEventHandler(PanelSupport::OnPaint));
-	this->Disconnect(wxEVT_SIZE, wxSizeEventHandler(PanelSupport::OnSize));
+			wxMouseEventHandler(PanelWalkcycle::OnLeftDown));
+	this->Disconnect(wxEVT_MOTION,
+			wxMouseEventHandler(PanelWalkcycle::OnMotion));
+	this->Disconnect(wxEVT_PAINT, wxPaintEventHandler(PanelWalkcycle::OnPaint));
+	this->Disconnect(wxEVT_SIZE, wxSizeEventHandler(PanelWalkcycle::OnSize));
 }
 
-void PanelSupport::OnSize(wxSizeEvent& event)
+void PanelWalkcycle::OnSize(wxSizeEvent& event)
 {
 	this->Refresh();
 }
 
-void PanelSupport::OnPaint(wxPaintEvent& event)
+void PanelWalkcycle::OnPaint(wxPaintEvent& event)
 {
 
 	wxPoint temp;
@@ -80,16 +79,17 @@ void PanelSupport::OnPaint(wxPaintEvent& event)
 
 	dc.CrossHair(mx, my);
 
-	wxString text = wxString::Format(_T("Supports"));
+	wxString text = wxString::Format(_T("Walkcycle"));
 	dc.DrawText(text, 10, 10);
 }
 
-void PanelSupport::OnMotion(wxMouseEvent& event)
+void PanelWalkcycle::OnMotion(wxMouseEvent& event)
 {
 
 }
 
-void PanelSupport::OnLeftDown(wxMouseEvent& event)
+void PanelWalkcycle::OnLeftDown(wxMouseEvent& event)
 {
 
 }
+
