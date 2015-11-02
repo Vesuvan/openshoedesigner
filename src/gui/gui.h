@@ -23,17 +23,19 @@
 #include <wx/toolbar.h>
 #include <wx/frame.h>
 #include <wx/stattext.h>
-#include <wx/slider.h>
 #include <wx/textctrl.h>
-#include <wx/statbox.h>
 #include <wx/button.h>
 #include <wx/panel.h>
 #include <wx/notebook.h>
+#include <wx/choice.h>
+#include <wx/radiobut.h>
+#include <wx/dialog.h>
+#include <wx/slider.h>
+#include <wx/statbox.h>
 #include "PanelSupport.h"
 #include "PanelWalkcycle.h"
 #include <wx/checkbox.h>
 #include "PanelPlotSimple.h"
-#include <wx/choice.h>
 #include "PanelPattern.h"
 
 ///////////////////////////////////////////////////////////////////////////
@@ -109,6 +111,87 @@ class GUIFrameMain : public wxFrame
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+/// Class GUIFrameFootParameter
+///////////////////////////////////////////////////////////////////////////////
+class GUIFrameFootParameter : public wxFrame 
+{
+	private:
+	
+	protected:
+		wxNotebook* m_notebook;
+		wxPanel* m_panelMeasurements;
+		wxStaticText* m_staticText21;
+		wxTextCtrl* m_textCtrl5;
+		wxStaticText* m_staticText22;
+		wxStaticText* m_staticText23;
+		wxTextCtrl* m_textCtrl6;
+		wxStaticText* m_staticText24;
+		wxStaticText* m_staticText25;
+		wxTextCtrl* m_textCtrl7;
+		wxStaticText* m_staticText26;
+		wxStaticText* m_staticText27;
+		wxTextCtrl* m_textCtrl8;
+		wxStaticText* m_staticText28;
+		wxStaticText* m_staticText29;
+		wxTextCtrl* m_textCtrl9;
+		wxStaticText* m_staticText30;
+		wxStaticText* m_staticText31;
+		wxTextCtrl* m_textCtrl10;
+		wxStaticText* m_staticText32;
+		wxStaticText* m_staticText33;
+		wxTextCtrl* m_textCtrl11;
+		wxStaticText* m_staticText34;
+		wxStaticText* m_staticText35;
+		wxTextCtrl* m_textCtrl12;
+		wxStaticText* m_staticText36;
+		wxButton* m_buttonCalculate;
+		wxPanel* m_panelBoneLength;
+		wxPanel* m_panelBoneDiameter;
+		wxPanel* m_panelSkin;
+		wxPanel* m_panelLeg;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnClose( wxCloseEvent& event ) = 0;
+		virtual void OnCalculate( wxCommandEvent& event ) = 0;
+		
+	
+	public:
+		
+		GUIFrameFootParameter( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Foot Setup"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 539,307 ), long style = wxDEFAULT_FRAME_STYLE|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
+		~GUIFrameFootParameter();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class GUIDialogInitSettings
+///////////////////////////////////////////////////////////////////////////////
+class GUIDialogInitSettings : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_staticText37;
+		wxTextCtrl* m_textCtrlShoeSize;
+		wxChoice* m_choiceUnit;
+		wxRadioButton* m_radioBtnWide;
+		wxRadioButton* m_radioBtnMedium;
+		wxRadioButton* m_radioBtnSmall;
+		wxButton* m_button2;
+		wxButton* m_button3;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnText( wxCommandEvent& event ) = 0;
+		virtual void OnChoice( wxCommandEvent& event ) = 0;
+		
+	
+	public:
+		
+		GUIDialogInitSettings( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Initialize Settings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
+		~GUIDialogInitSettings();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
 /// Class GUIFrameLastParameter
 ///////////////////////////////////////////////////////////////////////////////
 class GUIFrameLastParameter : public wxFrame 
@@ -163,35 +246,6 @@ class GUIFrameLastParameter : public wxFrame
 		
 		GUIFrameLastParameter( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Last Setup"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 418,514 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
 		~GUIFrameLastParameter();
-	
-};
-
-///////////////////////////////////////////////////////////////////////////////
-/// Class GUIFrameFootParameter
-///////////////////////////////////////////////////////////////////////////////
-class GUIFrameFootParameter : public wxFrame 
-{
-	private:
-	
-	protected:
-		wxNotebook* m_notebook;
-		wxPanel* m_panelMeasurements;
-		
-		wxButton* m_buttonCalculate;
-		wxPanel* m_panelBoneLength;
-		wxPanel* m_panelBoneDiameter;
-		wxPanel* m_panelSkin;
-		wxPanel* m_panelLeg;
-		
-		// Virtual event handlers, overide them in your derived class
-		virtual void OnClose( wxCloseEvent& event ) = 0;
-		virtual void OnCalculate( wxCommandEvent& event ) = 0;
-		
-	
-	public:
-		
-		GUIFrameFootParameter( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Foot Setup"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
-		~GUIFrameFootParameter();
 	
 };
 

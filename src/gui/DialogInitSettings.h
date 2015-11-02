@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Config.h
-// Purpose            : Global configuration
-// Thread Safe        : Yes
+// Name               : DialogInitSettings.h
+// Purpose            : Dialog to initialize foot and last settings
+// Thread Safe        : No
 // Platform dependent : No
-// Compiler Options   :
-// Author             : Tobias Schaefer
-// Created            : 21.02.2010
-// Copyright          : (C) 2010 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Compiler Options   : -lm
+// Author             : toby
+// Created            : 01.11.2015
+// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,23 +24,28 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-/*  Configuration file. Major switches that change the code
- *  and the structure can be found here (_DEBUG_ for example).
+#ifndef DIALOGINITSETTINGS_H_
+#define DIALOGINITSETTINGS_H_
+
+/*!\class DialogInitSettings
+ * \brief Dialog to initialize foot and last settings
+ *
+ * Dialog asking for the shoesize to set up the basic foot and last parameter.
  */
 
-#ifndef CONFIG_H_
-#define CONFIG_H_
+#include "gui.h"
+#include "MathParser.h"
 
-#define _LASTGENERATOR_VERSION "0.1"
-#define _LASTGENERATOR_AUTHORS "Tobias Schaefer"
+class DialogInitSettings:public GUIDialogInitSettings {
+public:
+	DialogInitSettings(wxWindow* parent);
+	virtual ~DialogInitSettings();
 
-#define _LASTGENERATOR_USEMULTITHREADING
+	MathParser parser;
 
-//#define _DEBUGMODE
+	virtual void OnClose(wxCloseEvent& event);
+	virtual void OnScroll(wxScrollEvent& event);
+	virtual void OnText(wxCommandEvent& event);
+};
 
-// Components used in this project:
-//#define _USE_3DPICKING
-//#define _USE_6DOFCONTROLLER
-#define _USE_UNIT
-
-#endif /* CONFIG_H_ */
+#endif /* DIALOGINITSETTINGS_H_ */

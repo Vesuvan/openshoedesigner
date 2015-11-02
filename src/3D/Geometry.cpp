@@ -28,7 +28,7 @@
 
 #include <GL/gl.h>
 #include <wx/log.h>
-#include <wx/arrimpl.cpp> // this is a magic incantation which must be done!
+#include <wx/arrimpl.cpp>
 WX_DEFINE_OBJARRAY(ArrayOfGeometry);
 
 Geometry::Geometry()

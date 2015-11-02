@@ -36,6 +36,7 @@ MathParser::MathParser()
 	autoEvaluate = true;
 	addUnit = false;
 	number = 0.0;
+	ResetVariables(true);
 }
 
 void MathParser::SetString(const wxString& expression)
@@ -88,6 +89,26 @@ void MathParser::SetUnit(const wxString& unit)
 wxString MathParser::GetUnit(void) const
 {
 	return unit;
+}
+
+void MathParser::ResetVariables(bool setStandard)
+{
+	globals.clear();
+	if(setStandard){
+		globals[_T("pi")] = M_PI;
+		globals[_T("e")] = M_E;
+	}
+}
+
+void MathParser::SetVariable(const wxString& variable, double value)
+{
+	globals[variable] = value;
+}
+
+double MathParser::GetVariable(const wxString& variable)
+{
+	double x = globals[variable];
+	return x;
 }
 
 /*! \brief Parse a single token off the string and add it to the stack
@@ -240,21 +261,11 @@ bool MathParser::Evaluate(void)
 			flag = false;
 
 			// Replace special symbols and variables
-			//TODO: Add processing of global variables.
 			if(posStack >= 2 && stackType[posStack - 2] == expressionText){
 				wxString variable = text.Mid(stackStartPos[posStack - 2],
 						stackCharCount[posStack - 2]);
-				bool foundVariable = false;
-
-				if(variable.CmpNoCase(_T("pi")) == 0){
-					stackNumber[posStack - 2] = M_PI;
-					foundVariable = true;
-				}
-				if(variable.CmpNoCase(_T("e")) == 0){
-					stackNumber[posStack - 2] = M_E;
-					foundVariable = true;
-				}
-				if(foundVariable){
+				if(globals.count(variable) == 1){
+					stackNumber[posStack - 2] = globals[variable];
 					stackType[posStack - 2] = expressionNumber;
 					flag = true;
 				}

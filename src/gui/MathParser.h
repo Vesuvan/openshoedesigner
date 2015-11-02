@@ -41,7 +41,14 @@
  *  - sqrt cbrt
  *  - ceil floor round
  *  - abs
+ *
+ *  Standard values:
+ *  - e and pi (both lowercase)
  */
+
+#include <wx/hashmap.h>
+
+WX_DECLARE_STRING_HASH_MAP(double, Variables);
 
 class MathParser {
 public:
@@ -64,11 +71,15 @@ public:
 		return unit.IsEmpty();
 	}
 
+	wxString GetError(void) const;
 	inline bool HasError(void) const
 	{
 		return error.IsEmpty();
 	}
-	wxString GetError(void) const;
+
+	void ResetVariables(bool setStandard = true);
+	void SetVariable(const wxString& variable, double value);
+	double GetVariable(const wxString& variable);
 
 	bool Evaluate(void);
 
@@ -79,6 +90,8 @@ private:
 public:
 	bool autoEvaluate; ///< Evaluate string whenever a new one is passed?
 	bool addUnit; ///< Add unit to generated string?
+
+	Variables globals;
 
 private:
 	wxString text;

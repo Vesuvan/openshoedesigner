@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Config.h
-// Purpose            : Global configuration
-// Thread Safe        : Yes
+// Name               : DialogInitSettings.cpp
+// Purpose            : Dialog to initialize foot and last settings
+// Thread Safe        : No
 // Platform dependent : No
-// Compiler Options   :
-// Author             : Tobias Schaefer
-// Created            : 21.02.2010
-// Copyright          : (C) 2010 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Compiler Options   : -lm
+// Author             : toby
+// Created            : 01.11.2015
+// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -23,24 +23,30 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 ///////////////////////////////////////////////////////////////////////////////
+#include "DialogInitSettings.h"
 
-/*  Configuration file. Major switches that change the code
- *  and the structure can be found here (_DEBUG_ for example).
- */
+DialogInitSettings::DialogInitSettings(wxWindow* parent) :
+		GUIDialogInitSettings(parent)
+{
+	
+}
 
-#ifndef CONFIG_H_
-#define CONFIG_H_
+DialogInitSettings::~DialogInitSettings()
+{
 
-#define _LASTGENERATOR_VERSION "0.1"
-#define _LASTGENERATOR_AUTHORS "Tobias Schaefer"
+}
 
-#define _LASTGENERATOR_USEMULTITHREADING
+void DialogInitSettings::OnClose(wxCloseEvent& event)
+{
+}
 
-//#define _DEBUGMODE
+void DialogInitSettings::OnScroll(wxScrollEvent& event)
+{
+}
 
-// Components used in this project:
-//#define _USE_3DPICKING
-//#define _USE_6DOFCONTROLLER
-#define _USE_UNIT
+void DialogInitSettings::OnText(wxCommandEvent& event)
+{
+	wxString text = m_textCtrlShoeSize->GetValue();
+	parser.SetString(text);
 
-#endif /* CONFIG_H_ */
+}
