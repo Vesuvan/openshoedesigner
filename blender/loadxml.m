@@ -1,5 +1,5 @@
 function y = loadxml(filename)
-%LOADXML  Load the XML Description.
+%LOADXML  Load a XML Description.
 %
 %   y = loadxml(filename)
 %       Load the file into a cell structure.
