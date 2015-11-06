@@ -28,6 +28,7 @@
 
 #include "IDs.h"
 #include "../3D/FileSTL.h"
+#include "DialogInitSettings.h"
 //#include <wx/file.h>
 #include <wx/filedlg.h>
 #include <wx/wfstream.h>
@@ -130,24 +131,14 @@ bool FrameMain::TransferDataFromWindow()
 	return true;
 }
 
-void FrameMain::OnQuit(wxCommandEvent& event)
+void FrameMain::Repaint(wxCommandEvent& event)
 {
-	Close();
-}
-
-void FrameMain::UpdateGUI(wxCommandEvent& event)
-{
-	TransferDataToWindow();
-}
-
-void FrameMain::OnEditPattern(wxCommandEvent& event)
-{
-	if(dialogPattern->IsShown()){
-		dialogPattern->Hide();
-	}else{
-		dialogPattern->Show();
+	if(thread != NULL){
+		thread->Wait();
+		delete thread;
+		thread = NULL;
 	}
-	TransferDataToWindow();
+	Refresh();
 }
 
 void FrameMain::OnToolClicked(wxCommandEvent& event)
@@ -177,33 +168,20 @@ void FrameMain::Update3DView(wxCommandEvent& event)
 
 	Refresh();
 }
-void FrameMain::Repaint(wxCommandEvent& event)
+void FrameMain::UpdateGUI(wxCommandEvent& event)
 {
-	if(thread != NULL){
-		thread->Wait();
-		delete thread;
-		thread = NULL;
-	}
-	Refresh();
+	TransferDataToWindow();
 }
 
-void FrameMain::OnToggleStereo3D(wxCommandEvent& event)
+void FrameMain::OnQuit(wxCommandEvent& event)
 {
-	if(m_canvas->stereoMode == stereoOff){
-		m_canvas->stereoMode = stereoAnaglyph;
-	}else{
-		m_canvas->stereoMode = stereoOff;
-	}
-	m_menuView->Check(ID_STEREO3D, m_canvas->stereoMode != stereoOff);
-	Refresh();
+	Close();
 }
 
-void FrameMain::OnSetupStereo3D(wxCommandEvent& event)
+void FrameMain::OnInitializeFoot(wxCommandEvent& event)
 {
-}
-
-void FrameMain::OnSetupUnits(wxCommandEvent& event)
-{
+	DialogInitSettings dialog(this);
+	dialog.ShowModal();
 }
 
 void FrameMain::OnSetupFoot(wxCommandEvent& event)
@@ -227,6 +205,16 @@ void FrameMain::OnSetupLast(wxCommandEvent& event)
 		dialogLastParameter->Show();
 	}
 
+	TransferDataToWindow();
+}
+
+void FrameMain::OnEditPattern(wxCommandEvent& event)
+{
+	if(dialogPattern->IsShown()){
+		dialogPattern->Hide();
+	}else{
+		dialogPattern->Show();
+	}
 	TransferDataToWindow();
 }
 
@@ -260,7 +248,7 @@ void FrameMain::OnSaveInsole(wxCommandEvent& event)
 {
 }
 
-void FrameMain::OnSaveShoe(wxCommandEvent& event)
+void FrameMain::OnSaveSole(wxCommandEvent& event)
 {
 }
 
@@ -272,8 +260,31 @@ void FrameMain::OnPackZip(wxCommandEvent& event)
 {
 }
 
+void FrameMain::OnToggleStereo3D(wxCommandEvent& event)
+{
+	if(m_canvas->stereoMode == stereoOff){
+		m_canvas->stereoMode = stereoAnaglyph;
+	}else{
+		m_canvas->stereoMode = stereoOff;
+	}
+	m_menuView->Check(ID_STEREO3D, m_canvas->stereoMode != stereoOff);
+	Refresh();
+}
+
 void FrameMain::OnViewChange(wxCommandEvent& event)
 {
 	TransferDataFromWindow();
 	Refresh();
+}
+
+void FrameMain::OnSetupStereo3D(wxCommandEvent& event)
+{
+}
+
+void FrameMain::OnSetupUnits(wxCommandEvent& event)
+{
+}
+
+void FrameMain::OnAbout(wxCommandEvent& event)
+{
 }

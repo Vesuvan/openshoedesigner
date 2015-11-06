@@ -36,17 +36,13 @@ DialogInitSettings::~DialogInitSettings()
 
 }
 
-void DialogInitSettings::OnClose(wxCloseEvent& event)
-{
-}
-
-void DialogInitSettings::OnScroll(wxScrollEvent& event)
-{
-}
-
 void DialogInitSettings::OnText(wxCommandEvent& event)
 {
 	wxString text = m_textCtrlShoeSize->GetValue();
 	parser.SetString(text);
 
+}
+
+void DialogInitSettings::OnChoice(wxCommandEvent& event)
+{
 }

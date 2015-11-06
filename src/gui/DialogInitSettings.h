@@ -42,10 +42,8 @@ public:
 	virtual ~DialogInitSettings();
 
 	MathParser parser;
-
-	virtual void OnClose(wxCloseEvent& event);
-	virtual void OnScroll(wxScrollEvent& event);
 	virtual void OnText(wxCommandEvent& event);
+	virtual void OnChoice(wxCommandEvent& event);
 };
 
 #endif /* DIALOGINITSETTINGS_H_ */

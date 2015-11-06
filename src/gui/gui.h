@@ -26,6 +26,7 @@
 #include <wx/textctrl.h>
 #include <wx/button.h>
 #include <wx/panel.h>
+#include <wx/grid.h>
 #include <wx/notebook.h>
 #include <wx/choice.h>
 #include <wx/radiobut.h>
@@ -40,7 +41,7 @@
 
 ///////////////////////////////////////////////////////////////////////////
 
-#define wxID_QUIT 1000
+#define ID_INITIALIZEFOOT 1000
 #define ID_SETUPFOOT 1001
 #define ID_SETUPLAST 1002
 #define ID_EDITPATTERN 1003
@@ -81,25 +82,28 @@ class GUIFrameMain : public wxFrame
 		wxMenu* m_menuGeometry;
 		wxMenu* m_menuView;
 		wxMenu* m_menuSystem;
+		wxMenu* m_menuHelp;
 		wxStatusBar* m_statusBar1;
 		Canvas3D * m_canvas;
 		wxToolBar* m_toolBar;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnQuit( wxCommandEvent& event ) = 0;
+		virtual void OnInitializeFoot( wxCommandEvent& event ) = 0;
 		virtual void OnSetupFoot( wxCommandEvent& event ) = 0;
 		virtual void OnSetupLast( wxCommandEvent& event ) = 0;
 		virtual void OnEditPattern( wxCommandEvent& event ) = 0;
 		virtual void OnEditWalkCycle( wxCommandEvent& event ) = 0;
 		virtual void OnSaveLast( wxCommandEvent& event ) = 0;
 		virtual void OnSaveInsole( wxCommandEvent& event ) = 0;
-		virtual void OnSaveShoe( wxCommandEvent& event ) = 0;
+		virtual void OnSaveSole( wxCommandEvent& event ) = 0;
 		virtual void OnSaveCutaway( wxCommandEvent& event ) = 0;
 		virtual void OnPackZip( wxCommandEvent& event ) = 0;
 		virtual void OnToggleStereo3D( wxCommandEvent& event ) = 0;
 		virtual void OnViewChange( wxCommandEvent& event ) = 0;
 		virtual void OnSetupStereo3D( wxCommandEvent& event ) = 0;
 		virtual void OnSetupUnits( wxCommandEvent& event ) = 0;
+		virtual void OnAbout( wxCommandEvent& event ) = 0;
 		virtual void OnToolClicked( wxCommandEvent& event ) = 0;
 		
 	
@@ -145,19 +149,27 @@ class GUIFrameFootParameter : public wxFrame
 		wxTextCtrl* m_textCtrl12;
 		wxStaticText* m_staticText36;
 		wxButton* m_buttonCalculate;
-		wxPanel* m_panelBoneLength;
-		wxPanel* m_panelBoneDiameter;
+		wxPanel* m_panelBone;
+		wxGrid* m_gridBoneLength;
+		wxPanel* m_panel10;
+		wxGrid* m_gridBoneDiameter;
 		wxPanel* m_panelSkin;
+		wxGrid* m_gridSkin;
 		wxPanel* m_panelLeg;
+		wxGrid* m_gridLeg;
+		wxMenuBar* m_menubar;
+		wxMenu* m_menuFoot;
+		wxMenu* m_menuSettings;
 		
 		// Virtual event handlers, overide them in your derived class
-		virtual void OnClose( wxCloseEvent& event ) = 0;
+		virtual void OnCloseX( wxCloseEvent& event ) = 0;
 		virtual void OnCalculate( wxCommandEvent& event ) = 0;
+		virtual void OnClose( wxCommandEvent& event ) = 0;
 		
 	
 	public:
 		
-		GUIFrameFootParameter( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Foot Setup"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 539,307 ), long style = wxDEFAULT_FRAME_STYLE|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
+		GUIFrameFootParameter( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Foot Setup"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 527,312 ), long style = wxDEFAULT_FRAME_STYLE|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
 		~GUIFrameFootParameter();
 	
 };

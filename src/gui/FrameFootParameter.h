@@ -37,8 +37,8 @@ class FrameFootParameter:public GUIFrameFootParameter {
 public:
 	FrameFootParameter(wxWindow* parent);
 	virtual ~FrameFootParameter();
-
-	virtual void OnClose(wxCloseEvent& event);
+	virtual void OnClose(wxCommandEvent& event);
+	virtual void OnCloseX(wxCloseEvent& event);
 	virtual void OnCalculate(wxCommandEvent& event);
 };
 

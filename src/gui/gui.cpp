@@ -21,12 +21,16 @@ GUIFrameMain::GUIFrameMain( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_menubar = new wxMenuBar( 0 );
 	m_menuFile = new wxMenu();
 	wxMenuItem* m_menuItemQuit;
-	m_menuItemQuit = new wxMenuItem( m_menuFile, wxID_QUIT, wxString( wxT("&Quit") ) + wxT('\t') + wxT("CTRL+Q"), wxEmptyString, wxITEM_NORMAL );
+	m_menuItemQuit = new wxMenuItem( m_menuFile, wxID_EXIT, wxString( wxT("&Quit") ) + wxT('\t') + wxT("CTRL+Q"), wxEmptyString, wxITEM_NORMAL );
 	m_menuFile->Append( m_menuItemQuit );
 	
 	m_menubar->Append( m_menuFile, wxT("&File") );
 	
 	m_menuFoot = new wxMenu();
+	wxMenuItem* m_menuItemInitalizeFoot;
+	m_menuItemInitalizeFoot = new wxMenuItem( m_menuFoot, ID_INITIALIZEFOOT, wxString( wxT("Quick &Initialization") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuFoot->Append( m_menuItemInitalizeFoot );
+	
 	wxMenuItem* m_menuItemSetupFoot;
 	m_menuItemSetupFoot = new wxMenuItem( m_menuFoot, ID_SETUPFOOT, wxString( wxT("Setup &Foot") ) , wxEmptyString, wxITEM_CHECK );
 	m_menuFoot->Append( m_menuItemSetupFoot );
@@ -58,7 +62,7 @@ GUIFrameMain::GUIFrameMain( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_menuGeometry->Append( m_menuItemSaveInsole );
 	
 	wxMenuItem* m_menuItemSaveShoe;
-	m_menuItemSaveShoe = new wxMenuItem( m_menuGeometry, wxID_ANY, wxString( wxT("Save &Shoe Prototype") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuItemSaveShoe = new wxMenuItem( m_menuGeometry, wxID_ANY, wxString( wxT("Save &Sole Prototype") ) , wxEmptyString, wxITEM_NORMAL );
 	m_menuGeometry->Append( m_menuItemSaveShoe );
 	
 	wxMenuItem* m_menuItemCutaway;
@@ -123,6 +127,13 @@ GUIFrameMain::GUIFrameMain( wxWindow* parent, wxWindowID id, const wxString& tit
 	
 	m_menubar->Append( m_menuSystem, wxT("S&ystem") );
 	
+	m_menuHelp = new wxMenu();
+	wxMenuItem* m_menuItemAbout;
+	m_menuItemAbout = new wxMenuItem( m_menuHelp, wxID_ABOUT, wxString( wxT("&About") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuHelp->Append( m_menuItemAbout );
+	
+	m_menubar->Append( m_menuHelp, wxT("&Help") );
+	
 	this->SetMenuBar( m_menubar );
 	
 	m_statusBar1 = this->CreateStatusBar( 1, wxST_SIZEGRIP, wxID_ANY );
@@ -142,13 +153,14 @@ GUIFrameMain::GUIFrameMain( wxWindow* parent, wxWindowID id, const wxString& tit
 	
 	// Connect Events
 	this->Connect( m_menuItemQuit->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnQuit ) );
+	this->Connect( m_menuItemInitalizeFoot->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnInitializeFoot ) );
 	this->Connect( m_menuItemSetupFoot->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupFoot ) );
 	this->Connect( m_menuItemSetupLast->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupLast ) );
 	this->Connect( m_menuItemEditPattern->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnEditPattern ) );
 	this->Connect( m_menuItemEditWalkCycle->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnEditWalkCycle ) );
 	this->Connect( m_menuItemSaveLast->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveLast ) );
 	this->Connect( m_menuItemSaveInsole->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveInsole ) );
-	this->Connect( m_menuItemSaveShoe->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveShoe ) );
+	this->Connect( m_menuItemSaveShoe->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveSole ) );
 	this->Connect( m_menuItemCutaway->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveCutaway ) );
 	this->Connect( m_menuItemPackZip->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnPackZip ) );
 	this->Connect( m_menuItemStereo3D->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnToggleStereo3D ) );
@@ -161,6 +173,7 @@ GUIFrameMain::GUIFrameMain( wxWindow* parent, wxWindowID id, const wxString& tit
 	this->Connect( m_menuItemShowFloor->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
 	this->Connect( m_menuItemSetupStereo3D->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupStereo3D ) );
 	this->Connect( m_menuItemSetupUnits->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupUnits ) );
+	this->Connect( m_menuItemAbout->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnAbout ) );
 	this->Connect( ID_TOOLSETUPFOOT, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToolClicked ) );
 	this->Connect( ID_TOOLSETUPLAST, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToolClicked ) );
 }
@@ -169,13 +182,14 @@ GUIFrameMain::~GUIFrameMain()
 {
 	// Disconnect Events
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnQuit ) );
+	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnInitializeFoot ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupFoot ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupLast ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnEditPattern ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnEditWalkCycle ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveLast ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveInsole ) );
-	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveShoe ) );
+	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveSole ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveCutaway ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnPackZip ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnToggleStereo3D ) );
@@ -188,6 +202,7 @@ GUIFrameMain::~GUIFrameMain()
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupStereo3D ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupUnits ) );
+	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnAbout ) );
 	this->Disconnect( ID_TOOLSETUPFOOT, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToolClicked ) );
 	this->Disconnect( ID_TOOLSETUPLAST, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToolClicked ) );
 }
@@ -308,30 +323,188 @@ GUIFrameFootParameter::GUIFrameFootParameter( wxWindow* parent, wxWindowID id, c
 	m_panelMeasurements->Layout();
 	bSizer16->Fit( m_panelMeasurements );
 	m_notebook->AddPage( m_panelMeasurements, wxT("Measurements"), true );
-	m_panelBoneLength = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	m_notebook->AddPage( m_panelBoneLength, wxT("Bone Length"), false );
-	m_panelBoneDiameter = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	m_notebook->AddPage( m_panelBoneDiameter, wxT("Bone Diameter"), false );
+	m_panelBone = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer21;
+	bSizer21 = new wxBoxSizer( wxVERTICAL );
+	
+	m_gridBoneLength = new wxGrid( m_panelBone, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	
+	// Grid
+	m_gridBoneLength->CreateGrid( 1, 3 );
+	m_gridBoneLength->EnableEditing( true );
+	m_gridBoneLength->EnableGridLines( true );
+	m_gridBoneLength->EnableDragGridSize( false );
+	m_gridBoneLength->SetMargins( 0, 0 );
+	
+	// Columns
+	m_gridBoneLength->EnableDragColMove( false );
+	m_gridBoneLength->EnableDragColSize( true );
+	m_gridBoneLength->SetColLabelSize( 30 );
+	m_gridBoneLength->SetColLabelValue( 0, wxT("Formula") );
+	m_gridBoneLength->SetColLabelValue( 1, wxT("Value") );
+	m_gridBoneLength->SetColLabelValue( 2, wxT("Unit") );
+	m_gridBoneLength->SetColLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
+	
+	// Rows
+	m_gridBoneLength->EnableDragRowSize( true );
+	m_gridBoneLength->SetRowLabelSize( 80 );
+	m_gridBoneLength->SetRowLabelValue( 0, wxT("Tibia") );
+	m_gridBoneLength->SetRowLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
+	
+	// Label Appearance
+	
+	// Cell Defaults
+	m_gridBoneLength->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_TOP );
+	bSizer21->Add( m_gridBoneLength, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
+	
+	m_panelBone->SetSizer( bSizer21 );
+	m_panelBone->Layout();
+	bSizer21->Fit( m_panelBone );
+	m_notebook->AddPage( m_panelBone, wxT("Bone Length"), false );
+	m_panel10 = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer28;
+	bSizer28 = new wxBoxSizer( wxVERTICAL );
+	
+	m_gridBoneDiameter = new wxGrid( m_panel10, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	
+	// Grid
+	m_gridBoneDiameter->CreateGrid( 5, 5 );
+	m_gridBoneDiameter->EnableEditing( true );
+	m_gridBoneDiameter->EnableGridLines( true );
+	m_gridBoneDiameter->EnableDragGridSize( false );
+	m_gridBoneDiameter->SetMargins( 0, 0 );
+	
+	// Columns
+	m_gridBoneDiameter->EnableDragColMove( false );
+	m_gridBoneDiameter->EnableDragColSize( true );
+	m_gridBoneDiameter->SetColLabelSize( 30 );
+	m_gridBoneDiameter->SetColLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
+	
+	// Rows
+	m_gridBoneDiameter->EnableDragRowSize( true );
+	m_gridBoneDiameter->SetRowLabelSize( 80 );
+	m_gridBoneDiameter->SetRowLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
+	
+	// Label Appearance
+	
+	// Cell Defaults
+	m_gridBoneDiameter->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_TOP );
+	bSizer28->Add( m_gridBoneDiameter, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
+	
+	m_panel10->SetSizer( bSizer28 );
+	m_panel10->Layout();
+	bSizer28->Fit( m_panel10 );
+	m_notebook->AddPage( m_panel10, wxT("Bone Diameter"), false );
 	m_panelSkin = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer26;
+	bSizer26 = new wxBoxSizer( wxVERTICAL );
+	
+	m_gridSkin = new wxGrid( m_panelSkin, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	
+	// Grid
+	m_gridSkin->CreateGrid( 5, 5 );
+	m_gridSkin->EnableEditing( true );
+	m_gridSkin->EnableGridLines( true );
+	m_gridSkin->EnableDragGridSize( false );
+	m_gridSkin->SetMargins( 0, 0 );
+	
+	// Columns
+	m_gridSkin->EnableDragColMove( false );
+	m_gridSkin->EnableDragColSize( true );
+	m_gridSkin->SetColLabelSize( 30 );
+	m_gridSkin->SetColLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
+	
+	// Rows
+	m_gridSkin->EnableDragRowSize( true );
+	m_gridSkin->SetRowLabelSize( 80 );
+	m_gridSkin->SetRowLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
+	
+	// Label Appearance
+	
+	// Cell Defaults
+	m_gridSkin->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_TOP );
+	bSizer26->Add( m_gridSkin, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
+	
+	m_panelSkin->SetSizer( bSizer26 );
+	m_panelSkin->Layout();
+	bSizer26->Fit( m_panelSkin );
 	m_notebook->AddPage( m_panelSkin, wxT("Skin Density"), false );
 	m_panelLeg = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer27;
+	bSizer27 = new wxBoxSizer( wxVERTICAL );
+	
+	m_gridLeg = new wxGrid( m_panelLeg, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	
+	// Grid
+	m_gridLeg->CreateGrid( 5, 5 );
+	m_gridLeg->EnableEditing( true );
+	m_gridLeg->EnableGridLines( true );
+	m_gridLeg->EnableDragGridSize( false );
+	m_gridLeg->SetMargins( 0, 0 );
+	
+	// Columns
+	m_gridLeg->EnableDragColMove( false );
+	m_gridLeg->EnableDragColSize( true );
+	m_gridLeg->SetColLabelSize( 30 );
+	m_gridLeg->SetColLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
+	
+	// Rows
+	m_gridLeg->EnableDragRowSize( true );
+	m_gridLeg->SetRowLabelSize( 80 );
+	m_gridLeg->SetRowLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
+	
+	// Label Appearance
+	
+	// Cell Defaults
+	m_gridLeg->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_TOP );
+	bSizer27->Add( m_gridLeg, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
+	
+	m_panelLeg->SetSizer( bSizer27 );
+	m_panelLeg->Layout();
+	bSizer27->Fit( m_panelLeg );
 	m_notebook->AddPage( m_panelLeg, wxT("Leg"), false );
 	
 	bSizer11->Add( m_notebook, 1, wxEXPAND | wxALL, 5 );
 	
 	this->SetSizer( bSizer11 );
 	this->Layout();
+	m_menubar = new wxMenuBar( 0 );
+	m_menuFoot = new wxMenu();
+	wxMenuItem* m_menuItemInitialize;
+	m_menuItemInitialize = new wxMenuItem( m_menuFoot, ID_INITIALIZEFOOT, wxString( wxT("&Initialize") ) , wxT("Initialize measurements from shoe-size."), wxITEM_NORMAL );
+	m_menuFoot->Append( m_menuItemInitialize );
+	
+	wxMenuItem* m_separator;
+	m_separator = m_menuFoot->AppendSeparator();
+	
+	wxMenuItem* m_menuItemClose;
+	m_menuItemClose = new wxMenuItem( m_menuFoot, wxID_ANY, wxString( wxT("&Close") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuFoot->Append( m_menuItemClose );
+	
+	m_menubar->Append( m_menuFoot, wxT("&Foot Setup") );
+	
+	m_menuSettings = new wxMenu();
+	wxMenuItem* m_menuItem23;
+	m_menuItem23 = new wxMenuItem( m_menuSettings, ID_SETUPUNITS, wxString( wxT("Setup &Units") ) + wxT('\t') + wxT("CTRL+U"), wxEmptyString, wxITEM_NORMAL );
+	m_menuSettings->Append( m_menuItem23 );
+	
+	m_menubar->Append( m_menuSettings, wxT("&Settings") );
+	
+	this->SetMenuBar( m_menubar );
+	
 	
 	// Connect Events
-	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameFootParameter::OnClose ) );
+	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameFootParameter::OnCloseX ) );
 	m_buttonCalculate->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameFootParameter::OnCalculate ), NULL, this );
+	this->Connect( m_menuItemClose->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameFootParameter::OnClose ) );
 }
 
 GUIFrameFootParameter::~GUIFrameFootParameter()
 {
 	// Disconnect Events
-	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameFootParameter::OnClose ) );
+	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameFootParameter::OnCloseX ) );
 	m_buttonCalculate->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameFootParameter::OnCalculate ), NULL, this );
+	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameFootParameter::OnClose ) );
 }
 
 GUIDialogInitSettings::GUIDialogInitSettings( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )

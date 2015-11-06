@@ -54,19 +54,21 @@ public:
 	void Repaint(wxCommandEvent& event);
 
 	virtual void OnQuit(wxCommandEvent& event);
+	virtual void OnInitializeFoot(wxCommandEvent& event);
 	virtual void OnSetupFoot(wxCommandEvent& event);
 	virtual void OnSetupLast(wxCommandEvent& event);
 	virtual void OnEditPattern(wxCommandEvent& event);
 	virtual void OnEditWalkCycle(wxCommandEvent& event);
 	virtual void OnSaveLast(wxCommandEvent& event);
 	virtual void OnSaveInsole(wxCommandEvent& event);
-	virtual void OnSaveShoe(wxCommandEvent& event);
+	virtual void OnSaveSole(wxCommandEvent& event);
 	virtual void OnSaveCutaway(wxCommandEvent& event);
 	virtual void OnPackZip(wxCommandEvent& event);
 	virtual void OnToggleStereo3D(wxCommandEvent& event);
 	virtual void OnViewChange(wxCommandEvent& event);
 	virtual void OnSetupStereo3D(wxCommandEvent& event);
 	virtual void OnSetupUnits(wxCommandEvent& event);
+	virtual void OnAbout(wxCommandEvent& event);
 	virtual void OnToolClicked(wxCommandEvent& event);
 
 	FrameLastParameter* dialogLastParameter;

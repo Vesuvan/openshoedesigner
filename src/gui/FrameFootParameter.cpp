@@ -27,7 +27,8 @@
 #include "FrameFootParameter.h"
 #include "IDs.h"
 
-FrameFootParameter::FrameFootParameter(wxWindow* parent):GUIFrameFootParameter(parent)
+FrameFootParameter::FrameFootParameter(wxWindow* parent) :
+		GUIFrameFootParameter(parent)
 {
 	// TODO Auto-generated constructor stub
 	
@@ -38,7 +39,14 @@ FrameFootParameter::~FrameFootParameter()
 	// TODO Auto-generated destructor stub
 }
 
-void FrameFootParameter::OnClose(wxCloseEvent& event)
+void FrameFootParameter::OnCloseX(wxCloseEvent& event)
+{
+	this->Hide();
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
+	ProcessEvent(selectEvent);
+}
+
+void FrameFootParameter::OnClose(wxCommandEvent& event)
 {
 	this->Hide();
 	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);

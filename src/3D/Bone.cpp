@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Name               : Bone.cpp
-// Purpose            : 
+// Purpose            : Simple bone
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
@@ -30,10 +30,15 @@
 
 #include <math.h>
 
-Bone::Bone()
+Bone::Bone(const wxString &name)
 {
+	this->name = name;
 	r1 = 0.0;
 	r2 = 0.0;
+	linkD = 0;
+	length = 0;
+	s1 = 0.01;
+	s2 = 0.01;
 	rotx = 0.0;
 	roty = 0.0;
 }
@@ -198,10 +203,16 @@ void Bone::Process(LinkageVisitor& visitor)
 
 void Bone::Setup(void)
 {
+	double rLocal;
 	if(parent == NULL){
 		matrix = AffineTransformMatrix::Identity();
+		link.x = linkN.x;
+		link.y = linkN.y;
+		link.z = linkD;
+		rLocal = 1.0;
 	}else{
 		matrix = parent->matrix;
+		link = parent->
 	}
 	matrix.TranslateLocal(anchor.x, anchor.y, anchor.z);
 	matrix = matrix

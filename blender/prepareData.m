@@ -117,17 +117,6 @@ end
 
 
 
-% Make all bones relative to their parents
-for n = size(bone,1):-1:1
-	m = bone{n,1};
-	bone{n,5} = bone{n,5} - bone{n,3};
-	bone{n,3} = bone{n,3} - bone{n,7};
-	if isnan(m)
-		bone{n,7} = [0,0,0];
-	else	
-		bone{n,7} = bone{n,7} - bone{m,3};
-	end
-end
 
 % Print code
 
@@ -140,27 +129,100 @@ for n = 1:size(bone,1);
 	fprintf(1,'\t%s->AddChild(%s);\n', bone{m,2}, bone{n,2});
 end
 
+
 fprintf(1,'\n\t// Relative links:\n');
 for n = 1:size(bone,1);
+	
+	np = bone{n,1};
+	name = bone{n,2};
+	p1 = bone{n,3};
+	r1 = bone{n,4};
+	p2 = bone{n,5};
+	r2 = bone{n,6};
+	link = bone{n,7};
+	
+	if ~isnan(np)
+		p1p = bone{np,3};
+		r1p = bone{np,4};
+		p2p = bone{np,5};
+		r2p = bone{np,6};
+	else
+		p1p = [0,0,0];
+		r1p = 1;
+		p2p = [0,0,0];
+		r2p = 1;
+	end	
+			
+	len = sqrt(sum((p2-p1).^2));
+	lenp = sqrt(sum((p2p-p1p).^2));
+	
+	if len < 1e-6
+		no = [0,0,1];
+	else
+		no = (p2-p1)./len;
+	end
+	if lenp < 1e-6
+		lenp = 1.0;
+		nop = [0,0,1];
+	else
+		nop = (p2p-p1p)./lenp;
+	end
+		
+	dLink = sum((link-p1p).*nop);
+	ap = dLink*nop+p1p;
+	apr = r1p + (r2p-r1p) * min(max(dLink,0),1);
+	rLink = sqrt(sum((ap-link).^2));
+	nLink = (ap-link)/apr;
+	
+	
+	fprintf('\t%s->linkD = %f;\n',name, dLink/lenp);
+	fprintf('\t%s->linkN.Set(%f, %f, %f);\n', name, ...
+	   nLink(1),nLink(2),nLink(3));
+	
+	anchor = (p1-link)/(apr+r1);
+		
+	fprintf('\t%s->anchor.Set(%f, %f, %f);\n', name, ...
+	   anchor(1),anchor(2),anchor(3));
 
-	fprintf('\t%s->r1 = %f;\n',bone{n,2},bone{n,4});
-	fprintf('\t%s->r2 = %f;\n',bone{n,2},bone{n,6});
+	fprintf('\t%s->normal.Set(%f, %f, %f);\n', name, ...
+	   no(1),no(2),no(3));
+	
+	fprintf('\t%s->length = %f;\n',name, len);
+
+	fprintf('\t%s->r1 = %f;\n',name, r1);
+	fprintf('\t%s->r2 = %f;\n',name, r2);
+
+	
+%	return;
+	
+%	bone{n,5} = bone{n,5} - bone{n,3};
+	
+%	bL = sqrt(sum(bone{n,5}.^2));
+%	if isnan(m) || bL == 0
+%		bL = 1.0;
+%	end
+	
+%	bone{n,3} = bone{n,3} - bone{n,7};
+%	if isnan(m)
+%		bone{n,7} = [0,0,0];
+%	else	
+%		bone{n,7} = bone{n,7} - bone{m,3};
+%	end
+
+%	fprintf('\t%s->r1 = %f;\n',bone{n,2},bone{n,4});
+%	fprintf('\t%s->r2 = %f;\n',bone{n,2},bone{n,6});
 
 %	fprintf('\t%s->p1.Set(%f, %f, %f);\n', ...
 %	   bone{n,2}, bone{n,3}(1),bone{n,3}(2),bone{n,3}(3));
 %	fprintf('\t%s->p2.Set(%f, %f, %f);\n', ...
 %	   bone{n,2}, bone{n,5}(1),bone{n,5}(2),bone{n,5}(3));
 
-	fprintf('\t%s->link.Set(%f, %f, %f);\n', ...
-	   bone{n,2}, bone{n,3}(1),bone{n,3}(2),bone{n,3}(3));
-	fprintf('\t%s->bone.Set(%f, %f, %f);\n', ...
-	   bone{n,2}, bone{n,5}(1),bone{n,5}(2),bone{n,5}(3));
-	fprintf('\t%s->anchor.Set(%f, %f, %f);\n', ...
-	   bone{n,2}, bone{n,7}(1),bone{n,7}(2),bone{n,7}(3));
-
-
+%	fprintf('\t%s->link.Set(%f, %f, %f);\n', ...
+%	   bone{n,2}, bone{n,3}(1),bone{n,3}(2),bone{n,3}(3));
+%	fprintf('\t%s->bone.Set(%f, %f, %f);\n', ...
+%	   bone{n,2}, bone{n,5}(1),bone{n,5}(2),bone{n,5}(3));
+%	fprintf('\t%s->anchor.Set(%f, %f, %f);\n', ...
+%	   bone{n,2}, bone{n,7}(1),bone{n,7}(2),bone{n,7}(3));
 
 end
-
-
 

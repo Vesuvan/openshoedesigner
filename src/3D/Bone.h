@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Name               : Bone.h
-// Purpose            : 
+// Purpose            : Simple bone
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
@@ -26,29 +26,69 @@
 
 #ifndef BONE_H_
 #define BONE_H_
+/*!\class Bone
+ * \brief Simple bone approximated by a capsule.
+ *
+ * Simple bone model with two radii for both ends.
+ * Definition of a link may be confusing but is selected
+ * this way to make every bone scaleable while keeping
+ * the skeleton intact.
+ *
+ * Rotations are done with 50-50 split rotations.
+ *
+ * Parent bone provides an anchor, a bone normal and a length.
+ *
+ * First calculate the normal intersection from link and parent bond.
+ *
+ * p1Parent + normalParent*lengthParent*linkD
+ *
+ * add the offset vector linkN times the radius of the parent bone at this spot.
+ *
+ * + linkN*rLocalParent
+ *
+ * Second calculate p1. It is the link-point + anchor*(rLocalParent+r1)
+ *
+ * Third calculate p2 by adding p1 + normal*length
+ *
+ */
+
 #include "LinkageVisitor.h"
 #include "Linkage.h"
-/*!\class Bone
- * \brief ...
- *
- * ...
- */
+#include <wx/string.h>
 
 class Bone:public Linkage {
 public:
-	Bone();
+	Bone(const wxString &name);
 	virtual ~Bone();
 
-	Vector3 p1;
-	Vector3 p2;
-	float r1;
-	float r2;
+	wxString name;
 
-	float rotx, roty;
-
-	Vector3 anchor;
+	// Parent bone provides an anchor, a bone normal and a length.
+	// First calculate the normal intersection from link and parent bond.
 	Vector3 link;
-	Vector3 bone;
+	// p1Parent + normalParent*lengthParent*linkD
+	double linkD; ///< Relative position of link in parent bone.
+	// add the offset vector linkN times the radius of the parent bone at this spot.
+	// + linkN*rLocalParent
+	Vector3 linkN; ///< Point from the parent bone
+
+	// Second calculate p1. It is the link-point + anchor*(rLocalParent+r1)
+	Vector3 p1;
+	Vector3 anchor;
+
+	// Third calculate p2 by adding p1 + normal*length
+	Vector3 p2;
+	Vector3 normal;
+	double length;
+
+	double r1;
+	double r2;
+
+	double s1;
+	double s2;
+
+	double rotx;
+	double roty;
 
 	void Setup(void);
 	void Render(void);
