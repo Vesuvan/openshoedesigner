@@ -126,37 +126,30 @@ class GUIFrameFootParameter : public wxFrame
 		wxPanel* m_panelMeasurements;
 		wxStaticText* m_staticText21;
 		wxTextCtrl* m_textCtrl5;
-		wxStaticText* m_staticText22;
 		wxStaticText* m_staticText23;
 		wxTextCtrl* m_textCtrl6;
-		wxStaticText* m_staticText24;
 		wxStaticText* m_staticText25;
 		wxTextCtrl* m_textCtrl7;
-		wxStaticText* m_staticText26;
 		wxStaticText* m_staticText27;
 		wxTextCtrl* m_textCtrl8;
-		wxStaticText* m_staticText28;
 		wxStaticText* m_staticText29;
 		wxTextCtrl* m_textCtrl9;
-		wxStaticText* m_staticText30;
 		wxStaticText* m_staticText31;
 		wxTextCtrl* m_textCtrl10;
-		wxStaticText* m_staticText32;
 		wxStaticText* m_staticText33;
 		wxTextCtrl* m_textCtrl11;
-		wxStaticText* m_staticText34;
 		wxStaticText* m_staticText35;
 		wxTextCtrl* m_textCtrl12;
-		wxStaticText* m_staticText36;
 		wxButton* m_buttonCalculate;
 		wxPanel* m_panelBone;
 		wxGrid* m_gridBoneLength;
-		wxPanel* m_panel10;
+		wxPanel* m_panelBoneDiameter;
 		wxGrid* m_gridBoneDiameter;
 		wxPanel* m_panelSkin;
 		wxGrid* m_gridSkin;
 		wxPanel* m_panelLeg;
 		wxGrid* m_gridLeg;
+		wxStaticText* m_staticText38;
 		wxMenuBar* m_menubar;
 		wxMenu* m_menuFoot;
 		wxMenu* m_menuSettings;
@@ -169,7 +162,7 @@ class GUIFrameFootParameter : public wxFrame
 	
 	public:
 		
-		GUIFrameFootParameter( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Foot Setup"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 527,312 ), long style = wxDEFAULT_FRAME_STYLE|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
+		GUIFrameFootParameter( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Foot Setup"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 709,321 ), long style = wxDEFAULT_FRAME_STYLE|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
 		~GUIFrameFootParameter();
 	
 };

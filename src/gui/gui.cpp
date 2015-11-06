@@ -61,9 +61,9 @@ GUIFrameMain::GUIFrameMain( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_menuItemSaveInsole = new wxMenuItem( m_menuGeometry, wxID_ANY, wxString( wxT("Save &Insole") ) , wxEmptyString, wxITEM_NORMAL );
 	m_menuGeometry->Append( m_menuItemSaveInsole );
 	
-	wxMenuItem* m_menuItemSaveShoe;
-	m_menuItemSaveShoe = new wxMenuItem( m_menuGeometry, wxID_ANY, wxString( wxT("Save &Sole Prototype") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menuGeometry->Append( m_menuItemSaveShoe );
+	wxMenuItem* m_menuItemSaveSole;
+	m_menuItemSaveSole = new wxMenuItem( m_menuGeometry, wxID_ANY, wxString( wxT("Save &Sole Prototype") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuGeometry->Append( m_menuItemSaveSole );
 	
 	wxMenuItem* m_menuItemCutaway;
 	m_menuItemCutaway = new wxMenuItem( m_menuGeometry, wxID_ANY, wxString( wxT("Save &Cutaway Object") ) , wxEmptyString, wxITEM_NORMAL );
@@ -160,7 +160,7 @@ GUIFrameMain::GUIFrameMain( wxWindow* parent, wxWindowID id, const wxString& tit
 	this->Connect( m_menuItemEditWalkCycle->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnEditWalkCycle ) );
 	this->Connect( m_menuItemSaveLast->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveLast ) );
 	this->Connect( m_menuItemSaveInsole->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveInsole ) );
-	this->Connect( m_menuItemSaveShoe->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveSole ) );
+	this->Connect( m_menuItemSaveSole->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveSole ) );
 	this->Connect( m_menuItemCutaway->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveCutaway ) );
 	this->Connect( m_menuItemPackZip->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnPackZip ) );
 	this->Connect( m_menuItemStereo3D->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnToggleStereo3D ) );
@@ -220,9 +220,9 @@ GUIFrameFootParameter::GUIFrameFootParameter( wxWindow* parent, wxWindowID id, c
 	bSizer16 = new wxBoxSizer( wxVERTICAL );
 	
 	wxFlexGridSizer* fgSizer2;
-	fgSizer2 = new wxFlexGridSizer( 5, 6, 0, 0 );
+	fgSizer2 = new wxFlexGridSizer( 5, 4, 0, 0 );
 	fgSizer2->AddGrowableCol( 1 );
-	fgSizer2->AddGrowableCol( 4 );
+	fgSizer2->AddGrowableCol( 3 );
 	fgSizer2->SetFlexibleDirection( wxHORIZONTAL );
 	fgSizer2->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 	
@@ -233,20 +233,12 @@ GUIFrameFootParameter::GUIFrameFootParameter( wxWindow* parent, wxWindowID id, c
 	m_textCtrl5 = new wxTextCtrl( m_panelMeasurements, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer2->Add( m_textCtrl5, 0, wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 5 );
 	
-	m_staticText22 = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("mm"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText22->Wrap( -1 );
-	fgSizer2->Add( m_staticText22, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
-	
 	m_staticText23 = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("Foot width:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText23->Wrap( -1 );
 	fgSizer2->Add( m_staticText23, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5 );
 	
 	m_textCtrl6 = new wxTextCtrl( m_panelMeasurements, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer2->Add( m_textCtrl6, 0, wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 5 );
-	
-	m_staticText24 = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("mm"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText24->Wrap( -1 );
-	fgSizer2->Add( m_staticText24, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 	
 	m_staticText25 = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("Heel width:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText25->Wrap( -1 );
@@ -255,20 +247,12 @@ GUIFrameFootParameter::GUIFrameFootParameter( wxWindow* parent, wxWindowID id, c
 	m_textCtrl7 = new wxTextCtrl( m_panelMeasurements, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer2->Add( m_textCtrl7, 0, wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 5 );
 	
-	m_staticText26 = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("mm"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText26->Wrap( -1 );
-	fgSizer2->Add( m_staticText26, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
-	
 	m_staticText27 = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("Ankle width:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText27->Wrap( -1 );
 	fgSizer2->Add( m_staticText27, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
 	m_textCtrl8 = new wxTextCtrl( m_panelMeasurements, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer2->Add( m_textCtrl8, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
-	
-	m_staticText28 = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("mm"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText28->Wrap( -1 );
-	fgSizer2->Add( m_staticText28, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 	
 	m_staticText29 = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("MyLabel"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText29->Wrap( -1 );
@@ -277,20 +261,12 @@ GUIFrameFootParameter::GUIFrameFootParameter( wxWindow* parent, wxWindowID id, c
 	m_textCtrl9 = new wxTextCtrl( m_panelMeasurements, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer2->Add( m_textCtrl9, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5 );
 	
-	m_staticText30 = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("mm"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText30->Wrap( -1 );
-	fgSizer2->Add( m_staticText30, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
-	
 	m_staticText31 = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("MyLabel"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText31->Wrap( -1 );
 	fgSizer2->Add( m_staticText31, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
 	m_textCtrl10 = new wxTextCtrl( m_panelMeasurements, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer2->Add( m_textCtrl10, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
-	
-	m_staticText32 = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("mm"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText32->Wrap( -1 );
-	fgSizer2->Add( m_staticText32, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 	
 	m_staticText33 = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("MyLabel"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText33->Wrap( -1 );
@@ -299,10 +275,6 @@ GUIFrameFootParameter::GUIFrameFootParameter( wxWindow* parent, wxWindowID id, c
 	m_textCtrl11 = new wxTextCtrl( m_panelMeasurements, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer2->Add( m_textCtrl11, 0, wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 5 );
 	
-	m_staticText34 = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("mm"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText34->Wrap( -1 );
-	fgSizer2->Add( m_staticText34, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
-	
 	m_staticText35 = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("MyLabel"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText35->Wrap( -1 );
 	fgSizer2->Add( m_staticText35, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5 );
@@ -310,11 +282,7 @@ GUIFrameFootParameter::GUIFrameFootParameter( wxWindow* parent, wxWindowID id, c
 	m_textCtrl12 = new wxTextCtrl( m_panelMeasurements, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer2->Add( m_textCtrl12, 0, wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 5 );
 	
-	m_staticText36 = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("mm"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText36->Wrap( -1 );
-	fgSizer2->Add( m_staticText36, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
-	
-	bSizer16->Add( fgSizer2, 1, wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
+	bSizer16->Add( fgSizer2, 1, wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
 	
 	m_buttonCalculate = new wxButton( m_panelMeasurements, wxID_ANY, wxT("Calculate Bones and Skin"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer16->Add( m_buttonCalculate, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
@@ -330,25 +298,25 @@ GUIFrameFootParameter::GUIFrameFootParameter( wxWindow* parent, wxWindowID id, c
 	m_gridBoneLength = new wxGrid( m_panelBone, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	
 	// Grid
-	m_gridBoneLength->CreateGrid( 1, 3 );
+	m_gridBoneLength->CreateGrid( 0, 2 );
 	m_gridBoneLength->EnableEditing( true );
 	m_gridBoneLength->EnableGridLines( true );
 	m_gridBoneLength->EnableDragGridSize( false );
 	m_gridBoneLength->SetMargins( 0, 0 );
 	
 	// Columns
+	m_gridBoneLength->AutoSizeColumns();
 	m_gridBoneLength->EnableDragColMove( false );
 	m_gridBoneLength->EnableDragColSize( true );
 	m_gridBoneLength->SetColLabelSize( 30 );
-	m_gridBoneLength->SetColLabelValue( 0, wxT("Formula") );
-	m_gridBoneLength->SetColLabelValue( 1, wxT("Value") );
-	m_gridBoneLength->SetColLabelValue( 2, wxT("Unit") );
+	m_gridBoneLength->SetColLabelValue( 0, wxT("Length (Formula)") );
+	m_gridBoneLength->SetColLabelValue( 1, wxT("Length (Value)") );
 	m_gridBoneLength->SetColLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
 	
 	// Rows
+	m_gridBoneLength->AutoSizeRows();
 	m_gridBoneLength->EnableDragRowSize( true );
 	m_gridBoneLength->SetRowLabelSize( 80 );
-	m_gridBoneLength->SetRowLabelValue( 0, wxT("Tibia") );
 	m_gridBoneLength->SetRowLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
 	
 	// Label Appearance
@@ -361,23 +329,28 @@ GUIFrameFootParameter::GUIFrameFootParameter( wxWindow* parent, wxWindowID id, c
 	m_panelBone->Layout();
 	bSizer21->Fit( m_panelBone );
 	m_notebook->AddPage( m_panelBone, wxT("Bone Length"), false );
-	m_panel10 = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_panelBoneDiameter = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer28;
 	bSizer28 = new wxBoxSizer( wxVERTICAL );
 	
-	m_gridBoneDiameter = new wxGrid( m_panel10, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_gridBoneDiameter = new wxGrid( m_panelBoneDiameter, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	
 	// Grid
-	m_gridBoneDiameter->CreateGrid( 5, 5 );
+	m_gridBoneDiameter->CreateGrid( 0, 4 );
 	m_gridBoneDiameter->EnableEditing( true );
 	m_gridBoneDiameter->EnableGridLines( true );
 	m_gridBoneDiameter->EnableDragGridSize( false );
 	m_gridBoneDiameter->SetMargins( 0, 0 );
 	
 	// Columns
+	m_gridBoneDiameter->AutoSizeColumns();
 	m_gridBoneDiameter->EnableDragColMove( false );
 	m_gridBoneDiameter->EnableDragColSize( true );
 	m_gridBoneDiameter->SetColLabelSize( 30 );
+	m_gridBoneDiameter->SetColLabelValue( 0, wxT("r1 (Formula)") );
+	m_gridBoneDiameter->SetColLabelValue( 1, wxT("r1 (Value)") );
+	m_gridBoneDiameter->SetColLabelValue( 2, wxT("r2 (Formula)") );
+	m_gridBoneDiameter->SetColLabelValue( 3, wxT("r2 (Value)") );
 	m_gridBoneDiameter->SetColLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
 	
 	// Rows
@@ -391,10 +364,10 @@ GUIFrameFootParameter::GUIFrameFootParameter( wxWindow* parent, wxWindowID id, c
 	m_gridBoneDiameter->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_TOP );
 	bSizer28->Add( m_gridBoneDiameter, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
 	
-	m_panel10->SetSizer( bSizer28 );
-	m_panel10->Layout();
-	bSizer28->Fit( m_panel10 );
-	m_notebook->AddPage( m_panel10, wxT("Bone Diameter"), false );
+	m_panelBoneDiameter->SetSizer( bSizer28 );
+	m_panelBoneDiameter->Layout();
+	bSizer28->Fit( m_panelBoneDiameter );
+	m_notebook->AddPage( m_panelBoneDiameter, wxT("Bone Diameter"), false );
 	m_panelSkin = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer26;
 	bSizer26 = new wxBoxSizer( wxVERTICAL );
@@ -402,16 +375,21 @@ GUIFrameFootParameter::GUIFrameFootParameter( wxWindow* parent, wxWindowID id, c
 	m_gridSkin = new wxGrid( m_panelSkin, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	
 	// Grid
-	m_gridSkin->CreateGrid( 5, 5 );
+	m_gridSkin->CreateGrid( 0, 4 );
 	m_gridSkin->EnableEditing( true );
 	m_gridSkin->EnableGridLines( true );
 	m_gridSkin->EnableDragGridSize( false );
 	m_gridSkin->SetMargins( 0, 0 );
 	
 	// Columns
+	m_gridSkin->AutoSizeColumns();
 	m_gridSkin->EnableDragColMove( false );
 	m_gridSkin->EnableDragColSize( true );
 	m_gridSkin->SetColLabelSize( 30 );
+	m_gridSkin->SetColLabelValue( 0, wxT("s1 (Formula)") );
+	m_gridSkin->SetColLabelValue( 1, wxT("s1 (Value)") );
+	m_gridSkin->SetColLabelValue( 2, wxT("s2 (Formula)") );
+	m_gridSkin->SetColLabelValue( 3, wxT("s2 (Value)") );
 	m_gridSkin->SetColLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
 	
 	// Rows
@@ -428,7 +406,7 @@ GUIFrameFootParameter::GUIFrameFootParameter( wxWindow* parent, wxWindowID id, c
 	m_panelSkin->SetSizer( bSizer26 );
 	m_panelSkin->Layout();
 	bSizer26->Fit( m_panelSkin );
-	m_notebook->AddPage( m_panelSkin, wxT("Skin Density"), false );
+	m_notebook->AddPage( m_panelSkin, wxT("Skin Thickness"), false );
 	m_panelLeg = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer27;
 	bSizer27 = new wxBoxSizer( wxVERTICAL );
@@ -436,16 +414,21 @@ GUIFrameFootParameter::GUIFrameFootParameter( wxWindow* parent, wxWindowID id, c
 	m_gridLeg = new wxGrid( m_panelLeg, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	
 	// Grid
-	m_gridLeg->CreateGrid( 5, 5 );
+	m_gridLeg->CreateGrid( 0, 4 );
 	m_gridLeg->EnableEditing( true );
 	m_gridLeg->EnableGridLines( true );
 	m_gridLeg->EnableDragGridSize( false );
 	m_gridLeg->SetMargins( 0, 0 );
 	
 	// Columns
+	m_gridLeg->AutoSizeColumns();
 	m_gridLeg->EnableDragColMove( false );
 	m_gridLeg->EnableDragColSize( true );
 	m_gridLeg->SetColLabelSize( 30 );
+	m_gridLeg->SetColLabelValue( 0, wxT("Height (Formula)") );
+	m_gridLeg->SetColLabelValue( 1, wxT("Height (Value)") );
+	m_gridLeg->SetColLabelValue( 2, wxT("Circumfence (Formula)") );
+	m_gridLeg->SetColLabelValue( 3, wxT("Circumfence (Value)") );
 	m_gridLeg->SetColLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
 	
 	// Rows
@@ -458,6 +441,10 @@ GUIFrameFootParameter::GUIFrameFootParameter( wxWindow* parent, wxWindowID id, c
 	// Cell Defaults
 	m_gridLeg->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_TOP );
 	bSizer27->Add( m_gridLeg, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
+	
+	m_staticText38 = new wxStaticText( m_panelLeg, wxID_ANY, wxT("(This table is only needed for boot designs.)"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText38->Wrap( -1 );
+	bSizer27->Add( m_staticText38, 0, wxALL|wxEXPAND, 5 );
 	
 	m_panelLeg->SetSizer( bSizer27 );
 	m_panelLeg->Layout();

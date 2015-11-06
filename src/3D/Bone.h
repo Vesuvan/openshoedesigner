@@ -65,16 +65,16 @@ public:
 
 	// Parent bone provides an anchor, a bone normal and a length.
 	// First calculate the normal intersection from link and parent bond.
-	Vector3 link;
+	Vector3 anchor;
 	// p1Parent + normalParent*lengthParent*linkD
-	double linkD; ///< Relative position of link in parent bone.
+	double anchorD; ///< Relative position of link in parent bone.
 	// add the offset vector linkN times the radius of the parent bone at this spot.
 	// + linkN*rLocalParent
-	Vector3 linkN; ///< Point from the parent bone
+	Vector3 anchorN; ///< Point from the parent bone
 
 	// Second calculate p1. It is the link-point + anchor*(rLocalParent+r1)
 	Vector3 p1;
-	Vector3 anchor;
+	Vector3 link;
 
 	// Third calculate p2 by adding p1 + normal*length
 	Vector3 p2;

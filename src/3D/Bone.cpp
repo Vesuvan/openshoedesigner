@@ -35,7 +35,7 @@ Bone::Bone(const wxString &name)
 	this->name = name;
 	r1 = 0.0;
 	r2 = 0.0;
-	linkD = 0;
+	anchorD = 0;
 	length = 0;
 	s1 = 0.01;
 	s2 = 0.01;
@@ -203,17 +203,25 @@ void Bone::Process(LinkageVisitor& visitor)
 
 void Bone::Setup(void)
 {
+	Bone *parent = (Bone*) this->parent;
+
 	double rLocal;
+
 	if(parent == NULL){
 		matrix = AffineTransformMatrix::Identity();
-		link.x = linkN.x;
-		link.y = linkN.y;
-		link.z = linkD;
+		anchor.x = anchorN.x;
+		anchor.y = anchorN.y;
+		anchor.z = anchorD;
 		rLocal = 1.0;
 	}else{
 		matrix = parent->matrix;
-		link = parent->
+		anchor = parent->normal * (parent->length * anchorD);
+
+		double h = fmin(fmax(parent->anchorD, 0.0), 1.0);
+		rLocal = parent->r1 + (parent->r2 - parent->r1) * h;
+		anchor += anchorN * rLocal;
 	}
+
 	matrix.TranslateLocal(anchor.x, anchor.y, anchor.z);
 	matrix = matrix
 			* AffineTransformMatrix::RotateAroundVector(Vector3(1, 0, 0),
@@ -221,13 +229,17 @@ void Bone::Setup(void)
 	matrix = matrix
 			* AffineTransformMatrix::RotateAroundVector(Vector3(0, 1, 0),
 					roty / 2);
-	matrix.TranslateLocal(link.x, link.y, link.z);
+
+	Vector3 temp = link * (rLocal + r1);
+	matrix.TranslateLocal(temp.x, temp.y, temp.z);
+
 	matrix = matrix
 			* AffineTransformMatrix::RotateAroundVector(Vector3(1, 0, 0),
 					rotx / 2);
 	matrix = matrix
 			* AffineTransformMatrix::RotateAroundVector(Vector3(0, 1, 0),
 					roty / 2);
+
 	p1 = matrix.Transform(Vector3(0, 0, 0));
-	p2 = matrix.Transform(bone);
+	p2 = matrix.Transform(normal * length);
 }

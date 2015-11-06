@@ -33,12 +33,12 @@ Canvas3D::Canvas3D(wxWindow* parent) :
 	bone = NULL;
 	volume = NULL;
 
-	showBones = false;
-	showLast = true;
+	showBones = true;
+	showLast = false;
 	showInsole = true;
 	showSole = true;
 	showUpper = false;
-	showCutaway = true;
+	showCutaway = false;
 	showFloor = false;
 }
 

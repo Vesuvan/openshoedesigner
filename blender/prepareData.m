@@ -133,65 +133,70 @@ end
 fprintf(1,'\n\t// Relative links:\n');
 for n = 1:size(bone,1);
 	
-	np = bone{n,1};
+	parent = bone{n,1};
 	name = bone{n,2};
 	p1 = bone{n,3};
 	r1 = bone{n,4};
 	p2 = bone{n,5};
 	r2 = bone{n,6};
-	link = bone{n,7};
+	anchor = bone{n,7};
 	
-	if ~isnan(np)
-		p1p = bone{np,3};
-		r1p = bone{np,4};
-		p2p = bone{np,5};
-		r2p = bone{np,6};
-	else
+	if isnan(parent)
 		p1p = [0,0,0];
-		r1p = 1;
-		p2p = [0,0,0];
-		r2p = 1;
+		r1p = 0;
+		p2p = [0,0,1];
+		r2p = 0;
+	else
+		p1p = bone{parent,3};
+		r1p = bone{parent,4};
+		p2p = bone{parent,5};
+		r2p = bone{parent,6};
 	end	
-			
+
 	len = sqrt(sum((p2-p1).^2));
 	lenp = sqrt(sum((p2p-p1p).^2));
+
+	epsilon = 1e-6;
 	
-	if len < 1e-6
-		no = [0,0,1];
+	if len < epsilon
+		len = epsilon;
+		normal = [0,0,1];
 	else
-		no = (p2-p1)./len;
+		normal = (p2-p1)./len;
 	end
-	if lenp < 1e-6
-		lenp = 1.0;
-		nop = [0,0,1];
+	if lenp < epsilon
+		lenp = epsilon;
+		normalp = [0,0,1];
 	else
-		nop = (p2p-p1p)./lenp;
+		normalp = (p2p-p1p)./lenp;
 	end
 		
-	dLink = sum((link-p1p).*nop);
-	ap = dLink*nop+p1p;
-	apr = r1p + (r2p-r1p) * min(max(dLink,0),1);
-	rLink = sqrt(sum((ap-link).^2));
-	nLink = (ap-link)/apr;
+	anchorD = sum((anchor-p1p).*normalp);
+	hp = anchorD*normalp+p1p;
+	if isnan(parent)
+		localR = 1.0;
+	else
+		localR = r1p + (r2p-r1p) * min(max(anchorD,0),1);
+	end
+	%anchorR = sqrt(sum((hp-anchor).^2));
 	
-	
-	fprintf('\t%s->linkD = %f;\n',name, dLink/lenp);
-	fprintf('\t%s->linkN.Set(%f, %f, %f);\n', name, ...
-	   nLink(1),nLink(2),nLink(3));
-	
-	anchor = (p1-link)/(apr+r1);
+	anchorN = (anchor-hp)/localR;
+	link= (p1-anchor)/(localR+r1);
 		
-	fprintf('\t%s->anchor.Set(%f, %f, %f);\n', name, ...
-	   anchor(1),anchor(2),anchor(3));
-
-	fprintf('\t%s->normal.Set(%f, %f, %f);\n', name, ...
-	   no(1),no(2),no(3));
+	fprintf('\t%s->anchorD = %e;\n',name, anchorD/lenp);
+	fprintf('\t%s->anchorN.Set(%e, %e, %e);\n', name, ...
+	   anchorN(1),anchorN(2),anchorN(3));
 	
-	fprintf('\t%s->length = %f;\n',name, len);
+	fprintf('\t%s->link.Set(%e, %e, %e);\n', name, ...
+	   link(1),link(2),link(3));
 
-	fprintf('\t%s->r1 = %f;\n',name, r1);
-	fprintf('\t%s->r2 = %f;\n',name, r2);
+	fprintf('\t%s->normal.Set(%e, %e, %e);\n', name, ...
+	   normal(1),normal(2),normal(3));
+	
+	fprintf('\t%s->length = %e;\n',name, len);
 
+	fprintf('\t%s->r1 = %e;\n',name, r1);
+	fprintf('\t%s->r2 = %e;\n',name, r2);
 	
 %	return;
 	
