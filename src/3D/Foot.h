@@ -26,9 +26,6 @@
 
 #ifndef FOOT_H_
 #define FOOT_H_
-#include "Bone.h"
-#include "FootParameters.h"
-#include "Volume.h"
 
 /*!\class Foot
  * \brief Footbones and skin parameters
@@ -38,14 +35,21 @@
  * Upon calling Setup with a FootParameters object, the parameters of bones and skin are recalculated.
  */
 
+#include "Bone.h"
+#include "FootParameters.h"
+#include "Volume.h"
+#include <wx/txtstrm.h>
+
 class Foot {
 public:
 	Foot();
 	virtual ~Foot();
 	void Render(void) const;
 
-	void AddToVolume(Volume * vol);
-	void Setup(FootParameters * param);
+	bool LoadModel(wxTextInputStream* stream);
+
+	void AddToVolume(Volume* vol);
+	void Setup(void);
 
 private:
 	void InitBones(void);

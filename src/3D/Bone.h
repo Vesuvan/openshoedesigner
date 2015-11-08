@@ -63,6 +63,23 @@ public:
 
 	wxString name;
 
+	// Formulas:
+	wxString anchorNx;
+	wxString anchorNy;
+	wxString anchorNz;
+	wxString linkx;
+	wxString linky;
+	wxString linkz;
+	wxString normalx;
+	wxString normaly;
+	wxString normalz;
+	wxString anchorDv;
+	wxString lengthv;
+	wxString r1v;
+	wxString r2v;
+	wxString s1v;
+	wxString s2v;
+
 	// Parent bone provides an anchor, a bone normal and a length.
 	// First calculate the normal intersection from link and parent bond.
 	Vector3 anchor;
@@ -90,6 +107,7 @@ public:
 	double rotx;
 	double roty;
 
+	bool Set(wxString text);
 	void Setup(void);
 	void Render(void);
 

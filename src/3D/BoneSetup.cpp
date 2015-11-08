@@ -36,5 +36,21 @@ BoneSetup::~BoneSetup()
 
 void BoneSetup::Visit(Bone& bone)
 {
+	bone.anchorN.x = parser.GetNumber(bone.anchorNx);
+	bone.anchorN.y = parser.GetNumber(bone.anchorNy);
+	bone.anchorN.z = parser.GetNumber(bone.anchorNz);
+	bone.link.x = parser.GetNumber(bone.linkx);
+	bone.link.y = parser.GetNumber(bone.linky);
+	bone.link.z = parser.GetNumber(bone.linkz);
+	bone.normal.x = parser.GetNumber(bone.normalx);
+	bone.normal.y = parser.GetNumber(bone.normaly);
+	bone.normal.z = parser.GetNumber(bone.normalz);
+	bone.anchorD = parser.GetNumber(bone.anchorDv);
+	bone.length = parser.GetNumber(bone.lengthv);
+	bone.r1 = parser.GetNumber(bone.r1v);
+	bone.r2 = parser.GetNumber(bone.r2v);
+	bone.s1 = parser.GetNumber(bone.s1v);
+	bone.s2 = parser.GetNumber(bone.s2v);
+
 	bone.Setup();
 }

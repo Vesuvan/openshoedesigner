@@ -190,6 +190,43 @@ void Bone::Normal(const Vector3 v) const
 	::glNormal3f(v.x, v.y, v.z);
 }
 
+bool Bone::Set(wxString text)
+{
+	wxString temp = text.BeforeFirst(_T('|'));
+	if(temp.Cmp(name) != 0) return false;
+	text = text.AfterFirst(_T('|'));
+	anchorNx = text.BeforeFirst(_T('|'));
+	text = text.AfterFirst(_T('|'));
+	anchorNy = text.BeforeFirst(_T('|'));
+	text = text.AfterFirst(_T('|'));
+	anchorNz = text.BeforeFirst(_T('|'));
+	text = text.AfterFirst(_T('|'));
+	linkx = text.BeforeFirst(_T('|'));
+	text = text.AfterFirst(_T('|'));
+	linky = text.BeforeFirst(_T('|'));
+	text = text.AfterFirst(_T('|'));
+	linkz = text.BeforeFirst(_T('|'));
+	text = text.AfterFirst(_T('|'));
+	normalx = text.BeforeFirst(_T('|'));
+	text = text.AfterFirst(_T('|'));
+	normaly = text.BeforeFirst(_T('|'));
+	text = text.AfterFirst(_T('|'));
+	normalz = text.BeforeFirst(_T('|'));
+	text = text.AfterFirst(_T('|'));
+	anchorDv = text.BeforeFirst(_T('|'));
+	text = text.AfterFirst(_T('|'));
+	lengthv = text.BeforeFirst(_T('|'));
+	text = text.AfterFirst(_T('|'));
+	r1v = text.BeforeFirst(_T('|'));
+	text = text.AfterFirst(_T('|'));
+	r2v = text.BeforeFirst(_T('|'));
+	text = text.AfterFirst(_T('|'));
+	s1v = text.BeforeFirst(_T('|'));
+	text = text.AfterFirst(_T('|'));
+	s2v = text;
+	return true;
+}
+
 void Bone::Vertex(const Vector3 v) const
 {
 	::glVertex3f(v.x, v.y, v.z);

@@ -24,20 +24,20 @@
 #include <wx/frame.h>
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
-#include <wx/button.h>
 #include <wx/panel.h>
 #include <wx/grid.h>
 #include <wx/notebook.h>
 #include <wx/choice.h>
 #include <wx/radiobut.h>
+#include <wx/button.h>
 #include <wx/dialog.h>
-#include <wx/slider.h>
-#include <wx/statbox.h>
+#include <wx/checkbox.h>
 #include "PanelSupport.h"
 #include "PanelWalkcycle.h"
-#include <wx/checkbox.h>
+#include <wx/statbox.h>
 #include "PanelPlotSimple.h"
 #include "PanelPattern.h"
+#include <wx/slider.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -58,14 +58,15 @@
 #define ID_SETUPUNITS 1014
 #define ID_TOOLSETUPFOOT 1015
 #define ID_TOOLSETUPLAST 1016
-#define ID_SLIDER1Y 1017
-#define ID_TEXT1Y 1018
-#define ID_SLIDER1X 1019
-#define ID_TEXT1X 1020
-#define ID_SLIDER2X 1021
-#define ID_TEXT2X 1022
-#define ID_SLIDER3Y 1023
-#define ID_TEXT3Y 1024
+#define ID_PRESETFLATS 1017
+#define ID_PRESETHHLOW 1018
+#define ID_PRESETPLATFORM 1019
+#define ID_PRESETHIKING 1020
+#define ID_PRESETHHMID 1021
+#define ID_PRESETPONY 1022
+#define ID_PRESETPLATEAU 1023
+#define ID_PRESETHHHIGH 1024
+#define ID_PRESETBALLET 1025
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class GUIFrameMain
@@ -115,9 +116,9 @@ class GUIFrameMain : public wxFrame
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class GUIFrameFootParameter
+/// Class GUIFrameFootSetup
 ///////////////////////////////////////////////////////////////////////////////
-class GUIFrameFootParameter : public wxFrame 
+class GUIFrameFootSetup : public wxFrame 
 {
 	private:
 	
@@ -132,15 +133,6 @@ class GUIFrameFootParameter : public wxFrame
 		wxTextCtrl* m_textCtrl7;
 		wxStaticText* m_staticText27;
 		wxTextCtrl* m_textCtrl8;
-		wxStaticText* m_staticText29;
-		wxTextCtrl* m_textCtrl9;
-		wxStaticText* m_staticText31;
-		wxTextCtrl* m_textCtrl10;
-		wxStaticText* m_staticText33;
-		wxTextCtrl* m_textCtrl11;
-		wxStaticText* m_staticText35;
-		wxTextCtrl* m_textCtrl12;
-		wxButton* m_buttonCalculate;
 		wxPanel* m_panelBone;
 		wxGrid* m_gridBoneLength;
 		wxPanel* m_panelBoneDiameter;
@@ -156,14 +148,15 @@ class GUIFrameFootParameter : public wxFrame
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnCloseX( wxCloseEvent& event ) = 0;
-		virtual void OnCalculate( wxCommandEvent& event ) = 0;
+		virtual void OnLoadModel( wxCommandEvent& event ) = 0;
+		virtual void OnSaveModel( wxCommandEvent& event ) = 0;
 		virtual void OnClose( wxCommandEvent& event ) = 0;
 		
 	
 	public:
 		
-		GUIFrameFootParameter( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Foot Setup"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 709,321 ), long style = wxDEFAULT_FRAME_STYLE|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
-		~GUIFrameFootParameter();
+		GUIFrameFootSetup( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Foot Setup"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 709,321 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
+		~GUIFrameFootSetup();
 	
 };
 
@@ -181,8 +174,8 @@ class GUIDialogInitSettings : public wxDialog
 		wxRadioButton* m_radioBtnWide;
 		wxRadioButton* m_radioBtnMedium;
 		wxRadioButton* m_radioBtnSmall;
-		wxButton* m_button2;
-		wxButton* m_button3;
+		wxButton* m_buttonInit;
+		wxButton* m_buttonAbort;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnText( wxCommandEvent& event ) = 0;
@@ -197,60 +190,48 @@ class GUIDialogInitSettings : public wxDialog
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class GUIFrameLastParameter
+/// Class GUIFrameBasicShoeSetup
 ///////////////////////////////////////////////////////////////////////////////
-class GUIFrameLastParameter : public wxFrame 
+class GUIFrameBasicShoeSetup : public wxFrame 
 {
 	private:
 	
 	protected:
-		wxStaticText* m_staticText1;
-		
-		wxStaticText* m_staticText2;
-		
-		wxStaticText* m_staticText3;
-		wxSlider* m_slider1Y;
-		
-		wxStaticText* m_staticText4;
-		wxTextCtrl* m_textCtrl1Y;
-		wxStaticText* m_staticText111;
-		
-		wxStaticText* m_staticText211;
-		
-		wxStaticText* m_staticText311;
-		wxSlider* m_slider1X;
-		
-		wxStaticText* m_staticText42;
-		wxTextCtrl* m_textCtrl1X;
-		wxStaticText* m_staticText11;
-		
-		wxStaticText* m_staticText21;
-		
+		wxCheckBox* m_checkBoxHeelHeight;
 		wxStaticText* m_staticText31;
-		wxSlider* m_slider2X;
-		
-		wxStaticText* m_staticText41;
-		wxTextCtrl* m_textCtrl2X;
-		wxStaticText* m_staticText112;
-		
-		wxStaticText* m_staticText212;
-		
-		wxStaticText* m_staticText312;
-		wxSlider* m_slider3Y;
-		
-		wxStaticText* m_staticText411;
-		wxTextCtrl* m_textCtrl3Y;
+		wxTextCtrl* m_textCtrl14;
+		wxStaticText* m_staticText32;
+		wxCheckBox* m_checkBoxPlateauHeight;
+		wxStaticText* m_staticText33;
+		wxTextCtrl* m_textCtrl15;
+		wxStaticText* m_staticText34;
+		wxCheckBox* m_checkBoxHeelAngle;
+		wxStaticText* m_staticText35;
+		wxTextCtrl* m_textCtrl16;
+		wxStaticText* m_staticText36;
+		wxCheckBox* m_checkBoxToeAngle;
+		wxStaticText* m_staticText37;
+		wxTextCtrl* m_textCtrl17;
+		wxStaticText* m_staticText38;
+		wxButton* m_buttonFlats;
+		wxButton* m_buttonHHLow;
+		wxButton* m_buttonPlatform;
+		wxButton* m_buttonHiking;
+		wxButton* m_buttonHHMid;
+		wxButton* m_buttonPony;
+		wxButton* m_buttonPlateau;
+		wxButton* m_buttonHHHigh;
+		wxButton* m_buttonBallet;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnClose( wxCloseEvent& event ) = 0;
-		virtual void OnScroll( wxScrollEvent& event ) = 0;
-		virtual void OnText( wxCommandEvent& event ) = 0;
+		virtual void OnPreset( wxCommandEvent& event ) = 0;
 		
 	
 	public:
 		
-		GUIFrameLastParameter( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Last Setup"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 418,514 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
-		~GUIFrameLastParameter();
+		GUIFrameBasicShoeSetup( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Basic Shoe Setup"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
+		~GUIFrameBasicShoeSetup();
 	
 };
 
@@ -266,10 +247,12 @@ class GUIFrameWalkcycleSupport : public wxFrame
 		PanelWalkcycle* m_panelCycle;
 		wxCheckBox* m_checkBoxLockAnkle;
 		PanelPlotSimple* m_panelPlot;
-		wxChoice* m_choice;
+		wxChoice* m_choiceDisplay;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnClose( wxCloseEvent& event ) = 0;
+		virtual void OnToggleAnkleLock( wxCommandEvent& event ) = 0;
+		virtual void OnChoiceDisplay( wxCommandEvent& event ) = 0;
 		
 	
 	public:
@@ -289,16 +272,17 @@ class GUIFramePattern : public wxFrame
 	protected:
 		PanelPattern* m_panel;
 		wxStaticText* m_staticText17;
-		wxChoice* m_choice2;
+		wxChoice* m_choicePreset;
 		wxStaticText* m_staticText18;
-		wxChoice* m_choice3;
+		wxChoice* m_choiceStyle;
 		wxStaticText* m_staticText19;
-		wxSlider* m_slider5;
-		wxStaticText* m_staticText20;
-		wxSlider* m_slider6;
+		wxSlider* m_sliderBootLength;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnClose( wxCloseEvent& event ) = 0;
+		virtual void OnChoicePreset( wxCommandEvent& event ) = 0;
+		virtual void OnChoiceStyle( wxCommandEvent& event ) = 0;
+		virtual void OnScroll( wxScrollEvent& event ) = 0;
 		
 	
 	public:

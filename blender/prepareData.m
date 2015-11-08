@@ -7,9 +7,8 @@
 % Copyright (C) 2015 Tobias Schäfer
 
 filename = 'FootBones.x3d';
-
-footLength = 28.67; % cm
-EUSize = (footLength+2)/2*3; % = EU 46
+footLength = 28.67e-2; % cm
+footWidth = 9.56e-2; % cm
 
 fhd = fopen(filename,'r');
 if fhd <=0
@@ -130,6 +129,9 @@ for n = 1:size(bone,1);
 end
 
 
+fhd = fopen('../data/FootModelDefault.txt','wt');
+
+
 fprintf(1,'\n\t// Relative links:\n');
 for n = 1:size(bone,1);
 	
@@ -182,22 +184,42 @@ for n = 1:size(bone,1);
 	
 	anchorN = (anchor-hp)/localR;
 	link= (p1-anchor)/(localR+r1);
+
+	s1 = 0.01;
+	s2 = 0.01;
 		
-	fprintf('\t%s->anchorD = %e;\n',name, anchorD/lenp);
-	fprintf('\t%s->anchorN.Set(%e, %e, %e);\n', name, ...
+	fprintf('\t%s->anchorD = %g;\n',name, anchorD/lenp);
+	fprintf('\t%s->anchorN.Set(%g, %g, %g);\n', name, ...
 	   anchorN(1),anchorN(2),anchorN(3));
 	
-	fprintf('\t%s->link.Set(%e, %e, %e);\n', name, ...
+	fprintf('\t%s->link.Set(%g, %g, %g);\n', name, ...
 	   link(1),link(2),link(3));
 
-	fprintf('\t%s->normal.Set(%e, %e, %e);\n', name, ...
+	fprintf('\t%s->normal.Set(%g, %g, %g);\n', name, ...
 	   normal(1),normal(2),normal(3));
 	
-	fprintf('\t%s->length = %e;\n',name, len);
+	fprintf('\t%s->length = %g;\n',name, len);
 
-	fprintf('\t%s->r1 = %e;\n',name, r1);
-	fprintf('\t%s->r2 = %e;\n',name, r2);
+	fprintf('\t%s->r1 = %g;\n',name, r1);
+	fprintf('\t%s->r2 = %g;\n',name, r2);
 	
+	fprintf('\t%s->s1 = %g;\n',name, s1);
+	fprintf('\t%s->s2 = %g;\n',name, s2);
+		
+	% Print to file
+	fprintf(fhd, '%s|%g|%g|%g', name, ...
+	   anchorN(1),anchorN(2),anchorN(3));
+	fprintf(fhd, '|%g|%g|%g', ...
+	   link(1),link(2),link(3));
+	fprintf(fhd, '|%g|%g|%g', ...
+	   normal(1),normal(2),normal(3));
+	fprintf(fhd, '|%g*L', anchorD/lenp/footLength);
+	fprintf(fhd, '|%g*L', len/footLength);
+	fprintf(fhd, '|%g*L*W', r1/footLength/footWidth);
+	fprintf(fhd, '|%g*L*W', r2/footLength/footWidth);
+	fprintf(fhd, '|%g*L*W', s1/footLength/footWidth);
+	fprintf(fhd, '|%g*L*W\n', s2/footLength/footWidth);
+		
 %	return;
 	
 %	bone{n,5} = bone{n,5} - bone{n,3};
@@ -230,4 +252,5 @@ for n = 1:size(bone,1);
 %	   bone{n,2}, bone{n,7}(1),bone{n,7}(2),bone{n,7}(3));
 
 end
+fclose(fhd);
 

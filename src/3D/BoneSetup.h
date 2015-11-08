@@ -30,15 +30,19 @@
 #include "Bone.h"
 
 /*!\class BoneSetup
- * \brief ...
+ * \brief Setup all bones
  *
- * ...
+ * eValuate the formulas and set up the bones.
  */
+
+#include "../gui/MathParser.h"
 
 class BoneSetup:public LinkageVisitor {
 public:
 	BoneSetup();
 	virtual ~BoneSetup();
+
+	MathParser parser; ///< The mathparser stores the configuration.
 
 	void Visit(Bone &bone);
 };

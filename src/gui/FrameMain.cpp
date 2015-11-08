@@ -51,7 +51,11 @@ FrameMain::FrameMain(wxWindow* parent) :
 	m_canvas->SetBones(&foot);
 
 	volume.Clear();
-	foot.Setup(&setup);
+
+	wxFileInputStream input(_T("data/FootModelDefault.txt"));
+	wxTextInputStream text(input);
+	foot.LoadModel(&text);
+	foot.Setup();
 	foot.AddToVolume(&volume);
 	volume.MarchingCubes(0.5);
 
@@ -158,7 +162,7 @@ void FrameMain::OnToolClicked(wxCommandEvent& event)
 
 void FrameMain::Update3DView(wxCommandEvent& event)
 {
-	foot.Setup(&setup);
+	foot.Setup();
 
 	if(thread == NULL){
 		thread = new LastGenerationThread(this, &foot, &volume);
