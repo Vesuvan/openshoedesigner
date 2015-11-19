@@ -26,10 +26,12 @@
 
 #include "Foot.h"
 
-#include "BoneSetup.h"
+#include "VisitorBoneToGrid.h"
+#include "VisitorBoneFromGrid.h"
+#include "VisitorBoneToVolume.h"
+#include "VisitorSetupBone.h"
 
-#include "BoneToVolume.h"
-
+const unsigned int Foot::NBones = 29;
 Foot::Foot()
 {
 	Tibia = new Bone(_T("Tibia"));
@@ -102,6 +104,11 @@ Foot::Foot()
 	PhalanxII3->AddChild(PhalanxIII3);
 	PhalanxII4->AddChild(PhalanxIII4);
 
+	L = 28.67e-2;
+	W = 9.56e-2;
+	H = W - 2e-2;
+	A = H - 1e-2;
+
 	InitBones();
 
 }
@@ -118,7 +125,7 @@ void Foot::Render(void) const
 
 void Foot::AddToVolume(Volume* vol)
 {
-	BoneToVolume b2v(vol);
+	VisitorBoneToVolume b2v(vol);
 	Tibia->Accept(b2v);
 }
 
@@ -134,46 +141,29 @@ void Foot::Setup(void)
 //	PhalanxI4->roty = param->angle_3Y;
 //	PhalanxI5->roty = param->angle_3Y;
 
-// Run the BoneSetup visitor to recalculate each single bone.
-	BoneSetup set;
-	set.parser.SetVariable(_T("L"), 28.67e-2);
-	set.parser.SetVariable(_T("W"), 9.56e-2);
+// Run the VisitorSetupBone visitor to recalculate each single bone.
+	VisitorSetupBone set;
+	set.parser.SetVariable(_T("L"), L);
+	set.parser.SetVariable(_T("W"), W);
 	Tibia->Accept(set);
 }
 
-bool Foot::LoadModel(wxTextInputStream* stream)
+void Foot::AddToGrid(wxGrid* gridLength, wxGrid* gridDiameter, wxGrid* gridSkin)
 {
-	if(!Tibia->Set(stream->ReadLine())) return false;
-	if(!Fibula->Set(stream->ReadLine())) return false;
-	if(!Talus->Set(stream->ReadLine())) return false;
-	if(!Talus2->Set(stream->ReadLine())) return false;
-	if(!Calcaneus->Set(stream->ReadLine())) return false;
-	if(!Cuboideum->Set(stream->ReadLine())) return false;
-	if(!Naviculare->Set(stream->ReadLine())) return false;
-	if(!Cuneiforme1->Set(stream->ReadLine())) return false;
-	if(!Cuneiforme2->Set(stream->ReadLine())) return false;
-	if(!Cuneiforme3->Set(stream->ReadLine())) return false;
-	if(!Metatarsalis1->Set(stream->ReadLine())) return false;
-	if(!Metatarsalis2->Set(stream->ReadLine())) return false;
-	if(!Metatarsalis3->Set(stream->ReadLine())) return false;
-	if(!Metatarsalis4->Set(stream->ReadLine())) return false;
-	if(!Metatarsalis5->Set(stream->ReadLine())) return false;
-	if(!PhalanxI1->Set(stream->ReadLine())) return false;
-	if(!PhalanxI2->Set(stream->ReadLine())) return false;
-	if(!PhalanxI3->Set(stream->ReadLine())) return false;
-	if(!PhalanxI4->Set(stream->ReadLine())) return false;
-	if(!PhalanxI5->Set(stream->ReadLine())) return false;
-	if(!PhalanxII1->Set(stream->ReadLine())) return false;
-	if(!PhalanxII2->Set(stream->ReadLine())) return false;
-	if(!PhalanxII3->Set(stream->ReadLine())) return false;
-	if(!PhalanxII4->Set(stream->ReadLine())) return false;
-	if(!PhalanxII5->Set(stream->ReadLine())) return false;
-	if(!PhalanxIII1->Set(stream->ReadLine())) return false;
-	if(!PhalanxIII2->Set(stream->ReadLine())) return false;
-	if(!PhalanxIII3->Set(stream->ReadLine())) return false;
-	if(!PhalanxIII4->Set(stream->ReadLine())) return false;
+	VisitorBoneToGrid togrid(gridLength, gridDiameter, gridSkin);
+	Tibia->Accept(togrid);
+}
 
-	return true;
+void Foot::GetFromGrid(wxGrid* gridLength, wxGrid* gridDiameter,
+		wxGrid* gridSkin)
+{
+	VisitorBoneFromGrid togrid(gridLength, gridDiameter, gridSkin);
+	Tibia->Accept(togrid);
+}
+
+unsigned int Foot::GetBoneCount(void) const
+{
+	return NBones;
 }
 
 void Foot::InitBones(void)
@@ -440,3 +430,39 @@ void Foot::InitBones(void)
 	PhalanxIII4->s1 = 0.01;
 	PhalanxIII4->s2 = 0.01;
 }
+
+bool Foot::LoadModel(wxTextInputStream* stream)
+{
+	if(!Tibia->Set(stream->ReadLine())) return false;
+	if(!Fibula->Set(stream->ReadLine())) return false;
+	if(!Talus->Set(stream->ReadLine())) return false;
+	if(!Talus2->Set(stream->ReadLine())) return false;
+	if(!Calcaneus->Set(stream->ReadLine())) return false;
+	if(!Cuboideum->Set(stream->ReadLine())) return false;
+	if(!Naviculare->Set(stream->ReadLine())) return false;
+	if(!Cuneiforme1->Set(stream->ReadLine())) return false;
+	if(!Cuneiforme2->Set(stream->ReadLine())) return false;
+	if(!Cuneiforme3->Set(stream->ReadLine())) return false;
+	if(!Metatarsalis1->Set(stream->ReadLine())) return false;
+	if(!Metatarsalis2->Set(stream->ReadLine())) return false;
+	if(!Metatarsalis3->Set(stream->ReadLine())) return false;
+	if(!Metatarsalis4->Set(stream->ReadLine())) return false;
+	if(!Metatarsalis5->Set(stream->ReadLine())) return false;
+	if(!PhalanxI1->Set(stream->ReadLine())) return false;
+	if(!PhalanxI2->Set(stream->ReadLine())) return false;
+	if(!PhalanxI3->Set(stream->ReadLine())) return false;
+	if(!PhalanxI4->Set(stream->ReadLine())) return false;
+	if(!PhalanxI5->Set(stream->ReadLine())) return false;
+	if(!PhalanxII1->Set(stream->ReadLine())) return false;
+	if(!PhalanxII2->Set(stream->ReadLine())) return false;
+	if(!PhalanxII3->Set(stream->ReadLine())) return false;
+	if(!PhalanxII4->Set(stream->ReadLine())) return false;
+	if(!PhalanxII5->Set(stream->ReadLine())) return false;
+	if(!PhalanxIII1->Set(stream->ReadLine())) return false;
+	if(!PhalanxIII2->Set(stream->ReadLine())) return false;
+	if(!PhalanxIII3->Set(stream->ReadLine())) return false;
+	if(!PhalanxIII4->Set(stream->ReadLine())) return false;
+
+	return true;
+}
+

@@ -32,14 +32,18 @@
  */
 
 #include "gui.h"
+#include "../project/Shoe.h"
 
 class FrameWalkcycleSupport:public GUIFrameWalkcycleSupport {
 public:
-	FrameWalkcycleSupport(wxWindow* parent);
+	FrameWalkcycleSupport(wxWindow* parent, Shoe* shoe);
 	virtual ~FrameWalkcycleSupport();
 
-	virtual void OnClose(wxCloseEvent& event);
+	virtual void OnCloseX(wxCloseEvent& event);
+	virtual void OnToggleAnkleLock(wxCommandEvent& event);
+	virtual void OnChoiceDisplay(wxCommandEvent& event);
 
+	Shoe* shoe;
 };
 
 #endif /* FRAMEWALKCYCLESUPPORT_H_ */

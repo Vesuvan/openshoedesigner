@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameWalkcycleSupport.cpp
-// Purpose            : GUI for setting up the walkcycle supports
+// Name               : Pattern.h
+// Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 29.10.2015
+// Created            : 09.11.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,30 +24,19 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "FrameWalkcycleSupport.h"
-#include "IDs.h"
+#ifndef PATTERN_H_
+#define PATTERN_H_
 
-FrameWalkcycleSupport::FrameWalkcycleSupport(wxWindow* parent, Shoe* shoe) :
-		GUIFrameWalkcycleSupport(parent)
-{
-this->shoe = shoe;
-}
+/*!\class Pattern
+ * \brief ...
+ *
+ * ...
+ */
 
-FrameWalkcycleSupport::~FrameWalkcycleSupport()
-{
-}
+class Pattern {
+public:
+	Pattern();
+	virtual ~Pattern();
+};
 
-void FrameWalkcycleSupport::OnCloseX(wxCloseEvent& event)
-{
-	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
-	ProcessEvent(selectEvent);
-}
-
-void FrameWalkcycleSupport::OnToggleAnkleLock(wxCommandEvent& event)
-{
-}
-
-void FrameWalkcycleSupport::OnChoiceDisplay(wxCommandEvent& event)
-{
-}
+#endif /* PATTERN_H_ */

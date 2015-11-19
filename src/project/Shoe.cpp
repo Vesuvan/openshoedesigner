@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameWalkcycleSupport.cpp
-// Purpose            : GUI for setting up the walkcycle supports
+// Name               : Shoe.cpp
+// Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 29.10.2015
+// Created            : 29.09.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,30 +24,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "FrameWalkcycleSupport.h"
-#include "IDs.h"
+#include "Shoe.h"
 
-FrameWalkcycleSupport::FrameWalkcycleSupport(wxWindow* parent, Shoe* shoe) :
-		GUIFrameWalkcycleSupport(parent)
+Shoe::Shoe()
 {
-this->shoe = shoe;
+	HeelHeight = _T("0 cm");
+	HeelAngle = _T("0 cm");
+	PlateauHeight = _T("0 deg");
+	ToeAngle = _T("0 deg");
 }
 
-FrameWalkcycleSupport::~FrameWalkcycleSupport()
-{
-}
-
-void FrameWalkcycleSupport::OnCloseX(wxCloseEvent& event)
-{
-	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
-	ProcessEvent(selectEvent);
-}
-
-void FrameWalkcycleSupport::OnToggleAnkleLock(wxCommandEvent& event)
+Shoe::~Shoe()
 {
 }
 
-void FrameWalkcycleSupport::OnChoiceDisplay(wxCommandEvent& event)
-{
-}

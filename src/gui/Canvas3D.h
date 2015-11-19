@@ -33,8 +33,8 @@
  * ...
  */
 
+#include "../project/Foot.h"
 #include "../3D/OpenGLCanvas.h"
-#include "../3D/Foot.h"
 #include "../3D/Volume.h"
 #include "../3D/Vector3.h"
 
@@ -54,7 +54,6 @@ public:
 	bool showUpper;
 	bool showCutaway;
 	bool showFloor;
-
 
 private:
 	Foot* bone;

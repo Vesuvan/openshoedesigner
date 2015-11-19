@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : DialogInitSettings.cpp
-// Purpose            : Dialog to initialize foot and last settings
-// Thread Safe        : No
+// Name               : CanvasStereoTest.h
+// Purpose            : Rotating cube for 3D-Tests
+// Thread Safe        : Yes
 // Platform dependent : No
-// Compiler Options   : -lm
-// Author             : toby
-// Created            : 01.11.2015
+// Compiler Options   :
+// Author             : Tobias Schaefer
+// Created            : 25.01.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -23,26 +23,32 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 ///////////////////////////////////////////////////////////////////////////////
-#include "DialogInitSettings.h"
 
-DialogInitSettings::DialogInitSettings(wxWindow* parent) :
-		GUIDialogInitSettings(parent)
-{
-	
-}
+#ifndef CANVASSTEREOTEST_H_
+#define CANVASSTEREOTEST_H_
 
-DialogInitSettings::~DialogInitSettings()
-{
+/*!\class CanvasStereoTest
+ * \brief Displays a rotating cube
+ *
+ * ...
+ */
 
-}
+#include "../3D/BooleanBox.h"
+#include "../3D/OpenGLCanvas.h"
 
-void DialogInitSettings::OnText(wxCommandEvent& event)
-{
-	wxString text = m_textCtrlShoeSize->GetValue();
-	parser.SetString(text);
+#include "../StdInclude.h"
 
-}
+class CanvasStereoTest:public OpenGLCanvas {
+public:
+	CanvasStereoTest(wxWindow *parent, wxWindowID id = wxID_ANY,
+			const wxPoint& pos = wxDefaultPosition, const wxSize& size =
+					wxDefaultSize, long style = 0,
+			const wxString& name = _T(""));
+	virtual ~CanvasStereoTest();
 
-void DialogInitSettings::OnChoice(wxCommandEvent& event)
-{
-}
+	BooleanBox box;
+
+	void Render();
+};
+
+#endif /* CANVASSTEREOTEST_H_ */

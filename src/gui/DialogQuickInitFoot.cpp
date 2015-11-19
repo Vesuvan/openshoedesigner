@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameWalkcycleSupport.cpp
-// Purpose            : GUI for setting up the walkcycle supports
-// Thread Safe        : Yes
+// Name               : DialogQuickInitFoot.cpp
+// Purpose            : Dialog to initialize foot and last settings
+// Thread Safe        : No
 // Platform dependent : No
-// Compiler Options   :
-// Author             : Tobias Schaefer
-// Created            : 29.10.2015
+// Compiler Options   : -lm
+// Author             : toby
+// Created            : 01.11.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,30 +24,26 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "FrameWalkcycleSupport.h"
-#include "IDs.h"
+#include "DialogQuickInitFoot.h"
 
-FrameWalkcycleSupport::FrameWalkcycleSupport(wxWindow* parent, Shoe* shoe) :
-		GUIFrameWalkcycleSupport(parent)
+DialogQuickInitFoot::DialogQuickInitFoot(wxWindow* parent) :
+		GUIDialogQuickInitFoot(parent)
 {
-this->shoe = shoe;
+	
 }
 
-FrameWalkcycleSupport::~FrameWalkcycleSupport()
+DialogQuickInitFoot::~DialogQuickInitFoot()
 {
+
 }
 
-void FrameWalkcycleSupport::OnCloseX(wxCloseEvent& event)
+void DialogQuickInitFoot::OnText(wxCommandEvent& event)
 {
-	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
-	ProcessEvent(selectEvent);
+	wxString text = m_textCtrlShoeSize->GetValue();
+	parser.SetString(text);
+
 }
 
-void FrameWalkcycleSupport::OnToggleAnkleLock(wxCommandEvent& event)
-{
-}
-
-void FrameWalkcycleSupport::OnChoiceDisplay(wxCommandEvent& event)
+void DialogQuickInitFoot::OnChoice(wxCommandEvent& event)
 {
 }

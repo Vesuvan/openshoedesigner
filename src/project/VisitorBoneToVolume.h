@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameWalkcycleSupport.cpp
-// Purpose            : GUI for setting up the walkcycle supports
+// Name               : VisitorBoneToVolume.h
+// Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 29.10.2015
+// Created            : 27.09.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,30 +24,28 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "FrameWalkcycleSupport.h"
-#include "IDs.h"
+#ifndef VISITORBONETOVOLUME_H_
+#define VISITORBONETOVOLUME_H_
 
-FrameWalkcycleSupport::FrameWalkcycleSupport(wxWindow* parent, Shoe* shoe) :
-		GUIFrameWalkcycleSupport(parent)
-{
-this->shoe = shoe;
-}
+/*!\class VisitorBoneToVolume
+ * \brief ...
+ *
+ * ...
+ */
 
-FrameWalkcycleSupport::~FrameWalkcycleSupport()
-{
-}
+#include "../3D/LinkageVisitor.h"
+#include "../3D/Volume.h"
+#include "Bone.h"
 
-void FrameWalkcycleSupport::OnCloseX(wxCloseEvent& event)
-{
-	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
-	ProcessEvent(selectEvent);
-}
+class VisitorBoneToVolume:public LinkageVisitor {
+public:
+	VisitorBoneToVolume(Volume * volume);
+	virtual ~VisitorBoneToVolume();
 
-void FrameWalkcycleSupport::OnToggleAnkleLock(wxCommandEvent& event)
-{
-}
+	void Visit(Bone &bone);
 
-void FrameWalkcycleSupport::OnChoiceDisplay(wxCommandEvent& event)
-{
-}
+private:
+	Volume * volume;
+};
+
+#endif /* VISITORBONETOVOLUME_H_ */

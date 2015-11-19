@@ -33,26 +33,66 @@
  * Stores the footbones and skin parameters.
  *
  * Upon calling Setup with a FootParameters object, the parameters of bones and skin are recalculated.
+ *
+ * Tibia
+ * Fibula
+ * Talus
+ * Talus2
+ * Calcaneus
+ * Cuboideum
+ * Naviculare
+ * Cuneiforme1
+ * Cuneiforme2
+ * Cuneiforme3
+ * Metatarsalis1
+ * Metatarsalis2
+ * Metatarsalis3
+ * Metatarsalis4
+ * Metatarsalis5
+ * PhalanxI1
+ * PhalanxI2
+ * PhalanxI3
+ * PhalanxI4
+ * PhalanxI5
+ * PhalanxII1
+ * PhalanxII2
+ * PhalanxII3
+ * PhalanxII4
+ * PhalanxII5
+ * PhalanxIII1
+ * PhalanxIII2
+ * PhalanxIII3
+ * PhalanxIII4
+ *
  */
 
 #include "Bone.h"
-#include "FootParameters.h"
-#include "Volume.h"
+
+#include "../3D/Volume.h"
+
 #include <wx/txtstrm.h>
+#include <wx/grid.h>
 
 class Foot {
+	friend class FrameFoot;
 public:
 	Foot();
 	virtual ~Foot();
 	void Render(void) const;
 
+	unsigned int GetBoneCount(void) const;
 	bool LoadModel(wxTextInputStream* stream);
 
-	void AddToVolume(Volume* vol);
+	void AddToGrid(wxGrid* gridLength, wxGrid* gridDiameter, wxGrid* gridSkin);
+	void GetFromGrid(wxGrid* gridLength, wxGrid* gridDiameter,
+			wxGrid* gridSkin);
 	void Setup(void);
+	void AddToVolume(Volume* vol);
 
 private:
 	void InitBones(void);
+
+	double L, W, H, A;
 
 private:
 	Bone* Tibia; /// Schienbein
@@ -84,6 +124,9 @@ private:
 	Bone* PhalanxIII2;
 	Bone* PhalanxIII3;
 	Bone* PhalanxIII4;
+
+private:
+	static const unsigned int NBones;
 };
 
 #endif /* FOOT_H_ */

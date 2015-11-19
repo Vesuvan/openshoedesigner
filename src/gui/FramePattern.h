@@ -35,13 +35,19 @@
 
 #include "gui.h"
 
+#include "../project/Pattern.h"
+
 class FramePattern:public GUIFramePattern {
 public:
-	FramePattern(wxWindow* parent);
+	FramePattern(wxWindow* parent, Pattern* pattern);
 	virtual ~FramePattern();
 
-	virtual void OnClose(wxCloseEvent& event);
+	virtual void OnCloseX(wxCloseEvent& event);
+	virtual void OnChoicePreset(wxCommandEvent& event);
+	virtual void OnChoiceStyle(wxCommandEvent& event);
+	virtual void OnScroll(wxScrollEvent& event);
 
+	Pattern* pattern;
 };
 
 #endif /* FRAMEPATTERN_H_ */

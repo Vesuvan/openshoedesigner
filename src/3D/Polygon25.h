@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FootParameters.h
-// Purpose            : 
+// Name               : Polygon3.h
+// Purpose            : Contains a 2.5D polygon.
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 29.09.2015
-// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 17.07.2011
+// Copyright          : (C) 2011 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,30 +24,37 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef FOOTPARAMETERS_H_
-#define FOOTPARAMETERS_H_
+#ifndef POLYGON25_H_
+#define POLYGON25_H_
 
-/*!\class FootParameters
- * \brief Parameters describing the shape of the last
- * Objects of this class keep a list of all the parameters describing
- * the bones. Furthermore the skin surrounding the bones is describes.
- * The third group of parameters describes the angles of the bones, thus
- * the position of the foot.
+/*!\class Polygon3
+ * \brief ...
  *
- * The foots position is not part of the dataset, but has to be kept here,
- * because the functions generating the last need these informations as
- * well.
+ * ...
  */
 
-class FootParameters {
+#include "Polygon3.h"
+#include <wx/dynarray.h>
+
+class Polygon25:public Polygon3 {
 public:
-	FootParameters();
-	virtual ~FootParameters();
+	Polygon25();
+	virtual ~Polygon25();
 
-	float angle_1X;
-	float angle_1Y;
-	float angle_2X;
-	float angle_3Y;
+	// Methods
+public:
+	double GetLengthXY(void) const;
+	void PolygonFillHoles(void);
+	void PolygonSmooth(void);
+	void PolygonExpand(double r);
+	void PolygonDiminish(double r);
+	bool IsElementInside(const Vector3 v);
+	double DistanceToElement(const size_t elementInPolygon, const double x,
+			const double y, const double vx, const double vy) const;
+	double DistanceToPolygon(const Polygon25 &polygon, double vx,
+			double vy) const;
+	void RotatePolygonStart(double x, double y);
 };
+WX_DECLARE_OBJARRAY(Polygon25, ArrayOfPolygon25);
 
-#endif /* FOOTPARAMETERS_H_ */
+#endif /* POLYGON25_H_ */

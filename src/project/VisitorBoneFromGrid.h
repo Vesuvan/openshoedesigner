@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameLastParameter.h
+// Name               : VisitorBoneFromGrid.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 04.10.2015
+// Created            : 19.11.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,27 +24,32 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef FRAMELASTPARAMETER_H_
-#define FRAMELASTPARAMETER_H_
+#ifndef VISITORBONEFROMGRID_H_
+#define VISITORBONEFROMGRID_H_
 
-/*!\class FrameLastParameter
- * \brief GUI for setting up a last
+/*!\class VisitorBoneFromGrid
+ * \brief ...
+ *
+ * ...
  */
+#include "../StdInclude.h"
+#include "Bone.h"
+#include <wx/grid.h>
 
-#include "gui.h"
-
-class FrameLastParameter:public GUIFrameLastParameter {
+class VisitorBoneFromGrid:public LinkageVisitor {
 public:
-	FrameLastParameter(wxWindow* parent, FootParameters * param);
-	virtual ~FrameLastParameter();
+	VisitorBoneFromGrid(wxGrid* gridLength, wxGrid* gridDiameter,
+			wxGrid* gridSkin);
+	virtual ~VisitorBoneFromGrid();
 
-	bool TransferDataToWindow();
-	virtual void OnClose(wxCloseEvent& event);
-	virtual void OnScroll(wxScrollEvent& event);
-	virtual void OnText(wxCommandEvent& event);
+	void Visit(Bone &bone);
 
 private:
-	FootParameters * param;
+	wxGrid* gridLength;
+	wxGrid* gridDiameter;
+	wxGrid* gridSkin;
+	unsigned int row;
+
 };
 
-#endif /* FRAMELASTPARAMETER_H_ */
+#endif /* VISITORBONEFROMGRID_H_ */

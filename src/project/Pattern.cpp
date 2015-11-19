@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : DialogInitSettings.h
-// Purpose            : Dialog to initialize foot and last settings
-// Thread Safe        : No
+// Name               : Pattern.cpp
+// Purpose            : 
+// Thread Safe        : Yes
 // Platform dependent : No
-// Compiler Options   : -lm
-// Author             : toby
-// Created            : 01.11.2015
+// Compiler Options   :
+// Author             : Tobias Schaefer
+// Created            : 09.11.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,26 +24,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef DIALOGINITSETTINGS_H_
-#define DIALOGINITSETTINGS_H_
+#include "Pattern.h"
 
-/*!\class DialogInitSettings
- * \brief Dialog to initialize foot and last settings
- *
- * Dialog asking for the shoesize to set up the basic foot and last parameter.
- */
+Pattern::Pattern()
+{
+	// TODO Auto-generated constructor stub
+	
+}
 
-#include "gui.h"
-#include "MathParser.h"
+Pattern::~Pattern()
+{
+	// TODO Auto-generated destructor stub
+}
 
-class DialogInitSettings:public GUIDialogInitSettings {
-public:
-	DialogInitSettings(wxWindow* parent);
-	virtual ~DialogInitSettings();
-
-	MathParser parser;
-	virtual void OnText(wxCommandEvent& event);
-	virtual void OnChoice(wxCommandEvent& event);
-};
-
-#endif /* DIALOGINITSETTINGS_H_ */

@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : BoneToVolume.cpp
-// Purpose            : 
+// Name               : FrameFoot.h
+// Purpose            : GUI for setting up the foots parameter
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 27.09.2015
+// Created            : 29.10.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,19 +24,31 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "BoneToVolume.h"
-#include <stdlib.h>
-BoneToVolume::BoneToVolume(Volume * volume)
-{
-	this->volume = volume;
-}
+#ifndef FRAMEFOOT_H_
+#define FRAMEFOOT_H_
 
-BoneToVolume::~BoneToVolume()
-{
-}
+/*!\class FrameFoot
+ * \brief GUI for setting up the foots parameter
+ */
 
-void BoneToVolume::Visit(Bone& bone)
-{
-	if(volume == NULL) return;
-	volume->AddCylinder(bone.p1, bone.p2, bone.r1, bone.r2, 0.010);
-}
+#include "gui.h"
+
+#include "../project/Foot.h"
+
+class FrameFoot:public GUIFrameFoot {
+public:
+	FrameFoot(wxWindow* parent, Foot* foot);
+	virtual ~FrameFoot();
+	virtual void OnClose(wxCommandEvent& event);
+	virtual void OnCloseX(wxCloseEvent& event);
+	virtual void OnText(wxCommandEvent& event);
+	virtual void OnCellChange(wxGridEvent& event);
+
+	bool TransferDataToWindow(void);
+	bool TransferDataFromWindow(void);
+
+private:
+	Foot* foot;
+};
+
+#endif /* FRAMEFOOT_H_ */

@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : BoneSetup.cpp
+// Name               : VisitorBoneFromGrid.cpp
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 03.10.2015
+// Created            : 19.11.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,33 +24,39 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "BoneSetup.h"
+#include "VisitorBoneFromGrid.h"
 
-BoneSetup::BoneSetup()
+VisitorBoneFromGrid::VisitorBoneFromGrid(wxGrid* gridLength,
+		wxGrid* gridDiameter, wxGrid* gridSkin)
+{
+	this->gridLength = gridLength;
+	this->gridDiameter = gridDiameter;
+	this->gridSkin = gridSkin;
+	row = 0;
+
+}
+
+VisitorBoneFromGrid::~VisitorBoneFromGrid()
 {
 }
 
-BoneSetup::~BoneSetup()
+void VisitorBoneFromGrid::Visit(Bone& bone)
 {
-}
-
-void BoneSetup::Visit(Bone& bone)
-{
-	bone.anchorN.x = parser.GetNumber(bone.anchorNx);
-	bone.anchorN.y = parser.GetNumber(bone.anchorNy);
-	bone.anchorN.z = parser.GetNumber(bone.anchorNz);
-	bone.link.x = parser.GetNumber(bone.linkx);
-	bone.link.y = parser.GetNumber(bone.linky);
-	bone.link.z = parser.GetNumber(bone.linkz);
-	bone.normal.x = parser.GetNumber(bone.normalx);
-	bone.normal.y = parser.GetNumber(bone.normaly);
-	bone.normal.z = parser.GetNumber(bone.normalz);
-	bone.anchorD = parser.GetNumber(bone.anchorDv);
-	bone.length = parser.GetNumber(bone.lengthv);
-	bone.r1 = parser.GetNumber(bone.r1v);
-	bone.r2 = parser.GetNumber(bone.r2v);
-	bone.s1 = parser.GetNumber(bone.s1v);
-	bone.s2 = parser.GetNumber(bone.s2v);
-
-	bone.Setup();
+	if(gridLength != NULL){
+		wxString temp = gridLength->GetCellValue(row, 0);
+		bone.lengthv = temp.Trim(false).Trim(true);
+	}
+	if(gridDiameter != NULL){
+		wxString temp = gridDiameter->GetCellValue(row, 0);
+		bone.r1v = temp.Trim(false).Trim(true);
+		temp = gridDiameter->GetCellValue(row, 2);
+		bone.r2v = temp.Trim(false).Trim(true);
+	}
+	if(gridSkin != NULL){
+		wxString temp = gridSkin->GetCellValue(row, 0);
+		bone.s1v = temp.Trim(false).Trim(true);
+		temp = gridSkin->GetCellValue(row, 2);
+		bone.s2v = temp.Trim(false).Trim(true);
+	}
+	row++;
 }

@@ -28,15 +28,19 @@
 
 #include "IDs.h"
 #include "../3D/FileSTL.h"
-#include "DialogInitSettings.h"
+#include "DialogQuickInitFoot.h"
 //#include <wx/file.h>
 #include <wx/filedlg.h>
 #include <wx/wfstream.h>
 #include <wx/filename.h>
 
-FrameMain::FrameMain(wxWindow* parent) :
+FrameMain::FrameMain(wxWindow* parent, wxLocale* locale, wxConfig* config) :
 		GUIFrameMain(parent)
 {
+	this->config = config;
+	this->locale = locale;
+	settings.GetConfigFrom(config);
+
 	volume.SetSize(0.40, 0.3, 0.4, 0.0075);
 	volume.matrix.TranslateGlobal(-0.1, -0.15, -0.3);
 
@@ -60,29 +64,30 @@ FrameMain::FrameMain(wxWindow* parent) :
 	volume.MarchingCubes(0.5);
 
 //		m_canvas->stereoMode = stereoAnaglyph;
-	m_canvas->eyeDistance = 0.005;
-	m_canvas->leftEyeR = 0;
-	m_canvas->leftEyeG = 109;
-	m_canvas->leftEyeB = 0;
-	m_canvas->rightEyeR = 106;
-	m_canvas->rightEyeG = 0;
-	m_canvas->rightEyeB = 0;
+	settings.WriteToCanvas(m_canvas);
 
 	thread = NULL;
 
-	dialogLastParameter = new FrameLastParameter(this, &setup);
-	dialogFootParameter = new FrameFootParameter(this);
-	dialogWalkcycleSupport = new FrameWalkcycleSupport(this);
-	dialogPattern = new FramePattern(this);
+	dialogShoe = new FrameShoe(this, &shoe);
+	dialogFoot = new FrameFoot(this, &foot);
+	dialogWalkcycleSupport = new FrameWalkcycleSupport(this, &shoe);
+	dialogPattern = new FramePattern(this, &pattern);
+	dialogSetupStereo3D = new DialogSetupStereo3D(this, &settings);
+	dialogDebugParser = new FrameDebugParser(this);
 
 	TransferDataToWindow();
-
-	this->Connect(ID_UPDATELAST, wxEVT_COMMAND_MENU_SELECTED,
+	this->Connect(ID_REFRESH, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::RefreshMain));
+	this->Connect(ID_UPDATE3DVIEW, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::Update3DView));
-	this->Connect(ID_THREADLASTDONE, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::Repaint));
 	this->Connect(ID_UPDATEGUI, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::UpdateGUI));
+	this->Connect(ID_REFRESHPROJECT, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::RefreshProject));
+	this->Connect(ID_CALCULATELAST, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::CalculateLast));
+	this->Connect(ID_THREADLASTDONE, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::LastCalculationDone));
 }
 
 FrameMain::~FrameMain()
@@ -91,21 +96,30 @@ FrameMain::~FrameMain()
 		thread->Wait();
 		delete thread;
 	}
+	this->Disconnect(ID_THREADLASTDONE, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::LastCalculationDone));
+	this->Disconnect(ID_CALCULATELAST, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::CalculateLast));
+	this->Disconnect(ID_REFRESHPROJECT, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::RefreshProject));
 	this->Disconnect(ID_UPDATEGUI, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::UpdateGUI));
-	this->Disconnect(ID_THREADLASTDONE, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::Repaint));
-	this->Disconnect(ID_UPDATELAST, wxEVT_COMMAND_MENU_SELECTED,
+	this->Disconnect(ID_UPDATE3DVIEW, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::Update3DView));
+	this->Disconnect(ID_REFRESH, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::RefreshMain));
+
+	settings.WriteConfigTo(config);
+	delete config; // config is written back on deletion of object
 }
 
 bool FrameMain::TransferDataToWindow()
 {
-	m_toolBar->ToggleTool(ID_TOOLSETUPLAST, dialogLastParameter->IsShown());
-	m_toolBar->ToggleTool(ID_TOOLSETUPFOOT, dialogFootParameter->IsShown());
+	m_toolBar->ToggleTool(ID_TOOLSETUPFOOT, dialogFoot->IsShown());
+	m_toolBar->ToggleTool(ID_TOOLSETUPSHOE, dialogShoe->IsShown());
 
-	m_menuFoot->Check(ID_SETUPFOOT, dialogFootParameter->IsShown());
-	m_menuShoe->Check(ID_SETUPLAST, dialogLastParameter->IsShown());
+	m_menuFoot->Check(ID_SETUPFOOT, dialogFoot->IsShown());
+	m_menuShoe->Check(ID_SETUPSHOE, dialogShoe->IsShown());
 	m_menuShoe->Check(ID_EDITPATTERN, dialogPattern->IsShown());
 	m_menuShoe->Check(ID_EDITWALKCYCLE, dialogWalkcycleSupport->IsShown());
 
@@ -135,7 +149,46 @@ bool FrameMain::TransferDataFromWindow()
 	return true;
 }
 
-void FrameMain::Repaint(wxCommandEvent& event)
+void FrameMain::RefreshMain(wxCommandEvent& event)
+{
+	Refresh();
+}
+
+void FrameMain::UpdateGUI(wxCommandEvent& event)
+{
+	TransferDataToWindow();
+}
+
+void FrameMain::Update3DView(wxCommandEvent& event)
+{
+	foot.Setup();
+
+	settings.WriteToCanvas(m_canvas);
+	m_canvas->Refresh();
+
+	Refresh();
+}
+
+void FrameMain::RefreshProject(wxCommandEvent& event)
+{
+	//dialogFoot->TransferDataToWindow();
+	dialogShoe->TransferDataToWindow();
+//	dialogPattern->TransferDataToWindow();
+//	dialogWalkcycleSupport->TransferDataToWindow();
+
+	this->Refresh(); // FIXME: Recursive refresh not work with GTK1. Call Refresh on every child-dialog by hand.
+}
+
+void FrameMain::CalculateLast(wxCommandEvent& event)
+{
+	if(thread == NULL){
+		thread = new LastGenerationThread(this, &foot, &volume);
+		thread->Create();
+		thread->Run();
+	}
+}
+
+void FrameMain::LastCalculationDone(wxCommandEvent& event)
 {
 	if(thread != NULL){
 		thread->Wait();
@@ -148,33 +201,32 @@ void FrameMain::Repaint(wxCommandEvent& event)
 void FrameMain::OnToolClicked(wxCommandEvent& event)
 {
 	if(m_toolBar->GetToolState(ID_TOOLSETUPFOOT)){
-		dialogFootParameter->Show();
+		dialogFoot->Show();
 	}else{
-		dialogFootParameter->Hide();
+		dialogFoot->Hide();
 	}
-	if(m_toolBar->GetToolState(ID_TOOLSETUPLAST)){
-		dialogLastParameter->Show();
+	if(m_toolBar->GetToolState(ID_TOOLSETUPSHOE)){
+		dialogShoe->Show();
 	}else{
-		dialogLastParameter->Hide();
+		dialogShoe->Hide();
 	}
 	TransferDataToWindow();
 }
 
-void FrameMain::Update3DView(wxCommandEvent& event)
+void FrameMain::OnLoadFootModel(wxCommandEvent& event)
 {
-	foot.Setup();
-
-	if(thread == NULL){
-		thread = new LastGenerationThread(this, &foot, &volume);
-		thread->Create();
-		thread->Run();
-	}
-
-	Refresh();
 }
-void FrameMain::UpdateGUI(wxCommandEvent& event)
+
+void FrameMain::OnSaveFootModel(wxCommandEvent& event)
 {
-	TransferDataToWindow();
+}
+
+void FrameMain::OnLoadShoe(wxCommandEvent& event)
+{
+}
+
+void FrameMain::OnSaveShoe(wxCommandEvent& event)
+{
 }
 
 void FrameMain::OnQuit(wxCommandEvent& event)
@@ -182,54 +234,37 @@ void FrameMain::OnQuit(wxCommandEvent& event)
 	Close();
 }
 
-void FrameMain::OnInitializeFoot(wxCommandEvent& event)
+void FrameMain::OnInitializeFootModel(wxCommandEvent& event)
 {
-	DialogInitSettings dialog(this);
+	DialogQuickInitFoot dialog(this);
 	dialog.ShowModal();
 }
 
 void FrameMain::OnSetupFoot(wxCommandEvent& event)
 {
-
-	if(dialogFootParameter->IsShown()){
-		dialogFootParameter->Hide();
-	}else{
-		dialogFootParameter->Show();
-	}
-
+	dialogFoot->Show();
+	dialogFoot->Raise();
 	TransferDataToWindow();
 }
 
-void FrameMain::OnSetupLast(wxCommandEvent& event)
+void FrameMain::OnSetupShoe(wxCommandEvent& event)
 {
-
-	if(dialogLastParameter->IsShown()){
-		dialogLastParameter->Hide();
-	}else{
-		dialogLastParameter->Show();
-	}
-
+	dialogShoe->Show();
+	dialogShoe->Raise();
 	TransferDataToWindow();
 }
 
 void FrameMain::OnEditPattern(wxCommandEvent& event)
 {
-	if(dialogPattern->IsShown()){
-		dialogPattern->Hide();
-	}else{
-		dialogPattern->Show();
-	}
+	dialogPattern->Show();
+	dialogPattern->Raise();
 	TransferDataToWindow();
 }
 
 void FrameMain::OnEditWalkCycle(wxCommandEvent& event)
 {
-	if(dialogWalkcycleSupport->IsShown()){
-		dialogWalkcycleSupport->Hide();
-	}else{
-		dialogWalkcycleSupport->Show();
-	}
-
+	dialogWalkcycleSupport->Show();
+	dialogWalkcycleSupport->Raise();
 	TransferDataToWindow();
 }
 
@@ -283,6 +318,8 @@ void FrameMain::OnViewChange(wxCommandEvent& event)
 
 void FrameMain::OnSetupStereo3D(wxCommandEvent& event)
 {
+	dialogSetupStereo3D->Show();
+	dialogSetupStereo3D->Raise();
 }
 
 void FrameMain::OnSetupUnits(wxCommandEvent& event)
@@ -292,3 +329,13 @@ void FrameMain::OnSetupUnits(wxCommandEvent& event)
 void FrameMain::OnAbout(wxCommandEvent& event)
 {
 }
+
+void FrameMain::OnSelectLanguage(wxCommandEvent& event)
+{
+}
+
+void FrameMain::OnDebug(wxCommandEvent& event)
+{
+	dialogDebugParser->Show();
+}
+

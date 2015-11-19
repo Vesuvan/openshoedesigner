@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameFootParameter.cpp
-// Purpose            : GUI for setting up the foots parameter
+// Name               : FrameDebugParser.h
+// Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 29.10.2015
+// Created            : 16.11.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,35 +24,28 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "FrameFootParameter.h"
-#include "IDs.h"
+#ifndef FRAMEDEBUGPARSER_H_
+#define FRAMEDEBUGPARSER_H_
 
-FrameFootParameter::FrameFootParameter(wxWindow* parent) :
-		GUIFrameFootParameter(parent)
-{
-	// TODO Auto-generated constructor stub
-	
-}
+/*!\class FrameDebugParser
+ * \brief ...
+ *
+ * ...
+ */
 
-FrameFootParameter::~FrameFootParameter()
-{
-	// TODO Auto-generated destructor stub
-}
+#include "gui.h"
+#include "MathParser.h"
 
-void FrameFootParameter::OnCloseX(wxCloseEvent& event)
-{
-	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
-	ProcessEvent(selectEvent);
-}
+class FrameDebugParser:public GUIFrameDebugParser {
+public:
+	FrameDebugParser(wxWindow* parent);
+	virtual ~FrameDebugParser();
+	virtual void OnCloseX(wxCloseEvent& event);
+	virtual void OnText(wxCommandEvent& event);
 
-void FrameFootParameter::OnClose(wxCommandEvent& event)
-{
-	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
-	ProcessEvent(selectEvent);
-}
 
-void FrameFootParameter::OnCalculate(wxCommandEvent& event)
-{
-}
+	MathParser parser;
+
+};
+
+#endif /* FRAMEDEBUGPARSER_H_ */

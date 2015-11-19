@@ -33,30 +33,47 @@
  * ...
  */
 
-#include "FrameLastParameter.h"
-#include "FrameFootParameter.h"
+#include "gui.h"
+
+#include "FrameFoot.h"
+#include "FrameShoe.h"
 #include "FrameWalkcycleSupport.h"
 #include "FramePattern.h"
+#include "DialogSetupStereo3D.h"
+#include "FrameDebugParser.h"
+#include "DisplaySettings.h"
 
-#include "gui.h"
 #include "LastGenerationThread.h"
+#include "../project/Foot.h"
+#include "../project/Shoe.h"
+#include "../project/Pattern.h"
+
+#include <wx/intl.h>
+#include <wx/config.h>
 
 class FrameMain:public GUIFrameMain {
 public:
-	FrameMain(wxWindow* parent);
+	FrameMain(wxWindow* parent, wxLocale* locale, wxConfig* config);
 	virtual ~FrameMain();
 
 	bool TransferDataToWindow();
 	bool TransferDataFromWindow();
 
-	void Update3DView(wxCommandEvent& event);
+	void RefreshMain(wxCommandEvent& event);
 	void UpdateGUI(wxCommandEvent& event);
-	void Repaint(wxCommandEvent& event);
+	void Update3DView(wxCommandEvent& event);
+	void RefreshProject(wxCommandEvent& event);
+	void CalculateLast(wxCommandEvent& event);
+	void LastCalculationDone(wxCommandEvent& event);
 
+	virtual void OnLoadFootModel(wxCommandEvent& event);
+	virtual void OnSaveFootModel(wxCommandEvent& event);
+	virtual void OnLoadShoe(wxCommandEvent& event);
+	virtual void OnSaveShoe(wxCommandEvent& event);
 	virtual void OnQuit(wxCommandEvent& event);
-	virtual void OnInitializeFoot(wxCommandEvent& event);
+	virtual void OnInitializeFootModel(wxCommandEvent& event);
 	virtual void OnSetupFoot(wxCommandEvent& event);
-	virtual void OnSetupLast(wxCommandEvent& event);
+	virtual void OnSetupShoe(wxCommandEvent& event);
 	virtual void OnEditPattern(wxCommandEvent& event);
 	virtual void OnEditWalkCycle(wxCommandEvent& event);
 	virtual void OnSaveLast(wxCommandEvent& event);
@@ -69,18 +86,27 @@ public:
 	virtual void OnSetupStereo3D(wxCommandEvent& event);
 	virtual void OnSetupUnits(wxCommandEvent& event);
 	virtual void OnAbout(wxCommandEvent& event);
+	virtual void OnSelectLanguage(wxCommandEvent& event);
+	virtual void OnDebug(wxCommandEvent& event);
 	virtual void OnToolClicked(wxCommandEvent& event);
 
-	FrameLastParameter* dialogLastParameter;
-	FrameFootParameter* dialogFootParameter;
+	wxConfig *config;
+	wxLocale *locale;
+	DisplaySettings settings;
+
+	FrameShoe* dialogShoe;
+	FrameFoot* dialogFoot;
 	FrameWalkcycleSupport* dialogWalkcycleSupport;
 	FramePattern* dialogPattern;
-
+	DialogSetupStereo3D* dialogSetupStereo3D;
+	FrameDebugParser* dialogDebugParser;
 	LastGenerationThread* thread;
-	FootParameters setup;
 
 private:
 	Foot foot;
+	Shoe shoe;
+	Pattern pattern;
+
 	Volume volume;
 };
 

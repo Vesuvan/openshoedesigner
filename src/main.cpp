@@ -26,12 +26,49 @@
 
 #include "main.h"
 #include <cstdlib>
+#include "languages.h"
 
 IMPLEMENT_APP(LastGenerator)
 
 LastGenerator::LastGenerator()
 {
 	frame = NULL;
+	config = new wxConfig(_T("LastGenerator"));
+
+	unsigned int selectedLanguage = wxLocale::GetSystemLanguage();
+	if(selectedLanguage == wxLANGUAGE_UNKNOWN) selectedLanguage =
+			wxLANGUAGE_DEFAULT;
+
+	// Read language from config.
+	wxString str;
+	if(config->Read(_T("Language"), &str)){
+		unsigned int i;
+		for(i = 0; i < WXSIZEOF(langNames); i++)
+			if(str.CmpNoCase(langNames[i]) == 0){
+				selectedLanguage = langIds[i];
+			}
+	}
+
+	//CHECK: Why does wxLOCALE_CONV_ENCODING not work?
+	if(!locale.Init(selectedLanguage, wxLOCALE_LOAD_DEFAULT)){
+		wxLogError(_T("This language is not supported by the system."));
+		return;
+	}
+
+	//	wxLogMessage(wxString::Format(_T("id language : %u " ), selectedLanguage));
+	//	wxLogMessage(wxString::Format(_T("id language : %u " ),
+	//			locale.GetLanguage()));
+	//	wxLogMessage(_T("name language :") + locale.GetCanonicalName());
+
+	locale.AddCatalogLookupPathPrefix(_T("i18n"));
+	bool catalogLoaded = locale.AddCatalog(_T("LastGenerator"));
+	if(!catalogLoaded){
+		wxString temp;
+		temp =
+		_T("The translation catalog for ") + locale.GetCanonicalName() +
+		_T(" was not loaded !");
+		wxLogError(temp);
+	}
 }
 
 LastGenerator::~LastGenerator()
@@ -40,7 +77,9 @@ LastGenerator::~LastGenerator()
 
 bool LastGenerator::OnInit()
 {
-	frame = new FrameMain(NULL);
-	frame->Show();
+	if(!wxApp::OnInit()) return false;
+	frame = new FrameMain(NULL, &locale, config);
+	frame->Show(true);
+	SetTopWindow(frame);
 	return true;
 }

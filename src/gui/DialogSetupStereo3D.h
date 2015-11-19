@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameWalkcycleSupport.cpp
-// Purpose            : GUI for setting up the walkcycle supports
+// Name               : DialogSetupStereo3D.h
+// Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 29.10.2015
+// Created            : 25.01.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,30 +24,39 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "FrameWalkcycleSupport.h"
-#include "IDs.h"
+#ifndef DIALOGSETUPSTEREO3D_H_
+#define DIALOGSETUPSTEREO3D_H_
 
-FrameWalkcycleSupport::FrameWalkcycleSupport(wxWindow* parent, Shoe* shoe) :
-		GUIFrameWalkcycleSupport(parent)
-{
-this->shoe = shoe;
-}
+/*!\class DialogSetupStereo3D
+ * \brief ...
+ *
+ * ...
+ */
 
-FrameWalkcycleSupport::~FrameWalkcycleSupport()
-{
-}
+#include "guiSetupStereo3D.h"
 
-void FrameWalkcycleSupport::OnCloseX(wxCloseEvent& event)
-{
-	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
-	ProcessEvent(selectEvent);
-}
+#include <wx/event.h>
 
-void FrameWalkcycleSupport::OnToggleAnkleLock(wxCommandEvent& event)
-{
-}
+class DisplaySettings;
 
-void FrameWalkcycleSupport::OnChoiceDisplay(wxCommandEvent& event)
-{
-}
+class DialogSetupStereo3D:public GUISetupStereo3D {
+public:
+	DialogSetupStereo3D(wxWindow* parent, DisplaySettings * settings);
+
+private:
+	DisplaySettings * settings;
+
+	// Methods
+public:
+	bool TransferDataToWindow(void);
+	bool TransferDataFromWindow(void);
+
+private:
+	void OnXClose(wxCloseEvent& event);
+	void OnScroll(wxScrollEvent& event);
+	void OnColorChanged(wxColourPickerEvent& event);
+	void OnSwap(wxCommandEvent& event);
+	void OnTextChange(wxCommandEvent& event);
+};
+
+#endif /* DIALOGSETUPSTEREO3D_H_ */

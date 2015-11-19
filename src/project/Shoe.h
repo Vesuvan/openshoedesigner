@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameWalkcycleSupport.cpp
-// Purpose            : GUI for setting up the walkcycle supports
+// Name               : Shoe.h
+// Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 29.10.2015
+// Created            : 29.09.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,30 +24,32 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "FrameWalkcycleSupport.h"
-#include "IDs.h"
+#ifndef SHOE_H_
+#define SHOE_H_
 
-FrameWalkcycleSupport::FrameWalkcycleSupport(wxWindow* parent, Shoe* shoe) :
-		GUIFrameWalkcycleSupport(parent)
-{
-this->shoe = shoe;
-}
+/*!\class Shoe
+ * \brief Parameters describing the shape of the last
+ * Objects of this class keep a list of all the parameters describing
+ * the bones. Furthermore the skin surrounding the bones is describes.
+ * The third group of parameters describes the angles of the bones, thus
+ * the position of the foot.
+ *
+ * The foots position is not part of the dataset, but has to be kept here,
+ * because the functions generating the last need these informations as
+ * well.
+ */
 
-FrameWalkcycleSupport::~FrameWalkcycleSupport()
-{
-}
+#include <wx/string.h>
 
-void FrameWalkcycleSupport::OnCloseX(wxCloseEvent& event)
-{
-	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
-	ProcessEvent(selectEvent);
-}
+class Shoe {
+public:
+	Shoe();
+	virtual ~Shoe();
 
-void FrameWalkcycleSupport::OnToggleAnkleLock(wxCommandEvent& event)
-{
-}
+	wxString HeelHeight;
+	wxString HeelAngle;
+	wxString PlateauHeight;
+	wxString ToeAngle;
+};
 
-void FrameWalkcycleSupport::OnChoiceDisplay(wxCommandEvent& event)
-{
-}
+#endif /* SHOE_H_ */

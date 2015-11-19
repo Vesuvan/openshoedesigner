@@ -31,11 +31,21 @@
  * \brief List of command IDs
  * This headerfile contains a list of command IDs. These are used to communicate
  * from the child windows to the main window.
+ *
+ * On the difference between Update and Refresh:
+ *
+ *   Refresh: It would be nice, if we do a repaint next time we are in the idle loop. All calculations are already done.
+ *
+ *   Update: Do some processing, use new information to recalculate something. (Perhaps do a Refresh afterwards.)
+ *
  */
 
-#define ID_UPDATELAST			(wxID_HIGHEST+1)
-#define ID_UPDATE3DVIEW			(wxID_HIGHEST+2)
-#define ID_UPDATEGUI			(wxID_HIGHEST+3)
-#define ID_THREADLASTDONE		(wxID_HIGHEST+4)
+#define ID_REFRESH				(wxID_HIGHEST+1)
+#define ID_UPDATEGUI			(wxID_HIGHEST+2)
+#define ID_UPDATE3DVIEW			(wxID_HIGHEST+3)
+#define ID_REFRESHPROJECT		(wxID_HIGHEST+4)
+
+#define ID_CALCULATELAST		(wxID_HIGHEST+10)
+#define ID_THREADLASTDONE		(wxID_HIGHEST+11)
 
 #endif /* IDS_H_ */

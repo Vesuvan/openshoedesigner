@@ -52,8 +52,8 @@
  *
  */
 
-#include "LinkageVisitor.h"
-#include "Linkage.h"
+#include "../3D/LinkageVisitor.h"
+#include "../3D/Linkage.h"
 #include <wx/string.h>
 
 class Bone:public Linkage {

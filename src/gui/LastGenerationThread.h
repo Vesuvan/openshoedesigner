@@ -27,10 +27,10 @@
 #ifndef LASTGENERATIONTHREAD_H_
 #define LASTGENERATIONTHREAD_H_
 
+#include "../project/Foot.h"
+#include "../3D/Volume.h"
 #include <wx/thread.h>
 #include <wx/frame.h>
-#include "../3D/Foot.h"
-#include "../3D/Volume.h"
 
 /*!\class LastGenerationThread
  * \brief ...

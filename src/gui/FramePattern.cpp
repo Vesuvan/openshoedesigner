@@ -27,20 +27,31 @@
 
 #include "IDs.h"
 
-FramePattern::FramePattern(wxWindow* parent) :
+FramePattern::FramePattern(wxWindow* parent, Pattern* pattern) :
 		GUIFramePattern(parent)
 {
-	
+	this->pattern = pattern;
 }
 
 FramePattern::~FramePattern()
 {
-	// TODO Auto-generated destructor stub
 }
 
-void FramePattern::OnClose(wxCloseEvent& event)
+void FramePattern::OnCloseX(wxCloseEvent& event)
 {
 	this->Hide();
 	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
 	ProcessEvent(selectEvent);
+}
+
+void FramePattern::OnChoicePreset(wxCommandEvent& event)
+{
+}
+
+void FramePattern::OnChoiceStyle(wxCommandEvent& event)
+{
+}
+
+void FramePattern::OnScroll(wxScrollEvent& event)
+{
 }

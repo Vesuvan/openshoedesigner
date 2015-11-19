@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FootParameters.cpp
+// Name               : VisitorBoneToGrid.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 29.09.2015
+// Created            : 19.11.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,17 +24,32 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "FootParameters.h"
+#ifndef VISITORBONETOGRID_H_
+#define VISITORBONETOGRID_H_
 
-FootParameters::FootParameters()
-{
-	angle_1X = 0.0;
-	angle_1Y = 0.0;
-	angle_2X = 0.0;
-	angle_3Y = 0.0;
-}
+/*!\class VisitorBoneToGrid
+ * \brief ...
+ *
+ * ...
+ */
 
-FootParameters::~FootParameters()
-{
-}
+#include "../StdInclude.h"
+#include "Bone.h"
+#include <wx/grid.h>
 
+
+class VisitorBoneToGrid:public LinkageVisitor {
+public:
+	VisitorBoneToGrid(wxGrid* gridLength, wxGrid* gridDiameter,wxGrid* gridSkin );
+	virtual ~VisitorBoneToGrid();
+
+	void Visit(Bone &bone);
+
+private:
+	wxGrid* gridLength;
+	wxGrid* gridDiameter;
+	wxGrid* gridSkin;
+	unsigned int row;
+};
+
+#endif /* VISITORBONETOGRID_H_ */

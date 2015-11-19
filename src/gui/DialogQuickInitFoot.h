@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameFootParameter.h
-// Purpose            : GUI for setting up the foots parameter
-// Thread Safe        : Yes
+// Name               : DialogQuickInitFoot.h
+// Purpose            : Dialog to initialize foot and last settings
+// Thread Safe        : No
 // Platform dependent : No
-// Compiler Options   :
-// Author             : Tobias Schaefer
-// Created            : 29.10.2015
+// Compiler Options   : -lm
+// Author             : toby
+// Created            : 01.11.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,22 +24,26 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef FRAMEFOOTPARAMETER_H_
-#define FRAMEFOOTPARAMETER_H_
+#ifndef DIALOGQUICKINITFOOT_H_
+#define DIALOGQUICKINITFOOT_H_
 
-/*!\class FrameFootParameter
- * \brief GUI for setting up the foots parameter
+/*!\class DialogQuickInitFoot
+ * \brief Dialog to initialize foot and last settings
+ *
+ * Dialog asking for the shoesize to set up the basic foot and last parameter.
  */
 
 #include "gui.h"
+#include "MathParser.h"
 
-class FrameFootParameter:public GUIFrameFootParameter {
+class DialogQuickInitFoot:public GUIDialogQuickInitFoot {
 public:
-	FrameFootParameter(wxWindow* parent);
-	virtual ~FrameFootParameter();
-	virtual void OnClose(wxCommandEvent& event);
-	virtual void OnCloseX(wxCloseEvent& event);
-	virtual void OnCalculate(wxCommandEvent& event);
+	DialogQuickInitFoot(wxWindow* parent);
+	virtual ~DialogQuickInitFoot();
+
+	MathParser parser;
+	virtual void OnText(wxCommandEvent& event);
+	virtual void OnChoice(wxCommandEvent& event);
 };
 
-#endif /* FRAMEFOOTPARAMETER_H_ */
+#endif /* DIALOGQUICKINITFOOT_H_ */

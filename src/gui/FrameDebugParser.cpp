@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : BoneSetup.h
+// Name               : FrameDebugParser.cpp
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 03.10.2015
+// Created            : 16.11.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,27 +24,39 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef BONESETUP_H_
-#define BONESETUP_H_
-#include "LinkageVisitor.h"
-#include "Bone.h"
+#include "FrameDebugParser.h"
 
-/*!\class BoneSetup
- * \brief Setup all bones
- *
- * eValuate the formulas and set up the bones.
- */
+FrameDebugParser::FrameDebugParser(wxWindow* parent) :
+		GUIFrameDebugParser(parent)
+{
+	parser.AddAllowedUnit(_T("mm"), 1e-3);
+	parser.AddAllowedUnit(_T("cm"), 1e-2);
+	parser.AddAllowedUnit(_T("m"), 1);
+	parser.AddAllowedUnit(_T("in"), 2.54e-2);
+	parser.AddAllowedUnit(_T("ft"), 0.3048);
+}
 
-#include "../gui/MathParser.h"
+FrameDebugParser::~FrameDebugParser()
+{
+}
 
-class BoneSetup:public LinkageVisitor {
-public:
-	BoneSetup();
-	virtual ~BoneSetup();
+void FrameDebugParser::OnCloseX(wxCloseEvent& event)
+{
+	this->Hide();
+}
 
-	MathParser parser; ///< The mathparser stores the configuration.
-
-	void Visit(Bone &bone);
-};
-
-#endif /* BONESETUP_H_ */
+void FrameDebugParser::OnText(wxCommandEvent& event)
+{
+	wxString text;
+	text = m_textCtrlExpression->GetValue();
+	parser.SetString(text);
+	m_textCtrlError->SetValue(parser.GetError());
+	if(parser.HasError()){
+		m_textCtrlNumber->SetValue(_T(""));
+		m_textCtrlUnit->SetValue(_T(""));
+	}else{
+		m_textCtrlNumber->SetValue(
+				wxString::Format(_T("%g"), parser.GetNumber()));
+		m_textCtrlUnit->SetValue(parser.GetUnit());
+	}
+}

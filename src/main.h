@@ -30,6 +30,8 @@
 #include "gui/FrameMain.h"
 #include "StdInclude.h"
 #include <wx/app.h>
+#include <wx/intl.h>
+#include <wx/config.h>
 
 class FrameMain;
 
@@ -41,6 +43,10 @@ public:
 	// Member variables
 public:
 	FrameMain* frame;
+
+protected:
+	wxLocale locale;
+	wxConfig* config;
 
 	// Methods
 public:

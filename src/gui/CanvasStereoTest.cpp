@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameWalkcycleSupport.cpp
-// Purpose            : GUI for setting up the walkcycle supports
+// Name               : CanvasStereoTest.cpp
+// Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 29.10.2015
+// Created            : 25.01.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,30 +24,27 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "FrameWalkcycleSupport.h"
-#include "IDs.h"
+#include "CanvasStereoTest.h"
 
-FrameWalkcycleSupport::FrameWalkcycleSupport(wxWindow* parent, Shoe* shoe) :
-		GUIFrameWalkcycleSupport(parent)
+CanvasStereoTest::CanvasStereoTest(wxWindow* parent, wxWindowID id,
+		const wxPoint& pos, const wxSize& size, long style,
+		const wxString& name) :
+		OpenGLCanvas(parent, id, pos, size, style, name)
 {
-this->shoe = shoe;
+	box.SetSize(0.4, 0.4, 0.4);
+	box -= BooleanBox(0.1, 0.1, 0.0, 0.3, 0.3, 0.4);
+	box -= BooleanBox(0.0, 0.0, 0.0, 0.3, 0.3, 0.1);
 }
 
-FrameWalkcycleSupport::~FrameWalkcycleSupport()
-{
-}
-
-void FrameWalkcycleSupport::OnCloseX(wxCloseEvent& event)
-{
-	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
-	ProcessEvent(selectEvent);
-}
-
-void FrameWalkcycleSupport::OnToggleAnkleLock(wxCommandEvent& event)
+CanvasStereoTest::~CanvasStereoTest()
 {
 }
 
-void FrameWalkcycleSupport::OnChoiceDisplay(wxCommandEvent& event)
+void CanvasStereoTest::Render()
 {
+	::glPushMatrix();
+	::glColor3f(0.8, 0.8, 0.8);
+	::glTranslatef(-0.2, -0.2, -0.2);
+	box.Paint();
+	::glPopMatrix();
 }

@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameWalkcycleSupport.cpp
-// Purpose            : GUI for setting up the walkcycle supports
+// Name               : VisitorBoneToVolume.cpp
+// Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 29.10.2015
+// Created            : 27.09.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,30 +24,21 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "FrameWalkcycleSupport.h"
-#include "IDs.h"
-
-FrameWalkcycleSupport::FrameWalkcycleSupport(wxWindow* parent, Shoe* shoe) :
-		GUIFrameWalkcycleSupport(parent)
+#include "VisitorBoneToVolume.h"
+#include <stdlib.h>
+VisitorBoneToVolume::VisitorBoneToVolume(Volume * volume)
 {
-this->shoe = shoe;
+	this->volume = volume;
 }
 
-FrameWalkcycleSupport::~FrameWalkcycleSupport()
-{
-}
-
-void FrameWalkcycleSupport::OnCloseX(wxCloseEvent& event)
-{
-	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
-	ProcessEvent(selectEvent);
-}
-
-void FrameWalkcycleSupport::OnToggleAnkleLock(wxCommandEvent& event)
+VisitorBoneToVolume::~VisitorBoneToVolume()
 {
 }
 
-void FrameWalkcycleSupport::OnChoiceDisplay(wxCommandEvent& event)
+void VisitorBoneToVolume::Visit(Bone& bone)
 {
+	if(volume == NULL) return;
+	volume->AddCylinder(bone.p1, bone.p2, bone.r1, bone.r2, bone.s1);
+//	volume->AddCylinder(bone.p1, bone.p2, bone.r1, bone.r2, bone.s1,bone.s2);
+
 }

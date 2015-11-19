@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameWalkcycleSupport.cpp
-// Purpose            : GUI for setting up the walkcycle supports
+// Name               : VisitorSetupBone.h
+// Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 29.10.2015
+// Created            : 03.10.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,30 +24,28 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "FrameWalkcycleSupport.h"
-#include "IDs.h"
+#ifndef VISITORSETUPBONE_H_
+#define VISITORSETUPBONE_H_
 
-FrameWalkcycleSupport::FrameWalkcycleSupport(wxWindow* parent, Shoe* shoe) :
-		GUIFrameWalkcycleSupport(parent)
-{
-this->shoe = shoe;
-}
+#include "../3D/LinkageVisitor.h"
+#include "Bone.h"
 
-FrameWalkcycleSupport::~FrameWalkcycleSupport()
-{
-}
+/*!\class VisitorSetupBone
+ * \brief Setup all bones
+ *
+ * eValuate the formulas and set up the bones.
+ */
 
-void FrameWalkcycleSupport::OnCloseX(wxCloseEvent& event)
-{
-	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
-	ProcessEvent(selectEvent);
-}
+#include "../gui/MathParser.h"
 
-void FrameWalkcycleSupport::OnToggleAnkleLock(wxCommandEvent& event)
-{
-}
+class VisitorSetupBone:public LinkageVisitor {
+public:
+	VisitorSetupBone();
+	virtual ~VisitorSetupBone();
 
-void FrameWalkcycleSupport::OnChoiceDisplay(wxCommandEvent& event)
-{
-}
+	MathParser parser; ///< The mathparser stores the configuration.
+
+	void Visit(Bone &bone);
+};
+
+#endif /* VISITORSETUPBONE_H_ */

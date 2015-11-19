@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : BoneToVolume.h
-// Purpose            : 
+// Name               : Polygon3.h
+// Purpose            :
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 27.09.2015
-// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 07.07.2011
+// Copyright          : (C) 2011 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,28 +24,46 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef BONETOVOLUME_H_
-#define BONETOVOLUME_H_
+#ifndef POLYGON3_H_
+#define POLYGON3_H_
 
-/*!\class BoneToVolume
+/*!\class Polygon3
  * \brief ...
  *
  * ...
  */
 
-#include "LinkageVisitor.h"
-#include "Volume.h"
-#include "Bone.h"
+#include <wx/dynarray.h>
+#include "Vector3.h"
+#include "AffineTransformMatrix.h"
 
-class BoneToVolume:public LinkageVisitor {
+class Polygon3 {
+	// Constructor / Destructor
 public:
-	BoneToVolume(Volume * volume);
-	virtual ~BoneToVolume();
+	Polygon3();
+	virtual ~Polygon3();
+	// Member variables
+public:
+	AffineTransformMatrix matrix;
+	Vector3 color;
+	ArrayOfVector3 elements;
 
-	void Visit(Bone &bone);
+	bool isClosed;
 
-private:
-	Volume * volume;
+	// Methods
+public:
+	void Clear(void);
+	void Close(bool close = true);
+	void InsertPoint(double x = 0.0, double y = 0.0, double z = 0.0);
+	void Reverse(void);
+	void RemoveZeroLength(void);
+	Polygon3 & operator+=(const Polygon3 &a);
+	const Polygon3 operator+(const Polygon3 &a) const;
+	void Paint(void) const;
+	double GetLength(void) const;
+	void ApplyTransformation(void);
+	void ApplyTransformation(const AffineTransformMatrix &matrix);
 };
+WX_DECLARE_OBJARRAY(Polygon3, ArrayOfPolygon3);
 
-#endif /* BONETOVOLUME_H_ */
+#endif /* POLYGON3_H_ */
