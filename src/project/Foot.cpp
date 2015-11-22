@@ -466,3 +466,37 @@ bool Foot::LoadModel(wxTextInputStream* stream)
 	return true;
 }
 
+bool Foot::SaveModel(wxTextOutputStream* stream)
+{
+	stream->WriteString(Tibia->Get());
+	stream->WriteString(Fibula->Get());
+	stream->WriteString(Talus->Get());
+	stream->WriteString(Talus2->Get());
+	stream->WriteString(Calcaneus->Get());
+	stream->WriteString(Cuboideum->Get());
+	stream->WriteString(Naviculare->Get());
+	stream->WriteString(Cuneiforme1->Get());
+	stream->WriteString(Cuneiforme2->Get());
+	stream->WriteString(Cuneiforme3->Get());
+	stream->WriteString(Metatarsalis1->Get());
+	stream->WriteString(Metatarsalis2->Get());
+	stream->WriteString(Metatarsalis3->Get());
+	stream->WriteString(Metatarsalis4->Get());
+	stream->WriteString(Metatarsalis5->Get());
+	stream->WriteString(PhalanxI1->Get());
+	stream->WriteString(PhalanxI2->Get());
+	stream->WriteString(PhalanxI3->Get());
+	stream->WriteString(PhalanxI4->Get());
+	stream->WriteString(PhalanxI5->Get());
+	stream->WriteString(PhalanxII1->Get());
+	stream->WriteString(PhalanxII2->Get());
+	stream->WriteString(PhalanxII3->Get());
+	stream->WriteString(PhalanxII4->Get());
+	stream->WriteString(PhalanxII5->Get());
+	stream->WriteString(PhalanxIII1->Get());
+	stream->WriteString(PhalanxIII2->Get());
+	stream->WriteString(PhalanxIII3->Get());
+	stream->WriteString(PhalanxIII4->Get());
+	return true;
+}
+

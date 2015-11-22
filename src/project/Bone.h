@@ -108,6 +108,7 @@ public:
 	double roty;
 
 	bool Set(wxString text);
+	wxString Get(void) const;
 	void Setup(void);
 	void Render(void);
 

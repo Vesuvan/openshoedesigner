@@ -62,6 +62,8 @@ Unit::Unit(const wxString SIName, const wxString otherName, const double factor)
 		this->factor = 1.0;
 }
 
+
+
 Unit::Unit(int m, int kg, int s, int A, int K, int mol, int cd, int cur)
 {
 	this->m = m;
@@ -74,6 +76,7 @@ Unit::Unit(int m, int kg, int s, int A, int K, int mol, int cd, int cur)
 	this->cur = cur;
 //	this->extra = _T("*");
 }
+
 
 void Unit::Setup(const wxString SIName, const wxString otherName,
 		const double factor)
@@ -125,6 +128,7 @@ void Unit::SetCurrency(wxString currency)
 	cur = 1;
 //	this->extra = currency;
 }
+
 
 double Unit::FromSI(const double value)
 {

@@ -82,6 +82,7 @@ public:
 
 	unsigned int GetBoneCount(void) const;
 	bool LoadModel(wxTextInputStream* stream);
+	bool SaveModel(wxTextOutputStream* stream);
 
 	void AddToGrid(wxGrid* gridLength, wxGrid* gridDiameter, wxGrid* gridSkin);
 	void GetFromGrid(wxGrid* gridLength, wxGrid* gridDiameter,

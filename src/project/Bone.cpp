@@ -226,6 +226,27 @@ bool Bone::Set(wxString text)
 	return true;
 }
 
+wxString Bone::Get(void) const
+{
+	wxString temp = name + _T("|");
+	temp += anchorNx + _T("|");
+	temp += anchorNy + _T("|");
+	temp += anchorNz + _T("|");
+	temp += linkx + _T("|");
+	temp += linky + _T("|");
+	temp += linkz + _T("|");
+	temp += normalx + _T("|");
+	temp += normaly + _T("|");
+	temp += normalz + _T("|");
+	temp += anchorDv + _T("|");
+	temp += lengthv + _T("|");
+	temp += r1v + _T("|");
+	temp += r2v + _T("|");
+	temp += s1v + _T("|");
+	temp += s2v +_T("\n");
+	return temp;
+}
+
 void Bone::Vertex(const Vector3 v) const
 {
 	::glVertex3f(v.x, v.y, v.z);
@@ -279,3 +300,4 @@ void Bone::Setup(void)
 	p1 = matrix.Transform(Vector3(0, 0, 0));
 	p2 = matrix.Transform(normal * length);
 }
+

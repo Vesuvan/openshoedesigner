@@ -33,6 +33,7 @@
 #include <wx/filedlg.h>
 #include <wx/wfstream.h>
 #include <wx/filename.h>
+#include <wx/dir.h>
 
 FrameMain::FrameMain(wxWindow* parent, wxLocale* locale, wxConfig* config) :
 		GUIFrameMain(parent)
@@ -215,10 +216,56 @@ void FrameMain::OnToolClicked(wxCommandEvent& event)
 
 void FrameMain::OnLoadFootModel(wxCommandEvent& event)
 {
+
+	wxFileName fileName;
+	wxFileDialog dialog(this, _("Open Foot Model..."), _T(""), _T(""),
+			_("Foot Model (*.fmd; *.txt)|*.fmd;*.txt|All Files|*.*"),
+			wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+	if(wxDir::Exists(settings.lastFootDirectory)){
+		dialog.SetDirectory(settings.lastFootDirectory);
+	}
+
+	if(dialog.ShowModal() == wxID_OK){
+		fileName = dialog.GetPath();
+
+		wxFileInputStream input(fileName.GetFullPath());
+		wxTextInputStream text(input);
+
+		if(foot.LoadModel(&text)){
+			foot.Setup();
+			settings.lastFootDirectory = fileName.GetPath();
+			TransferDataToWindow();
+		}
+	}
 }
 
 void FrameMain::OnSaveFootModel(wxCommandEvent& event)
 {
+
+	wxFileName fileName;
+	wxFileDialog dialog(this, _("Save Foot Model As..."), _T(""), _T(""),
+			_("Foot Model (*.fmd; *.txt)|*.fmd;*.txt|All Files|*.*"),
+			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+	if(wxDir::Exists(settings.lastFootDirectory)){
+		dialog.SetDirectory(settings.lastFootDirectory);
+	}
+
+//	if(project.fileName.IsOk()) dialog.SetFilename(
+//			project.fileName.GetFullPath());
+
+	if(dialog.ShowModal() == wxID_OK){
+		fileName = dialog.GetPath();
+
+		wxFileOutputStream output(fileName.GetFullPath());
+		wxTextOutputStream text(output);
+
+		if(foot.SaveModel(&text)){
+			settings.lastFootDirectory = fileName.GetPath();
+			TransferDataToWindow();
+		}
+	}
 }
 
 void FrameMain::OnLoadShoe(wxCommandEvent& event)

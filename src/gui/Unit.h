@@ -94,7 +94,12 @@ public:
 public:
 
 private:
+	double factor; ///< 1 in SI = factor in non SI units
+	double power; ///<
+	wxString SIName; ///< The name in SI: m, m/s, 1/s, ...
 	wxString otherName; ///< The name in the "other" system: h, cm, dm, rpm, inch, mil, mm, ...
+
+	MathParser parser;
 
 	int m; ///< Power of Length
 	int kg; ///< Power of Mass
@@ -104,13 +109,6 @@ private:
 	int mol; ///< Power of Molar Mass
 	int cd; ///< Power of Brightness
 	int cur; ///< Power of Currency
-
-	wxString SIName; ///< The name in SI: m, m/s, 1/s, ... generated from list above
-
-	double factor; ///< 1 in SI = factor in non SI units
-	int power; ///< Power of ten, used for prefixing, also included in factor
-
-	MathParser parser;
 
 	// Methods
 public:
@@ -128,6 +126,7 @@ public:
 	wxString TextFromSI(const double value, unsigned int digitsAfterComma = 3);
 	wxString TextFromSIWithUnit(const double value,
 			unsigned int digitsAfterComma = 3);
+
 	double SIFromString(const wxString &text, bool useEvaluator = true);
 
 	Unit& operator*=(const Unit &other)
