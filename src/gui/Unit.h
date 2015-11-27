@@ -37,7 +37,7 @@
  *    1 rpm = 1/60 1/s, factor = 1/60
  *
  *
- *    Powers:
+ * Powers:
  *    'y',-24
  *    'z',-21
  *    'a',-18
@@ -60,55 +60,30 @@
  *    'Z',21
  *    'Y',24
  *
- *
- *
- *
  * HINT: The available types for the units are maintained in the DialogSetupUnits.
  */
 
-#include <wx/string.h>
 #include "MathParser.h"
-
-/*!\enum unit
- * \brief Predefined types of units (SI and otherwise)
- */
+#include <wx/string.h>
 
 class Unit {
 	// Enumerations
 public:
+	/*!\enum unit
+	 * \brief Predefined types of units (SI and otherwise)
+	 */
 	enum unit {
 		Unitless = 0, Second, Volume, Celsius
 	};
 
 	//Constructor / Destructor
 public:
-
 	Unit();
 	Unit(int m, int kg = 0, int s = 0, int A = 0, int K = 0, int mol = 0,
 			int cd = 0, int cur = 0);
 	Unit(wxString otherName);
 	Unit(const wxString SIName, const wxString otherName, const double factor);
 	Unit(unit predefinedUnit, wxString extra = _T("*"));
-
-	//Member variables
-public:
-
-private:
-	double factor; ///< 1 in SI = factor in non SI units
-	double power; ///<
-	wxString SIName; ///< The name in SI: m, m/s, 1/s, ...
-	wxString otherName; ///< The name in the "other" system: h, cm, dm, rpm, inch, mil, mm, ...
-
-	MathParser parser;
-
-	int m; ///< Power of Length
-	int kg; ///< Power of Mass
-	int s; ///< Power of Time
-	int A; ///< Power of Current
-	int K; ///< Power of Temperature (absolut)
-	int mol; ///< Power of Molar Mass
-	int cd; ///< Power of Brightness
-	int cur; ///< Power of Currency
 
 	// Methods
 public:
@@ -173,6 +148,24 @@ public:
 	{
 		return !(lhs == rhs);
 	}
+
+	//Member variables
+private:
+	double factor; ///< 1 in SI = factor in non SI units
+	double power; ///<
+	wxString SIName; ///< The name in SI: m, m/s, 1/s, ...
+	wxString otherName; ///< The name in the "other" system: h, cm, dm, rpm, inch, mil, mm, ...
+
+	MathParser parser;
+
+	int m; ///< Power of Length
+	int kg; ///< Power of Mass
+	int s; ///< Power of Time
+	int A; ///< Power of Current
+	int K; ///< Power of Temperature (absolut)
+	int mol; ///< Power of Molar Mass
+	int cd; ///< Power of Brightness
+	int cur; ///< Power of Currency
 };
 
 #endif /* UNIT_H_ */
