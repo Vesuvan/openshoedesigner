@@ -38,7 +38,8 @@ VisitorBoneToVolume::~VisitorBoneToVolume()
 void VisitorBoneToVolume::Visit(Bone& bone)
 {
 	if(volume == NULL) return;
-	volume->AddCylinder(bone.p1, bone.p2, bone.r1, bone.r2, bone.s1);
+	volume->AddCylinder(bone.p1, bone.p2, bone.r1 + bone.s1, bone.r2 + bone.s2,
+			(bone.s1 + bone.s2) / 2.0);
 //	volume->AddCylinder(bone.p1, bone.p2, bone.r1, bone.r2, bone.s1,bone.s2);
 
 }
