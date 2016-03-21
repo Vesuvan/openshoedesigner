@@ -36,14 +36,14 @@
 
 class FrameWalkcycleSupport:public GUIFrameWalkcycleSupport {
 public:
-	FrameWalkcycleSupport(wxWindow* parent, Shoe* shoe);
+	FrameWalkcycleSupport(wxWindow* parent, Project* project);
 	virtual ~FrameWalkcycleSupport();
 
 	virtual void OnCloseX(wxCloseEvent& event);
 	virtual void OnToggleAnkleLock(wxCommandEvent& event);
 	virtual void OnChoiceDisplay(wxCommandEvent& event);
 
-	Shoe* shoe;
+	Project* project;
 };
 
 #endif /* FRAMEWALKCYCLESUPPORT_H_ */

@@ -27,10 +27,10 @@
 
 #include "IDs.h"
 
-FramePattern::FramePattern(wxWindow* parent, Pattern* pattern) :
+FramePattern::FramePattern(wxWindow* parent, Project* project) :
 		GUIFramePattern(parent)
 {
-	this->pattern = pattern;
+	this->project = project;
 }
 
 FramePattern::~FramePattern()

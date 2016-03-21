@@ -33,11 +33,11 @@
 
 #include "gui.h"
 
-#include "../project/Foot.h"
+#include "../project/Project.h"
 
 class FrameFoot:public GUIFrameFoot {
 public:
-	FrameFoot(wxWindow* parent, Foot* foot);
+	FrameFoot(wxWindow* parent, Project* project);
 	virtual ~FrameFoot();
 	virtual void OnClose(wxCommandEvent& event);
 	virtual void OnCloseX(wxCloseEvent& event);
@@ -48,7 +48,7 @@ public:
 	bool TransferDataFromWindow(void);
 
 private:
-	Foot* foot;
+	Project* project;
 };
 
 #endif /* FRAMEFOOT_H_ */

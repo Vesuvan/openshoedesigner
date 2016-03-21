@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Canvas3D.h
+// Name               : Project.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 11.08.2015
-// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 29.01.2016
+// Copyright          : (C) 2016 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,38 +24,53 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CANVAS3D_H_
-#define CANVAS3D_H_
+#ifndef PROJECT_H_
+#define PROJECT_H_
 
-/*!\class Canvas3D
- * \brief ...
+/*!\class Project
+ * \brief Project container
  *
- * ...
+ * Data part of the Data View Model.
  */
 
-#include "../project/Project.h"
-#include "../3D/OpenGLCanvas.h"
 #include "../3D/Volume.h"
-#include "../3D/Vector3.h"
+#include "Foot.h"
+#include "Shoe.h"
+#include "Pattern.h"
 
-class Canvas3D:public OpenGLCanvas {
+class Project {
 public:
-	Canvas3D(wxWindow* parent);
-	virtual ~Canvas3D();
+	Project();
+	virtual ~Project();
 
-	void SetProject(Project* const project);
-	void Render();
+	void Reset(void);
+	void Update(void);
+	void UpdateVolume(void);
 
-	bool showBones;
-	bool showLast;
-	bool showInsole;
-	bool showSole;
-	bool showUpper;
-	bool showCutaway;
-	bool showFloor;
+	const Foot* GetFoot(void) const;
+	Shoe* GetShoe(void);
+	void AddFootToGrid(wxGrid* gridLength, wxGrid* gridDiameter,
+			wxGrid* gridSkin);
+	void GetFootFromGrid(wxGrid* gridLength, wxGrid* gridDiameter,
+			wxGrid* gridSkin);
+
+	bool LoadModel(wxString fileName);
+	bool SaveModel(wxString fileName);
+	bool SaveLast(wxString fileName);
+
+	void PaintBones(void) const;
+	void PaintLast(void) const;
+	void PaintInsole(void) const;
+	void PaintSole(void) const;
+	void PaintUpper(void) const;
+	void PaintCutaway(void) const;
 
 private:
-	Project *project;
+	Foot foot;
+	Shoe shoe;
+	Pattern pattern;
+
+	Volume volume;
 };
 
-#endif /* CANVAS3D_H_ */
+#endif /* PROJECT_H_ */

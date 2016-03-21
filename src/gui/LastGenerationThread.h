@@ -27,8 +27,7 @@
 #ifndef LASTGENERATIONTHREAD_H_
 #define LASTGENERATIONTHREAD_H_
 
-#include "../project/Foot.h"
-#include "../3D/Volume.h"
+#include "../project/Project.h"
 #include <wx/thread.h>
 #include <wx/frame.h>
 
@@ -40,7 +39,7 @@
 
 class LastGenerationThread:public wxThread {
 public:
-	LastGenerationThread(wxFrame * frame, Foot * foot, Volume * volume);
+	LastGenerationThread(wxFrame * frame, Project* project);
 	virtual ~LastGenerationThread();
 
 	virtual void *Entry();
@@ -48,8 +47,7 @@ public:
 
 public:
 	wxFrame * frame;
-	Foot * foot;
-	Volume * volume;
+	Project * project;
 };
 
 #endif /* LASTGENERATIONTHREAD_H_ */

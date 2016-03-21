@@ -29,10 +29,10 @@
 #include <math.h>
 #include "IDs.h"
 
-FrameShoe::FrameShoe(wxWindow* parent, Shoe* shoe) :
+FrameShoe::FrameShoe(wxWindow* parent, Project* project) :
 		GUIFrameShoe(parent)
 {
-	this->shoe = shoe;
+	this->project = project;
 	TransferDataToWindow();
 }
 
@@ -42,6 +42,7 @@ FrameShoe::~FrameShoe()
 
 bool FrameShoe::TransferDataToWindow()
 {
+	Shoe *shoe = project->GetShoe();
 	m_textCtrlHeelHeight->SetValue(shoe->HeelHeight);
 	m_textCtrlPlateauHeight->SetValue(shoe->PlateauHeight);
 	m_textCtrlHeelAngle->SetValue(shoe->HeelAngle);
@@ -69,6 +70,7 @@ void FrameShoe::OnClick(wxCommandEvent& event)
 
 void FrameShoe::OnPreset(wxCommandEvent& event)
 {
+	Shoe *shoe = project->GetShoe();
 	// 0.26 m is the average footlength (= size EU 39).
 	switch(event.GetId()){
 	case ID_PRESETFLATS:

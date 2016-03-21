@@ -31,7 +31,7 @@
 #include "DialogQuickInitFoot.h"
 //#include <wx/file.h>
 #include <wx/filedlg.h>
-#include <wx/wfstream.h>
+
 #include <wx/filename.h>
 #include <wx/dir.h>
 
@@ -42,37 +42,17 @@ FrameMain::FrameMain(wxWindow* parent, wxLocale* locale, wxConfig* config) :
 	this->locale = locale;
 	settings.GetConfigFrom(config);
 
-	volume.SetSize(0.40, 0.3, 0.4, 0.0075);
-	volume.matrix.TranslateGlobal(-0.1, -0.15, -0.3);
-
-//	volume.AddHalfplane(Vector3(0, 0, 1), -0.10, 0.01);
-//	volume.AddSphere(Vector3(0, 0.10, 0), 0.02, 0.1);
-//	volume.AddSphere(Vector3(0.1, 0, 0.0), 0.04, 0.01);
-//	volume.AddCylinder(Vector3(0.0, 0, 0.0), Vector3(0.05 * 1, 0, -0.00), 0.04,
-//			0.04, 0.02,0.04);
-
-	m_canvas->SetVolume(&volume);
-
-	m_canvas->SetBones(&foot);
-
-	volume.Clear();
-
-	wxFileInputStream input(_T("data/FootModelDefault.txt"));
-	wxTextInputStream text(input);
-	foot.LoadModel(&text);
-	foot.Setup();
-	foot.AddToVolume(&volume);
-	volume.MarchingCubes(0.5);
+	m_canvas->SetProject(&project);
 
 //		m_canvas->stereoMode = stereoAnaglyph;
 	settings.WriteToCanvas(m_canvas);
 
 	thread = NULL;
 
-	dialogShoe = new FrameShoe(this, &shoe);
-	dialogFoot = new FrameFoot(this, &foot);
-	dialogWalkcycleSupport = new FrameWalkcycleSupport(this, &shoe);
-	dialogPattern = new FramePattern(this, &pattern);
+	dialogShoe = new FrameShoe(this, &project);
+	dialogFoot = new FrameFoot(this, &project);
+	dialogWalkcycleSupport = new FrameWalkcycleSupport(this, &project);
+	dialogPattern = new FramePattern(this, &project);
 	dialogSetupStereo3D = new DialogSetupStereo3D(this, &settings);
 	dialogDebugParser = new FrameDebugParser(this);
 
@@ -162,7 +142,7 @@ void FrameMain::UpdateGUI(wxCommandEvent& event)
 
 void FrameMain::Update3DView(wxCommandEvent& event)
 {
-	foot.Setup();
+	project.Update();
 
 	settings.WriteToCanvas(m_canvas);
 	m_canvas->Refresh();
@@ -183,7 +163,7 @@ void FrameMain::RefreshProject(wxCommandEvent& event)
 void FrameMain::CalculateLast(wxCommandEvent& event)
 {
 	if(thread == NULL){
-		thread = new LastGenerationThread(this, &foot, &volume);
+		thread = new LastGenerationThread(this, &project);
 		thread->Create();
 		thread->Run();
 	}
@@ -216,8 +196,6 @@ void FrameMain::OnToolClicked(wxCommandEvent& event)
 
 void FrameMain::OnLoadFootModel(wxCommandEvent& event)
 {
-
-	wxFileName fileName;
 	wxFileDialog dialog(this, _("Open Foot Model..."), _T(""), _T(""),
 			_("Foot Model (*.fmd; *.txt)|*.fmd;*.txt|All Files|*.*"),
 			wxFD_OPEN | wxFD_FILE_MUST_EXIST);
@@ -227,13 +205,9 @@ void FrameMain::OnLoadFootModel(wxCommandEvent& event)
 	}
 
 	if(dialog.ShowModal() == wxID_OK){
-		fileName = dialog.GetPath();
-
-		wxFileInputStream input(fileName.GetFullPath());
-		wxTextInputStream text(input);
-
-		if(foot.LoadModel(&text)){
-			foot.Setup();
+		wxFileName fileName(dialog.GetPath());
+		if(project.LoadModel(fileName.GetFullPath())){
+			project.Update();
 			settings.lastFootDirectory = fileName.GetPath();
 			TransferDataToWindow();
 		}
@@ -243,7 +217,6 @@ void FrameMain::OnLoadFootModel(wxCommandEvent& event)
 void FrameMain::OnSaveFootModel(wxCommandEvent& event)
 {
 
-	wxFileName fileName;
 	wxFileDialog dialog(this, _("Save Foot Model As..."), _T(""), _T(""),
 			_("Foot Model (*.fmd; *.txt)|*.fmd;*.txt|All Files|*.*"),
 			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -256,12 +229,8 @@ void FrameMain::OnSaveFootModel(wxCommandEvent& event)
 //			project.fileName.GetFullPath());
 
 	if(dialog.ShowModal() == wxID_OK){
-		fileName = dialog.GetPath();
-
-		wxFileOutputStream output(fileName.GetFullPath());
-		wxTextOutputStream text(output);
-
-		if(foot.SaveModel(&text)){
+		wxFileName fileName(dialog.GetPath());
+		if(project.SaveModel(fileName.GetFullPath())){
 			settings.lastFootDirectory = fileName.GetPath();
 			TransferDataToWindow();
 		}
@@ -324,9 +293,7 @@ void FrameMain::OnSaveLast(wxCommandEvent& event)
 	if(dialog.ShowModal() == wxID_OK){
 		wxFileName fileName;
 		fileName = dialog.GetPath();
-		wxFFileOutputStream outStream(fileName.GetFullPath());
-		FileSTL temp;
-		temp.WriteStream(outStream, volume.geometry);
+		project.SaveLast(fileName.GetFullPath());
 	}
 }
 

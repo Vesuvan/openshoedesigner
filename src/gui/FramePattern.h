@@ -39,7 +39,7 @@
 
 class FramePattern:public GUIFramePattern {
 public:
-	FramePattern(wxWindow* parent, Pattern* pattern);
+	FramePattern(wxWindow* parent, Project* project);
 	virtual ~FramePattern();
 
 	virtual void OnCloseX(wxCloseEvent& event);
@@ -47,7 +47,8 @@ public:
 	virtual void OnChoiceStyle(wxCommandEvent& event);
 	virtual void OnScroll(wxScrollEvent& event);
 
-	Pattern* pattern;
+private:
+	Project* project;
 };
 
 #endif /* FRAMEPATTERN_H_ */

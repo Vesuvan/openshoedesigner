@@ -28,9 +28,10 @@
 #define FRAMEMAIN_H_
 
 /*!\class FrameMain
- * \brief ...
+ * \brief Main Window
  *
- * ...
+ * Main window of the application. Has the main 3D display and work area.
+ * All other windows and dialogs are children of this frame.
  */
 
 #include "gui.h"
@@ -43,10 +44,9 @@
 #include "FrameDebugParser.h"
 #include "DisplaySettings.h"
 
+#include "../project/Project.h"
+
 #include "LastGenerationThread.h"
-#include "../project/Foot.h"
-#include "../project/Shoe.h"
-#include "../project/Pattern.h"
 
 #include <wx/intl.h>
 #include <wx/config.h>
@@ -94,20 +94,16 @@ public:
 	wxLocale *locale;
 	DisplaySettings settings;
 
+	Project project;
+
 	FrameShoe* dialogShoe;
 	FrameFoot* dialogFoot;
 	FrameWalkcycleSupport* dialogWalkcycleSupport;
 	FramePattern* dialogPattern;
 	DialogSetupStereo3D* dialogSetupStereo3D;
 	FrameDebugParser* dialogDebugParser;
+
 	LastGenerationThread* thread;
-
-private:
-	Foot foot;
-	Shoe shoe;
-	Pattern pattern;
-
-	Volume volume;
 };
 
 #endif /* FRAMEMAIN_H_ */

@@ -77,9 +77,11 @@ void Geometry::ApplyTransformation(void)
 		triangles[i].ApplyTransformation(this->matrix);
 }
 
-void Geometry::Paint(void) const
+void Geometry::Paint(GeometryColorStyle style) const
 {
 	if(!visible) return;
+
+	if(style == geometryColorDefault) style = useColor;
 
 	// GL_RESCALE_NORMAL is faster, but doesn't work on non-uniform scaled models
 	// GL_NORMALIZE is slower, but works always
@@ -96,7 +98,7 @@ void Geometry::Paint(void) const
 
 	size_t i;
 	::glBegin(GL_TRIANGLES);
-	switch(useColor){
+	switch(style){
 	case geometryColorNone:
 		for(i = 0; i < triangles.Count(); i++)
 			triangles[i].Paint(true, false);

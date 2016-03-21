@@ -760,7 +760,7 @@ void Volume::MarchingCubes(float limit)
 
 }
 
-void Volume::Render(void)
+void Volume::Render(void) const
 {
 
 	glPushMatrix();
@@ -797,8 +797,7 @@ void Volume::Render(void)
 	}
 
 	if(true){
-		geometry.useColor = geometryColorNone;
-		geometry.Paint();
+		geometry.Paint(geometryColorNone);
 //		glBegin(GL_TRIANGLES);
 //		unsigned int n;
 //		for(n = 0; n < triangles.GetCount(); n++){

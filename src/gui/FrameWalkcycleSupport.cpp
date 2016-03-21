@@ -27,10 +27,10 @@
 #include "FrameWalkcycleSupport.h"
 #include "IDs.h"
 
-FrameWalkcycleSupport::FrameWalkcycleSupport(wxWindow* parent, Shoe* shoe) :
+FrameWalkcycleSupport::FrameWalkcycleSupport(wxWindow* parent, Project* project) :
 		GUIFrameWalkcycleSupport(parent)
 {
-this->shoe = shoe;
+	this->project = project;
 }
 
 FrameWalkcycleSupport::~FrameWalkcycleSupport()

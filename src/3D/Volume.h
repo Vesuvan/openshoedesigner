@@ -60,7 +60,7 @@ public:
 			const float r2, const float k1, const float k2);
 
 	void MarchingCubes(float limit = 0.5);
-	void Render(void);
+	void Render(void) const;
 
 	AffineTransformMatrix matrix;
 	Vector3 color;

@@ -31,12 +31,12 @@
  * \brief GUI for setting up a last
  */
 
-#include "../project/Shoe.h"
+#include "../project/Project.h"
 #include "gui.h"
 
 class FrameShoe:public GUIFrameShoe {
 public:
-	FrameShoe(wxWindow* parent, Shoe* shoe);
+	FrameShoe(wxWindow* parent, Project* project);
 	virtual ~FrameShoe();
 
 	bool TransferDataToWindow();
@@ -46,7 +46,7 @@ public:
 	virtual void OnPreset(wxCommandEvent& event);
 
 private:
-	Shoe* shoe;
+	Project* project;
 };
 
 #endif /* FRAMESHOE_H_ */

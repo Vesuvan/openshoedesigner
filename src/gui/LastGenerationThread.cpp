@@ -27,13 +27,11 @@
 #include "LastGenerationThread.h"
 #include "IDs.h"
 
-LastGenerationThread::LastGenerationThread(wxFrame* frame, Foot * foot,
-		Volume * volume) :
+LastGenerationThread::LastGenerationThread(wxFrame* frame, Project * project) :
 		wxThread(wxTHREAD_JOINABLE)
 {
 	this->frame = frame;
-	this->foot = foot;
-	this->volume = volume;
+	this->project = project;
 }
 
 LastGenerationThread::~LastGenerationThread()
@@ -42,11 +40,9 @@ LastGenerationThread::~LastGenerationThread()
 
 void* LastGenerationThread::Entry()
 {
-	volume->Clear();
 	if(TestDestroy()) return NULL;
-	foot->AddToVolume(volume);
-	if(TestDestroy()) return NULL;
-	volume->MarchingCubes(0.5);
+
+	project->UpdateVolume();
 
 	wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, ID_THREADLASTDONE);
 	wxPostEvent(frame, event);

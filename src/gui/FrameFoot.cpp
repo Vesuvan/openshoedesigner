@@ -27,10 +27,12 @@
 #include "FrameFoot.h"
 #include "IDs.h"
 
-FrameFoot::FrameFoot(wxWindow* parent, Foot* foot) :
+FrameFoot::FrameFoot(wxWindow* parent, Project* project) :
 		GUIFrameFoot(parent)
 {
-	this->foot = foot;
+	this->project = project;
+
+	const Foot *foot = project->GetFoot();
 
 	m_textCtrlFootLength->SetValue(
 			wxString::Format(_T("%.1f cm"), foot->L * 100));
@@ -74,7 +76,7 @@ void FrameFoot::OnText(wxCommandEvent& event)
 void FrameFoot::OnCellChange(wxGridEvent& event)
 {
 	TransferDataFromWindow();
-	foot->Setup();
+	project->Update();
 	TransferDataToWindow();
 	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_REFRESHPROJECT);
 	ProcessEvent(selectEvent);
@@ -82,12 +84,12 @@ void FrameFoot::OnCellChange(wxGridEvent& event)
 
 bool FrameFoot::TransferDataToWindow(void)
 {
-	foot->AddToGrid(m_gridBoneLength, m_gridBoneDiameter, m_gridSkin);
+	project->AddFootToGrid(m_gridBoneLength, m_gridBoneDiameter, m_gridSkin);
 	return true;
 }
 
 bool FrameFoot::TransferDataFromWindow(void)
 {
-	foot->GetFromGrid(m_gridBoneLength, m_gridBoneDiameter, m_gridSkin);
+	project->GetFootFromGrid(m_gridBoneLength, m_gridBoneDiameter, m_gridSkin);
 	return true;
 }

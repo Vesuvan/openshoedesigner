@@ -30,8 +30,7 @@
 Canvas3D::Canvas3D(wxWindow* parent) :
 		OpenGLCanvas(parent)
 {
-	bone = NULL;
-	volume = NULL;
+	project = NULL;
 
 	showBones = true;
 	showLast = false;
@@ -46,14 +45,9 @@ Canvas3D::~Canvas3D()
 {
 }
 
-void Canvas3D::SetBones(Foot* const bone)
+void Canvas3D::SetProject(Project* const project)
 {
-	this->bone = bone;
-}
-
-void Canvas3D::SetVolume(Volume* const volume)
-{
-	this->volume = volume;
+	this->project = project;
 }
 
 void Canvas3D::Render()
@@ -111,7 +105,10 @@ void Canvas3D::Render()
 		glEnd();
 	}
 
-	if(showBones && bone != NULL) bone->Render();
-	if(showLast && volume != NULL) volume->Render();
-
+	if(showBones) project->PaintBones();
+	if(showLast) project->PaintLast();
+	if(showInsole) project->PaintInsole();
+	if(showSole) project->PaintSole();
+	if(showUpper) project->PaintUpper();
+	if(showCutaway) project->PaintCutaway();
 }
