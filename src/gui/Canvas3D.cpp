@@ -32,8 +32,8 @@ Canvas3D::Canvas3D(wxWindow* parent) :
 {
 	project = NULL;
 
-	showBones = true;
-	showLast = false;
+	showBones = false;
+	showLast = true;
 	showInsole = true;
 	showSole = true;
 	showUpper = false;

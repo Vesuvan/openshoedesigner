@@ -44,11 +44,11 @@ void Project::Reset(void)
 	volume.SetSize(0.40, 0.3, 0.4, 0.0075);
 	volume.matrix.TranslateGlobal(-0.1, -0.15, -0.3);
 
-	//	volume.AddHalfplane(Vector3(0, 0, 1), -0.10, 0.01);
-	//	volume.AddSphere(Vector3(0, 0.10, 0), 0.02, 0.1);
-	//	volume.AddSphere(Vector3(0.1, 0, 0.0), 0.04, 0.01);
-	//	volume.AddCylinder(Vector3(0.0, 0, 0.0), Vector3(0.05 * 1, 0, -0.00), 0.04,
-	//			0.04, 0.02,0.04);
+//	volume.AddHalfplane(Vector3(0, 0, 1), -0.10, 0.01);
+//	volume.AddSphere(Vector3(0, 0.1, 0), 0.15, 0.1);
+//	volume.AddSphere(Vector3(0.13, 0, 0.0), 0.19, 0.01);
+//	volume.AddCylinder(Vector3(0.0, 0, 0.0), Vector3(0.05 * 1, 0, -0.00), 0.04,
+//			0.04, 0.02, 0.04);
 
 	volume.Clear();
 

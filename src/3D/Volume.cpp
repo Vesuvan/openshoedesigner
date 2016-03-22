@@ -543,6 +543,16 @@ static uint16_t edge[256] =
 			2197, 2460, 666, 915, 153, 400, 3840, 3593, 3331, 3082, 1804, 1541,
 			1295, 1030, 2822, 2575, 2309, 2060, 778, 515, 265, 0};
 
+static int8_t cap[144] =
+	{-1, -1, -1, -1, -1, -1, -1, -1, -1, 7, 1, 0, -1, -1, -1, -1, -1, -1, 3, 2,
+			1, -1, -1, -1, -1, -1, -1, 3, 2, 0, 7, 3, 0, -1, -1, -1, 5, 4, 3,
+			-1, -1, -1, -1, -1, -1, 7, 1, 0, 5, 4, 3, -1, -1, -1, 5, 2, 1, 5, 4,
+			2, -1, -1, -1, 0, 7, 2, 5, 4, 2, 7, 5, 2, 6, 5, 7, -1, -1, -1, -1,
+			-1, -1, 6, 1, 0, 6, 5, 1, -1, -1, -1, 3, 2, 1, 7, 6, 5, -1, -1, -1,
+			3, 2, 0, 5, 3, 0, 6, 5, 0, 4, 3, 7, 6, 4, 7, -1, -1, -1, 1, 0, 6, 3,
+			1, 6, 4, 3, 6, 2, 1, 4, 1, 7, 4, 7, 6, 4, 4, 2, 0, 6, 4, 0, -1, -1,
+			-1};
+
 void Volume::MarchingCubes(float limit)
 {
 //	setlocale(LC_ALL, "C"); // To get a 3.1415 instead 3,1415 or else on every computer.
@@ -594,145 +604,407 @@ void Volume::MarchingCubes(float limit)
 				if(v5 > limit) v |= 32;
 				if(v6 > limit) v |= 64;
 				if(v7 > limit) v |= 128;
-				if(v == 0 || v == 255){
-					p.x += dx;
-					c++;
-					continue;
-				}
-				uint16_t h = edge[v];
-				if(h & ((uint16_t) 1 << 0)){
-					float x = (limit - v0) / (v1 - v0);
-					p0.x = p.x;
-					p0.y = p.y;
-					p0.z = p.z;
-					p0.x += dx * x;
-				}
-				if(h & ((uint16_t) 1 << 1)){
-					float x = (limit - v1) / (v3 - v1);
-					p1.x = p.x + dx;
-					p1.y = p.y;
-					p1.z = p.z;
-					p1.y += dy * x;
-				}
-				if(h & ((uint16_t) 1 << 2)){
-					float x = (limit - v2) / (v3 - v2);
-					p2.x = p.x;
-					p2.y = p.y + dy;
-					p2.z = p.z;
-					p2.x += dx * x;
-				}
-				if(h & ((uint16_t) 1 << 3)){
-					float x = (limit - v0) / (v2 - v0);
-					p3.x = p.x;
-					p3.y = p.y;
-					p3.z = p.z;
-					p3.y += dy * x;
-				}
-				if(h & ((uint16_t) 1 << 4)){
-					float x = (limit - v4) / (v5 - v4);
-					p4.x = p.x;
-					p4.y = p.y;
-					p4.z = p.z + dz;
-					p4.x += dx * x;
-				}
-				if(h & ((uint16_t) 1 << 5)){
-					float x = (limit - v5) / (v7 - v5);
-					p5.x = p.x + dx;
-					p5.y = p.y;
-					p5.z = p.z + dz;
-					p5.y += dy * x;
-				}
-				if(h & ((uint16_t) 1 << 6)){
-					float x = (limit - v6) / (v7 - v6);
-					p6.x = p.x;
-					p6.y = p.y + dy;
-					p6.z = p.z + dz;
-					p6.x += dx * x;
-				}
-				if(h & ((uint16_t) 1 << 7)){
-					float x = (limit - v4) / (v6 - v4);
-					p7.x = p.x;
-					p7.y = p.y;
-					p7.z = p.z + dz;
-					p7.y += dy * x;
-				}
-				if(h & ((uint16_t) 1 << 8)){
-					float x = (limit - v0) / (v4 - v0);
-					p8.x = p.x;
-					p8.y = p.y;
-					p8.z = p.z;
-					p8.z += dz * x;
-				}
-				if(h & ((uint16_t) 1 << 9)){
-					float x = (limit - v1) / (v5 - v1);
-					p9.x = p.x + dx;
-					p9.y = p.y;
-					p9.z = p.z;
-					p9.z += dz * x;
-				}
-				if(h & ((uint16_t) 1 << 10)){
-					float x = (limit - v3) / (v7 - v3);
-					p10.x = p.x + dx;
-					p10.y = p.y + dy;
-					p10.z = p.z;
-					p10.z += dz * x;
-				}
-				if(h & ((uint16_t) 1 << 11)){
-					float x = (limit - v2) / (v6 - v2);
-					p11.x = p.x;
-					p11.y = p.y + dy;
-					p11.z = p.z;
-					p11.z += dz * x;
-				}
+				if(v != 0 && v != 255){
 
-				h = v * 12;
-				for(n = 0; n < 12; n++){
-					if(tri[h] == -1) break;
-					switch(tri[h]){
-					case 0:
-						t.p[2 - (n % 3)] = p0;
-						break;
-					case 1:
-						t.p[2 - (n % 3)] = p1;
-						break;
-					case 2:
-						t.p[2 - (n % 3)] = p2;
-						break;
-					case 3:
-						t.p[2 - (n % 3)] = p3;
-						break;
-					case 4:
-						t.p[2 - (n % 3)] = p4;
-						break;
-					case 5:
-						t.p[2 - (n % 3)] = p5;
-						break;
-					case 6:
-						t.p[2 - (n % 3)] = p6;
-						break;
-					case 7:
-						t.p[2 - (n % 3)] = p7;
-						break;
-					case 8:
-						t.p[2 - (n % 3)] = p8;
-						break;
-					case 9:
-						t.p[2 - (n % 3)] = p9;
-						break;
-					case 10:
-						t.p[2 - (n % 3)] = p10;
-						break;
-					case 11:
-						t.p[2 - (n % 3)] = p11;
-						break;
+					uint16_t h = edge[v];
+					if(h & ((uint16_t) 1 << 0)){
+						float x = (limit - v0) / (v1 - v0);
+						p0.x = p.x;
+						p0.y = p.y;
+						p0.z = p.z;
+						p0.x += dx * x;
 					}
+					if(h & ((uint16_t) 1 << 1)){
+						float x = (limit - v1) / (v3 - v1);
+						p1.x = p.x + dx;
+						p1.y = p.y;
+						p1.z = p.z;
+						p1.y += dy * x;
+					}
+					if(h & ((uint16_t) 1 << 2)){
+						float x = (limit - v2) / (v3 - v2);
+						p2.x = p.x;
+						p2.y = p.y + dy;
+						p2.z = p.z;
+						p2.x += dx * x;
+					}
+					if(h & ((uint16_t) 1 << 3)){
+						float x = (limit - v0) / (v2 - v0);
+						p3.x = p.x;
+						p3.y = p.y;
+						p3.z = p.z;
+						p3.y += dy * x;
+					}
+					if(h & ((uint16_t) 1 << 4)){
+						float x = (limit - v4) / (v5 - v4);
+						p4.x = p.x;
+						p4.y = p.y;
+						p4.z = p.z + dz;
+						p4.x += dx * x;
+					}
+					if(h & ((uint16_t) 1 << 5)){
+						float x = (limit - v5) / (v7 - v5);
+						p5.x = p.x + dx;
+						p5.y = p.y;
+						p5.z = p.z + dz;
+						p5.y += dy * x;
+					}
+					if(h & ((uint16_t) 1 << 6)){
+						float x = (limit - v6) / (v7 - v6);
+						p6.x = p.x;
+						p6.y = p.y + dy;
+						p6.z = p.z + dz;
+						p6.x += dx * x;
+					}
+					if(h & ((uint16_t) 1 << 7)){
+						float x = (limit - v4) / (v6 - v4);
+						p7.x = p.x;
+						p7.y = p.y;
+						p7.z = p.z + dz;
+						p7.y += dy * x;
+					}
+					if(h & ((uint16_t) 1 << 8)){
+						float x = (limit - v0) / (v4 - v0);
+						p8.x = p.x;
+						p8.y = p.y;
+						p8.z = p.z;
+						p8.z += dz * x;
+					}
+					if(h & ((uint16_t) 1 << 9)){
+						float x = (limit - v1) / (v5 - v1);
+						p9.x = p.x + dx;
+						p9.y = p.y;
+						p9.z = p.z;
+						p9.z += dz * x;
+					}
+					if(h & ((uint16_t) 1 << 10)){
+						float x = (limit - v3) / (v7 - v3);
+						p10.x = p.x + dx;
+						p10.y = p.y + dy;
+						p10.z = p.z;
+						p10.z += dz * x;
+					}
+					if(h & ((uint16_t) 1 << 11)){
+						float x = (limit - v2) / (v6 - v2);
+						p11.x = p.x;
+						p11.y = p.y + dy;
+						p11.z = p.z;
+						p11.z += dz * x;
+					}
+
+					h = v * 12;
+					for(n = 0; n < 12; n++){
+						if(tri[h] == -1) break;
+						switch(tri[h]){
+						case 0:
+							t.p[2 - (n % 3)] = p0;
+							break;
+						case 1:
+							t.p[2 - (n % 3)] = p1;
+							break;
+						case 2:
+							t.p[2 - (n % 3)] = p2;
+							break;
+						case 3:
+							t.p[2 - (n % 3)] = p3;
+							break;
+						case 4:
+							t.p[2 - (n % 3)] = p4;
+							break;
+						case 5:
+							t.p[2 - (n % 3)] = p5;
+							break;
+						case 6:
+							t.p[2 - (n % 3)] = p6;
+							break;
+						case 7:
+							t.p[2 - (n % 3)] = p7;
+							break;
+						case 8:
+							t.p[2 - (n % 3)] = p8;
+							break;
+						case 9:
+							t.p[2 - (n % 3)] = p9;
+							break;
+						case 10:
+							t.p[2 - (n % 3)] = p10;
+							break;
+						case 11:
+							t.p[2 - (n % 3)] = p11;
+							break;
+						}
 
 //					if(t.p[2 - (n % 3)].Abs() < 0.001){
 //						break;
 //					}
 
-					if(n % 3 == 2) geometry.AddTriangle(t, false);
-					h++;
+						if(n % 3 == 2) geometry.AddTriangle(t, false);
+						h++;
+					}
+				}
+
+				if(i == 0){
+					v = 0;
+					if(v0 > limit) v |= 1;
+					if(v2 > limit) v |= 2;
+					if(v6 > limit) v |= 4;
+					if(v4 > limit) v |= 8;
+					if(v > 0){
+						uint8_t h = v * 9;
+						for(n = 0; n < 9; n++){
+							if(cap[h] == -1) break;
+							switch(cap[h]){
+							case 0:
+								t.p[n % 3] = p;
+								break;
+							case 1:
+								t.p[n % 3] = p3;
+								break;
+							case 2:
+								t.p[n % 3].Set(p.x, p.y + dy, p.z);
+								break;
+							case 3:
+								t.p[n % 3] = p11;
+								break;
+							case 4:
+								t.p[n % 3].Set(p.x, p.y + dy, p.z + dz);
+								break;
+							case 5:
+								t.p[n % 3] = p7;
+								break;
+							case 6:
+								t.p[n % 3].Set(p.x, p.y, p.z + dz);
+								break;
+							case 7:
+								t.p[n % 3] = p8;
+								break;
+							}
+							if(n % 3 == 2) geometry.AddTriangle(t, false);
+							h++;
+						}
+
+					}
+
+				}
+
+				if(i == Nx - 2){
+					v = 0;
+					if(v1 > limit) v |= 1;
+					if(v5 > limit) v |= 2;
+					if(v7 > limit) v |= 4;
+					if(v3 > limit) v |= 8;
+					if(v > 0){
+						uint8_t h = v * 9;
+						for(n = 0; n < 9; n++){
+							if(cap[h] == -1) break;
+							switch(cap[h]){
+							case 0:
+								t.p[n % 3].Set(p.x + dx, p.y, p.z);
+								break;
+							case 1:
+								t.p[n % 3] = p9;
+								break;
+							case 2:
+								t.p[n % 3].Set(p.x + dx, p.y, p.z + dz);
+								break;
+							case 3:
+								t.p[n % 3] = p5;
+								break;
+							case 4:
+								t.p[n % 3].Set(p.x + dx, p.y + dy, p.z + dz);
+								break;
+							case 5:
+								t.p[n % 3] = p10;
+								break;
+							case 6:
+								t.p[n % 3].Set(p.x + dx, p.y + dy, p.z);
+								break;
+							case 7:
+								t.p[n % 3] = p1;
+								break;
+							}
+							if(n % 3 == 2) geometry.AddTriangle(t, false);
+							h++;
+						}
+
+					}
+
+				}
+
+				if(j == 0){
+					v = 0;
+					if(v0 > limit) v |= 1;
+					if(v4 > limit) v |= 2;
+					if(v5 > limit) v |= 4;
+					if(v1 > limit) v |= 8;
+					if(v > 0){
+						uint8_t h = v * 9;
+						for(n = 0; n < 9; n++){
+							if(cap[h] == -1) break;
+							switch(cap[h]){
+							case 0:
+								t.p[n % 3] = p;
+								break;
+							case 1:
+								t.p[n % 3] = p8;
+								break;
+							case 2:
+								t.p[n % 3].Set(p.x, p.y, p.z + dz);
+								break;
+							case 3:
+								t.p[n % 3] = p4;
+								break;
+							case 4:
+								t.p[n % 3].Set(p.x + dx, p.y, p.z + dz);
+								break;
+							case 5:
+								t.p[n % 3] = p9;
+								break;
+							case 6:
+								t.p[n % 3].Set(p.x + dx, p.y, p.z);
+								break;
+							case 7:
+								t.p[n % 3] = p0;
+								break;
+							}
+							if(n % 3 == 2) geometry.AddTriangle(t, false);
+							h++;
+						}
+
+					}
+
+				}
+
+				if(j == Ny - 2){
+					v = 0;
+					if(v2 > limit) v |= 1;
+					if(v3 > limit) v |= 2;
+					if(v7 > limit) v |= 4;
+					if(v6 > limit) v |= 8;
+					if(v > 0){
+						uint8_t h = v * 9;
+						for(n = 0; n < 9; n++){
+							if(cap[h] == -1) break;
+							switch(cap[h]){
+							case 0:
+								t.p[n % 3].Set(p.x, p.y + dy, p.z);
+								break;
+							case 1:
+								t.p[n % 3] = p2;
+								break;
+							case 2:
+								t.p[n % 3].Set(p.x + dx, p.y + dy, p.z);
+								break;
+							case 3:
+								t.p[n % 3] = p10;
+								break;
+							case 4:
+								t.p[n % 3].Set(p.x + dx, p.y + dy, p.z + dz);
+								break;
+							case 5:
+								t.p[n % 3] = p6;
+								break;
+							case 6:
+								t.p[n % 3].Set(p.x, p.y + dy, p.z + dz);
+								break;
+							case 7:
+								t.p[n % 3] = p11;
+								break;
+							}
+							if(n % 3 == 2) geometry.AddTriangle(t, false);
+							h++;
+						}
+
+					}
+
+				}
+
+				if(k == 0){
+					v = 0;
+					if(v0 > limit) v |= 1;
+					if(v1 > limit) v |= 2;
+					if(v3 > limit) v |= 4;
+					if(v2 > limit) v |= 8;
+					if(v > 0){
+						uint8_t h = v * 9;
+						for(n = 0; n < 9; n++){
+							if(cap[h] == -1) break;
+							switch(cap[h]){
+							case 0:
+								t.p[n % 3] = p;
+								break;
+							case 1:
+								t.p[n % 3] = p0;
+								break;
+							case 2:
+								t.p[n % 3].Set(p.x + dx, p.y, p.z);
+								break;
+							case 3:
+								t.p[n % 3] = p1;
+								break;
+							case 4:
+								t.p[n % 3].Set(p.x + dx, p.y + dy, p.z);
+								break;
+							case 5:
+								t.p[n % 3] = p2;
+								break;
+							case 6:
+								t.p[n % 3].Set(p.x, p.y + dy, p.z);
+								break;
+							case 7:
+								t.p[n % 3] = p3;
+								break;
+							}
+							if(n % 3 == 2) geometry.AddTriangle(t, false);
+							h++;
+						}
+
+					}
+
+				}
+
+				if(k == Nz - 2){
+					v = 0;
+					if(v4 > limit) v |= 1;
+					if(v6 > limit) v |= 2;
+					if(v7 > limit) v |= 4;
+					if(v5 > limit) v |= 8;
+					if(v > 0){
+						uint8_t h = v * 9;
+						for(n = 0; n < 9; n++){
+							if(cap[h] == -1) break;
+							switch(cap[h]){
+							case 0:
+								t.p[n % 3].Set(p.x, p.y, p.z + dz);
+								break;
+							case 1:
+								t.p[n % 3] = p7;
+								break;
+							case 2:
+								t.p[n % 3].Set(p.x, p.y + dy, p.z + dz);
+								break;
+							case 3:
+								t.p[n % 3] = p6;
+								break;
+							case 4:
+								t.p[n % 3].Set(p.x + dx, p.y + dy, p.z + dz);
+								break;
+							case 5:
+								t.p[n % 3] = p5;
+								break;
+							case 6:
+								t.p[n % 3].Set(p.x + dx, p.y, p.z + dz);
+								break;
+							case 7:
+								t.p[n % 3] = p4;
+								break;
+							}
+							if(n % 3 == 2) geometry.AddTriangle(t, false);
+							h++;
+						}
+
+					}
+
 				}
 
 				p.x += dx;
