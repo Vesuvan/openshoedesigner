@@ -46,10 +46,10 @@ public:
 	Shoe();
 	virtual ~Shoe();
 
-	wxString HeelHeight;
-	wxString HeelAngle;
-	wxString PlateauHeight;
-	wxString ToeAngle;
+	double heelHeight;
+	double toeHeight;
+	double toeAngle;
+	double mixing;
 };
 
 #endif /* SHOE_H_ */

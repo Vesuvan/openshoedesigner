@@ -27,7 +27,10 @@
 #include "Project.h"
 
 #include "../3D/FileSTL.h"
+#include "../gui/MathParser.h"
+
 #include <wx/wfstream.h>
+#include <GL/gl.h>
 
 Project::Project()
 {
@@ -55,7 +58,13 @@ void Project::Reset(void)
 	wxFileInputStream input(_T("data/FootModelDefault.txt"));
 	wxTextInputStream text(input);
 	foot.LoadModel(&text);
-	foot.Setup();
+
+	HeelHeight = _T("5 cm");
+	HeelAngle = _T("0 cm");
+	PlateauHeight = _T("0 deg");
+	ToeAngle = _T("0 deg");
+	Evaluate();
+
 	foot.AddToVolume(&volume);
 	volume.MarchingCubes(0.5);
 
@@ -63,7 +72,7 @@ void Project::Reset(void)
 
 void Project::Update(void)
 {
-	foot.Setup();
+
 }
 
 void Project::UpdateVolume(void)
@@ -98,7 +107,15 @@ bool Project::LoadModel(wxString fileName)
 {
 	wxFileInputStream input(fileName);
 	wxTextInputStream text(input);
-	return foot.LoadModel(&text);
+
+	if(foot.LoadModel(&text))
+
+	{
+		foot.SetPosition(shoe.heelHeight, shoe.toeAngle, shoe.mixing);
+		return true;
+	}
+	return false;
+
 }
 
 bool Project::SaveModel(wxString fileName)
@@ -142,3 +159,53 @@ void Project::PaintCutaway(void) const
 {
 }
 
+void Project::PaintFloor(void) const
+{
+	glColor3f(0.4, 0.4, 0.4);
+	glBegin(GL_QUADS);
+	glNormal3f(0, 0, 1);
+	glVertex3f(-0.5, -0.5, floorLevel);
+	glVertex3f(0.5, -0.5, floorLevel);
+	glVertex3f(0.5, 0.5, floorLevel);
+	glVertex3f(-0.5, 0.5, floorLevel);
+	glEnd();
+}
+
+bool Project::Evaluate(void)
+{
+	MathParser parser;
+	parser.autoEvaluate = false;
+	parser.AddAllowedUnit(_T("mm"), 1e-3);
+	parser.AddAllowedUnit(_T("cm"), 1e-2);
+	parser.AddAllowedUnit(_T("m"), 1);
+	parser.AddAllowedUnit(_T("in"), 2.54e-2);
+	parser.AddAllowedUnit(_T("ft"), 0.3048);
+	parser.AddAllowedUnit(_T("rad"), 1);
+	parser.AddAllowedUnit(_T("deg"), 57.296);
+	parser.AddAllowedUnit(_T("gon"), 63.662);
+
+	parser.SetVariable(_T("L"), foot.L);
+	parser.SetVariable(_T("W"), foot.W);
+	parser.SetVariable(_T("H"), foot.H);
+	parser.SetVariable(_T("A"), foot.A);
+
+	parser.SetString(HeelHeight);
+	if(!parser.Evaluate()) return false;
+	shoe.heelHeight = parser.GetNumber();
+	parser.SetString(PlateauHeight);
+	if(!parser.Evaluate()) return false;
+	shoe.toeHeight = parser.GetNumber();
+	parser.SetString(ToeAngle);
+	if(!parser.Evaluate()) return false;
+	shoe.toeAngle = parser.GetNumber();
+	parser.SetString(HeelAngle);
+	if(!parser.Evaluate()) return false;
+	shoe.mixing = parser.GetNumber();
+
+	foot.SetPosition(shoe.heelHeight - shoe.toeHeight, shoe.toeAngle,
+			shoe.mixing);
+
+	floorLevel = foot.GetHeelHeight() - shoe.heelHeight;
+
+	return true;
+}

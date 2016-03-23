@@ -28,10 +28,7 @@
 
 Shoe::Shoe()
 {
-	HeelHeight = _T("0 cm");
-	HeelAngle = _T("0 cm");
-	PlateauHeight = _T("0 deg");
-	ToeAngle = _T("0 deg");
+
 }
 
 Shoe::~Shoe()

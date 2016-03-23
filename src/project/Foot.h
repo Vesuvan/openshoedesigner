@@ -74,7 +74,7 @@
 #include <wx/grid.h>
 
 class Foot {
-	friend class FrameFoot;
+
 public:
 	Foot();
 	virtual ~Foot();
@@ -87,12 +87,20 @@ public:
 	void AddToGrid(wxGrid* gridLength, wxGrid* gridDiameter, wxGrid* gridSkin);
 	void GetFromGrid(wxGrid* gridLength, wxGrid* gridDiameter,
 			wxGrid* gridSkin);
-	void Setup(void);
+
+	void SetPosition(double heelheight, double toeAngle, double mixing = 0.5);
+	void SetSize(double L, double W, double H, double A);
+
+	double GetHeelHeight(void) const;
+	double GetToeHeight(void) const;
+
 	void AddToVolume(Volume* vol);
 
 private:
 	void InitBones(void);
+	void Update(void);
 
+public:
 	double L, W, H, A;
 
 private:

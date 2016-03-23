@@ -64,8 +64,20 @@ public:
 	void PaintSole(void) const;
 	void PaintUpper(void) const;
 	void PaintCutaway(void) const;
+	void PaintFloor(void) const;
+	bool Evaluate(void);
+
+public:
+
+	wxString HeelHeight;
+	wxString HeelAngle;
+	wxString PlateauHeight;
+	wxString ToeAngle;
 
 private:
+
+	double floorLevel;
+
 	Foot foot;
 	Shoe shoe;
 	Pattern pattern;

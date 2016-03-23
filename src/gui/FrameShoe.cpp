@@ -42,11 +42,10 @@ FrameShoe::~FrameShoe()
 
 bool FrameShoe::TransferDataToWindow()
 {
-	Shoe *shoe = project->GetShoe();
-	m_textCtrlHeelHeight->SetValue(shoe->HeelHeight);
-	m_textCtrlPlateauHeight->SetValue(shoe->PlateauHeight);
-	m_textCtrlHeelAngle->SetValue(shoe->HeelAngle);
-	m_textCtrlToeAngle->SetValue(shoe->ToeAngle);
+	m_textCtrlHeelHeight->SetValue(project->HeelHeight);
+	m_textCtrlPlateauHeight->SetValue(project->PlateauHeight);
+	m_textCtrlHeelAngle->SetValue(project->HeelAngle);
+	m_textCtrlToeAngle->SetValue(project->ToeAngle);
 	return true;
 }
 
@@ -60,6 +59,7 @@ void FrameShoe::OnCloseX(wxCloseEvent& event)
 void FrameShoe::OnText(wxCommandEvent& event)
 {
 	TransferDataFromWindow();
+	project->Evaluate();
 	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CALCULATELAST);
 	ProcessEvent(selectEvent);
 }
@@ -70,64 +70,63 @@ void FrameShoe::OnClick(wxCommandEvent& event)
 
 void FrameShoe::OnPreset(wxCommandEvent& event)
 {
-	Shoe *shoe = project->GetShoe();
 	// 0.26 m is the average footlength (= size EU 39).
 	switch(event.GetId()){
 	case ID_PRESETFLATS:
-		shoe->HeelHeight = _T("0 cm");
-		shoe->PlateauHeight = _T("0 cm");
-		shoe->HeelAngle = _T("0 deg");
-		shoe->ToeAngle = _T("0 deg");
+		project->HeelHeight = _T("0 cm");
+		project->PlateauHeight = _T("0 cm");
+		project->HeelAngle = _T("0 deg");
+		project->ToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETHIKING:
-		shoe->HeelHeight = _T("4 cm");
-		shoe->PlateauHeight = _T("1 cm");
-		shoe->HeelAngle = _T("0 deg");
-		shoe->ToeAngle = _T("0 deg");
+		project->HeelHeight = _T("4 cm");
+		project->PlateauHeight = _T("1 cm");
+		project->HeelAngle = _T("0 deg");
+		project->ToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETPLATEAU:
-		shoe->HeelHeight = _T("11 cm");
-		shoe->PlateauHeight = _T("9 cm");
-		shoe->HeelAngle = _T("0 deg");
-		shoe->ToeAngle = _T("0 deg");
+		project->HeelHeight = _T("11 cm");
+		project->PlateauHeight = _T("9 cm");
+		project->HeelAngle = _T("0 deg");
+		project->ToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETHHLOW:
-		shoe->HeelHeight = _T("7*(L/0.26) cm");
-		shoe->PlateauHeight = _T("0 cm");
-		shoe->HeelAngle = _T("0 deg");
-		shoe->ToeAngle = _T("0 deg");
+		project->HeelHeight = _T("7*(L/0.26) cm");
+		project->PlateauHeight = _T("0 cm");
+		project->HeelAngle = _T("0 deg");
+		project->ToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETHHMID:
-		shoe->HeelHeight = _T("10*(L/0.26) cm");
-		shoe->PlateauHeight = _T("0 cm");
-		shoe->HeelAngle = _T("0 deg");
-		shoe->ToeAngle = _T("0 deg");
+		project->HeelHeight = _T("10*(L/0.26) cm");
+		project->PlateauHeight = _T("0 cm");
+		project->HeelAngle = _T("0 deg");
+		project->ToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETHHHIGH:
-		shoe->HeelHeight = _T("13*(L/0.26) cm");
-		shoe->PlateauHeight = _T("0 cm");
-		shoe->HeelAngle = _T("0 deg");
-		shoe->ToeAngle = _T("0 deg");
+		project->HeelHeight = _T("13*(L/0.26) cm");
+		project->PlateauHeight = _T("0 cm");
+		project->HeelAngle = _T("0 deg");
+		project->ToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETPLATFORM:
-		shoe->HeelHeight = _T("15*(L/0.26) cm");
-		shoe->PlateauHeight = _T("5*(L/0.26) cm");
-		shoe->HeelAngle = _T("0 deg");
-		shoe->ToeAngle = _T("0 deg");
+		project->HeelHeight = _T("15*(L/0.26) cm");
+		project->PlateauHeight = _T("5*(L/0.26) cm");
+		project->HeelAngle = _T("0 deg");
+		project->ToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETPONY:
-		shoe->HeelHeight = _T("16*(L/0.26) cm");
-		shoe->PlateauHeight = _T("0 cm");
-		shoe->HeelAngle = _T("0 deg");
-		shoe->ToeAngle = _T("45 deg");
+		project->HeelHeight = _T("16*(L/0.26) cm");
+		project->PlateauHeight = _T("0 cm");
+		project->HeelAngle = _T("0 deg");
+		project->ToeAngle = _T("45 deg");
 		break;
 	case ID_PRESETBALLET:
-		shoe->HeelHeight = _T("20*(L/0.26) cm");
-		shoe->PlateauHeight = _T("0 cm");
-		shoe->HeelAngle = _T("0 deg");
-		shoe->ToeAngle = _T("90 deg");
+		project->HeelHeight = _T("20*(L/0.26) cm");
+		project->PlateauHeight = _T("0 cm");
+		project->HeelAngle = _T("0 deg");
+		project->ToeAngle = _T("90 deg");
 		break;
-
 	}
+	project->Evaluate();
 	TransferDataToWindow();
 }

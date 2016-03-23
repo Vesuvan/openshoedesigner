@@ -111,6 +111,7 @@ Foot::Foot()
 
 	InitBones();
 
+	Update();
 }
 
 Foot::~Foot()
@@ -129,22 +130,79 @@ void Foot::AddToVolume(Volume* vol)
 	Tibia->Accept(b2v);
 }
 
-void Foot::Setup(void)
+void Foot::SetPosition(double heelheight, double toeAngle, double mixing)
 {
-	// Passe the parameters down to each bone.
-//	Talus->roty = param->angle_1Y;
-//	Talus->rotx = param->angle_1X;
-//	Calcaneus->rotx = param->angle_2X;
-//	PhalanxI1->roty = param->angle_3Y;
-//	PhalanxI2->roty = param->angle_3Y;
-//	PhalanxI3->roty = param->angle_3Y;
-//	PhalanxI4->roty = param->angle_3Y;
-//	PhalanxI5->roty = param->angle_3Y;
+	Talus->roty = 0;
+	Talus->rotx = 0;
+	Calcaneus->rotx = 0;
+	PhalanxI1->roty = 0;
+	PhalanxI2->roty = 0;
+	PhalanxI3->roty = 0;
+	PhalanxI4->roty = 0;
+	PhalanxI5->roty = 0;
 
-// Run the VisitorSetupBone visitor to recalculate each single bone.
+	Update();
+
+	double h1, h2;
+	int c = 100;
+	while(Talus->roty > -M_PI / 2 && Talus->roty < M_PI / 2 && c > 0){
+		h1 = GetHeelHeight();
+		h2 = GetToeHeight();
+		if(h1 - h2 < heelheight){
+			Talus->roty += 0.01;
+		}else{
+			Talus->roty -= 0.01;
+		}
+		Update();
+		c--;
+	}
+
+	PhalanxI1->roty = -Talus->roty;
+	PhalanxI2->roty = -Talus->roty;
+	PhalanxI3->roty = -Talus->roty;
+	PhalanxI4->roty = -Talus->roty;
+	PhalanxI5->roty = -Talus->roty;
+
+	c = 100;
+	while(Talus->roty > -M_PI / 2 && Talus->roty < M_PI / 2 && c > 0){
+		h1 = GetHeelHeight();
+		h2 = GetToeHeight();
+		if(h1 - h2 < heelheight){
+			Talus->roty += 0.001;
+		}else{
+			Talus->roty -= 0.001;
+		}
+		Update();
+		c--;
+	}
+
+}
+
+void Foot::SetSize(double L, double W, double H, double A)
+{
+	this->L = L;
+	this->W = W;
+	this->H = H;
+	this->A = A;
+}
+
+double Foot::GetHeelHeight(void) const
+{
+	return Calcaneus->p2.z - Calcaneus->r2 - Calcaneus->s2;
+}
+
+double Foot::GetToeHeight(void) const
+{
+	return PhalanxI5->p1.z - PhalanxI5->r1 - PhalanxI5->s1;
+}
+void Foot::Update(void)
+{
+	// Run the VisitorSetupBone visitor to recalculate each single bone.
 	VisitorSetupBone set;
 	set.parser.SetVariable(_T("L"), L);
 	set.parser.SetVariable(_T("W"), W);
+	set.parser.SetVariable(_T("H"), H);
+	set.parser.SetVariable(_T("A"), A);
 	Tibia->Accept(set);
 }
 
@@ -462,6 +520,8 @@ bool Foot::LoadModel(wxTextInputStream* stream)
 	if(!PhalanxIII2->Set(stream->ReadLine())) return false;
 	if(!PhalanxIII3->Set(stream->ReadLine())) return false;
 	if(!PhalanxIII4->Set(stream->ReadLine())) return false;
+
+	Update();
 
 	return true;
 }
