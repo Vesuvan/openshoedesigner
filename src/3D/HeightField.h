@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Shoe.cpp
+// Name               : HeightField.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 29.09.2015
-// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 23.03.2016
+// Copyright          : (C) 2016 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,17 +24,44 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "Shoe.h"
+#ifndef HEIGHTFIELD_H_
+#define HEIGHTFIELD_H_
 
-Shoe::Shoe()
-{
-	heelHeight = 0.0;
-	toeHeight = 0.0;
-	toeAngle = 0.0;
-	mixing = 0.5;
-}
+/*!\class HeightField
+ * \brief Planar 2.5D heightfield
+ *
+ * Grid of points with a height. This class provides some operations to generate some Polygon3 objects from it.
+ */
 
-Shoe::~Shoe()
-{
-}
+#include "AffineTransformMatrix.h"
+#include "Vector3.h"
 
+class HeightField {
+public:
+	HeightField();
+	virtual ~HeightField();
+
+	void SetCount(unsigned int nx, unsigned int ny, float resolution);
+	void SetSize(float x, float y, float resolution);
+
+	void SetValues(double *v, unsigned int size);
+
+	void Clear(void);
+
+	void Paint(void) const;
+
+	AffineTransformMatrix matrix;
+	Vector3 color;
+
+private:
+
+	double * value;
+
+	unsigned int Nx;
+	unsigned int Ny;
+	unsigned int N;
+	float dx;
+	float dy;
+};
+
+#endif /* HEIGHTFIELD_H_ */

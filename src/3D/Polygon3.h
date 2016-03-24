@@ -28,14 +28,15 @@
 #define POLYGON3_H_
 
 /*!\class Polygon3
- * \brief ...
+ * \brief Polygon in 3D space.
  *
- * ...
+ * Loop of Vector3 objects that form a polygon.
  */
 
-#include <wx/dynarray.h>
-#include "Vector3.h"
 #include "AffineTransformMatrix.h"
+#include "Vector3.h"
+
+#include <wx/dynarray.h>
 
 class Polygon3 {
 	// Constructor / Destructor

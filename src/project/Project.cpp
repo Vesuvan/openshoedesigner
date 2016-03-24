@@ -60,8 +60,8 @@ void Project::Reset(void)
 	foot.LoadModel(&text);
 
 	HeelHeight = _T("5 cm");
-	HeelAngle = _T("0 cm");
-	PlateauHeight = _T("0 deg");
+	Mixing = _T("0 cm");
+	ToeHeight = _T("0 deg");
 	ToeAngle = _T("0 deg");
 	Evaluate();
 
@@ -80,6 +80,7 @@ void Project::UpdateVolume(void)
 	volume.Clear();
 	foot.AddToVolume(&volume);
 	volume.MarchingCubes(0.5);
+	volume.FillHeightField(&sole);
 }
 
 const Foot* Project::GetFoot(void) const
@@ -140,7 +141,7 @@ void Project::PaintBones(void) const
 
 void Project::PaintLast(void) const
 {
-	volume.Render();
+	volume.Paint();
 }
 
 void Project::PaintInsole(void) const
@@ -149,6 +150,7 @@ void Project::PaintInsole(void) const
 
 void Project::PaintSole(void) const
 {
+	sole.Paint();
 }
 
 void Project::PaintUpper(void) const
@@ -181,8 +183,8 @@ bool Project::Evaluate(void)
 	parser.AddAllowedUnit(_T("in"), 2.54e-2);
 	parser.AddAllowedUnit(_T("ft"), 0.3048);
 	parser.AddAllowedUnit(_T("rad"), 1);
-	parser.AddAllowedUnit(_T("deg"), 57.296);
-	parser.AddAllowedUnit(_T("gon"), 63.662);
+	parser.AddAllowedUnit(_T("deg"), 0.017453);
+	parser.AddAllowedUnit(_T("gon"), 0.015708);
 
 	parser.SetVariable(_T("L"), foot.L);
 	parser.SetVariable(_T("W"), foot.W);
@@ -192,15 +194,16 @@ bool Project::Evaluate(void)
 	parser.SetString(HeelHeight);
 	if(!parser.Evaluate()) return false;
 	shoe.heelHeight = parser.GetNumber();
-	parser.SetString(PlateauHeight);
+	parser.SetString(ToeHeight);
 	if(!parser.Evaluate()) return false;
 	shoe.toeHeight = parser.GetNumber();
 	parser.SetString(ToeAngle);
 	if(!parser.Evaluate()) return false;
 	shoe.toeAngle = parser.GetNumber();
-	parser.SetString(HeelAngle);
+	parser.SetString(Mixing);
 	if(!parser.Evaluate()) return false;
 	shoe.mixing = parser.GetNumber();
+	shoe.mixing = 0.1;
 
 	foot.SetPosition(shoe.heelHeight - shoe.toeHeight, shoe.toeAngle,
 			shoe.mixing);

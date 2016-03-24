@@ -27,6 +27,7 @@
 #ifndef VOLUME_H_
 #define VOLUME_H_
 
+#include "HeightField.h"
 #include "AffineTransformMatrix.h"
 #include "Geometry.h"
 #include "Vector3.h"
@@ -60,7 +61,9 @@ public:
 			const float r2, const float k1, const float k2);
 
 	void MarchingCubes(float limit = 0.5);
-	void Render(void) const;
+	void Paint(void) const;
+
+	void FillHeightField(HeightField *heightfield) const;
 
 	AffineTransformMatrix matrix;
 	Vector3 color;

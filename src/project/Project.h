@@ -70,8 +70,8 @@ public:
 public:
 
 	wxString HeelHeight;
-	wxString HeelAngle;
-	wxString PlateauHeight;
+	wxString Mixing;
+	wxString ToeHeight;
 	wxString ToeAngle;
 
 private:
@@ -81,6 +81,7 @@ private:
 	Foot foot;
 	Shoe shoe;
 	Pattern pattern;
+	HeightField sole;
 
 	Volume volume;
 };

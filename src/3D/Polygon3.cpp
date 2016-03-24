@@ -27,9 +27,10 @@
 
 #include "Polygon3.h"
 
-#include <float.h>
 #include <GL/gl.h>
-#include <wx/arrimpl.cpp> // this is a magic incantation which must be done!
+#include <wx/arrimpl.cpp>
+#include <float.h>
+
 WX_DEFINE_OBJARRAY(ArrayOfPolygon3)
 
 Polygon3::Polygon3()
@@ -51,6 +52,7 @@ void Polygon3::InsertPoint(double x, double y, double z)
 	Vector3 temp(x, y, z);
 	elements.Add(temp);
 }
+
 //! Overloaded operator for polygon concatenation.
 Polygon3 & Polygon3::operator+=(const Polygon3 &a)
 {
@@ -149,6 +151,7 @@ void Polygon3::ApplyTransformation(void)
 		elements[i] = matrix.Transform(elements[i]);
 	matrix.SetIdentity();
 }
+
 void Polygon3::ApplyTransformation(const AffineTransformMatrix &matrix)
 {
 	size_t i;

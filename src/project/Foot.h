@@ -92,7 +92,7 @@ public:
 	void SetSize(double L, double W, double H, double A);
 
 	double GetHeelHeight(void) const;
-	double GetToeHeight(void) const;
+	double GetBallHeight(void) const;
 
 	void AddToVolume(Volume* vol);
 

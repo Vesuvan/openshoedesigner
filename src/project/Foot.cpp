@@ -143,39 +143,35 @@ void Foot::SetPosition(double heelheight, double toeAngle, double mixing)
 
 	Update();
 
-	double h1, h2;
-	int c = 100;
-	while(Talus->roty > -M_PI / 2 && Talus->roty < M_PI / 2 && c > 0){
-		h1 = GetHeelHeight();
-		h2 = GetToeHeight();
-		if(h1 - h2 < heelheight){
-			Talus->roty += 0.01;
-		}else{
-			Talus->roty -= 0.01;
+	double h;
+	double ang = 0.0;
+	;
+	double inc = 2.0;
+	int c;
+	for(c = 0; c < 10; c++){
+		inc /= 2.0;
+		h = GetHeelHeight() - GetBallHeight();
+		if(h < heelheight){
+			ang = fmin(ang + inc, 1.2);
 		}
-		Update();
-		c--;
-	}
-
-	PhalanxI1->roty = -Talus->roty;
-	PhalanxI2->roty = -Talus->roty;
-	PhalanxI3->roty = -Talus->roty;
-	PhalanxI4->roty = -Talus->roty;
-	PhalanxI5->roty = -Talus->roty;
-
-	c = 100;
-	while(Talus->roty > -M_PI / 2 && Talus->roty < M_PI / 2 && c > 0){
-		h1 = GetHeelHeight();
-		h2 = GetToeHeight();
-		if(h1 - h2 < heelheight){
-			Talus->roty += 0.001;
-		}else{
-			Talus->roty -= 0.001;
+		if(h > heelheight){
+			ang = fmax(ang - inc, -0.5);
 		}
-		Update();
-		c--;
-	}
 
+		Talus->roty = ang * (1 - mixing);
+
+		Cuboideum->roty = ang * mixing;
+		Cuneiforme1->roty = ang * mixing;
+		Cuneiforme2->roty = ang * mixing;
+		Cuneiforme3->roty = ang * mixing;
+
+		PhalanxI1->roty = -ang + toeAngle;
+		PhalanxI2->roty = -ang + toeAngle;
+		PhalanxI3->roty = -ang + toeAngle;
+		PhalanxI4->roty = -ang + toeAngle;
+		PhalanxI5->roty = -ang + toeAngle;
+		Update();
+	}
 }
 
 void Foot::SetSize(double L, double W, double H, double A)
@@ -191,7 +187,7 @@ double Foot::GetHeelHeight(void) const
 	return Calcaneus->p2.z - Calcaneus->r2 - Calcaneus->s2;
 }
 
-double Foot::GetToeHeight(void) const
+double Foot::GetBallHeight(void) const
 {
 	return PhalanxI5->p1.z - PhalanxI5->r1 - PhalanxI5->s1;
 }

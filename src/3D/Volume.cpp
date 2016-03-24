@@ -1032,7 +1032,7 @@ void Volume::MarchingCubes(float limit)
 
 }
 
-void Volume::Render(void) const
+void Volume::Paint(void) const
 {
 
 	glPushMatrix();
@@ -1088,3 +1088,37 @@ void Volume::Render(void) const
 	glPopMatrix();
 }
 
+void Volume::FillHeightField(HeightField* heightfield) const
+{
+	heightfield->matrix = matrix;
+	heightfield->SetCount(Nx, Ny, dx);
+
+	unsigned int h = Nx * Ny;
+
+	double *temp = new double[h];
+	for(unsigned int n = 0; n < h; n++)
+		temp[n] = 0.0;
+
+	if(temp == NULL) throw(__FILE__ "FillHeightField() - Not enough memory.");
+
+	unsigned int i, j, k;
+	double c;
+	for(i = 0; i < h; i++){
+		double v0 = value[i];
+		j = i;
+		for(k = 1; k < Nz; k++){
+			j += h;
+			if(value[j] > 0.5){
+				if(v0 > 0.5){
+					temp[i] = (double) (k - 1) * dz;
+				}else{
+					c = fmin(fmax((0.5 - v0) / (value[j] - v0), 0), 1);
+					temp[i] = ((double) (k - 1) + c) * dz;
+				}
+				break;
+			}
+			v0 = value[j];
+		}
+	}
+	heightfield->SetValues(temp, h);
+}

@@ -43,8 +43,8 @@ FrameShoe::~FrameShoe()
 bool FrameShoe::TransferDataToWindow()
 {
 	m_textCtrlHeelHeight->SetValue(project->HeelHeight);
-	m_textCtrlPlateauHeight->SetValue(project->PlateauHeight);
-	m_textCtrlHeelAngle->SetValue(project->HeelAngle);
+	m_textCtrlPlateauHeight->SetValue(project->ToeHeight);
+	m_textCtrlHeelAngle->SetValue(project->Mixing);
 	m_textCtrlToeAngle->SetValue(project->ToeAngle);
 	return true;
 }
@@ -74,56 +74,56 @@ void FrameShoe::OnPreset(wxCommandEvent& event)
 	switch(event.GetId()){
 	case ID_PRESETFLATS:
 		project->HeelHeight = _T("0 cm");
-		project->PlateauHeight = _T("0 cm");
-		project->HeelAngle = _T("0 deg");
+		project->ToeHeight = _T("0 cm");
+		project->Mixing = _T("0 deg");
 		project->ToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETHIKING:
-		project->HeelHeight = _T("4 cm");
-		project->PlateauHeight = _T("1 cm");
-		project->HeelAngle = _T("0 deg");
+		project->HeelHeight = _T("3 cm");
+		project->ToeHeight = _T("1.5 cm");
+		project->Mixing = _T("0 deg");
 		project->ToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETPLATEAU:
 		project->HeelHeight = _T("11 cm");
-		project->PlateauHeight = _T("9 cm");
-		project->HeelAngle = _T("0 deg");
+		project->ToeHeight = _T("9 cm");
+		project->Mixing = _T("0 deg");
 		project->ToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETHHLOW:
 		project->HeelHeight = _T("7*(L/0.26) cm");
-		project->PlateauHeight = _T("0 cm");
-		project->HeelAngle = _T("0 deg");
+		project->ToeHeight = _T("0 cm");
+		project->Mixing = _T("0 deg");
 		project->ToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETHHMID:
 		project->HeelHeight = _T("10*(L/0.26) cm");
-		project->PlateauHeight = _T("0 cm");
-		project->HeelAngle = _T("0 deg");
+		project->ToeHeight = _T("0 cm");
+		project->Mixing = _T("0 deg");
 		project->ToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETHHHIGH:
 		project->HeelHeight = _T("13*(L/0.26) cm");
-		project->PlateauHeight = _T("0 cm");
-		project->HeelAngle = _T("0 deg");
+		project->ToeHeight = _T("0 cm");
+		project->Mixing = _T("0 deg");
 		project->ToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETPLATFORM:
 		project->HeelHeight = _T("15*(L/0.26) cm");
-		project->PlateauHeight = _T("5*(L/0.26) cm");
-		project->HeelAngle = _T("0 deg");
+		project->ToeHeight = _T("5*(L/0.26) cm");
+		project->Mixing = _T("0 deg");
 		project->ToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETPONY:
 		project->HeelHeight = _T("16*(L/0.26) cm");
-		project->PlateauHeight = _T("0 cm");
-		project->HeelAngle = _T("0 deg");
+		project->ToeHeight = _T("0 cm");
+		project->Mixing = _T("0 deg");
 		project->ToeAngle = _T("45 deg");
 		break;
 	case ID_PRESETBALLET:
 		project->HeelHeight = _T("20*(L/0.26) cm");
-		project->PlateauHeight = _T("0 cm");
-		project->HeelAngle = _T("0 deg");
+		project->ToeHeight = _T("0 cm");
+		project->Mixing = _T("0 deg");
 		project->ToeAngle = _T("90 deg");
 		break;
 	}
