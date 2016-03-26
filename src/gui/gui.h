@@ -28,16 +28,16 @@
 #include <wx/radiobut.h>
 #include <wx/button.h>
 #include <wx/dialog.h>
+#include <wx/statbox.h>
 #include <wx/panel.h>
 #include <wx/grid.h>
 #include <wx/notebook.h>
-#include <wx/checkbox.h>
+#include <wx/slider.h>
 #include "PanelSupport.h"
 #include "PanelWalkcycle.h"
-#include <wx/statbox.h>
+#include <wx/checkbox.h>
 #include "PanelPlotSimple.h"
 #include "PanelPattern.h"
-#include <wx/slider.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -73,7 +73,7 @@
 #define ID_PRESETFLATS 1029
 #define ID_PRESETHHLOW 1030
 #define ID_PRESETPLATFORM 1031
-#define ID_PRESETHIKING 1032
+#define ID_PRESETCLASSIC 1032
 #define ID_PRESETHHMID 1033
 #define ID_PRESETPONY 1034
 #define ID_PRESETPLATEAU 1035
@@ -180,6 +180,16 @@ class GUIFrameFoot : public wxFrame
 		wxTextCtrl* m_textCtrlHeelWidth;
 		wxStaticText* m_staticText27;
 		wxTextCtrl* m_textCtrlAnkleWidth;
+		
+		wxButton* m_buttonSetByShoeSize;
+		
+		wxStaticText* m_staticTextShoeSizeEU;
+		wxTextCtrl* m_textCtrlShoeSizeEU;
+		wxStaticText* m_staticTextShoeSizeUS;
+		wxTextCtrl* m_textCtrlShoeSizeUS;
+		wxStaticText* m_staticTextShoeSizeUK;
+		wxTextCtrl* m_textCtrlShoeSizeUK;
+		
 		wxPanel* m_panelBone;
 		wxGrid* m_gridBoneLength;
 		wxPanel* m_panelBoneDiameter;
@@ -196,13 +206,14 @@ class GUIFrameFoot : public wxFrame
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnCloseX( wxCloseEvent& event ) = 0;
 		virtual void OnText( wxCommandEvent& event ) = 0;
+		virtual void OnSetByShoeSize( wxCommandEvent& event ) = 0;
 		virtual void OnCellChange( wxGridEvent& event ) = 0;
 		virtual void OnClose( wxCommandEvent& event ) = 0;
 		
 	
 	public:
 		
-		GUIFrameFoot( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Foot Setup"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 709,321 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxTAB_TRAVERSAL );
+		GUIFrameFoot( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Foot Setup"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 709,321 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
 		~GUIFrameFoot();
 	
 };
@@ -215,18 +226,22 @@ class GUIFrameShoe : public wxFrame
 	private:
 	
 	protected:
-		wxCheckBox* m_checkBoxHeelHeight;
+		wxStaticText* m_staticTextHeelHeight;
 		wxTextCtrl* m_textCtrlHeelHeight;
-		wxCheckBox* m_checkBoxPlateauHeight;
-		wxTextCtrl* m_textCtrlPlateauHeight;
-		wxCheckBox* m_checkBoxHeelAngle;
-		wxTextCtrl* m_textCtrlHeelAngle;
-		wxCheckBox* m_checkBoxToeAngle;
+		wxTextCtrl* m_textCtrlResultHeelHeight;
+		wxStaticText* m_staticTextBallHeight;
+		wxTextCtrl* m_textCtrlBallHeight;
+		wxTextCtrl* m_textCtrlResultBallHeight;
+		wxStaticText* m_staticTextToeAngle;
 		wxTextCtrl* m_textCtrlToeAngle;
+		wxTextCtrl* m_textCtrlResultToeAngle;
+		wxStaticText* m_staticTextMixing;
+		wxSlider* m_sliderMixing;
+		wxTextCtrl* m_textCtrlResultMixing;
 		wxButton* m_buttonFlats;
 		wxButton* m_buttonHHLow;
 		wxButton* m_buttonPlatform;
-		wxButton* m_buttonHiking;
+		wxButton* m_buttonClassic;
 		wxButton* m_buttonHHMid;
 		wxButton* m_buttonPony;
 		wxButton* m_buttonPlateau;
@@ -235,14 +250,15 @@ class GUIFrameShoe : public wxFrame
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnCloseX( wxCloseEvent& event ) = 0;
-		virtual void OnClick( wxCommandEvent& event ) = 0;
-		virtual void OnText( wxCommandEvent& event ) = 0;
+		virtual void OnTextEnter( wxCommandEvent& event ) = 0;
+		virtual void OnScroll( wxScrollEvent& event ) = 0;
+		virtual void OnScrollChange( wxScrollEvent& event ) = 0;
 		virtual void OnPreset( wxCommandEvent& event ) = 0;
 		
 	
 	public:
 		
-		GUIFrameShoe( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Basic Shoe Setup"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxTAB_TRAVERSAL );
+		GUIFrameShoe( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Basic Shoe Setup"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 436,287 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
 		~GUIFrameShoe();
 	
 };

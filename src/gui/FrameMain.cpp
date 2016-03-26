@@ -27,11 +27,11 @@
 #include "FrameMain.h"
 
 #include "IDs.h"
-#include "../3D/FileSTL.h"
 #include "DialogQuickInitFoot.h"
+#include "../3D/FileSTL.h"
+#include "../languages.h"
 //#include <wx/file.h>
 #include <wx/filedlg.h>
-
 #include <wx/filename.h>
 #include <wx/dir.h>
 
@@ -48,6 +48,7 @@ FrameMain::FrameMain(wxWindow* parent, wxLocale* locale, wxConfig* config) :
 	settings.WriteToCanvas(m_canvas);
 
 	thread = NULL;
+	updateVolume = false;
 
 	dialogShoe = new FrameShoe(this, &project);
 	dialogFoot = new FrameFoot(this, &project);
@@ -57,16 +58,14 @@ FrameMain::FrameMain(wxWindow* parent, wxLocale* locale, wxConfig* config) :
 	dialogDebugParser = new FrameDebugParser(this);
 
 	TransferDataToWindow();
-	this->Connect(ID_REFRESH, wxEVT_COMMAND_MENU_SELECTED,
+	this->Connect(ID_REFRESHDISPLAY, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::RefreshMain));
-	this->Connect(ID_UPDATE3DVIEW, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::Update3DView));
-	this->Connect(ID_UPDATEGUI, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::UpdateGUI));
-	this->Connect(ID_REFRESHPROJECT, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::RefreshProject));
-	this->Connect(ID_CALCULATELAST, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::CalculateLast));
+	this->Connect(ID_REFRESHMAINGUI, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::UpdateMainGUI));
+	this->Connect(ID_REFRESHFULLGUI, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::UpdateFullGUI));
+	this->Connect(ID_UPDATEPROJECT, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::UpdateProject));
 	this->Connect(ID_THREADLASTDONE, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::LastCalculationDone));
 }
@@ -79,15 +78,13 @@ FrameMain::~FrameMain()
 	}
 	this->Disconnect(ID_THREADLASTDONE, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::LastCalculationDone));
-	this->Disconnect(ID_CALCULATELAST, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::CalculateLast));
-	this->Disconnect(ID_REFRESHPROJECT, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::RefreshProject));
-	this->Disconnect(ID_UPDATEGUI, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::UpdateGUI));
-	this->Disconnect(ID_UPDATE3DVIEW, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::Update3DView));
-	this->Disconnect(ID_REFRESH, wxEVT_COMMAND_MENU_SELECTED,
+	this->Disconnect(ID_UPDATEPROJECT, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::UpdateProject));
+	this->Disconnect(ID_REFRESHFULLGUI, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::UpdateFullGUI));
+	this->Disconnect(ID_REFRESHMAINGUI, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::UpdateMainGUI));
+	this->Disconnect(ID_REFRESHDISPLAY, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::RefreshMain));
 
 	settings.WriteConfigTo(config);
@@ -132,27 +129,21 @@ bool FrameMain::TransferDataFromWindow()
 
 void FrameMain::RefreshMain(wxCommandEvent& event)
 {
+	settings.WriteToCanvas(m_canvas);
+	m_canvas->Refresh();
 	Refresh();
 }
 
-void FrameMain::UpdateGUI(wxCommandEvent& event)
+void FrameMain::UpdateMainGUI(wxCommandEvent& event)
 {
 	TransferDataToWindow();
 }
 
-void FrameMain::Update3DView(wxCommandEvent& event)
+void FrameMain::UpdateFullGUI(wxCommandEvent& event)
 {
-	project.Update();
+	TransferDataToWindow();
 
-	settings.WriteToCanvas(m_canvas);
-	m_canvas->Refresh();
-
-	Refresh();
-}
-
-void FrameMain::RefreshProject(wxCommandEvent& event)
-{
-	//dialogFoot->TransferDataToWindow();
+//	dialogFoot->TransferDataToWindow();
 	dialogShoe->TransferDataToWindow();
 //	dialogPattern->TransferDataToWindow();
 //	dialogWalkcycleSupport->TransferDataToWindow();
@@ -160,13 +151,21 @@ void FrameMain::RefreshProject(wxCommandEvent& event)
 	this->Refresh(); // FIXME: Recursive refresh not work with GTK1. Call Refresh on every child-dialog by hand.
 }
 
-void FrameMain::CalculateLast(wxCommandEvent& event)
+void FrameMain::UpdateProject(wxCommandEvent& event)
 {
+	project.Evaluate();
+
 	if(thread == NULL){
 		thread = new LastGenerationThread(this, &project);
 		thread->Create();
 		thread->Run();
+		updateVolume = false;
+	}else{
+		updateVolume = true;
 	}
+
+	m_canvas->Refresh();
+	Refresh();
 }
 
 void FrameMain::LastCalculationDone(wxCommandEvent& event)
@@ -176,7 +175,14 @@ void FrameMain::LastCalculationDone(wxCommandEvent& event)
 		delete thread;
 		thread = NULL;
 	}
+	if(updateVolume){
+		thread = new LastGenerationThread(this, &project);
+		thread->Create();
+		thread->Run();
+	}
+	m_canvas->Refresh();
 	Refresh();
+	updateVolume = false;
 }
 
 void FrameMain::OnToolClicked(wxCommandEvent& event)
@@ -207,7 +213,7 @@ void FrameMain::OnLoadFootModel(wxCommandEvent& event)
 	if(dialog.ShowModal() == wxID_OK){
 		wxFileName fileName(dialog.GetPath());
 		if(project.LoadModel(fileName.GetFullPath())){
-			project.Update();
+			project.Evaluate();
 			settings.lastFootDirectory = fileName.GetPath();
 			TransferDataToWindow();
 		}
@@ -253,7 +259,9 @@ void FrameMain::OnQuit(wxCommandEvent& event)
 void FrameMain::OnInitializeFootModel(wxCommandEvent& event)
 {
 	DialogQuickInitFoot dialog(this);
-	dialog.ShowModal();
+	if(dialog.ShowModal() == wxID_OK){
+
+	}
 }
 
 void FrameMain::OnSetupFoot(wxCommandEvent& event)
@@ -346,6 +354,12 @@ void FrameMain::OnAbout(wxCommandEvent& event)
 
 void FrameMain::OnSelectLanguage(wxCommandEvent& event)
 {
+	long lng =
+			wxGetSingleChoiceIndex(
+					_T(
+							"Please choose language:\nChanges will take place after restart!"),
+					_T("Language"), WXSIZEOF(langNames), langNames);
+	config->Write(_T("Language"), langNames[lng]);
 }
 
 void FrameMain::OnDebug(wxCommandEvent& event)

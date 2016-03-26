@@ -32,9 +32,9 @@
 #include <wx/frame.h>
 
 /*!\class LastGenerationThread
- * \brief ...
+ * \brief Thread for the loadheavy calculation of the volume
  *
- * ...
+ * This thread inscribes the volume with the bones of the foot.
  */
 
 class LastGenerationThread:public wxThread {

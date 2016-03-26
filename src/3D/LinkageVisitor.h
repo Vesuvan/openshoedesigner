@@ -29,6 +29,7 @@
 
 /*!\class LinkageVisitor
  * \brief Visitor class for 3D object collections
+ *
  * Abstract Visitor class for the Linkage class.
  * Inherit this to a class that will operate on the objects in the tree.
  */

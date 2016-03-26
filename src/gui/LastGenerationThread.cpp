@@ -46,7 +46,6 @@ void* LastGenerationThread::Entry()
 
 	wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, ID_THREADLASTDONE);
 	wxPostEvent(frame, event);
-
 	return NULL;
 }
 

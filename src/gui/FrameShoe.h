@@ -41,9 +41,10 @@ public:
 
 	bool TransferDataToWindow();
 	virtual void OnCloseX(wxCloseEvent& event);
-	virtual void OnText(wxCommandEvent& event);
-	virtual void OnClick(wxCommandEvent& event);
+	virtual void OnTextEnter(wxCommandEvent& event);
 	virtual void OnPreset(wxCommandEvent& event);
+	virtual void OnScroll(wxScrollEvent& event);
+	virtual void OnScrollChange(wxScrollEvent& event);
 
 private:
 	Project* project;

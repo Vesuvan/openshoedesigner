@@ -60,10 +60,9 @@ public:
 	bool TransferDataFromWindow();
 
 	void RefreshMain(wxCommandEvent& event);
-	void UpdateGUI(wxCommandEvent& event);
-	void Update3DView(wxCommandEvent& event);
-	void RefreshProject(wxCommandEvent& event);
-	void CalculateLast(wxCommandEvent& event);
+	void UpdateMainGUI(wxCommandEvent& event);
+	void UpdateFullGUI(wxCommandEvent& event);
+	void UpdateProject(wxCommandEvent& event);
 	void LastCalculationDone(wxCommandEvent& event);
 
 	virtual void OnLoadFootModel(wxCommandEvent& event);
@@ -104,6 +103,10 @@ public:
 	FrameDebugParser* dialogDebugParser;
 
 	LastGenerationThread* thread;
+
+private:
+	bool updateVolume;
+
 };
 
 #endif /* FRAMEMAIN_H_ */

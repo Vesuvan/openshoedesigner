@@ -368,6 +368,56 @@ GUIFrameFoot::GUIFrameFoot( wxWindow* parent, wxWindowID id, const wxString& tit
 	
 	bSizer16->Add( fgSizer2, 0, wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
 	
+	wxBoxSizer* bSizer18;
+	bSizer18 = new wxBoxSizer( wxHORIZONTAL );
+	
+	
+	bSizer18->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	m_buttonSetByShoeSize = new wxButton( m_panelMeasurements, wxID_ANY, wxT("Set by shoesize"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer18->Add( m_buttonSetByShoeSize, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	
+	bSizer18->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	wxStaticBoxSizer* sbSizerShoeSizes;
+	sbSizerShoeSizes = new wxStaticBoxSizer( new wxStaticBox( m_panelMeasurements, wxID_ANY, wxT("Shoesizes") ), wxVERTICAL );
+	
+	wxFlexGridSizer* fgSizer3;
+	fgSizer3 = new wxFlexGridSizer( 3, 2, 0, 0 );
+	fgSizer3->SetFlexibleDirection( wxBOTH );
+	fgSizer3->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_staticTextShoeSizeEU = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("EU:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextShoeSizeEU->Wrap( -1 );
+	fgSizer3->Add( m_staticTextShoeSizeEU, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
+	
+	m_textCtrlShoeSizeEU = new wxTextCtrl( m_panelMeasurements, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY );
+	fgSizer3->Add( m_textCtrlShoeSizeEU, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_staticTextShoeSizeUS = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("US:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextShoeSizeUS->Wrap( -1 );
+	fgSizer3->Add( m_staticTextShoeSizeUS, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_textCtrlShoeSizeUS = new wxTextCtrl( m_panelMeasurements, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY );
+	fgSizer3->Add( m_textCtrlShoeSizeUS, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_staticTextShoeSizeUK = new wxStaticText( m_panelMeasurements, wxID_ANY, wxT("UK:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextShoeSizeUK->Wrap( -1 );
+	fgSizer3->Add( m_staticTextShoeSizeUK, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_textCtrlShoeSizeUK = new wxTextCtrl( m_panelMeasurements, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY );
+	fgSizer3->Add( m_textCtrlShoeSizeUK, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	sbSizerShoeSizes->Add( fgSizer3, 1, 0, 5 );
+	
+	bSizer18->Add( sbSizerShoeSizes, 0, wxEXPAND, 5 );
+	
+	
+	bSizer18->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	bSizer16->Add( bSizer18, 1, wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
+	
 	m_panelMeasurements->SetSizer( bSizer16 );
 	m_panelMeasurements->Layout();
 	bSizer16->Fit( m_panelMeasurements );
@@ -585,6 +635,7 @@ GUIFrameFoot::GUIFrameFoot( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_textCtrlFootWidth->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GUIFrameFoot::OnText ), NULL, this );
 	m_textCtrlHeelWidth->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GUIFrameFoot::OnText ), NULL, this );
 	m_textCtrlAnkleWidth->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GUIFrameFoot::OnText ), NULL, this );
+	m_buttonSetByShoeSize->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameFoot::OnSetByShoeSize ), NULL, this );
 	m_gridBoneLength->Connect( wxEVT_GRID_CELL_CHANGE, wxGridEventHandler( GUIFrameFoot::OnCellChange ), NULL, this );
 	m_gridBoneDiameter->Connect( wxEVT_GRID_CELL_CHANGE, wxGridEventHandler( GUIFrameFoot::OnCellChange ), NULL, this );
 	m_gridSkin->Connect( wxEVT_GRID_CELL_CHANGE, wxGridEventHandler( GUIFrameFoot::OnCellChange ), NULL, this );
@@ -600,6 +651,7 @@ GUIFrameFoot::~GUIFrameFoot()
 	m_textCtrlFootWidth->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GUIFrameFoot::OnText ), NULL, this );
 	m_textCtrlHeelWidth->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GUIFrameFoot::OnText ), NULL, this );
 	m_textCtrlAnkleWidth->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GUIFrameFoot::OnText ), NULL, this );
+	m_buttonSetByShoeSize->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameFoot::OnSetByShoeSize ), NULL, this );
 	m_gridBoneLength->Disconnect( wxEVT_GRID_CELL_CHANGE, wxGridEventHandler( GUIFrameFoot::OnCellChange ), NULL, this );
 	m_gridBoneDiameter->Disconnect( wxEVT_GRID_CELL_CHANGE, wxGridEventHandler( GUIFrameFoot::OnCellChange ), NULL, this );
 	m_gridSkin->Disconnect( wxEVT_GRID_CELL_CHANGE, wxGridEventHandler( GUIFrameFoot::OnCellChange ), NULL, this );
@@ -615,37 +667,52 @@ GUIFrameShoe::GUIFrameShoe( wxWindow* parent, wxWindowID id, const wxString& tit
 	bSizer2 = new wxBoxSizer( wxVERTICAL );
 	
 	wxFlexGridSizer* fgSizer1;
-	fgSizer1 = new wxFlexGridSizer( 2, 2, 0, 0 );
+	fgSizer1 = new wxFlexGridSizer( 4, 3, 0, 0 );
 	fgSizer1->AddGrowableCol( 1 );
 	fgSizer1->SetFlexibleDirection( wxBOTH );
 	fgSizer1->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 	
-	m_checkBoxHeelHeight = new wxCheckBox( this, wxID_ANY, wxT("Heel Height:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_checkBoxHeelHeight->SetValue(true); 
-	fgSizer1->Add( m_checkBoxHeelHeight, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxEXPAND|wxALIGN_RIGHT, 5 );
+	m_staticTextHeelHeight = new wxStaticText( this, wxID_ANY, wxT("Heel Height:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextHeelHeight->Wrap( -1 );
+	fgSizer1->Add( m_staticTextHeelHeight, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
-	m_textCtrlHeelHeight = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_textCtrlHeelHeight = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
 	fgSizer1->Add( m_textCtrlHeelHeight, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
 	
-	m_checkBoxPlateauHeight = new wxCheckBox( this, wxID_ANY, wxT("Plateau Height:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_checkBoxPlateauHeight->SetValue(true); 
-	fgSizer1->Add( m_checkBoxPlateauHeight, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
+	m_textCtrlResultHeelHeight = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxTE_RIGHT );
+	fgSizer1->Add( m_textCtrlResultHeelHeight, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5 );
 	
-	m_textCtrlPlateauHeight = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer1->Add( m_textCtrlPlateauHeight, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
+	m_staticTextBallHeight = new wxStaticText( this, wxID_ANY, wxT("Ball Height:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextBallHeight->Wrap( -1 );
+	fgSizer1->Add( m_staticTextBallHeight, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
-	m_checkBoxHeelAngle = new wxCheckBox( this, wxID_ANY, wxT("Heel Angle:"), wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer1->Add( m_checkBoxHeelAngle, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
+	m_textCtrlBallHeight = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	fgSizer1->Add( m_textCtrlBallHeight, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
 	
-	m_textCtrlHeelAngle = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer1->Add( m_textCtrlHeelAngle, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
+	m_textCtrlResultBallHeight = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxTE_RIGHT );
+	fgSizer1->Add( m_textCtrlResultBallHeight, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5 );
 	
-	m_checkBoxToeAngle = new wxCheckBox( this, wxID_ANY, wxT("Toe Angle:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_checkBoxToeAngle->SetValue(true); 
-	fgSizer1->Add( m_checkBoxToeAngle, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
+	m_staticTextToeAngle = new wxStaticText( this, wxID_ANY, wxT("Toe Angle:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextToeAngle->Wrap( -1 );
+	fgSizer1->Add( m_staticTextToeAngle, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
-	m_textCtrlToeAngle = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer1->Add( m_textCtrlToeAngle, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
+	m_textCtrlToeAngle = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	fgSizer1->Add( m_textCtrlToeAngle, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
+	
+	m_textCtrlResultToeAngle = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxTE_RIGHT );
+	fgSizer1->Add( m_textCtrlResultToeAngle, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_staticTextMixing = new wxStaticText( this, wxID_ANY, wxT("Angle Mixing:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextMixing->Wrap( -1 );
+	fgSizer1->Add( m_staticTextMixing, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
+	
+	m_sliderMixing = new wxSlider( this, wxID_ANY, 10, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
+	m_sliderMixing->SetToolTip( wxT("Mixing determines how much of the needed bending of the foot is done by the heel and how much is spread on the forefoot. 0% is all heel, 100% is all forefoot. 100% is impractical unless some serious misalignment of the foot is to be compensated.") );
+	
+	fgSizer1->Add( m_sliderMixing, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
+	
+	m_textCtrlResultMixing = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxTE_RIGHT );
+	fgSizer1->Add( m_textCtrlResultMixing, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5 );
 	
 	bSizer2->Add( fgSizer1, 1, wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
 	
@@ -661,8 +728,8 @@ GUIFrameShoe::GUIFrameShoe( wxWindow* parent, wxWindowID id, const wxString& tit
 	m_buttonPlatform = new wxButton( this, ID_PRESETPLATFORM, wxT("Platform Heel"), wxDefaultPosition, wxDefaultSize, 0 );
 	gSizer1->Add( m_buttonPlatform, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
 	
-	m_buttonHiking = new wxButton( this, ID_PRESETHIKING, wxT("Hiking Boot"), wxDefaultPosition, wxDefaultSize, 0 );
-	gSizer1->Add( m_buttonHiking, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
+	m_buttonClassic = new wxButton( this, ID_PRESETCLASSIC, wxT("Classic"), wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer1->Add( m_buttonClassic, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
 	
 	m_buttonHHMid = new wxButton( this, ID_PRESETHHMID, wxT("High Heel (mid)"), wxDefaultPosition, wxDefaultSize, 0 );
 	gSizer1->Add( m_buttonHHMid, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
@@ -683,22 +750,26 @@ GUIFrameShoe::GUIFrameShoe( wxWindow* parent, wxWindowID id, const wxString& tit
 	
 	this->SetSizer( bSizer2 );
 	this->Layout();
-	bSizer2->Fit( this );
 	
 	// Connect Events
 	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameShoe::OnCloseX ) );
-	m_checkBoxHeelHeight->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnClick ), NULL, this );
-	m_textCtrlHeelHeight->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GUIFrameShoe::OnText ), NULL, this );
-	m_checkBoxPlateauHeight->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnClick ), NULL, this );
-	m_textCtrlPlateauHeight->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GUIFrameShoe::OnText ), NULL, this );
-	m_checkBoxHeelAngle->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnClick ), NULL, this );
-	m_textCtrlHeelAngle->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GUIFrameShoe::OnText ), NULL, this );
-	m_checkBoxToeAngle->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnClick ), NULL, this );
-	m_textCtrlToeAngle->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GUIFrameShoe::OnText ), NULL, this );
+	m_textCtrlHeelHeight->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameShoe::OnTextEnter ), NULL, this );
+	m_textCtrlBallHeight->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameShoe::OnTextEnter ), NULL, this );
+	m_textCtrlToeAngle->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameShoe::OnTextEnter ), NULL, this );
+	m_sliderMixing->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Connect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Connect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Connect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Connect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Connect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Connect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Connect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Connect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Connect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( GUIFrameShoe::OnScrollChange ), NULL, this );
 	m_buttonFlats->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnPreset ), NULL, this );
 	m_buttonHHLow->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnPreset ), NULL, this );
 	m_buttonPlatform->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnPreset ), NULL, this );
-	m_buttonHiking->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnPreset ), NULL, this );
+	m_buttonClassic->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnPreset ), NULL, this );
 	m_buttonHHMid->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnPreset ), NULL, this );
 	m_buttonPony->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnPreset ), NULL, this );
 	m_buttonPlateau->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnPreset ), NULL, this );
@@ -710,18 +781,23 @@ GUIFrameShoe::~GUIFrameShoe()
 {
 	// Disconnect Events
 	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameShoe::OnCloseX ) );
-	m_checkBoxHeelHeight->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnClick ), NULL, this );
-	m_textCtrlHeelHeight->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GUIFrameShoe::OnText ), NULL, this );
-	m_checkBoxPlateauHeight->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnClick ), NULL, this );
-	m_textCtrlPlateauHeight->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GUIFrameShoe::OnText ), NULL, this );
-	m_checkBoxHeelAngle->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnClick ), NULL, this );
-	m_textCtrlHeelAngle->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GUIFrameShoe::OnText ), NULL, this );
-	m_checkBoxToeAngle->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnClick ), NULL, this );
-	m_textCtrlToeAngle->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( GUIFrameShoe::OnText ), NULL, this );
+	m_textCtrlHeelHeight->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameShoe::OnTextEnter ), NULL, this );
+	m_textCtrlBallHeight->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameShoe::OnTextEnter ), NULL, this );
+	m_textCtrlToeAngle->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameShoe::OnTextEnter ), NULL, this );
+	m_sliderMixing->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Disconnect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Disconnect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Disconnect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Disconnect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Disconnect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Disconnect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Disconnect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Disconnect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( GUIFrameShoe::OnScroll ), NULL, this );
+	m_sliderMixing->Disconnect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( GUIFrameShoe::OnScrollChange ), NULL, this );
 	m_buttonFlats->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnPreset ), NULL, this );
 	m_buttonHHLow->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnPreset ), NULL, this );
 	m_buttonPlatform->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnPreset ), NULL, this );
-	m_buttonHiking->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnPreset ), NULL, this );
+	m_buttonClassic->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnPreset ), NULL, this );
 	m_buttonHHMid->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnPreset ), NULL, this );
 	m_buttonPony->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnPreset ), NULL, this );
 	m_buttonPlateau->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameShoe::OnPreset ), NULL, this );
@@ -895,7 +971,7 @@ GUIFrameDebugParser::GUIFrameDebugParser( wxWindow* parent, wxWindowID id, const
 	m_staticText14->Wrap( -1 );
 	bSizer17->Add( m_staticText14, 0, wxALL, 5 );
 	
-	m_textCtrlUnit = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_textCtrlUnit = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY );
 	bSizer17->Add( m_textCtrlUnit, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
 	
 	m_staticText13 = new wxStaticText( this, wxID_ANY, wxT("SI Base Units:"), wxDefaultPosition, wxDefaultSize, 0 );

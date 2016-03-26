@@ -44,10 +44,10 @@ public:
 	virtual ~Project();
 
 	void Reset(void);
-	void Update(void);
+	bool Evaluate(void);
 	void UpdateVolume(void);
 
-	const Foot* GetFoot(void) const;
+	Foot* GetFoot(void);
 	Shoe* GetShoe(void);
 	void AddFootToGrid(wxGrid* gridLength, wxGrid* gridDiameter,
 			wxGrid* gridSkin);
@@ -65,14 +65,8 @@ public:
 	void PaintUpper(void) const;
 	void PaintCutaway(void) const;
 	void PaintFloor(void) const;
-	bool Evaluate(void);
 
 public:
-
-	wxString HeelHeight;
-	wxString Mixing;
-	wxString ToeHeight;
-	wxString ToeAngle;
 
 private:
 

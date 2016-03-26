@@ -40,7 +40,7 @@ FrameWalkcycleSupport::~FrameWalkcycleSupport()
 void FrameWalkcycleSupport::OnCloseX(wxCloseEvent& event)
 {
 	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_REFRESHMAINGUI);
 	ProcessEvent(selectEvent);
 }
 

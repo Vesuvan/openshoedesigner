@@ -25,6 +25,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "FrameFoot.h"
+
+#include "DialogQuickInitFoot.h"
 #include "IDs.h"
 
 FrameFoot::FrameFoot(wxWindow* parent, Project* project) :
@@ -55,33 +57,6 @@ FrameFoot::~FrameFoot()
 {
 }
 
-void FrameFoot::OnCloseX(wxCloseEvent& event)
-{
-	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
-	ProcessEvent(selectEvent);
-}
-
-void FrameFoot::OnClose(wxCommandEvent& event)
-{
-	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
-	ProcessEvent(selectEvent);
-}
-
-void FrameFoot::OnText(wxCommandEvent& event)
-{
-}
-
-void FrameFoot::OnCellChange(wxGridEvent& event)
-{
-	TransferDataFromWindow();
-	project->Update();
-	TransferDataToWindow();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_REFRESHPROJECT);
-	ProcessEvent(selectEvent);
-}
-
 bool FrameFoot::TransferDataToWindow(void)
 {
 	project->AddFootToGrid(m_gridBoneLength, m_gridBoneDiameter, m_gridSkin);
@@ -93,3 +68,40 @@ bool FrameFoot::TransferDataFromWindow(void)
 	project->GetFootFromGrid(m_gridBoneLength, m_gridBoneDiameter, m_gridSkin);
 	return true;
 }
+
+void FrameFoot::OnCloseX(wxCloseEvent& event)
+{
+	this->Hide();
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_REFRESHMAINGUI);
+	ProcessEvent(selectEvent);
+}
+
+void FrameFoot::OnClose(wxCommandEvent& event)
+{
+	this->Hide();
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_REFRESHMAINGUI);
+	ProcessEvent(selectEvent);
+}
+
+void FrameFoot::OnSetByShoeSize(wxCommandEvent& event)
+{
+	DialogQuickInitFoot dialog(this);
+	if(dialog.ShowModal() == wxID_OK){
+		Foot * foot = project->GetFoot();
+//		foot->L = dialog.
+	}
+
+}
+void FrameFoot::OnText(wxCommandEvent& event)
+{
+}
+
+void FrameFoot::OnCellChange(wxGridEvent& event)
+{
+	TransferDataFromWindow();
+	project->Evaluate();
+	TransferDataToWindow();
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEPROJECT);
+	ProcessEvent(selectEvent);
+}
+

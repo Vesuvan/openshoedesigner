@@ -29,6 +29,7 @@
 
 /*!\class IDs
  * \brief List of command IDs
+ *
  * This headerfile contains a list of command IDs. These are used to communicate
  * from the child windows to the main window.
  *
@@ -40,12 +41,11 @@
  *
  */
 
-#define ID_REFRESH				(wxID_HIGHEST+1)
-#define ID_UPDATEGUI			(wxID_HIGHEST+2)
-#define ID_UPDATE3DVIEW			(wxID_HIGHEST+3)
-#define ID_REFRESHPROJECT		(wxID_HIGHEST+4)
-
-#define ID_CALCULATELAST		(wxID_HIGHEST+10)
-#define ID_THREADLASTDONE		(wxID_HIGHEST+11)
+#define ID_REFRESHDISPLAY			(wxID_HIGHEST+1)
+#define ID_REFRESHMAINGUI			(wxID_HIGHEST+2)
+#define ID_REFRESHFULLGUI			(wxID_HIGHEST+3)
+#define ID_UPDATEPROJECT			(wxID_HIGHEST+4)
+//!>\def ID_THREADLASTDONE Worker thread to main thread: Processing of volume ready.
+#define ID_THREADLASTDONE			(wxID_HIGHEST+5)
 
 #endif /* IDS_H_ */

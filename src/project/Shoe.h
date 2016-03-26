@@ -29,6 +29,7 @@
 
 /*!\class Shoe
  * \brief Parameters describing the shape of the last
+ *
  * Objects of this class keep a list of all the parameters describing
  * the bones. Furthermore the skin surrounding the bones is describes.
  * The third group of parameters describes the angles of the bones, thus
@@ -46,8 +47,15 @@ public:
 	Shoe();
 	virtual ~Shoe();
 
+	bool Evaluate(double L, double W, double H, double A);
+
+public:
+	wxString exprHeelHeight;
+	wxString exprBallHeight;
+	wxString exprToeAngle;
+
 	double heelHeight;
-	double toeHeight;
+	double ballHeight;
 	double toeAngle;
 	double mixing;
 };

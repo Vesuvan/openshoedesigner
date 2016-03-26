@@ -42,91 +42,105 @@ FrameShoe::~FrameShoe()
 
 bool FrameShoe::TransferDataToWindow()
 {
-	m_textCtrlHeelHeight->SetValue(project->HeelHeight);
-	m_textCtrlPlateauHeight->SetValue(project->ToeHeight);
-	m_textCtrlHeelAngle->SetValue(project->Mixing);
-	m_textCtrlToeAngle->SetValue(project->ToeAngle);
+	Shoe * shoe = project->GetShoe();
+	m_textCtrlHeelHeight->SetValue(shoe->exprHeelHeight);
+	m_textCtrlBallHeight->SetValue(shoe->exprBallHeight);
+	m_textCtrlToeAngle->SetValue(shoe->exprToeAngle);
+	m_sliderMixing->SetValue(shoe->mixing * 100.0);
+	m_textCtrlResultHeelHeight->SetValue(
+			wxString::Format(_T("%.1f cm"), shoe->heelHeight * 100.0));
+	m_textCtrlResultBallHeight->SetValue(
+			wxString::Format(_T("%.1f cm"), shoe->ballHeight * 100.0));
+	m_textCtrlResultToeAngle->SetValue(
+			wxString::Format(_T("%.1f deg"), shoe->toeAngle * 180 / M_PI));
+	m_textCtrlResultMixing->SetValue(
+			wxString::Format(_T("%.0f %%"), shoe->mixing * 100.0));
 	return true;
 }
 
 void FrameShoe::OnCloseX(wxCloseEvent& event)
 {
 	this->Hide();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEGUI);
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_REFRESHMAINGUI);
 	ProcessEvent(selectEvent);
 }
 
-void FrameShoe::OnText(wxCommandEvent& event)
+void FrameShoe::OnTextEnter(wxCommandEvent& event)
 {
 	TransferDataFromWindow();
-	project->Evaluate();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CALCULATELAST);
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEPROJECT);
 	ProcessEvent(selectEvent);
-}
-
-void FrameShoe::OnClick(wxCommandEvent& event)
-{
+	TransferDataToWindow();
 }
 
 void FrameShoe::OnPreset(wxCommandEvent& event)
 {
+	Shoe * shoe = project->GetShoe();
 	// 0.26 m is the average footlength (= size EU 39).
 	switch(event.GetId()){
 	case ID_PRESETFLATS:
-		project->HeelHeight = _T("0 cm");
-		project->ToeHeight = _T("0 cm");
-		project->Mixing = _T("0 deg");
-		project->ToeAngle = _T("0 deg");
+		shoe->exprHeelHeight = _T("0 cm");
+		shoe->exprBallHeight = _T("0 cm");
+		shoe->exprToeAngle = _T("0 deg");
 		break;
-	case ID_PRESETHIKING:
-		project->HeelHeight = _T("3 cm");
-		project->ToeHeight = _T("1.5 cm");
-		project->Mixing = _T("0 deg");
-		project->ToeAngle = _T("0 deg");
+	case ID_PRESETCLASSIC:
+		shoe->exprHeelHeight = _T("3 cm");
+		shoe->exprBallHeight = _T("1.5 cm");
+		shoe->exprToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETPLATEAU:
-		project->HeelHeight = _T("11 cm");
-		project->ToeHeight = _T("9 cm");
-		project->Mixing = _T("0 deg");
-		project->ToeAngle = _T("0 deg");
+		shoe->exprHeelHeight = _T("11 cm");
+		shoe->exprBallHeight = _T("9 cm");
+		shoe->exprToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETHHLOW:
-		project->HeelHeight = _T("7*(L/0.26) cm");
-		project->ToeHeight = _T("0 cm");
-		project->Mixing = _T("0 deg");
-		project->ToeAngle = _T("0 deg");
+		shoe->exprHeelHeight = _T("7*(L/0.26) cm");
+		shoe->exprBallHeight = _T("0 cm");
+		shoe->exprToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETHHMID:
-		project->HeelHeight = _T("10*(L/0.26) cm");
-		project->ToeHeight = _T("0 cm");
-		project->Mixing = _T("0 deg");
-		project->ToeAngle = _T("0 deg");
+		shoe->exprHeelHeight = _T("10*(L/0.26) cm");
+		shoe->exprBallHeight = _T("0 cm");
+		shoe->exprToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETHHHIGH:
-		project->HeelHeight = _T("13*(L/0.26) cm");
-		project->ToeHeight = _T("0 cm");
-		project->Mixing = _T("0 deg");
-		project->ToeAngle = _T("0 deg");
+		shoe->exprHeelHeight = _T("13*(L/0.26) cm");
+		shoe->exprBallHeight = _T("0 cm");
+		shoe->exprToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETPLATFORM:
-		project->HeelHeight = _T("15*(L/0.26) cm");
-		project->ToeHeight = _T("5*(L/0.26) cm");
-		project->Mixing = _T("0 deg");
-		project->ToeAngle = _T("0 deg");
+		shoe->exprHeelHeight = _T("15*(L/0.26) cm");
+		shoe->exprBallHeight = _T("5*(L/0.26) cm");
+		shoe->exprToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETPONY:
-		project->HeelHeight = _T("16*(L/0.26) cm");
-		project->ToeHeight = _T("0 cm");
-		project->Mixing = _T("0 deg");
-		project->ToeAngle = _T("45 deg");
+		shoe->exprHeelHeight = _T("16*(L/0.26) cm");
+		shoe->exprBallHeight = _T("0 cm");
+		shoe->exprToeAngle = _T("45 deg");
 		break;
 	case ID_PRESETBALLET:
-		project->HeelHeight = _T("20*(L/0.26) cm");
-		project->ToeHeight = _T("0 cm");
-		project->Mixing = _T("0 deg");
-		project->ToeAngle = _T("90 deg");
+		shoe->exprHeelHeight = _T("20*(L/0.26) cm");
+		shoe->exprBallHeight = _T("0 cm");
+		shoe->exprToeAngle = _T("90 deg");
 		break;
 	}
-	project->Evaluate();
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEPROJECT);
+	ProcessEvent(selectEvent);
+	TransferDataToWindow();
+}
+
+void FrameShoe::OnScroll(wxScrollEvent& event)
+{
+	Shoe * shoe = project->GetShoe();
+	shoe->mixing = ((double) event.GetPosition()) / 100.0;
+	TransferDataToWindow();
+}
+
+void FrameShoe::OnScrollChange(wxScrollEvent& event)
+{
+	Shoe * shoe = project->GetShoe();
+	shoe->mixing = ((double) event.GetPosition()) / 100.0;
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEPROJECT);
+	ProcessEvent(selectEvent);
 	TransferDataToWindow();
 }

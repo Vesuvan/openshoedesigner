@@ -43,6 +43,7 @@ public:
 	virtual void OnCloseX(wxCloseEvent& event);
 	virtual void OnText(wxCommandEvent& event);
 	virtual void OnCellChange(wxGridEvent& event);
+	virtual void OnSetByShoeSize(wxCommandEvent& event);
 
 	bool TransferDataToWindow(void);
 	bool TransferDataFromWindow(void);
