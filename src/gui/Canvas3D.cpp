@@ -95,10 +95,10 @@ void Canvas3D::Render()
 	glEnd();
 
 	if(showBones) project->PaintBones();
-	if(showLast) project->PaintLast();
 	if(showInsole) project->PaintInsole();
 	if(showSole) project->PaintSole();
 	if(showUpper) project->PaintUpper();
 	if(showCutaway) project->PaintCutaway();
 	if(showFloor) project->PaintFloor();
+	if(showLast) project->PaintLast();
 }

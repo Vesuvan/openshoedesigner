@@ -44,7 +44,7 @@ Project::~Project()
 void Project::Reset(void)
 {
 	volume.SetSize(0.40, 0.3, 0.4, 0.0075);
-	volume.matrix.TranslateGlobal(-0.1, -0.15, -0.3);
+	volume.SetOrigin(Vector3(-0.15, -0.1, -0.3));
 
 //	volume.AddHalfplane(Vector3(0, 0, 1), -0.10, 0.01);
 //	volume.AddSphere(Vector3(0, 0.1, 0), 0.15, 0.1);
@@ -57,19 +57,23 @@ void Project::Reset(void)
 	foot.LoadModel(&text);
 
 	Evaluate();
-
-	volume.Clear();
-	foot.AddToVolume(&volume);
-	volume.MarchingCubes(0.5);
-	volume.FillHeightField(&sole);
+	UpdateVolume();
 }
 
 void Project::UpdateVolume(void)
 {
 	volume.Clear();
 	foot.AddToVolume(&volume);
-	volume.MarchingCubes(0.5);
+	volume.MarchingCubes();
 	volume.FillHeightField(&sole);
+
+	h.Clear();
+	double p;
+	for(int i = 0; i < 200; i++){
+		p = (double) i / 300;
+		h.InsertPoint(p - 0.2, 0, volume.GetValue(p - 0.2, 0, 0.0) * 0.01);
+	}
+
 }
 
 bool Project::Evaluate(void)
@@ -143,6 +147,7 @@ void Project::PaintLast(void) const
 
 void Project::PaintInsole(void) const
 {
+	h.Paint();
 }
 
 void Project::PaintSole(void) const

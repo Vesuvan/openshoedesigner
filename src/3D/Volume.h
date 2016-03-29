@@ -44,7 +44,7 @@ public:
 	Volume();
 	//TODO: Add copy constructor, becaus it has a pointer.
 	virtual ~Volume();
-
+	void SetOrigin(Vector3 origin);
 	void SetCount(unsigned int nx, unsigned int ny, unsigned int nz,
 			float resolution);
 	void SetSize(float x, float y, float z, float resolution);
@@ -60,15 +60,20 @@ public:
 	void AddCylinder(const Vector3 &p1, const Vector3 &p2, const float r1,
 			const float r2, const float k1, const float k2);
 
-	void MarchingCubes(float limit = 0.5);
+	void MarchingCubes(void);
 	void Paint(void) const;
-
+	double GetValue(Vector3 p) const;
+	double GetValue(double x, double y, double z) const;
 	void FillHeightField(HeightField *heightfield) const;
+	Vector3 GetSurface(Vector3 p0, Vector3 n);
 
-	AffineTransformMatrix matrix;
 	Vector3 color;
 	Geometry geometry;
 private:
+
+	double surface;
+
+	Vector3 origin;
 
 	double * value;
 

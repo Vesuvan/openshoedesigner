@@ -42,6 +42,7 @@ Volume::Volume()
 	Nz = 0;
 	N = 0;
 	value = NULL;
+	surface = 0.5;
 	color.Set(0.5, 0.5, 0.5);
 }
 
@@ -97,7 +98,7 @@ void Volume::AddHalfplane(const Vector3& p1, float d0, float k0)
 	for(nz = 0; nz < Nz; nz++){
 		for(ny = 0; ny < Ny; ny++){
 			for(nx = 0; nx < Nx; nx++){
-				float d = matrix.Transform(p).Dot(p1);
+				float d = (p + origin).Dot(p1);
 				value[c] += 1 - 1 / (1 + exp(kh * (d - d0)));
 				c++;
 				p.x += dx;
@@ -113,7 +114,7 @@ void Volume::AddHalfplane(const Vector3& p1, float d0, float k0)
 void Volume::AddSphere(const Vector3 &p1, float r1, float k1)
 {
 	unsigned int nx, ny, nz;
-	Vector3 h1 = matrix.Inverse().Transform(p1);
+	Vector3 h1 = p1 - origin;
 	Vector3 p(0, 0, 0);
 	unsigned int c = 0;
 	float kh = -log(2 * M_E - 1) / k1;
@@ -138,8 +139,8 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 		const float k1)
 {
 	unsigned int nx, ny, nz;
-	Vector3 h1 = matrix.Inverse().Transform(p1);
-	Vector3 h2 = matrix.Inverse().Transform(p2);
+	Vector3 h1 = p1 - origin;
+	Vector3 h2 = p2 - origin;
 	Vector3 n = h2 - h1;
 	float nd = n.Abs();
 	float kh = -log(2 * M_E - 1) / k1;
@@ -172,8 +173,8 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 		const float r2, const float k1)
 {
-	Vector3 h1 = matrix.Inverse().Transform(p1);
-	Vector3 h2 = matrix.Inverse().Transform(p2);
+	Vector3 h1 = p1 - origin;
+	Vector3 h2 = p2 - origin;
 	Vector3 n = h2 - h1;
 	double nd = n.Abs();
 	if(nd == 0){
@@ -270,8 +271,8 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 		const float r2, const float k1, const float k2)
 {
-	Vector3 h1 = matrix.Inverse().Transform(p1);
-	Vector3 h2 = matrix.Inverse().Transform(p2);
+	Vector3 h1 = p1 - origin;
+	Vector3 h2 = p2 - origin;
 	Vector3 n = h2 - h1;
 	float nd = n.Abs();
 	if(nd == 0){
@@ -553,7 +554,7 @@ static int8_t cap[144] =
 			1, 6, 4, 3, 6, 2, 1, 4, 1, 7, 4, 7, 6, 4, 4, 2, 0, 6, 4, 0, -1, -1,
 			-1};
 
-void Volume::MarchingCubes(float limit)
+void Volume::MarchingCubes(void)
 {
 //	setlocale(LC_ALL, "C"); // To get a 3.1415 instead 3,1415 or else on every computer.
 //	wxTextFile temp(_T("~/octave/oneslice.m"));
@@ -596,96 +597,96 @@ void Volume::MarchingCubes(float limit)
 				double v6 = value[c + Nx * (1 + Ny)];
 				double v7 = value[c + 1 + Nx * (1 + Ny)];
 				uint8_t v = 0;
-				if(v0 > limit) v |= 1;
-				if(v1 > limit) v |= 2;
-				if(v2 > limit) v |= 4;
-				if(v3 > limit) v |= 8;
-				if(v4 > limit) v |= 16;
-				if(v5 > limit) v |= 32;
-				if(v6 > limit) v |= 64;
-				if(v7 > limit) v |= 128;
+				if(v0 > surface) v |= 1;
+				if(v1 > surface) v |= 2;
+				if(v2 > surface) v |= 4;
+				if(v3 > surface) v |= 8;
+				if(v4 > surface) v |= 16;
+				if(v5 > surface) v |= 32;
+				if(v6 > surface) v |= 64;
+				if(v7 > surface) v |= 128;
 				if(v != 0 && v != 255){
 
 					uint16_t h = edge[v];
 					if(h & ((uint16_t) 1 << 0)){
-						float x = (limit - v0) / (v1 - v0);
+						float x = (surface - v0) / (v1 - v0);
 						p0.x = p.x;
 						p0.y = p.y;
 						p0.z = p.z;
 						p0.x += dx * x;
 					}
 					if(h & ((uint16_t) 1 << 1)){
-						float x = (limit - v1) / (v3 - v1);
+						float x = (surface - v1) / (v3 - v1);
 						p1.x = p.x + dx;
 						p1.y = p.y;
 						p1.z = p.z;
 						p1.y += dy * x;
 					}
 					if(h & ((uint16_t) 1 << 2)){
-						float x = (limit - v2) / (v3 - v2);
+						float x = (surface - v2) / (v3 - v2);
 						p2.x = p.x;
 						p2.y = p.y + dy;
 						p2.z = p.z;
 						p2.x += dx * x;
 					}
 					if(h & ((uint16_t) 1 << 3)){
-						float x = (limit - v0) / (v2 - v0);
+						float x = (surface - v0) / (v2 - v0);
 						p3.x = p.x;
 						p3.y = p.y;
 						p3.z = p.z;
 						p3.y += dy * x;
 					}
 					if(h & ((uint16_t) 1 << 4)){
-						float x = (limit - v4) / (v5 - v4);
+						float x = (surface - v4) / (v5 - v4);
 						p4.x = p.x;
 						p4.y = p.y;
 						p4.z = p.z + dz;
 						p4.x += dx * x;
 					}
 					if(h & ((uint16_t) 1 << 5)){
-						float x = (limit - v5) / (v7 - v5);
+						float x = (surface - v5) / (v7 - v5);
 						p5.x = p.x + dx;
 						p5.y = p.y;
 						p5.z = p.z + dz;
 						p5.y += dy * x;
 					}
 					if(h & ((uint16_t) 1 << 6)){
-						float x = (limit - v6) / (v7 - v6);
+						float x = (surface - v6) / (v7 - v6);
 						p6.x = p.x;
 						p6.y = p.y + dy;
 						p6.z = p.z + dz;
 						p6.x += dx * x;
 					}
 					if(h & ((uint16_t) 1 << 7)){
-						float x = (limit - v4) / (v6 - v4);
+						float x = (surface - v4) / (v6 - v4);
 						p7.x = p.x;
 						p7.y = p.y;
 						p7.z = p.z + dz;
 						p7.y += dy * x;
 					}
 					if(h & ((uint16_t) 1 << 8)){
-						float x = (limit - v0) / (v4 - v0);
+						float x = (surface - v0) / (v4 - v0);
 						p8.x = p.x;
 						p8.y = p.y;
 						p8.z = p.z;
 						p8.z += dz * x;
 					}
 					if(h & ((uint16_t) 1 << 9)){
-						float x = (limit - v1) / (v5 - v1);
+						float x = (surface - v1) / (v5 - v1);
 						p9.x = p.x + dx;
 						p9.y = p.y;
 						p9.z = p.z;
 						p9.z += dz * x;
 					}
 					if(h & ((uint16_t) 1 << 10)){
-						float x = (limit - v3) / (v7 - v3);
+						float x = (surface - v3) / (v7 - v3);
 						p10.x = p.x + dx;
 						p10.y = p.y + dy;
 						p10.z = p.z;
 						p10.z += dz * x;
 					}
 					if(h & ((uint16_t) 1 << 11)){
-						float x = (limit - v2) / (v6 - v2);
+						float x = (surface - v2) / (v6 - v2);
 						p11.x = p.x;
 						p11.y = p.y + dy;
 						p11.z = p.z;
@@ -745,10 +746,10 @@ void Volume::MarchingCubes(float limit)
 
 				if(i == 0){
 					v = 0;
-					if(v0 > limit) v |= 1;
-					if(v2 > limit) v |= 2;
-					if(v6 > limit) v |= 4;
-					if(v4 > limit) v |= 8;
+					if(v0 > surface) v |= 1;
+					if(v2 > surface) v |= 2;
+					if(v6 > surface) v |= 4;
+					if(v4 > surface) v |= 8;
 					if(v > 0){
 						uint8_t h = v * 9;
 						for(n = 0; n < 9; n++){
@@ -789,10 +790,10 @@ void Volume::MarchingCubes(float limit)
 
 				if(i == Nx - 2){
 					v = 0;
-					if(v1 > limit) v |= 1;
-					if(v5 > limit) v |= 2;
-					if(v7 > limit) v |= 4;
-					if(v3 > limit) v |= 8;
+					if(v1 > surface) v |= 1;
+					if(v5 > surface) v |= 2;
+					if(v7 > surface) v |= 4;
+					if(v3 > surface) v |= 8;
 					if(v > 0){
 						uint8_t h = v * 9;
 						for(n = 0; n < 9; n++){
@@ -833,10 +834,10 @@ void Volume::MarchingCubes(float limit)
 
 				if(j == 0){
 					v = 0;
-					if(v0 > limit) v |= 1;
-					if(v4 > limit) v |= 2;
-					if(v5 > limit) v |= 4;
-					if(v1 > limit) v |= 8;
+					if(v0 > surface) v |= 1;
+					if(v4 > surface) v |= 2;
+					if(v5 > surface) v |= 4;
+					if(v1 > surface) v |= 8;
 					if(v > 0){
 						uint8_t h = v * 9;
 						for(n = 0; n < 9; n++){
@@ -877,10 +878,10 @@ void Volume::MarchingCubes(float limit)
 
 				if(j == Ny - 2){
 					v = 0;
-					if(v2 > limit) v |= 1;
-					if(v3 > limit) v |= 2;
-					if(v7 > limit) v |= 4;
-					if(v6 > limit) v |= 8;
+					if(v2 > surface) v |= 1;
+					if(v3 > surface) v |= 2;
+					if(v7 > surface) v |= 4;
+					if(v6 > surface) v |= 8;
 					if(v > 0){
 						uint8_t h = v * 9;
 						for(n = 0; n < 9; n++){
@@ -921,10 +922,10 @@ void Volume::MarchingCubes(float limit)
 
 				if(k == 0){
 					v = 0;
-					if(v0 > limit) v |= 1;
-					if(v1 > limit) v |= 2;
-					if(v3 > limit) v |= 4;
-					if(v2 > limit) v |= 8;
+					if(v0 > surface) v |= 1;
+					if(v1 > surface) v |= 2;
+					if(v3 > surface) v |= 4;
+					if(v2 > surface) v |= 8;
 					if(v > 0){
 						uint8_t h = v * 9;
 						for(n = 0; n < 9; n++){
@@ -965,10 +966,10 @@ void Volume::MarchingCubes(float limit)
 
 				if(k == Nz - 2){
 					v = 0;
-					if(v4 > limit) v |= 1;
-					if(v6 > limit) v |= 2;
-					if(v7 > limit) v |= 4;
-					if(v5 > limit) v |= 8;
+					if(v4 > surface) v |= 1;
+					if(v6 > surface) v |= 2;
+					if(v7 > surface) v |= 4;
+					if(v5 > surface) v |= 8;
 					if(v > 0){
 						uint8_t h = v * 9;
 						for(n = 0; n < 9; n++){
@@ -1036,7 +1037,7 @@ void Volume::Paint(void) const
 {
 
 	glPushMatrix();
-	glMultMatrixd(matrix.a);
+	glTranslatef(origin.x, origin.y, origin.z);
 	glColor4f(color.x, color.y, color.z, 0.8);
 
 	if(false){
@@ -1088,9 +1089,15 @@ void Volume::Paint(void) const
 	glPopMatrix();
 }
 
+void Volume::SetOrigin(Vector3 origin)
+{
+	this->origin = origin;
+}
+
 void Volume::FillHeightField(HeightField* heightfield) const
 {
-	heightfield->matrix = matrix;
+	heightfield->matrix.SetIdentity();
+	heightfield->matrix.TranslateGlobal(origin.x, origin.y, origin.z);
 	heightfield->SetCount(Nx, Ny, dx);
 
 	unsigned int h = Nx * Ny;
@@ -1121,4 +1128,58 @@ void Volume::FillHeightField(HeightField* heightfield) const
 		}
 	}
 	heightfield->SetValues(temp, h);
+}
+
+double Volume::GetValue(Vector3 p) const
+{
+	return GetValue(p.x, p.y, p.z);
+}
+
+double Volume::GetValue(double x, double y, double z) const
+{
+	double hx = (x - origin.x) / dx;
+	double hy = (y - origin.y) / dy;
+	double hz = (z - origin.z) / dz;
+	double px = floor(hx);
+	double py = floor(hy);
+	double pz = floor(hz);
+	double mx = hx - px;
+	double my = hy - py;
+	double mz = hz - pz;
+	int ix = (int) px;
+	int iy = (int) py;
+	int iz = (int) pz;
+	if(ix < 0 || iy < 0 || iz < 0 || ix > Nx - 2 || iy > Ny - 2 || iz > Nz - 2) return 0.0;
+	int pos = ix + (iy + iz * Ny) * Nx;
+	double v = 0.0;
+	v += value[pos] * (1 - mx) * (1 - my) * (1 - mz);
+	v += value[pos + 1] * (mx) * (1 - my) * (1 - mz);
+	v += value[pos + Nx] * (1 - mx) * (my) * (1 - mz);
+	v += value[pos + 1 + Nx] * (mx) * (my) * (1 - mz);
+	v += value[pos + Nx * Ny] * (1 - mx) * (1 - my) * (mz);
+	v += value[pos + 1 + Nx * Ny] * (mx) * (1 - my) * (mz);
+	v += value[pos + Nx + Nx * Ny] * (1 - mx) * (my) * (mz);
+	v += value[pos + 1 + Nx + Nx * Ny] * (mx) * (my) * (mz);
+	return v;
+}
+
+Vector3 Volume::GetSurface(Vector3 p0, Vector3 n)
+{
+	double d0 = 0;
+	double d1 = 1;
+	double d = 0.5;
+	for(int c = 0; c < 10; c++){
+		double v0 = GetValue(p0 + n * d0);
+		double v1 = GetValue(p0 + n * d1);
+		if(fabs(v0 - v1) < 1e-5) break;
+		d = (d0 * v1 - d1 * v0 + (d1 - d0) * surface) / (v1 - v0);
+		double v = GetValue(p0 + n * d);
+		if(fabs(v - surface) < 1e-5) break;
+		if(v > surface){
+			d0 = d;
+		}else{
+			d1 = d;
+		}
+	}
+	return (p0 + n * d);
 }

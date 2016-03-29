@@ -33,10 +33,12 @@
  * Data part of the Data View Model.
  */
 
-#include "../3D/Volume.h"
 #include "Foot.h"
 #include "Shoe.h"
 #include "Pattern.h"
+
+#include "../3D/Volume.h"
+#include "../3D/Polygon3.h"
 
 class Project {
 public:
@@ -78,6 +80,9 @@ private:
 	HeightField sole;
 
 	Volume volume;
+
+	Polygon3 h;
+
 };
 
 #endif /* PROJECT_H_ */
