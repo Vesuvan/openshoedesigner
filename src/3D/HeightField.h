@@ -34,17 +34,21 @@
  */
 
 #include "AffineTransformMatrix.h"
+#include "Polygon3.h"
 #include "Vector3.h"
 
 class HeightField {
 public:
 	HeightField();
+	HeightField(const HeightField& other);
 	virtual ~HeightField();
 
 	void SetCount(unsigned int nx, unsigned int ny, float resolution);
 	void SetSize(float x, float y, float resolution);
 
 	void SetValues(double *v, unsigned int size);
+
+	Polygon3 GetUnderline(void) const;
 
 	void Clear(void);
 

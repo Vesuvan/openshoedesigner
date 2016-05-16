@@ -46,6 +46,21 @@ Volume::Volume()
 	color.Set(0.5, 0.5, 0.5);
 }
 
+Volume::Volume(const Volume& other) :
+		N(other.N), Nx(other.Nx), Ny(other.Ny), Nz(other.Nz), dx(other.dx), dy(
+				other.dy), dz(other.dz), surface(other.surface), color(
+				other.color), geometry(other.geometry), origin(other.origin)
+{
+	if(N == 0){
+		value = NULL;
+		return;
+	}
+	value = new double[N];
+	if(value == NULL) throw(__FILE__ ":Copy constructor - Not enough memory.");
+	for(unsigned int n = 0; n < N; n++)
+		value[n] = other.value[n];
+}
+
 Volume::~Volume()
 {
 	if(value != NULL) delete[] value;
@@ -60,6 +75,8 @@ void Volume::SetCount(unsigned int nx, unsigned int ny, unsigned int nz,
 	this->Nz = nz;
 	this->N = nx * ny * nz;
 	value = new double[this->N];
+	if(value == NULL) throw(__FILE__ ":SetCount(...) - Not enough memory.");
+
 	dx = resolution;
 	dy = resolution;
 	dz = resolution;
@@ -74,18 +91,20 @@ void Volume::SetSize(float x, float y, float z, float resolution)
 	Nz = (unsigned int) ceil(z / resolution);
 	this->N = Nx * Ny * Nz;
 	value = new double[this->N];
+	if(value == NULL) throw(__FILE__ ":SetSize(...) - Not enough memory.");
+
 	dx = resolution;
 	dy = resolution;
 	dz = resolution;
 	Clear();
 }
 
-void Volume::Clear(void)
+void Volume::Clear(double zero)
 {
 	if(value == NULL) return;
 	unsigned int i;
 	for(i = 0; i < N; i++)
-		value[i] = 0.0;
+		value[i] = zero;
 }
 
 void Volume::AddHalfplane(const Vector3& p1, float d0, float k0)
@@ -1094,42 +1113,6 @@ void Volume::SetOrigin(Vector3 origin)
 	this->origin = origin;
 }
 
-void Volume::FillHeightField(HeightField* heightfield) const
-{
-	heightfield->matrix.SetIdentity();
-	heightfield->matrix.TranslateGlobal(origin.x, origin.y, origin.z);
-	heightfield->SetCount(Nx, Ny, dx);
-
-	unsigned int h = Nx * Ny;
-
-	double *temp = new double[h];
-	for(unsigned int n = 0; n < h; n++)
-		temp[n] = 0.0;
-
-	if(temp == NULL) throw(__FILE__ "FillHeightField() - Not enough memory.");
-
-	unsigned int i, j, k;
-	double c;
-	for(i = 0; i < h; i++){
-		double v0 = value[i];
-		j = i;
-		for(k = 1; k < Nz; k++){
-			j += h;
-			if(value[j] > 0.5){
-				if(v0 > 0.5){
-					temp[i] = (double) (k - 1) * dz;
-				}else{
-					c = fmin(fmax((0.5 - v0) / (value[j] - v0), 0), 1);
-					temp[i] = ((double) (k - 1) + c) * dz;
-				}
-				break;
-			}
-			v0 = value[j];
-		}
-	}
-	heightfield->SetValues(temp, h);
-}
-
 double Volume::GetValue(Vector3 p) const
 {
 	return GetValue(p.x, p.y, p.z);
@@ -1163,12 +1146,12 @@ double Volume::GetValue(double x, double y, double z) const
 	return v;
 }
 
-Vector3 Volume::GetSurface(Vector3 p0, Vector3 n)
+Vector3 Volume::GetSurface(Vector3 p0, Vector3 n) const
 {
 	double d0 = 0;
 	double d1 = 1;
 	double d = 0.5;
-	for(int c = 0; c < 10; c++){
+	for(int c = 0; c < 50; c++){
 		double v0 = GetValue(p0 + n * d0);
 		double v1 = GetValue(p0 + n * d1);
 		if(fabs(v0 - v1) < 1e-5) break;
@@ -1182,4 +1165,97 @@ Vector3 Volume::GetSurface(Vector3 p0, Vector3 n)
 		}
 	}
 	return (p0 + n * d);
+}
+
+Vector3 Volume::GetGrad(Vector3 p) const
+{
+	double hx = (p.x - origin.x) / dx;
+	double hy = (p.y - origin.y) / dy;
+	double hz = (p.z - origin.z) / dz;
+	double px = floor(hx);
+	double py = floor(hy);
+	double pz = floor(hz);
+	double mx = hx - px;
+	double my = hy - py;
+	double mz = hz - pz;
+	int ix = (int) px;
+	int iy = (int) py;
+	int iz = (int) pz;
+
+	Vector3 temp;
+	if(ix < 0 || iy < 0 || iz < 0 || ix > Nx - 2 || iy > Ny - 2 || iz > Nz - 2) return temp;
+
+	double v0, v1, v2, v3, v4, v5, v6, v7;
+
+	int pos = ix + (iy + iz * Ny) * Nx;
+	v0 = value[pos];
+	v1 = value[pos + 1];
+	v2 = value[pos + Nx];
+	v3 = value[pos + 1 + Nx];
+	v4 = value[pos + Nx * Ny];
+	v5 = value[pos + 1 + Nx * Ny];
+	v6 = value[pos + Nx + Nx * Ny];
+	v7 = value[pos + 1 + Nx + Nx * Ny];
+
+	//  Maxima:
+	//  v(x,y,z):= v0*(1-x)*(1-y)*(1-z)+v1*x*(1-y)*(1-z)+v2*(1-x)*y*(1-z)+v3*x*y*(1-z)+v4*(1-x)*(1-y)*z+v5*x*(1-y)*z+v6*(1-x)*y*z+v7*x*y*z;
+	//	diff(v(x,y,z),x);
+	//	diff(v(x,y,z),y);
+	//	diff(v(x,y,z),z);
+
+	temp.x = v7 * my * mz - v6 * my * mz + v5 * (1 - my) * mz
+			- v4 * (1 - my) * mz + v3 * my * (1 - mz) - v2 * my * (1 - mz)
+			+ v1 * (1 - my) * (1 - mz) - v0 * (1 - my) * (1 - mz);
+	temp.y = v7 * mx * mz - v5 * mx * mz + v6 * (1 - mx) * mz
+			- v4 * (1 - mx) * mz + v3 * mx * (1 - mz) - v1 * mx * (1 - mz)
+			+ v2 * (1 - mx) * (1 - mz) - v0 * (1 - mx) * (1 - mz);
+	temp.z = v7 * mx * my - v3 * mx * my + v6 * (1 - mx) * my
+			- v2 * (1 - mx) * my + v5 * mx * (1 - my) - v1 * mx * (1 - my)
+			+ v4 * (1 - mx) * (1 - my) - v0 * (1 - mx) * (1 - my);
+
+	return temp;
+}
+
+void Volume::RotateX(int quarters)
+{
+}
+
+void Volume::MirrorY(void)
+{
+}
+
+void Volume::FillHeightField(HeightField* heightfield) const
+{
+	heightfield->matrix.SetIdentity();
+	heightfield->matrix.TranslateGlobal(origin.x, origin.y, origin.z);
+	heightfield->SetCount(Nx, Ny, dx);
+
+	unsigned int h = Nx * Ny;
+
+	double *temp = new double[h];
+	if(temp == NULL) throw(__FILE__ "FillHeightField() - Not enough memory.");
+
+	for(unsigned int n = 0; n < h; n++)
+		temp[n] = 0.0;
+
+	unsigned int i, j, k;
+	double c;
+	for(i = 0; i < h; i++){
+		double v0 = value[i];
+		j = i;
+		for(k = 1; k < Nz; k++){
+			j += h;
+			if(value[j] > 0.5){
+				if(v0 > 0.5){
+					temp[i] = (double) (k - 1) * dz;
+				}else{
+					c = fmin(fmax((0.5 - v0) / (value[j] - v0), 0), 1);
+					temp[i] = ((double) (k - 1) + c) * dz;
+				}
+				break;
+			}
+			v0 = value[j];
+		}
+	}
+	heightfield->SetValues(temp, h);
 }

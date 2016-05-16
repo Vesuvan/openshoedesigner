@@ -41,10 +41,11 @@
  *
  */
 
-#define ID_REFRESHDISPLAY			(wxID_HIGHEST+1)
+#define ID_REFRESH3DVIEW			(wxID_HIGHEST+1)
 #define ID_REFRESHMAINGUI			(wxID_HIGHEST+2)
-#define ID_REFRESHFULLGUI			(wxID_HIGHEST+3)
+#define ID_REFRESHALLGUI			(wxID_HIGHEST+3)
 #define ID_UPDATEPROJECT			(wxID_HIGHEST+4)
+
 //!>\def ID_THREADLASTDONE Worker thread to main thread: Processing of volume ready.
 #define ID_THREADLASTDONE			(wxID_HIGHEST+5)
 

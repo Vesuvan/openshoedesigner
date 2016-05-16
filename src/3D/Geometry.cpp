@@ -29,6 +29,7 @@
 #include <GL/gl.h>
 #include <wx/log.h>
 #include <wx/arrimpl.cpp>
+
 WX_DEFINE_OBJARRAY(ArrayOfGeometry);
 
 Geometry::Geometry()

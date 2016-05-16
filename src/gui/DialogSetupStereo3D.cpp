@@ -32,7 +32,6 @@
 #include "../gui/DisplaySettings.h"
 #include "../gui/IDs.h"
 #include "../gui/Unit.h"
-//#include "../3D/OpenGLCanvas.h"
 
 DialogSetupStereo3D::DialogSetupStereo3D(wxWindow* parent,
 		DisplaySettings * settings) :
@@ -73,7 +72,7 @@ bool DialogSetupStereo3D::TransferDataToWindow(void)
 	m_sliderEyeDistance->SetValue(
 			(int) round((settings->eyeDistance * 1000.0)));
 	m_sliderFocalDistance->SetValue(
-			(int) round((settings->focalDistance * 200.0)));
+			(int) round((settings->focalDistance * 50.0)));
 
 	m_textCtrlEyeDistance->SetValue(
 			settings->Distance.TextFromSI(settings->eyeDistance, 1));
@@ -133,13 +132,13 @@ void DialogSetupStereo3D::OnScroll(wxScrollEvent& event)
 		break;
 	case ID_FOCALDISTANCE:
 		settings->focalDistance = ((float) m_sliderFocalDistance->GetValue())
-				/ 200.0;
+				/ 50.0;
 		break;
 
 	}
 
 	TransferDataToWindow();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_REFRESHDISPLAY);
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_REFRESH3DVIEW);
 	ProcessEvent(selectEvent);
 }
 
@@ -185,7 +184,7 @@ void DialogSetupStereo3D::OnColorChanged(wxColourPickerEvent& event)
 		break;
 	}
 	TransferDataToWindow();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_REFRESHDISPLAY);
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_REFRESH3DVIEW);
 	ProcessEvent(selectEvent);
 }
 
@@ -230,7 +229,7 @@ void DialogSetupStereo3D::OnTextChange(wxCommandEvent& event)
 	}
 	TransferDataToWindow();
 	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED,
-			ID_REFRESHDISPLAY);
+	ID_REFRESH3DVIEW);
 	ProcessEvent(selectEvent);
 }
 
@@ -241,6 +240,6 @@ void DialogSetupStereo3D::OnSwap(wxCommandEvent& event)
 	std::swap(settings->leftEyeB, settings->rightEyeB);
 	TransferDataToWindow();
 	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED,
-			ID_REFRESHDISPLAY);
+	ID_REFRESH3DVIEW);
 	ProcessEvent(selectEvent);
 }

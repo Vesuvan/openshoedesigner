@@ -67,12 +67,19 @@ void Project::UpdateVolume(void)
 	volume.MarchingCubes();
 	volume.FillHeightField(&sole);
 
-	h.Clear();
-	double p;
-	for(int i = 0; i < 200; i++){
-		p = (double) i / 300;
-		h.InsertPoint(p - 0.2, 0, volume.GetValue(p - 0.2, 0, 0.0) * 0.01);
-	}
+	bow.Clear();
+
+	bow = foot.GetCenterline();
+	bow.elements[0] = volume.GetSurface(bow.elements[1],
+			(bow.elements[0] - bow.elements[1]) * 2);
+	size_t M = bow.elements.GetCount();
+	bow.elements[M - 1] = volume.GetSurface(bow.elements[M - 2],
+			(bow.elements[M - 1] - bow.elements[M - 2]) * 2);
+
+	bow.Resample(50);
+	bow.Filter(20);
+
+	bottom = sole.GetUnderline();
 
 }
 
@@ -147,16 +154,34 @@ void Project::PaintLast(void) const
 
 void Project::PaintInsole(void) const
 {
-	h.Paint();
+	bow.Paint();
+
+	glColor3f(0.0, 0.75, 0.0);
+	glBegin(GL_LINES);
+	for(int i = 0; i < bow.elements.GetCount() - 1; i++){
+		Vector3 temp = bow.elements[i + 1] - bow.elements[i];
+		temp.Normalize();
+		glNormal3f(temp.x, temp.y, temp.z);
+		temp = temp * Vector3(0, -1, 0);
+		temp = volume.GetSurface(bow.elements[i], temp);
+
+		glVertex3f(bow.elements[i].x, bow.elements[i].y, bow.elements[i].z);
+//		glVertex3f(bow.elements[i].x + temp.x, bow.elements[i].y + temp.y,
+//				bow.elements[i].z + temp.z);
+		glVertex3f(temp.x, temp.y, temp.z);
+	}
+	glEnd();
 }
 
 void Project::PaintSole(void) const
 {
 	sole.Paint();
+	bottom.Paint();
 }
 
 void Project::PaintUpper(void) const
 {
+
 }
 
 void Project::PaintCutaway(void) const

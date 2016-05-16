@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Project.h
+// Name               : Project.bow
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
@@ -78,10 +78,11 @@ private:
 	Shoe shoe;
 	Pattern pattern;
 	HeightField sole;
+	Polygon3 bottom;
 
 	Volume volume;
 
-	Polygon3 h;
+	Polygon3 bow;
 
 };
 

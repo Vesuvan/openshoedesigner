@@ -191,6 +191,36 @@ double Foot::GetBallHeight(void) const
 {
 	return PhalanxI5->p1.z - PhalanxI5->r1 - PhalanxI5->s1;
 }
+
+Polygon3 Foot::GetCenterline(void) const
+{
+	Polygon3 temp;
+
+	temp.InsertPoint(
+			Calcaneus->p1.x
+					+ (-Calcaneus->r1 - Calcaneus->s1) * cos(Talus->roty - 0.4),
+			Calcaneus->p1.y,
+			Calcaneus->p1.z
+					- (-Calcaneus->r1 - Calcaneus->s1)
+							* sin(Talus->roty - 0.4));
+
+	temp.InsertPoint(Calcaneus->p1);
+	temp.InsertPoint(Talus->p2);
+	temp.InsertPoint(Naviculare->p1);
+	temp.InsertPoint(Metatarsalis4->p1);
+	temp.InsertPoint(PhalanxI4->p1);
+	temp.InsertPoint(PhalanxIII4->p2);
+
+	temp.InsertPoint(
+			PhalanxIII4->p1
+					+ (PhalanxIII4->p2 - PhalanxIII4->p1)
+							* (1
+									+ (PhalanxIII4->r2 + PhalanxIII4->s2)
+											/ (PhalanxIII4->p2 - PhalanxIII4->p1).Abs()));
+
+	return temp;
+}
+
 void Foot::Update(void)
 {
 	// Run the VisitorSetupBone visitor to recalculate each single bone.

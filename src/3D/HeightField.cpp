@@ -29,6 +29,7 @@
 #include "../StdInclude.h"
 #include <GL/gl.h>
 #include <math.h>
+#include <float.h>
 
 HeightField::HeightField()
 {
@@ -39,6 +40,20 @@ HeightField::HeightField()
 	N = 0;
 	value = NULL;
 	color.Set(0.5, 0.5, 0.5);
+}
+
+HeightField::HeightField(const HeightField& other) :
+		N(other.N), Nx(other.Nx), Ny(other.Ny), dx(other.dx), dy(other.dy), color(
+				other.color), matrix(other.matrix)
+{
+	if(N == 0){
+		value = NULL;
+		return;
+	}
+	value = new double[N];
+	if(value == NULL) throw(__FILE__ ":Copy constructor - Not enough memory.");
+	for(unsigned int n = 0; n < N; n++)
+		value[n] = other.value[n];
 }
 
 HeightField::~HeightField()
@@ -53,6 +68,7 @@ void HeightField::SetCount(unsigned int nx, unsigned int ny, float resolution)
 	this->Ny = ny;
 	this->N = nx * ny;
 	value = new double[this->N];
+	if(value == NULL) throw(__FILE__ ":SetCount(...) - Not enough memory.");
 	dx = resolution;
 	dy = resolution;
 	Clear();
@@ -65,6 +81,7 @@ void HeightField::SetSize(float x, float y, float resolution)
 	Ny = (unsigned int) ceil(y / resolution);
 	this->N = Nx * Ny;
 	value = new double[this->N];
+	if(value == NULL) throw(__FILE__ ":SetSize(...) - Not enough memory.");
 	dx = resolution;
 	dy = resolution;
 	Clear();
@@ -85,6 +102,34 @@ void HeightField::SetValues(double* v, unsigned int size)
 		this->value[n] = v[n];
 }
 
+Polygon3 HeightField::GetUnderline(void) const
+{
+	Polygon3 temp;
+
+	Vector3 p(0, 0, 0);
+	unsigned int i, j, c = 0;
+	for(i = 0; i < Nx; i++){
+		p.z = 0.0;
+		for(j = 0; j < Ny; j++){
+			double v0 = value[c];
+			if(v0 > 0.0){
+				if(p.z > 0.0){
+					if(v0 < p.z) p.z = v0;
+				}else{
+					p.z = v0;
+				}
+			}
+			c += Nx;
+		}
+		c -= (Nx * Ny - 1);
+		temp.InsertPoint(p);
+		p.x += dx;
+	}
+
+	temp.ApplyTransformation(this->matrix);
+	return temp;
+}
+
 void HeightField::Paint(void) const
 {
 	if(value == NULL) return;
@@ -97,8 +142,8 @@ void HeightField::Paint(void) const
 
 	Vector3 p(0, 0, 0);
 	unsigned int i, j, c = 0;
-	for(j = 0; j < Ny - 1; j++){
-		for(i = 0; i < Nx - 1; i++){
+	for(j = 0; j < Ny; j++){
+		for(i = 0; i < Nx; i++){
 			double v0 = value[c];
 
 			glColor3f(v0 * 5, v0 * 5, v0 * 5);
@@ -107,7 +152,6 @@ void HeightField::Paint(void) const
 			p.x += dx;
 			c++;
 		}
-		c++;
 		p.x = 0;
 		p.y += dy;
 	}

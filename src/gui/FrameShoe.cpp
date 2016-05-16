@@ -94,32 +94,32 @@ void FrameShoe::OnPreset(wxCommandEvent& event)
 		shoe->exprToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETHHLOW:
-		shoe->exprHeelHeight = _T("7*(L/0.26) cm");
+		shoe->exprHeelHeight = _T("7 cm * (L/26cm)");
 		shoe->exprBallHeight = _T("0 cm");
 		shoe->exprToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETHHMID:
-		shoe->exprHeelHeight = _T("10*(L/0.26) cm");
+		shoe->exprHeelHeight = _T("10 cm * (L/26cm)");
 		shoe->exprBallHeight = _T("0 cm");
 		shoe->exprToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETHHHIGH:
-		shoe->exprHeelHeight = _T("13*(L/0.26) cm");
+		shoe->exprHeelHeight = _T("13 cm * (L/26cm)");
 		shoe->exprBallHeight = _T("0 cm");
 		shoe->exprToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETPLATFORM:
-		shoe->exprHeelHeight = _T("15*(L/0.26) cm");
-		shoe->exprBallHeight = _T("5*(L/0.26) cm");
+		shoe->exprHeelHeight = _T("15 cm * (L/26cm)");
+		shoe->exprBallHeight = _T("5 cm * (L/26cm)");
 		shoe->exprToeAngle = _T("0 deg");
 		break;
 	case ID_PRESETPONY:
-		shoe->exprHeelHeight = _T("16*(L/0.26) cm");
+		shoe->exprHeelHeight = _T("16 cm * (L/26cm)");
 		shoe->exprBallHeight = _T("0 cm");
 		shoe->exprToeAngle = _T("45 deg");
 		break;
 	case ID_PRESETBALLET:
-		shoe->exprHeelHeight = _T("20*(L/0.26) cm");
+		shoe->exprHeelHeight = _T("20 cm * (L/26cm)");
 		shoe->exprBallHeight = _T("0 cm");
 		shoe->exprToeAngle = _T("90 deg");
 		break;

@@ -42,14 +42,22 @@
 class Volume {
 public:
 	Volume();
-	//TODO: Add copy constructor, becaus it has a pointer.
+	Volume(const Volume &other); ///< Copy constructor
 	virtual ~Volume();
+
+	/*! \brief Set the Origin
+	 *
+	 * Set the origin of the Volume to this point. Together with SetCount or SetSize
+	 * it determines the start and end coordinates of the Volume.
+	 *
+	 * @param origin Vector3 of origin
+	 */
 	void SetOrigin(Vector3 origin);
 	void SetCount(unsigned int nx, unsigned int ny, unsigned int nz,
 			float resolution);
 	void SetSize(float x, float y, float z, float resolution);
 
-	void Clear(void);
+	void Clear(double zero = 0.0); ///< Sets all datapoints to 0
 
 	void AddHalfplane(const Vector3 &p1, float d0, float k0);
 	void AddSphere(const Vector3 &p1, float r1, float k1);
@@ -60,22 +68,80 @@ public:
 	void AddCylinder(const Vector3 &p1, const Vector3 &p2, const float r1,
 			const float r2, const float k1, const float k2);
 
+	/*! \brief Marching cubes algorithm
+	 *
+	 * Rund the Marching-cubes algorithm to generate a geometry of the surface
+	 * of the data in the volume. The surface is assumed at the level of the
+	 * internal variable "surface".
+	 */
 	void MarchingCubes(void);
+
+	/*! \brief Render the data
+	 *
+	 * After the MarchingCubes algorithm has run, the generated Geometry can be
+	 * rendered with OpenGL commands.
+	 */
 	void Paint(void) const;
+
+	/*! \brief Return the Value at a point
+	 *
+	 * Returns the interpolated value of the field at the point p. Points
+	 * outside the volume are 0.
+	 *
+	 * @param p Vector3 point
+	 * @return Value at the point p
+	 */
 	double GetValue(Vector3 p) const;
+
+	/*! \brief Return the Value at a point
+	 *
+	 * Returns the interpolated value of the field at the point x,y,z. Points
+	 * outside the volume are 0.
+	 *
+	 * @param x coordinate
+	 * @param y coordinate
+	 * @param z coordinate
+	 * @return Value at the point p
+	 */
 	double GetValue(double x, double y, double z) const;
-	void FillHeightField(HeightField *heightfield) const;
-	Vector3 GetSurface(Vector3 p0, Vector3 n);
 
-	Vector3 color;
-	Geometry geometry;
+	/*! \brief Calculate the gradient at point p
+	 *
+	 * Calculates the gradient in a point by deriving the value of the field in x,y and z.
+	 * The returned vector points in the direction of the steppest ascent in the field.
+	 * @param p Vector3 point
+	 * @return Vector3 gradient at point p
+	 */
+	Vector3 GetGrad(Vector3 p) const;
+
+	/*! \brief Point on the surface
+	 *
+	 *
+	 * @param p0
+	 * @param n
+	 * @return
+	 */
+	Vector3 GetSurface(Vector3 p0, Vector3 n) const;
+
+	void RotateX(int quarters);
+	void MirrorY(void);
+
+	/*! \brief Fill a HeightField with the underside of the volume
+	 *
+	 * Calculate the lower surface of the volume and returns this data in a HeightField.
+	 *
+	 * @param heightfield Pointer to a HeightField
+	 */
+	void FillHeightField(HeightField * heightfield) const;
+
+	Vector3 color; ///< Color of the volume
+	Geometry geometry; ///< Generated geometry
+
 private:
+	double surface; ///< Value of the surface: values greater than surface are inside the volume
+	double * value; ///< Array with the values
 
-	double surface;
-
-	Vector3 origin;
-
-	double * value;
+	Vector3 origin; ///< Origin of the volume
 
 	unsigned int Nx;
 	unsigned int Ny;

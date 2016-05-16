@@ -43,8 +43,6 @@ FrameMain::FrameMain(wxWindow* parent, wxLocale* locale, wxConfig* config) :
 	settings.GetConfigFrom(config);
 
 	m_canvas->SetProject(&project);
-
-//		m_canvas->stereoMode = stereoAnaglyph;
 	settings.WriteToCanvas(m_canvas);
 
 	thread = NULL;
@@ -58,11 +56,11 @@ FrameMain::FrameMain(wxWindow* parent, wxLocale* locale, wxConfig* config) :
 	dialogDebugParser = new FrameDebugParser(this);
 
 	TransferDataToWindow();
-	this->Connect(ID_REFRESHDISPLAY, wxEVT_COMMAND_MENU_SELECTED,
+	this->Connect(ID_REFRESH3DVIEW, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::RefreshMain));
 	this->Connect(ID_REFRESHMAINGUI, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::UpdateMainGUI));
-	this->Connect(ID_REFRESHFULLGUI, wxEVT_COMMAND_MENU_SELECTED,
+	this->Connect(ID_REFRESHALLGUI, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::UpdateFullGUI));
 	this->Connect(ID_UPDATEPROJECT, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::UpdateProject));
@@ -80,11 +78,11 @@ FrameMain::~FrameMain()
 			wxCommandEventHandler(FrameMain::LastCalculationDone));
 	this->Disconnect(ID_UPDATEPROJECT, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::UpdateProject));
-	this->Disconnect(ID_REFRESHFULLGUI, wxEVT_COMMAND_MENU_SELECTED,
+	this->Disconnect(ID_REFRESHALLGUI, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::UpdateFullGUI));
 	this->Disconnect(ID_REFRESHMAINGUI, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::UpdateMainGUI));
-	this->Disconnect(ID_REFRESHDISPLAY, wxEVT_COMMAND_MENU_SELECTED,
+	this->Disconnect(ID_REFRESH3DVIEW, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::RefreshMain));
 
 	settings.WriteConfigTo(config);
@@ -359,7 +357,7 @@ void FrameMain::OnSelectLanguage(wxCommandEvent& event)
 					_T(
 							"Please choose language:\nChanges will take place after restart!"),
 					_T("Language"), WXSIZEOF(langNames), langNames);
-	config->Write(_T("Language"), langNames[lng]);
+	if(lng >= 0) config->Write(_T("Language"), langNames[lng]);
 }
 
 void FrameMain::OnDebug(wxCommandEvent& event)

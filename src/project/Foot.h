@@ -69,6 +69,7 @@
 #include "Bone.h"
 
 #include "../3D/Volume.h"
+#include "../3D/Polygon3.h"
 
 #include <wx/txtstrm.h>
 #include <wx/grid.h>
@@ -93,6 +94,7 @@ public:
 
 	double GetHeelHeight(void) const;
 	double GetBallHeight(void) const;
+	Polygon3 GetCenterline(void) const;
 
 	void AddToVolume(Volume* vol);
 

@@ -35,8 +35,9 @@ class LinkageVisitor;
 /*!\class Linkage
  * \brief Linked 3D object trees
  *
- *
  * Utilizes LinkageVisitor for traversing the object tree.
+ *
+ * \todo: add a copy constructor
  */
 
 class Linkage {
