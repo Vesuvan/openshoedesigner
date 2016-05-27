@@ -64,6 +64,9 @@ void Project::UpdateVolume(void)
 {
 	volume.Clear();
 	foot.AddToVolume(&volume);
+//	volume.Rotate(Volume::Z, 2);
+//	volume.Rotate(Volume::Z, -1);
+//	volume.Rotate(Volume::Z, -1);
 	volume.MarchingCubes();
 	volume.FillHeightField(&sole);
 

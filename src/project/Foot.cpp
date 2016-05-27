@@ -31,6 +31,8 @@
 #include "VisitorBoneToVolume.h"
 #include "VisitorSetupBone.h"
 
+#include <GL/gl.h>
+
 const unsigned int Foot::NBones = 29;
 Foot::Foot()
 {
@@ -145,7 +147,6 @@ void Foot::SetPosition(double heelheight, double toeAngle, double mixing)
 
 	double h;
 	double ang = 0.0;
-	;
 	double inc = 2.0;
 	int c;
 	for(c = 0; c < 10; c++){

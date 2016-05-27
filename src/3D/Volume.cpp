@@ -30,6 +30,7 @@
 //#include <wx/textfile.h>
 //#include <wx/string.h>
 #include <GL/gl.h>
+#include <assert.h>
 #include <math.h>
 
 Volume::Volume()
@@ -47,9 +48,9 @@ Volume::Volume()
 }
 
 Volume::Volume(const Volume& other) :
-		N(other.N), Nx(other.Nx), Ny(other.Ny), Nz(other.Nz), dx(other.dx), dy(
-				other.dy), dz(other.dz), surface(other.surface), color(
-				other.color), geometry(other.geometry), origin(other.origin)
+		color(other.color), geometry(other.geometry), surface(other.surface), origin(
+				other.origin), Nx(other.Nx), Ny(other.Ny), Nz(other.Nz), N(
+				other.N), dx(other.dx), dy(other.dy), dz(other.dz)
 {
 	if(N == 0){
 		value = NULL;
@@ -1216,12 +1217,178 @@ Vector3 Volume::GetGrad(Vector3 p) const
 	return temp;
 }
 
-void Volume::RotateX(int quarters)
+void Volume::Rotate(Axis a, int quarters)
 {
+	unsigned int i, j, k;
+	unsigned int n, m;
+
+	quarters %= 4;
+	if(quarters < 0) quarters += 4;
+	if(quarters == 0) return;
+	if(quarters == 2){
+		switch(a){
+		case X:
+			for(i = 0; i < Nx; i++){
+				for(n = i; n < (N / 2); n += Nx){
+					std::swap(value[n], value[(N - Nx) - n + 2 * i]);
+				}
+			}
+			break;
+		case Y:
+			for(j = 0; j < Ny; j++){
+				n = j * Nx;
+				m = N - 1 - (Ny - 1) * Nx + j * Nx;
+				for(k = 0; k < (Nx * Nz / 2); k++){
+					std::swap(value[n], value[m]);
+					n = (n + Nx * Ny) % (N - 1);
+					m = (m + (N - Nx * Ny - 1)) % (N - 1);
+				}
+			}
+			break;
+		case Z:
+			m = Nx * Ny;
+			for(k = 0; k < Nz; k++){
+				for(n = 0; n < (m / 2); n++){
+					std::swap(value[k * Nx * Ny + n],
+							value[k * Nx * Ny + (m - n - 1)]);
+				}
+			}
+			break;
+		}
+		return;
+	}
+	assert(quarters == 1 || quarters == 3);
+	double* temp = new double[N];
+	if(temp == NULL) throw("Out of memory!");
+
+	unsigned int ad, mo;
+
+	switch(a){
+	case X:
+		if(quarters == 1){
+			mo = N + Nx;
+			ad = N - (Nx * (Ny - 1));
+			for(i = 0; i < Nx; i++){
+				m = N - Ny * Nx + i;
+				for(n = 0; n < (Ny * Nz); n++){
+					temp[n * Nx + i] = value[m];
+					m = (m + ad) % mo;
+				}
+			}
+		}
+		if(quarters == 3){
+			mo = N + Nx;
+			ad = Nx * Ny;
+			for(i = 0; i < Nx; i++){
+				m = (Ny - 1) * Nx + i;
+				for(n = 0; n < (Ny * Nz); n++){
+					temp[n * Nx + i] = value[m];
+					m = (m + ad) % mo;
+				}
+			}
+		}
+		std::swap(Ny, Nz);
+		std::swap(dy, dz);
+		break;
+	case Y:
+		if(quarters == 1){
+//			Nx = 4;
+//			Ny = 5;
+//			Nz = 5;
+//			N = Nx * Ny * Nz;
+			n = 0;
+			m = Nx - 1;
+			for(i = 0; i < Nx; i++){
+				for(j = 0; j < Ny; j++){
+					for(k = 0; k < Nz; k++){
+						temp[n] = value[m];
+						n++;
+						m += Nx * Ny;
+					}
+					m = m + Nx - N;
+				}
+				m = m - Nx * Ny - 1;
+			}
+		}
+		if(quarters == 3){
+			n = 0;
+			m = N;
+			for(i = 0; i < Nx; i++){
+				for(j = 0; j < Ny; j++){
+					for(k = 0; k < Nz; k++){
+						m -= Nx * Ny;
+						temp[n] = value[m];
+						n++;
+					}
+					m = m + N + Nx;
+				}
+				m = m - Nx * Ny + 1;
+			}
+		}
+
+		std::swap(Nz, Nx);
+		std::swap(dz, dx);
+		break;
+	case Z:
+		mo = Nx * Ny + 1;
+		if(quarters == 1) ad = Nx * (Ny - 1) + 1;
+		if(quarters == 3) ad = Nx;
+		for(k = 0; k < Nz; k++){
+			n = 0;
+			for(m = ad - 1; m != mo - 1; m = (m + ad) % mo){
+				temp[n + k * Nx * Ny] = value[m + k * Nx * Ny];
+				n++;
+			}
+		}
+		std::swap(Nx, Ny);
+		std::swap(dx, dy);
+		break;
+	}
+
+	delete[] value;
+	value = temp;
 }
 
-void Volume::MirrorY(void)
+void Volume::Mirror(Axis a)
 {
+	unsigned int i, j, k;
+	unsigned int m, n;
+
+	switch(a){
+	case X:
+		for(i = 0; i < (Nx / 2); i++){
+			for(j = 0; j < Ny; j++){
+				for(k = 0; k < Nz; k++){
+					n = i + Nx * (j + Ny * k);
+					m = (Nx - i - 1) + Nx * (j + Ny * k);
+					std::swap(value[n], value[m]);
+				}
+			}
+		}
+		break;
+	case Y:
+		for(i = 0; i < Nx; i++){
+			for(j = 0; j < (Ny / 2); j++){
+				for(k = 0; k < Nz; k++){
+					n = i + Nx * (j + Ny * k);
+					m = i + Nx * ((Ny - j - 1) + Ny * k);
+					std::swap(value[n], value[m]);
+				}
+			}
+		}
+		break;
+	case Z:
+		for(i = 0; i < Nx; i++){
+			for(j = 0; j < Ny; j++){
+				for(k = 0; k < (Nz / 2); k++){
+					n = i + Nx * (j + Ny * k);
+					m = i + Nx * (j + Ny * (Nz - k - 1));
+					std::swap(value[n], value[m]);
+				}
+			}
+		}
+		break;
+	}
 }
 
 void Volume::FillHeightField(HeightField* heightfield) const

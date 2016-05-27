@@ -37,9 +37,40 @@
  *
  * Sets up a density map by using morph-objects.
  * Applies the marching cubes algorithm to convert the density map into a surface.
+ *
+ * In the internal data structure X is the first axis, Y the second one, Z the last one.
+ *
+ * XYZ
+ *
+ * 000
+ * 100
+ * 200
+ * 010
+ * 110
+ * 210
+ * 020
+ * 120
+ * 220
+ * 001
+ * 101
+ * 201
+ * 011
+ * 111
+ * 211
+ * 021
+ * 121
+ * 221
+ * 002
+ * ...
+ *
  */
 
 class Volume {
+public:
+	enum Axis {
+		X, Y, Z
+	};
+
 public:
 	Volume();
 	Volume(const Volume &other); ///< Copy constructor
@@ -123,8 +154,19 @@ public:
 	 */
 	Vector3 GetSurface(Vector3 p0, Vector3 n) const;
 
-	void RotateX(int quarters);
-	void MirrorY(void);
+	/*! \brief Rotate Volume
+	 *
+	 * Rotate the Volume around an axis. Some functions use this feature to access the model from all sides.
+	 *
+	 * @param quarters Number of 90 degree turns to do.
+	 */
+	void Rotate(Axis a, int quarters);
+
+	/*! \brief Mirror Volume
+	 *
+	 * Mirror the volume along an axis.
+	 */
+	void Mirror(Axis a);
 
 	/*! \brief Fill a HeightField with the underside of the volume
 	 *

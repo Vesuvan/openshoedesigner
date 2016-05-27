@@ -32,9 +32,9 @@ Canvas3D::Canvas3D(wxWindow* parent) :
 {
 	project = NULL;
 
-	showBones = false;
-	showLast = false;
-	showInsole = true;
+	showBones = true;
+	showLast = true;
+	showInsole = false;
 	showSole = true;
 	showUpper = false;
 	showCutaway = false;
@@ -75,14 +75,14 @@ void Canvas3D::Render()
 	glColor3f(1, 0, 0);
 	glBegin(GL_LINE_LOOP);
 	for(n = 0; n < 64; n++){
-		glVertex3d(0, 0.04 * cos(M_PI / 32 * (double) n),
+		glVertex3d(0.3, 0.04 * cos(M_PI / 32 * (double) n),
 				0.04 * sin(M_PI / 32 * (double) n));
 	}
 	glEnd();
 	glColor3f(0, 1, 0);
 	glBegin(GL_LINE_LOOP);
 	for(n = 0; n < 64; n++){
-		glVertex3d(0.04 * cos(M_PI / 32 * (double) n), 0,
+		glVertex3d(0.04 * cos(M_PI / 32 * (double) n), 0.3,
 				0.04 * sin(M_PI / 32 * (double) n));
 	}
 	glEnd();
@@ -90,7 +90,7 @@ void Canvas3D::Render()
 	glBegin(GL_LINE_LOOP);
 	for(n = 0; n < 64; n++){
 		glVertex3d(0.04 * cos(M_PI / 32 * (double) n),
-				0.04 * sin(M_PI / 32 * (double) n), 0);
+				0.04 * sin(M_PI / 32 * (double) n), 0.3);
 	}
 	glEnd();
 
