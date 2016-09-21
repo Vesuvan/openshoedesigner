@@ -43,9 +43,7 @@ public:
 	virtual void OnCloseX(wxCloseEvent& event);
 	virtual void OnText(wxCommandEvent& event);
 
-
 	MathParser parser;
-
 };
 
 #endif /* FRAMEDEBUGPARSER_H_ */

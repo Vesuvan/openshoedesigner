@@ -144,7 +144,7 @@ bool DisplaySettings::GetConfigFrom(wxConfig * config)
 	double dval;
 	config->Read(_T("Stereo3DEyeDistance"), &dval, 0.1);
 	eyeDistance = dval;
-	config->Read(_T("Stereo3DFocalDistance"), &dval, 0.0);
+	config->Read(_T("Stereo3DFocalDistance"), &dval, 1.0);
 	focalDistance = dval;
 
 	return true;

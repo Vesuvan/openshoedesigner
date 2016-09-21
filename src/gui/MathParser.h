@@ -32,7 +32,7 @@
 /*!\class MathParser
  * \brief Simple single-line math parser
  *
- * Parses a single line into an double number.
+ * Parses a single line into a double number.
  *
  * Supported functions:
  *  - + - * / ^ ( )

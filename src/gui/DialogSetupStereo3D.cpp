@@ -26,12 +26,12 @@
 
 #include "DialogSetupStereo3D.h"
 
-#include "../StdInclude.h"
-
-#include "../gui/CanvasStereoTest.h"
 #include "../gui/DisplaySettings.h"
-#include "../gui/IDs.h"
+#include "../gui/CanvasStereoTest.h"
 #include "../gui/Unit.h"
+#include "../gui/IDs.h"
+
+#include "../StdInclude.h"
 
 DialogSetupStereo3D::DialogSetupStereo3D(wxWindow* parent,
 		DisplaySettings * settings) :

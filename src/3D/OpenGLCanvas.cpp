@@ -50,11 +50,13 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
 
 	isInitialized = false;
 	m_gllist = 0;
-	x = y = 0;
-	w = h = 1;
+	w = h = 500;
+	x = y = 250;
+	unitAtOrigin = 400;
+
 	turntableX = 0;
 	turntableY = M_PI / 2;
-
+	scale = 1.0;
 	stereoMode = stereoOff;
 	eyeDistance = 0.1;
 	focalDistance = 1.0;
@@ -100,7 +102,7 @@ OpenGLCanvas::~OpenGLCanvas()
 {
 #ifdef _USE_6DOFCONTROLLER
 	this->Disconnect(wxEVT_TIMER, wxTimerEventHandler(OpenGLCanvas::OnTimer),
-			NULL, this);
+	NULL, this);
 #endif
 	this->Disconnect(wxEVT_RIGHT_DCLICK,
 			wxMouseEventHandler(OpenGLCanvas::OnMouseEvent), NULL, this);
@@ -239,9 +241,12 @@ bool OpenGLCanvas::OnPick(OpenGLPick &result, wxPoint pos)
 	::gluPerspective(45, ar, 0.01, 10);
 	::glMatrixMode(GL_MODELVIEW);
 	::glLoadIdentity();
-	::glTranslatef(0.0, -0.0, -1.0);
-	::glMultMatrixd(transmat.a);
+
+	::glTranslatef(0.0, 0.0, -focalDistance);
+	::glScalef(scale, scale, scale);
 	::glMultMatrixd(rotmat.a);
+	::glMultMatrixd(transmat.a);
+
 	Render();
 	glFlush();
 	GLuint hits = glRenderMode(GL_RENDER);
@@ -338,6 +343,22 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	}
 
 	::glTranslatef(0.0, 0.0, -focalDistance);
+	::glScalef(scale, scale, scale);
+
+	GLint viewport[4];
+	GLdouble modelview[16];
+	GLdouble projection[16];
+	GLdouble winX1, winY1, winZ1;
+	GLdouble winX2, winY2, winZ2;
+	glGetDoublev( GL_MODELVIEW_MATRIX, modelview);
+	glGetDoublev( GL_PROJECTION_MATRIX, projection);
+	glGetIntegerv( GL_VIEWPORT, viewport);
+	gluProject(0, 0, 0, modelview, projection, viewport, &winX1, &winY1,
+			&winZ1);
+	gluProject(1, 0, 0, modelview, projection, viewport, &winX2, &winY2,
+			&winZ2);
+	unitAtOrigin = winX2 - winX1;
+
 	::glMultMatrixd(rotmat.a);
 	::glMultMatrixd(transmat.a);
 	//	if(m_gllist == 0){
@@ -370,6 +391,7 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 				0);
 		::glTranslatef(-eyeDistance / 2, 0, 0);
 		::glTranslatef(0.0, 0.0, -focalDistance);
+		::glScalef(scale, scale, scale);
 		::glMultMatrixd(rotmat.a);
 		::glMultMatrixd(transmat.a);
 		Render();
@@ -506,8 +528,10 @@ void OpenGLCanvas::OnMouseEvent(wxMouseEvent& event)
 	}
 
 	if(event.Dragging() && event.MiddleIsDown()){
-		float dx = (float) (event.m_x - x) / 1000.0;
-		float dy = (float) (event.m_y - y) / 1000.0;
+		float movement = 1.0;
+		if(unitAtOrigin > 1.0) movement = unitAtOrigin;
+		float dx = (float) (event.m_x - x) / movement;
+		float dy = (float) (event.m_y - y) / movement;
 		rotmat.TranslateGlobal(dx, -dy, 0);
 		x = event.m_x;
 		y = event.m_y;
@@ -517,10 +541,12 @@ void OpenGLCanvas::OnMouseEvent(wxMouseEvent& event)
 
 	int x = event.GetWheelRotation();
 	if(x != 0){
-		rotmat.TranslateGlobal(0, 0, (float) -x / 1000.0);
+		scale = exp(log(scale) - ((float) x) / 1000.0);
+//		rotmat.TranslateGlobal(0, 0, (float) -x / 1000.0);
 		this->Refresh();
 	}
 
+	if(event.Moving() || event.Dragging()) event.Skip();
 }
 
 #ifdef _USE_6DOFCONTROLLER
@@ -532,15 +558,16 @@ void OpenGLCanvas::OnTimer(wxTimerEvent& event)
 	if(control->IsIdle()) return;
 
 	float resRot = 2000;
-	float resMov = 10000;
+	float resMov = 5 * unitAtOrigin;
 
 	rotmat = AffineTransformMatrix::RotateInterwoven(
 			(float) control->GetAxis(3) / resRot,
 			(float) control->GetAxis(4) / resRot,
 			(float) control->GetAxis(5) / resRot) * rotmat;
-	transmat.TranslateGlobal((float) control->GetAxis(0) / resMov,
+	rotmat.TranslateGlobal((float) control->GetAxis(0) / resMov,
 			(float) control->GetAxis(1) / resMov,
 			(float) control->GetAxis(2) / resMov);
+
 	//rotmat.RotateXY(1,0,1);
 	if(control->GetButton(0)){
 		rotmat.SetIdentity();
