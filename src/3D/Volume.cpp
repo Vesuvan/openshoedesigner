@@ -32,94 +32,54 @@
 #include <GL/gl.h>
 #include <assert.h>
 #include <math.h>
+#include <stdint.h>
 
 Volume::Volume()
 {
 	dx = 1.0;
 	dy = 1.0;
 	dz = 1.0;
-	Nx = 0;
-	Ny = 0;
-	Nz = 0;
-	N = 0;
-	value = NULL;
 	surface = 0.5;
 	color.Set(0.5, 0.5, 0.5);
 }
 
-Volume::Volume(const Volume& other) :
-		color(other.color), geometry(other.geometry), surface(other.surface), origin(
-				other.origin), Nx(other.Nx), Ny(other.Ny), Nz(other.Nz), N(
-				other.N), dx(other.dx), dy(other.dy), dz(other.dz)
-{
-	if(N == 0){
-		value = NULL;
-		return;
-	}
-	value = new double[N];
-	if(value == NULL) throw(__FILE__ ":Copy constructor - Not enough memory.");
-	for(unsigned int n = 0; n < N; n++)
-		value[n] = other.value[n];
-}
-
 Volume::~Volume()
 {
-	if(value != NULL) delete[] value;
 }
 
 void Volume::SetCount(unsigned int nx, unsigned int ny, unsigned int nz,
 		float resolution)
 {
-	if(value != NULL) delete[] value;
-	this->Nx = nx;
-	this->Ny = ny;
-	this->Nz = nz;
-	this->N = nx * ny * nz;
-	value = new double[this->N];
-	if(value == NULL) throw(__FILE__ ":SetCount(...) - Not enough memory.");
-
+	MatlabMatrix::SetSize(nx, ny, nz);
 	dx = resolution;
 	dy = resolution;
 	dz = resolution;
-	Clear();
 }
 
 void Volume::SetSize(float x, float y, float z, float resolution)
 {
-	if(value != NULL) delete[] value;
-	Nx = (unsigned int) ceil(x / resolution);
-	Ny = (unsigned int) ceil(y / resolution);
-	Nz = (unsigned int) ceil(z / resolution);
-	this->N = Nx * Ny * Nz;
-	value = new double[this->N];
-	if(value == NULL) throw(__FILE__ ":SetSize(...) - Not enough memory.");
-
+	size_t nx = (unsigned int) ceil(x / resolution);
+	size_t ny = (unsigned int) ceil(y / resolution);
+	size_t nz = (unsigned int) ceil(z / resolution);
+	MatlabMatrix::SetSize(nx, ny, nz);
 	dx = resolution;
 	dy = resolution;
 	dz = resolution;
-	Clear();
-}
-
-void Volume::Clear(double zero)
-{
-	if(value == NULL) return;
-	unsigned int i;
-	for(i = 0; i < N; i++)
-		value[i] = zero;
 }
 
 void Volume::AddHalfplane(const Vector3& p1, float d0, float k0)
 {
-	unsigned int nx, ny, nz;
+	const size_t Nx = Size(1);
+	const size_t Ny = Size(2);
+	const size_t Nz = Size(3);
 	Vector3 p(0, 0, 0);
-	float kh = -log(2 * M_E - 1) / k0;
-
+	const float kh = -log(2 * M_E - 1) / k0;
 	unsigned int c = 0;
-	for(nz = 0; nz < Nz; nz++){
-		for(ny = 0; ny < Ny; ny++){
-			for(nx = 0; nx < Nx; nx++){
-				float d = (p + origin).Dot(p1);
-				value[c] += 1 - 1 / (1 + exp(kh * (d - d0)));
+	for(size_t nz = 0; nz < Nz; nz++){
+		for(size_t ny = 0; ny < Ny; ny++){
+			for(size_t nx = 0; nx < Nx; nx++){
+				const float d = (p + origin).Dot(p1);
+				buffer[c] += 1 - 1 / (1 + exp(kh * (d - d0)));
 				c++;
 				p.x += dx;
 			}
@@ -133,17 +93,18 @@ void Volume::AddHalfplane(const Vector3& p1, float d0, float k0)
 
 void Volume::AddSphere(const Vector3 &p1, float r1, float k1)
 {
-	unsigned int nx, ny, nz;
-	Vector3 h1 = p1 - origin;
+	const size_t Nx = Size(1);
+	const size_t Ny = Size(2);
+	const size_t Nz = Size(3);
+	const Vector3 h1 = p1 - origin;
 	Vector3 p(0, 0, 0);
 	unsigned int c = 0;
-	float kh = -log(2 * M_E - 1) / k1;
-
-	for(nz = 0; nz < Nz; nz++){
-		for(ny = 0; ny < Ny; ny++){
-			for(nx = 0; nx < Nx; nx++){
-				float d = 1 - 1 / (1 + exp(kh * ((p - h1).Abs() - r1)));
-				value[c] += d;
+	const float kh = -log(2 * M_E - 1) / k1;
+	for(size_t nz = 0; nz < Nz; nz++){
+		for(size_t ny = 0; ny < Ny; ny++){
+			for(size_t nx = 0; nx < Nx; nx++){
+				const float d = 1 - 1 / (1 + exp(kh * ((p - h1).Abs() - r1)));
+				buffer[c] += d;
 				c++;
 				p.x += dx;
 			}
@@ -158,27 +119,27 @@ void Volume::AddSphere(const Vector3 &p1, float r1, float k1)
 void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 		const float k1)
 {
-	unsigned int nx, ny, nz;
-	Vector3 h1 = p1 - origin;
-	Vector3 h2 = p2 - origin;
+	const size_t Nx = Size(1);
+	const size_t Ny = Size(2);
+	const size_t Nz = Size(3);
+	const Vector3 h1 = p1 - origin;
+	const Vector3 h2 = p2 - origin;
 	Vector3 n = h2 - h1;
-	float nd = n.Abs();
-	float kh = -log(2 * M_E - 1) / k1;
-	Vector3 h;
+	const float nd = n.Abs();
+	const float kh = -log(2 * M_E - 1) / k1;
 	n.Normalize();
 	Vector3 p(0, 0, 0);
 	unsigned int c = 0;
-	for(nz = 0; nz < Nz; nz++){
-		for(ny = 0; ny < Ny; ny++){
-			for(nx = 0; nx < Nx; nx++){
-
+	for(size_t nz = 0; nz < Nz; nz++){
+		for(size_t ny = 0; ny < Ny; ny++){
+			for(size_t nx = 0; nx < Nx; nx++){
 				float r = n.Dot(p - h1);
 				if(r < 0) r = 0;
 				if(r > nd) r = nd;
-				h = h1 + n * r;
-				float d = (p - h).Abs() - r1;
+				const Vector3 h = h1 + n * r;
+				const float d = (p - h).Abs() - r1;
 
-				value[c] += 1 - 1 / (1 + exp(kh * d));
+				buffer[c] += 1 - 1 / (1 + exp(kh * d));
 				c++;
 				p.x += dx;
 			}
@@ -193,10 +154,14 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 		const float r2, const float k1)
 {
-	Vector3 h1 = p1 - origin;
-	Vector3 h2 = p2 - origin;
+	const size_t Nx = Size(1);
+	const size_t Ny = Size(2);
+	const size_t Nz = Size(3);
+
+	const Vector3 h1 = p1 - origin;
+	const Vector3 h2 = p2 - origin;
 	Vector3 n = h2 - h1;
-	double nd = n.Abs();
+	const double nd = n.Abs();
 	if(nd == 0){
 		AddSphere(p1, fmax(r1, r2), k1);
 		return;
@@ -218,29 +183,28 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 // x2 = x1*a
 // y2 = x1*b
 
-	double s0 = (r1 * r1 - r1 * r2) / nd;
-	double h0 = r1 * sqrt(2 * r1 * r2 + nd * nd - r1 * r1 - r2 * r2) / nd;
+	const double s0 = (r1 * r1 - r1 * r2) / nd;
+	const double h0 = r1 * sqrt(2 * r1 * r2 + nd * nd - r1 * r1 - r2 * r2) / nd;
 	// Coordinatesystemtransformation:
-	double a11 = 1 / nd;
-	double a12 = -s0 / (h0 * nd);
-//	float a21 = (r1 - r2) / nd;
-//	float a22 = (r2 * s0 - r1 * s0 + nd * r1) / (h0 * nd);
-	double a21 = 0;
-	double a22 = r1 / h0;
+	const double a11 = 1 / nd;
+	const double a12 = -s0 / (h0 * nd);
+//	const float a21 = (r1 - r2) / nd;
+//	const float a22 = (r2 * s0 - r1 * s0 + nd * r1) / (h0 * nd);
+	const double a21 = 0;
+	const double a22 = r1 / h0;
 
-	double kh = -log(2 * M_E - 1) / k1;
+	const double kh = -log(2 * M_E - 1) / k1;
 	Vector3 p(0, 0, 0);
 	Vector3 h;
 	unsigned int c = 0;
-	unsigned int nx, ny, nz;
-	for(nz = 0; nz < Nz; nz++){
-		for(ny = 0; ny < Ny; ny++){
-			for(nx = 0; nx < Nx; nx++){
-				double x = n.Dot(p - h1);
+	for(size_t nz = 0; nz < Nz; nz++){
+		for(size_t ny = 0; ny < Ny; ny++){
+			for(size_t nx = 0; nx < Nx; nx++){
+				const double x = n.Dot(p - h1);
 				h = n * x + h1;
-				double y = (p - h).Abs();
-				double x2 = fma(x, a11, y * a12);
-				double y2 = fma(x, a21, y * a22);
+				const double y = (p - h).Abs();
+				const double x2 = fma(x, a11, y * a12);
+				const double y2 = fma(x, a21, y * a22);
 				double d = y2;
 
 				if(x2 < 0) d = (p - h1).Abs();
@@ -266,7 +230,7 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 					}else{
 						d = d * 0.25 + 0.5;
 					}
-					value[c] += d;
+					buffer[c] += d;
 				}
 				//d = 1 - 1 / (1 + exp(-k1 * d));
 //				if(d > -5){
@@ -275,7 +239,7 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 //					}else{
 //						d = 1 - 1 / (1 + exp(d));
 //					}
-//					value[c] += d;
+//					buffer[c] += d;
 //				}
 				c++;
 				p.x += dx;
@@ -291,10 +255,13 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 		const float r2, const float k1, const float k2)
 {
-	Vector3 h1 = p1 - origin;
-	Vector3 h2 = p2 - origin;
+	const size_t Nx = Size(1);
+	const size_t Ny = Size(2);
+	const size_t Nz = Size(3);
+	const Vector3 h1 = p1 - origin;
+	const Vector3 h2 = p2 - origin;
 	Vector3 n = h2 - h1;
-	float nd = n.Abs();
+	const float nd = n.Abs();
 	if(nd == 0){
 		AddSphere(p1, fmax(r1, r2), k1);
 		return;
@@ -316,26 +283,25 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 // x2 = x1*a
 // y2 = x1*b
 
-	float dlimit = fmax(fmax(dx, dy), dz);
+	const float dlimit = fmax(fmax(dx, dy), dz);
 
-	float s0 = (r1 * r1 - r1 * r2) / nd;
-	float h0 = r1 * sqrt(2 * r1 * r2 + nd * nd - r1 * r1 - r2 * r2) / nd;
+	const float s0 = (r1 * r1 - r1 * r2) / nd;
+	const float h0 = r1 * sqrt(2 * r1 * r2 + nd * nd - r1 * r1 - r2 * r2) / nd;
 // Coordinatesystemtransformation:
-	float a11 = 1 / nd;
-	float a12 = -s0 / (h0 * nd);
-//	float a21 = (r1 - r2) / nd;
-//	float a22 = (r2 * s0 - r1 * s0 + nd * r1) / (h0 * nd);
-	float a21 = 0;
-	float a22 = r1 / h0;
+	const float a11 = 1 / nd;
+	const float a12 = -s0 / (h0 * nd);
+//	const float a21 = (r1 - r2) / nd;
+//	const float a22 = (r2 * s0 - r1 * s0 + nd * r1) / (h0 * nd);
+	const float a21 = 0;
+	const float a22 = r1 / h0;
 
-	float kh = -log(2 * M_E - 1);
+	const float kh = -log(2 * M_E - 1);
 	Vector3 p(0, 0, 0);
 	Vector3 h;
-	unsigned int c = 0;
-	unsigned int nx, ny, nz;
-	for(nz = 0; nz < Nz; nz++){
-		for(ny = 0; ny < Ny; ny++){
-			for(nx = 0; nx < Nx; nx++){
+	size_t c = 0;
+	for(size_t nz = 0; nz < Nz; nz++){
+		for(size_t ny = 0; ny < Ny; ny++){
+			for(size_t nx = 0; nx < Nx; nx++){
 				float x = n.Dot(p - h1);
 				h = h1 + n * x;
 				float y = (p - h).Abs();
@@ -372,7 +338,7 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 				d -= r;
 				//d = 1 - 1 / (1 + exp(-k1 * d));
 				d = 1 - 1 / (1 + exp(kh * d / k));
-				value[c] += d;
+				buffer[c] += d;
 				c++;
 				p.x += dx;
 			}
@@ -384,7 +350,7 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 	}
 }
 
-static int8_t tri[3072] =
+const static int8_t tri[3072] =
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 8, 3, 0, -1, -1, -1, -1,
 			-1, -1, -1, -1, -1, 9, 0, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 8,
 			3, 1, 8, 1, 9, -1, -1, -1, -1, -1, -1, 11, 2, 3, -1, -1, -1, -1, -1,
@@ -540,7 +506,7 @@ static int8_t tri[3072] =
 			1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, 8, 0, 3, -1, -1, -1, -1,
 			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
-static uint16_t edge[256] =
+const static uint16_t edge[256] =
 	{0, 265, 515, 778, 2060, 2309, 2575, 2822, 1030, 1295, 1541, 1804, 3082,
 			3331, 3593, 3840, 400, 153, 915, 666, 2460, 2197, 2975, 2710, 1430,
 			1183, 1941, 1692, 3482, 3219, 3993, 3728, 560, 825, 51, 314, 2620,
@@ -564,7 +530,7 @@ static uint16_t edge[256] =
 			2197, 2460, 666, 915, 153, 400, 3840, 3593, 3331, 3082, 1804, 1541,
 			1295, 1030, 2822, 2575, 2309, 2060, 778, 515, 265, 0};
 
-static int8_t cap[144] =
+const static int8_t cap[144] =
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, 7, 1, 0, -1, -1, -1, -1, -1, -1, 3, 2,
 			1, -1, -1, -1, -1, -1, -1, 3, 2, 0, 7, 3, 0, -1, -1, -1, 5, 4, 3,
 			-1, -1, -1, -1, -1, -1, 7, 1, 0, 5, 4, 3, -1, -1, -1, 5, 2, 1, 5, 4,
@@ -585,8 +551,12 @@ void Volume::MarchingCubes(void)
 //	temp.Clear();
 //	temp.AddLine(_T("M=[ ..."));
 
+	const size_t Nx = Size(1);
+	const size_t Ny = Size(2);
+	const size_t Nz = Size(3);
+
 	geometry.Clear();
-	if(value == NULL) return;
+	if(buffer == NULL) return;
 	Vector3 p(0, 0, 0);
 	Vector3 p0;
 	Vector3 p1;
@@ -601,21 +571,21 @@ void Volume::MarchingCubes(void)
 	Vector3 p10;
 	Vector3 p11;
 	Triangle t;
-	unsigned int i, j, k, n, c = 0;
-	for(k = 0; k < Nz - 1; k++){
-		for(j = 0; j < Ny - 1; j++){
-			for(i = 0; i < Nx - 1; i++){
+	unsigned int c = 0;
+	for(size_t k = 0; k < Nz - 1; k++){
+		for(size_t j = 0; j < Ny - 1; j++){
+			for(size_t i = 0; i < Nx - 1; i++){
 //				if(k == 60) temp.AddLine(
-//						wxString::Format(_T("%.3f,..."), value[c]));
+//						wxString::Format(_T("%.3f,..."), buffer[c]));
 
-				double v0 = value[c];
-				double v1 = value[c + 1];
-				double v2 = value[c + Nx];
-				double v3 = value[c + 1 + Nx];
-				double v4 = value[c + Nx * Ny];
-				double v5 = value[c + 1 + Nx * Ny];
-				double v6 = value[c + Nx * (1 + Ny)];
-				double v7 = value[c + 1 + Nx * (1 + Ny)];
+				const double v0 = buffer[c];
+				const double v1 = buffer[c + 1];
+				const double v2 = buffer[c + Nx];
+				const double v3 = buffer[c + 1 + Nx];
+				const double v4 = buffer[c + Nx * Ny];
+				const double v5 = buffer[c + 1 + Nx * Ny];
+				const double v6 = buffer[c + Nx * (1 + Ny)];
+				const double v7 = buffer[c + 1 + Nx * (1 + Ny)];
 				uint8_t v = 0;
 				if(v0 > surface) v |= 1;
 				if(v1 > surface) v |= 2;
@@ -629,94 +599,94 @@ void Volume::MarchingCubes(void)
 
 					uint16_t h = edge[v];
 					if(h & ((uint16_t) 1 << 0)){
-						float x = (surface - v0) / (v1 - v0);
+						const float x = (surface - v0) / (v1 - v0);
 						p0.x = p.x;
 						p0.y = p.y;
 						p0.z = p.z;
 						p0.x += dx * x;
 					}
 					if(h & ((uint16_t) 1 << 1)){
-						float x = (surface - v1) / (v3 - v1);
+						const float x = (surface - v1) / (v3 - v1);
 						p1.x = p.x + dx;
 						p1.y = p.y;
 						p1.z = p.z;
 						p1.y += dy * x;
 					}
 					if(h & ((uint16_t) 1 << 2)){
-						float x = (surface - v2) / (v3 - v2);
+						const float x = (surface - v2) / (v3 - v2);
 						p2.x = p.x;
 						p2.y = p.y + dy;
 						p2.z = p.z;
 						p2.x += dx * x;
 					}
 					if(h & ((uint16_t) 1 << 3)){
-						float x = (surface - v0) / (v2 - v0);
+						const float x = (surface - v0) / (v2 - v0);
 						p3.x = p.x;
 						p3.y = p.y;
 						p3.z = p.z;
 						p3.y += dy * x;
 					}
 					if(h & ((uint16_t) 1 << 4)){
-						float x = (surface - v4) / (v5 - v4);
+						const float x = (surface - v4) / (v5 - v4);
 						p4.x = p.x;
 						p4.y = p.y;
 						p4.z = p.z + dz;
 						p4.x += dx * x;
 					}
 					if(h & ((uint16_t) 1 << 5)){
-						float x = (surface - v5) / (v7 - v5);
+						const float x = (surface - v5) / (v7 - v5);
 						p5.x = p.x + dx;
 						p5.y = p.y;
 						p5.z = p.z + dz;
 						p5.y += dy * x;
 					}
 					if(h & ((uint16_t) 1 << 6)){
-						float x = (surface - v6) / (v7 - v6);
+						const float x = (surface - v6) / (v7 - v6);
 						p6.x = p.x;
 						p6.y = p.y + dy;
 						p6.z = p.z + dz;
 						p6.x += dx * x;
 					}
 					if(h & ((uint16_t) 1 << 7)){
-						float x = (surface - v4) / (v6 - v4);
+						const float x = (surface - v4) / (v6 - v4);
 						p7.x = p.x;
 						p7.y = p.y;
 						p7.z = p.z + dz;
 						p7.y += dy * x;
 					}
 					if(h & ((uint16_t) 1 << 8)){
-						float x = (surface - v0) / (v4 - v0);
+						const float x = (surface - v0) / (v4 - v0);
 						p8.x = p.x;
 						p8.y = p.y;
 						p8.z = p.z;
 						p8.z += dz * x;
 					}
 					if(h & ((uint16_t) 1 << 9)){
-						float x = (surface - v1) / (v5 - v1);
+						const float x = (surface - v1) / (v5 - v1);
 						p9.x = p.x + dx;
 						p9.y = p.y;
 						p9.z = p.z;
 						p9.z += dz * x;
 					}
 					if(h & ((uint16_t) 1 << 10)){
-						float x = (surface - v3) / (v7 - v3);
+						const float x = (surface - v3) / (v7 - v3);
 						p10.x = p.x + dx;
 						p10.y = p.y + dy;
 						p10.z = p.z;
 						p10.z += dz * x;
 					}
 					if(h & ((uint16_t) 1 << 11)){
-						float x = (surface - v2) / (v6 - v2);
+						const float x = (surface - v2) / (v6 - v2);
 						p11.x = p.x;
 						p11.y = p.y + dy;
 						p11.z = p.z;
 						p11.z += dz * x;
 					}
 
-					h = v * 12;
-					for(n = 0; n < 12; n++){
-						if(tri[h] == -1) break;
-						switch(tri[h]){
+					uint16_t h2 = v * 12;
+					for(uint_fast8_t n = 0; n < 12; n++){
+						if(tri[h2] == -1) break;
+						switch(tri[h2]){
 						case 0:
 							t.p[2 - (n % 3)] = p0;
 							break;
@@ -760,19 +730,19 @@ void Volume::MarchingCubes(void)
 //					}
 
 						if(n % 3 == 2) geometry.AddTriangle(t, false);
-						h++;
+						h2++;
 					}
 				}
 
 				if(i == 0){
-					v = 0;
+					uint8_t v = 0;
 					if(v0 > surface) v |= 1;
 					if(v2 > surface) v |= 2;
 					if(v6 > surface) v |= 4;
 					if(v4 > surface) v |= 8;
 					if(v > 0){
 						uint8_t h = v * 9;
-						for(n = 0; n < 9; n++){
+						for(uint_fast8_t n = 0; n < 9; n++){
 							if(cap[h] == -1) break;
 							switch(cap[h]){
 							case 0:
@@ -816,7 +786,7 @@ void Volume::MarchingCubes(void)
 					if(v3 > surface) v |= 8;
 					if(v > 0){
 						uint8_t h = v * 9;
-						for(n = 0; n < 9; n++){
+						for(uint_fast8_t n = 0; n < 9; n++){
 							if(cap[h] == -1) break;
 							switch(cap[h]){
 							case 0:
@@ -860,7 +830,7 @@ void Volume::MarchingCubes(void)
 					if(v1 > surface) v |= 8;
 					if(v > 0){
 						uint8_t h = v * 9;
-						for(n = 0; n < 9; n++){
+						for(uint_fast8_t n = 0; n < 9; n++){
 							if(cap[h] == -1) break;
 							switch(cap[h]){
 							case 0:
@@ -904,7 +874,7 @@ void Volume::MarchingCubes(void)
 					if(v6 > surface) v |= 8;
 					if(v > 0){
 						uint8_t h = v * 9;
-						for(n = 0; n < 9; n++){
+						for(uint_fast8_t n = 0; n < 9; n++){
 							if(cap[h] == -1) break;
 							switch(cap[h]){
 							case 0:
@@ -948,7 +918,7 @@ void Volume::MarchingCubes(void)
 					if(v2 > surface) v |= 8;
 					if(v > 0){
 						uint8_t h = v * 9;
-						for(n = 0; n < 9; n++){
+						for(uint_fast8_t n = 0; n < 9; n++){
 							if(cap[h] == -1) break;
 							switch(cap[h]){
 							case 0:
@@ -992,7 +962,7 @@ void Volume::MarchingCubes(void)
 					if(v5 > surface) v |= 8;
 					if(v > 0){
 						uint8_t h = v * 9;
-						for(n = 0; n < 9; n++){
+						for(uint_fast8_t n = 0; n < 9; n++){
 							if(cap[h] == -1) break;
 							switch(cap[h]){
 							case 0:
@@ -1055,6 +1025,9 @@ void Volume::MarchingCubes(void)
 
 void Volume::Paint(void) const
 {
+	const size_t Nx = Size(1);
+	const size_t Ny = Size(2);
+	const size_t Nz = Size(3);
 
 	glPushMatrix();
 	glTranslatef(origin.x, origin.y, origin.z);
@@ -1065,11 +1038,11 @@ void Volume::Paint(void) const
 		glBegin(GL_POINTS);
 
 		Vector3 p(0, 0, 0);
-		unsigned int i, j, k, c = 0;
-		for(k = 0; k < Nz - 1; k++){
-			for(j = 0; j < Ny - 1; j++){
-				for(i = 0; i < Nx - 1; i++){
-					double v0 = value[c];
+		unsigned int c = 0;
+		for(size_t k = 0; k < Nz - 1; k++){
+			for(size_t j = 0; j < Ny - 1; j++){
+				for(size_t i = 0; i < Nx - 1; i++){
+					const double v0 = buffer[c];
 
 					glColor3f(v0 * 5, v0 * 5, v0 * 5);
 					glVertex3f(p.x, p.y, p.z);
@@ -1121,29 +1094,32 @@ double Volume::GetValue(Vector3 p) const
 
 double Volume::GetValue(double x, double y, double z) const
 {
-	double hx = (x - origin.x) / dx;
-	double hy = (y - origin.y) / dy;
-	double hz = (z - origin.z) / dz;
-	double px = floor(hx);
-	double py = floor(hy);
-	double pz = floor(hz);
-	double mx = hx - px;
-	double my = hy - py;
-	double mz = hz - pz;
-	int ix = (int) px;
-	int iy = (int) py;
-	int iz = (int) pz;
+	const size_t Nx = Size(1);
+	const size_t Ny = Size(2);
+	const size_t Nz = Size(3);
+	const double hx = (x - origin.x) / dx;
+	const double hy = (y - origin.y) / dy;
+	const double hz = (z - origin.z) / dz;
+	const double px = floor(hx);
+	const double py = floor(hy);
+	const double pz = floor(hz);
+	const double mx = hx - px;
+	const double my = hy - py;
+	const double mz = hz - pz;
+	const int ix = (int) px;
+	const int iy = (int) py;
+	const int iz = (int) pz;
 	if(ix < 0 || iy < 0 || iz < 0 || ix > Nx - 2 || iy > Ny - 2 || iz > Nz - 2) return 0.0;
-	int pos = ix + (iy + iz * Ny) * Nx;
+	const int pos = ix + (iy + iz * Ny) * Nx;
 	double v = 0.0;
-	v += value[pos] * (1 - mx) * (1 - my) * (1 - mz);
-	v += value[pos + 1] * (mx) * (1 - my) * (1 - mz);
-	v += value[pos + Nx] * (1 - mx) * (my) * (1 - mz);
-	v += value[pos + 1 + Nx] * (mx) * (my) * (1 - mz);
-	v += value[pos + Nx * Ny] * (1 - mx) * (1 - my) * (mz);
-	v += value[pos + 1 + Nx * Ny] * (mx) * (1 - my) * (mz);
-	v += value[pos + Nx + Nx * Ny] * (1 - mx) * (my) * (mz);
-	v += value[pos + 1 + Nx + Nx * Ny] * (mx) * (my) * (mz);
+	v += buffer[pos] * (1 - mx) * (1 - my) * (1 - mz);
+	v += buffer[pos + 1] * (mx) * (1 - my) * (1 - mz);
+	v += buffer[pos + Nx] * (1 - mx) * (my) * (1 - mz);
+	v += buffer[pos + 1 + Nx] * (mx) * (my) * (1 - mz);
+	v += buffer[pos + Nx * Ny] * (1 - mx) * (1 - my) * (mz);
+	v += buffer[pos + 1 + Nx * Ny] * (mx) * (1 - my) * (mz);
+	v += buffer[pos + Nx + Nx * Ny] * (1 - mx) * (my) * (mz);
+	v += buffer[pos + 1 + Nx + Nx * Ny] * (mx) * (my) * (mz);
 	return v;
 }
 
@@ -1152,12 +1128,12 @@ Vector3 Volume::GetSurface(Vector3 p0, Vector3 n) const
 	double d0 = 0;
 	double d1 = 1;
 	double d = 0.5;
-	for(int c = 0; c < 50; c++){
-		double v0 = GetValue(p0 + n * d0);
-		double v1 = GetValue(p0 + n * d1);
+	for(uint_fast8_t c = 0; c < 50; c++){
+		const double v0 = GetValue(p0 + n * d0);
+		const double v1 = GetValue(p0 + n * d1);
 		if(fabs(v0 - v1) < 1e-5) break;
 		d = (d0 * v1 - d1 * v0 + (d1 - d0) * surface) / (v1 - v0);
-		double v = GetValue(p0 + n * d);
+		const double v = GetValue(p0 + n * d);
 		if(fabs(v - surface) < 1e-5) break;
 		if(v > surface){
 			d0 = d;
@@ -1170,33 +1146,33 @@ Vector3 Volume::GetSurface(Vector3 p0, Vector3 n) const
 
 Vector3 Volume::GetGrad(Vector3 p) const
 {
-	double hx = (p.x - origin.x) / dx;
-	double hy = (p.y - origin.y) / dy;
-	double hz = (p.z - origin.z) / dz;
-	double px = floor(hx);
-	double py = floor(hy);
-	double pz = floor(hz);
-	double mx = hx - px;
-	double my = hy - py;
-	double mz = hz - pz;
-	int ix = (int) px;
-	int iy = (int) py;
-	int iz = (int) pz;
+	const size_t Nx = Size(1);
+	const size_t Ny = Size(2);
+	const size_t Nz = Size(3);
+	const double hx = (p.x - origin.x) / dx;
+	const double hy = (p.y - origin.y) / dy;
+	const double hz = (p.z - origin.z) / dz;
+	const double px = floor(hx);
+	const double py = floor(hy);
+	const double pz = floor(hz);
+	const double mx = hx - px;
+	const double my = hy - py;
+	const double mz = hz - pz;
+	const int ix = (int) px;
+	const int iy = (int) py;
+	const int iz = (int) pz;
 
 	Vector3 temp;
 	if(ix < 0 || iy < 0 || iz < 0 || ix > Nx - 2 || iy > Ny - 2 || iz > Nz - 2) return temp;
-
-	double v0, v1, v2, v3, v4, v5, v6, v7;
-
-	int pos = ix + (iy + iz * Ny) * Nx;
-	v0 = value[pos];
-	v1 = value[pos + 1];
-	v2 = value[pos + Nx];
-	v3 = value[pos + 1 + Nx];
-	v4 = value[pos + Nx * Ny];
-	v5 = value[pos + 1 + Nx * Ny];
-	v6 = value[pos + Nx + Nx * Ny];
-	v7 = value[pos + 1 + Nx + Nx * Ny];
+	const size_t pos = ix + (iy + iz * Ny) * Nx;
+	const double v0 = buffer[pos];
+	const double v1 = buffer[pos + 1];
+	const double v2 = buffer[pos + Nx];
+	const double v3 = buffer[pos + 1 + Nx];
+	const double v4 = buffer[pos + Nx * Ny];
+	const double v5 = buffer[pos + 1 + Nx * Ny];
+	const double v6 = buffer[pos + Nx + Nx * Ny];
+	const double v7 = buffer[pos + 1 + Nx + Nx * Ny];
 
 	//  Maxima:
 	//  v(x,y,z):= v0*(1-x)*(1-y)*(1-z)+v1*x*(1-y)*(1-z)+v2*(1-x)*y*(1-z)+v3*x*y*(1-z)+v4*(1-x)*(1-y)*z+v5*x*(1-y)*z+v6*(1-x)*y*z+v7*x*y*z;
@@ -1219,8 +1195,9 @@ Vector3 Volume::GetGrad(Vector3 p) const
 
 void Volume::Rotate(Axis a, int quarters)
 {
-	unsigned int i, j, k;
-	unsigned int n, m;
+	const size_t Nx = Size(1);
+	const size_t Ny = Size(2);
+	const size_t Nz = Size(3);
 
 	quarters %= 4;
 	if(quarters < 0) quarters += 4;
@@ -1228,29 +1205,29 @@ void Volume::Rotate(Axis a, int quarters)
 	if(quarters == 2){
 		switch(a){
 		case X:
-			for(i = 0; i < Nx; i++){
-				for(n = i; n < (N / 2); n += Nx){
-					std::swap(value[n], value[(N - Nx) - n + 2 * i]);
+			for(size_t i = 0; i < Nx; i++){
+				for(size_t n = i; n < (size / 2); n += Nx){
+					std::swap(buffer[n], buffer[(size - Nx) - n + 2 * i]);
 				}
 			}
 			break;
 		case Y:
-			for(j = 0; j < Ny; j++){
-				n = j * Nx;
-				m = N - 1 - (Ny - 1) * Nx + j * Nx;
-				for(k = 0; k < (Nx * Nz / 2); k++){
-					std::swap(value[n], value[m]);
-					n = (n + Nx * Ny) % (N - 1);
-					m = (m + (N - Nx * Ny - 1)) % (N - 1);
+			for(size_t j = 0; j < Ny; j++){
+				size_t n = j * Nx;
+				size_t m = size - 1 - (Ny - 1) * Nx + j * Nx;
+				for(size_t k = 0; k < (Nx * Nz / 2); k++){
+					std::swap(buffer[n], buffer[m]);
+					n = (n + Nx * Ny) % (size - 1);
+					m = (m + (size - Nx * Ny - 1)) % (size - 1);
 				}
 			}
 			break;
 		case Z:
-			m = Nx * Ny;
-			for(k = 0; k < Nz; k++){
-				for(n = 0; n < (m / 2); n++){
-					std::swap(value[k * Nx * Ny + n],
-							value[k * Nx * Ny + (m - n - 1)]);
+			const size_t m = Nx * Ny;
+			for(size_t k = 0; k < Nz; k++){
+				for(size_t n = 0; n < (m / 2); n++){
+					std::swap(buffer[k * Nx * Ny + n],
+							buffer[k * Nx * Ny + (m - n - 1)]);
 				}
 			}
 			break;
@@ -1258,132 +1235,141 @@ void Volume::Rotate(Axis a, int quarters)
 		return;
 	}
 	assert(quarters == 1 || quarters == 3);
-	double* temp = new double[N];
+	double* temp = new double[size];
 	if(temp == NULL) throw("Out of memory!");
-
-	unsigned int ad, mo;
 
 	switch(a){
 	case X:
-		if(quarters == 1){
-			mo = N + Nx;
-			ad = N - (Nx * (Ny - 1));
-			for(i = 0; i < Nx; i++){
-				m = N - Ny * Nx + i;
-				for(n = 0; n < (Ny * Nz); n++){
-					temp[n * Nx + i] = value[m];
-					m = (m + ad) % mo;
+		{
+			if(quarters == 1){
+				const size_t mo = size + Nx;
+				const size_t ad = size - (Nx * (Ny - 1));
+				for(size_t i = 0; i < Nx; i++){
+					size_t m = size - Ny * Nx + i;
+					for(size_t n = 0; n < (Ny * Nz); n++){
+						temp[n * Nx + i] = buffer[m];
+						m = (m + ad) % mo;
+					}
 				}
 			}
-		}
-		if(quarters == 3){
-			mo = N + Nx;
-			ad = Nx * Ny;
-			for(i = 0; i < Nx; i++){
-				m = (Ny - 1) * Nx + i;
-				for(n = 0; n < (Ny * Nz); n++){
-					temp[n * Nx + i] = value[m];
-					m = (m + ad) % mo;
+			if(quarters == 3){
+				const size_t mo = size + Nx;
+				const size_t ad = Nx * Ny;
+				for(size_t i = 0; i < Nx; i++){
+					size_t m = (Ny - 1) * Nx + i;
+					for(size_t n = 0; n < (Ny * Nz); n++){
+						temp[n * Nx + i] = buffer[m];
+						m = (m + ad) % mo;
+					}
 				}
 			}
+
+//		std::swap(Ny, Nz);
+			MatlabMatrix::Reshape(Nx, Nz, Ny);
+			std::swap(dy, dz);
+			break;
 		}
-		std::swap(Ny, Nz);
-		std::swap(dy, dz);
-		break;
 	case Y:
-		if(quarters == 1){
+		{
+			if(quarters == 1){
 //			Nx = 4;
 //			Ny = 5;
 //			Nz = 5;
-//			N = Nx * Ny * Nz;
-			n = 0;
-			m = Nx - 1;
-			for(i = 0; i < Nx; i++){
-				for(j = 0; j < Ny; j++){
-					for(k = 0; k < Nz; k++){
-						temp[n] = value[m];
-						n++;
-						m += Nx * Ny;
+//			size = Nx * Ny * Nz;
+				size_t n = 0;
+				size_t m = Nx - 1;
+				for(size_t i = 0; i < Nx; i++){
+					for(size_t j = 0; j < Ny; j++){
+						for(size_t k = 0; k < Nz; k++){
+							temp[n] = buffer[m];
+							n++;
+							m += Nx * Ny;
+						}
+						m = m + Nx - size;
 					}
-					m = m + Nx - N;
+					m = m - Nx * Ny - 1;
 				}
-				m = m - Nx * Ny - 1;
 			}
-		}
-		if(quarters == 3){
-			n = 0;
-			m = N;
-			for(i = 0; i < Nx; i++){
-				for(j = 0; j < Ny; j++){
-					for(k = 0; k < Nz; k++){
-						m -= Nx * Ny;
-						temp[n] = value[m];
-						n++;
+			if(quarters == 3){
+				size_t n = 0;
+				size_t m = size;
+				for(size_t i = 0; i < Nx; i++){
+					for(size_t j = 0; j < Ny; j++){
+						for(size_t k = 0; k < Nz; k++){
+							m -= Nx * Ny;
+							temp[n] = buffer[m];
+							n++;
+						}
+						m = m + size + Nx;
 					}
-					m = m + N + Nx;
+					m = m - Nx * Ny + 1;
 				}
-				m = m - Nx * Ny + 1;
 			}
+			MatlabMatrix::Reshape(Nz, Ny, Nx);
+//		std::swap(Nz, Nx);
+			std::swap(dz, dx);
+			break;
 		}
-
-		std::swap(Nz, Nx);
-		std::swap(dz, dx);
-		break;
 	case Z:
-		mo = Nx * Ny + 1;
-		if(quarters == 1) ad = Nx * (Ny - 1) + 1;
-		if(quarters == 3) ad = Nx;
-		for(k = 0; k < Nz; k++){
-			n = 0;
-			for(m = ad - 1; m != mo - 1; m = (m + ad) % mo){
-				temp[n + k * Nx * Ny] = value[m + k * Nx * Ny];
-				n++;
+		{
+			const size_t mo = Nx * Ny + 1;
+			size_t ad;
+			if(quarters == 1) ad = Nx * (Ny - 1) + 1;
+			if(quarters == 3) ad = Nx;
+			for(size_t k = 0; k < Nz; k++){
+				size_t n = 0;
+				for(size_t m = ad - 1; m != mo - 1; m = (m + ad) % mo){
+					temp[n + k * Nx * Ny] = buffer[m + k * Nx * Ny];
+					n++;
+				}
 			}
+//		std::swap(Nx, Ny);
+			MatlabMatrix::Reshape(Ny, Nx, Nz);
+			std::swap(dx, dy);
+			break;
 		}
-		std::swap(Nx, Ny);
-		std::swap(dx, dy);
-		break;
 	}
 
-	delete[] value;
-	value = temp;
+	delete[] buffer;
+	buffer = temp;
 }
 
 void Volume::Mirror(Axis a)
 {
-	unsigned int i, j, k;
-	unsigned int m, n;
+	const size_t Nx = Size(1);
+	const size_t Ny = Size(2);
+	const size_t Nz = Size(3);
 
 	switch(a){
 	case X:
-		for(i = 0; i < (Nx / 2); i++){
-			for(j = 0; j < Ny; j++){
-				for(k = 0; k < Nz; k++){
-					n = i + Nx * (j + Ny * k);
-					m = (Nx - i - 1) + Nx * (j + Ny * k);
-					std::swap(value[n], value[m]);
+		for(size_t i = 0; i < (Nx / 2); i++){
+			for(size_t j = 0; j < Ny; j++){
+				for(size_t k = 0; k < Nz; k++){
+					const size_t n = i + Nx * (j + Ny * k);
+					const size_t m = (Nx - i - 1) + Nx * (j + Ny * k);
+					std::swap(buffer[n], buffer[m]);
 				}
 			}
 		}
 		break;
 	case Y:
-		for(i = 0; i < Nx; i++){
-			for(j = 0; j < (Ny / 2); j++){
-				for(k = 0; k < Nz; k++){
-					n = i + Nx * (j + Ny * k);
-					m = i + Nx * ((Ny - j - 1) + Ny * k);
-					std::swap(value[n], value[m]);
+		for(size_t i = 0; i < Nx; i++){
+			for(size_t j = 0; j < (Ny / 2); j++){
+				for(size_t k = 0; k < Nz; k++){
+					const size_t n = i + Nx * (j + Ny * k);
+					const size_t m = i + Nx * ((Ny - j - 1) + Ny * k);
+					std::swap(buffer[n], buffer[m]);
 				}
 			}
 		}
 		break;
 	case Z:
-		for(i = 0; i < Nx; i++){
-			for(j = 0; j < Ny; j++){
-				for(k = 0; k < (Nz / 2); k++){
-					n = i + Nx * (j + Ny * k);
-					m = i + Nx * (j + Ny * (Nz - k - 1));
-					std::swap(value[n], value[m]);
+		for(size_t i = 0; i < Nx; i++){
+			for(size_t j = 0; j < Ny; j++){
+				for(size_t k = 0; k < (Nz / 2); k++){
+					const size_t n = i + Nx * (j + Ny * k);
+					const size_t m = i + Nx * (j + Ny * (Nz - k - 1));
+					std::swap(buffer[n], buffer[m]);
 				}
 			}
 		}
@@ -1393,36 +1379,39 @@ void Volume::Mirror(Axis a)
 
 void Volume::FillHeightField(HeightField* heightfield) const
 {
+	const size_t Nx = Size(1);
+	const size_t Ny = Size(2);
+	const size_t Nz = Size(3);
 	heightfield->matrix.SetIdentity();
 	heightfield->matrix.TranslateGlobal(origin.x, origin.y, origin.z);
 	heightfield->SetCount(Nx, Ny, dx);
 
-	unsigned int h = Nx * Ny;
+	const size_t h = Nx * Ny;
 
 	double *temp = new double[h];
 	if(temp == NULL) throw(__FILE__ "FillHeightField() - Not enough memory.");
 
-	for(unsigned int n = 0; n < h; n++)
+	for(size_t n = 0; n < h; n++)
 		temp[n] = 0.0;
 
-	unsigned int i, j, k;
-	double c;
-	for(i = 0; i < h; i++){
-		double v0 = value[i];
-		j = i;
-		for(k = 1; k < Nz; k++){
+	for(size_t i = 0; i < h; i++){
+		double v0 = buffer[i];
+		size_t j = i;
+		for(size_t k = 1; k < Nz; k++){
 			j += h;
-			if(value[j] > 0.5){
+			if(buffer[j] > 0.5){
 				if(v0 > 0.5){
 					temp[i] = (double) (k - 1) * dz;
 				}else{
-					c = fmin(fmax((0.5 - v0) / (value[j] - v0), 0), 1);
+					const double c = fmin(
+							fmax((0.5 - v0) / (buffer[j] - v0), 0), 1);
 					temp[i] = ((double) (k - 1) + c) * dz;
 				}
 				break;
 			}
-			v0 = value[j];
+			v0 = buffer[j];
 		}
 	}
 	heightfield->SetValues(temp, h);
+	delete[] temp;
 }

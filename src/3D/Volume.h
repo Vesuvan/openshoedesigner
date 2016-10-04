@@ -27,6 +27,7 @@
 #ifndef VOLUME_H_
 #define VOLUME_H_
 
+#include "MatlabMatrix.h"
 #include "HeightField.h"
 #include "AffineTransformMatrix.h"
 #include "Geometry.h"
@@ -65,7 +66,7 @@
  *
  */
 
-class Volume {
+class Volume:public MatlabMatrix {
 public:
 	enum Axis {
 		X, Y, Z
@@ -73,7 +74,6 @@ public:
 
 public:
 	Volume();
-	Volume(const Volume &other); ///< Copy constructor
 	virtual ~Volume();
 
 	/*! \brief Set the Origin
@@ -87,8 +87,6 @@ public:
 	void SetCount(unsigned int nx, unsigned int ny, unsigned int nz,
 			float resolution);
 	void SetSize(float x, float y, float z, float resolution);
-
-	void Clear(double zero = 0.0); ///< Sets all datapoints to 0
 
 	void AddHalfplane(const Vector3 &p1, float d0, float k0);
 	void AddSphere(const Vector3 &p1, float r1, float k1);
@@ -181,14 +179,9 @@ public:
 
 private:
 	double surface; ///< Value of the surface: values greater than surface are inside the volume
-	double * value; ///< Array with the values
 
 	Vector3 origin; ///< Origin of the volume
 
-	unsigned int Nx;
-	unsigned int Ny;
-	unsigned int Nz;
-	unsigned int N;
 	float dx;
 	float dy;
 	float dz;
