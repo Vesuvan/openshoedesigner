@@ -81,7 +81,7 @@ BooleanBox::BooleanBox(const BooleanBox& other)
 	if(bufferSizeIntersect <= ny) bufferSizeIntersect = ny + 1;
 	if(bufferSizeIntersect <= nz) bufferSizeIntersect = nz + 1;
 
-	// Is the content of the box is copied anyway, this can also be used
+	// If the content of the box is copied anyway, this can also be used
 	// to keep the buffers from overflowing.
 	bufferSizeIntersect += 10;
 
@@ -107,6 +107,48 @@ BooleanBox::BooleanBox(const BooleanBox& other)
 	const unsigned int N = nx * ny * nz;
 	for(unsigned int n = 0; n < N; n++)
 		occupied[n] = other.occupied[n];
+}
+
+BooleanBox& BooleanBox::operator =(const BooleanBox& other)
+{
+	nx = other.nx;
+	ny = other.ny;
+	nz = other.nz;
+	bufferSizeIntersect = other.bufferSizeIntersect;
+	if(bufferSizeIntersect <= nx) bufferSizeIntersect = nx + 1;
+	if(bufferSizeIntersect <= ny) bufferSizeIntersect = ny + 1;
+	if(bufferSizeIntersect <= nz) bufferSizeIntersect = nz + 1;
+
+	// If the content of the box is copied anyway, this can also be used
+	// to keep the buffers from overflowing.
+	bufferSizeIntersect += 10;
+	if(pX != NULL) delete[] pX;
+	pX = new float[bufferSizeIntersect];
+	if(pY != NULL) delete[] pY;
+	pY = new float[bufferSizeIntersect];
+	if(pZ != NULL) delete[] pZ;
+	pZ = new float[bufferSizeIntersect];
+
+	for(unsigned int n = 0; n <= other.nx; n++)
+		pX[n] = other.pX[n];
+	for(unsigned int n = 0; n <= other.ny; n++)
+		pY[n] = other.pY[n];
+	for(unsigned int n = 0; n <= other.nz; n++)
+		pZ[n] = other.pZ[n];
+
+	bufferSizeOccupied = other.bufferSizeOccupied;
+	if(bufferSizeOccupied < (nx * ny * nz)) bufferSizeOccupied = nx * ny * nz;
+
+	// The +1000 should be something cubic, but then it would get very big very fast.
+	// I intend to use this class only for a handfull of boxes.
+	bufferSizeOccupied += 1000;
+
+	if(occupied != NULL) delete[] occupied;
+	occupied = new bool[bufferSizeOccupied];
+	const unsigned int N = nx * ny * nz;
+	for(unsigned int n = 0; n < N; n++)
+		occupied[n] = other.occupied[n];
+	return *this;
 }
 
 BooleanBox::~BooleanBox()

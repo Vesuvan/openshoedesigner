@@ -102,7 +102,7 @@ OpenGLCanvas::~OpenGLCanvas()
 {
 #ifdef _USE_6DOFCONTROLLER
 	this->Disconnect(wxEVT_TIMER, wxTimerEventHandler(OpenGLCanvas::OnTimer),
-	NULL, this);
+			NULL, this);
 #endif
 	this->Disconnect(wxEVT_RIGHT_DCLICK,
 			wxMouseEventHandler(OpenGLCanvas::OnMouseEvent), NULL, this);
@@ -189,6 +189,7 @@ void OpenGLCanvas::InitGL()
 	::glEnable(GL_BLEND);
 	::glEnable(GL_POINT_SMOOTH);
 	::glEnable(GL_DEPTH_TEST);
+	::glEnable(GL_RESCALE_NORMAL);
 
 	::glFrontFace(GL_CCW);
 	::glCullFace(GL_BACK);
@@ -496,30 +497,35 @@ void OpenGLCanvas::OnMouseEvent(wxMouseEvent& event)
 	}
 
 	if(event.Dragging() && event.RightIsDown()){
-		double r = (double) ((w < h)? w : h) / 2.2;
 		switch(rotationMode){
 		case rotateTrackball:
-			rotmat = AffineTransformMatrix::RotateTrackball(
-					(double) (x - w / 2), (double) (h / 2 - y),
-					(double) (event.m_x - w / 2), (double) (h / 2 - event.m_y),
-					r) * rotmat;
-			break;
+			{
+				const double r = (double) ((w < h)? w : h) / 2.2;
+				rotmat = AffineTransformMatrix::RotateTrackball(
+						(double) (x - w / 2), (double) (h / 2 - y),
+						(double) (event.m_x - w / 2),
+						(double) (h / 2 - event.m_y), r) * rotmat;
+				break;
+			}
 		case rotateInterwoven:
-			rotmat = AffineTransformMatrix::RotateXY(event.m_x - x,
-					event.m_y - y, 0.5) * rotmat;
-			break;
+			{
+				rotmat = AffineTransformMatrix::RotateXY(event.m_x - x,
+						event.m_y - y, 0.5) * rotmat;
+				break;
+			}
 		case rotateTurntable:
-			rotmat = AffineTransformMatrix::RotateAroundVector(Vector3(1, 0, 0),
-					-M_PI / 2);
-			turntableX += (double) (event.m_x - x) / 100;
-			turntableY += (double) (event.m_y - y) / 100;
-			rotmat = AffineTransformMatrix::RotateAroundVector(Vector3(1, 0, 0),
-					turntableY) * rotmat;
-			rotmat = rotmat
-					* AffineTransformMatrix::RotateAroundVector(
-							Vector3(0, 0, 1), turntableX);
-			break;
-
+			{
+				rotmat = AffineTransformMatrix::RotateAroundVector(
+						Vector3(1, 0, 0), -M_PI / 2);
+				turntableX += (double) (event.m_x - x) / 100;
+				turntableY += (double) (event.m_y - y) / 100;
+				rotmat = AffineTransformMatrix::RotateAroundVector(
+						Vector3(1, 0, 0), turntableY) * rotmat;
+				rotmat = rotmat
+						* AffineTransformMatrix::RotateAroundVector(
+								Vector3(0, 0, 1), turntableX);
+				break;
+			}
 		}
 		x = event.m_x;
 		y = event.m_y;

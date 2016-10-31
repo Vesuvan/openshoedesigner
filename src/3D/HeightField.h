@@ -28,7 +28,7 @@
 #define HEIGHTFIELD_H_
 
 /*!\class HeightField
- * \brief Planar 2.5D heightfield
+ * \brief DEPRECATED: Planar 2.5D heightfield
  *
  * Grid of points with a height. This class provides some operations to generate some Polygon3 objects from it.
  */

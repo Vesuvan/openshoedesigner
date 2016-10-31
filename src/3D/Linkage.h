@@ -37,20 +37,21 @@ class LinkageVisitor;
  *
  * Utilizes LinkageVisitor for traversing the object tree.
  *
- * \todo: add a copy constructor
  */
 
 class Linkage {
 public:
 	Linkage();
+	Linkage(const Linkage& other);
+	Linkage& operator=(const Linkage& other);
 	virtual ~Linkage();
 
 	Linkage* AddChild(Linkage* child);
 //	Linkage* AddChild(void);
 //	Linkage* AddChild(Vector3 const &position);
 
-	void Accept(LinkageVisitor & visitor);
-	virtual void Process(LinkageVisitor & visitor) = 0;
+	void Accept(LinkageVisitor& visitor);
+	virtual void Process(LinkageVisitor& visitor) = 0;
 
 	void Paint(void);
 	virtual void Render(void)=0;

@@ -40,7 +40,8 @@
 class BooleanBox {
 public:
 	BooleanBox();
-	BooleanBox(const BooleanBox& other); //!< Copy constructor, because this class has pointers
+	BooleanBox(const BooleanBox& other); //!< Copy constructor
+	BooleanBox& operator=(const BooleanBox& other); ///< Assignment operator
 	BooleanBox(float sx, float sy, float sz);
 	BooleanBox(float x1, float y1, float z1, float x2, float y2, float z2);
 	virtual ~BooleanBox();

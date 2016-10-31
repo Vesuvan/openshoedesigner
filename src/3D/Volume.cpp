@@ -32,6 +32,7 @@
 #include <GL/gl.h>
 #include <assert.h>
 #include <math.h>
+#include <float.h>
 #include <stdint.h>
 
 Volume::Volume()
@@ -41,6 +42,8 @@ Volume::Volume()
 	dz = 1.0;
 	surface = 0.5;
 	color.Set(0.5, 0.5, 0.5);
+	display2D = Image;
+	display3D = MarchingCubes;
 }
 
 Volume::~Volume()
@@ -65,6 +68,11 @@ void Volume::SetSize(float x, float y, float z, float resolution)
 	dx = resolution;
 	dy = resolution;
 	dz = resolution;
+}
+
+void Volume::SetOrigin(Vector3 origin)
+{
+	this->origin = origin;
 }
 
 void Volume::AddHalfplane(const Vector3& p1, float d0, float k0)
@@ -297,16 +305,15 @@ void Volume::AddCylinder(const Vector3& p1, const Vector3& p2, const float r1,
 
 	const float kh = -log(2 * M_E - 1);
 	Vector3 p(0, 0, 0);
-	Vector3 h;
 	size_t c = 0;
 	for(size_t nz = 0; nz < Nz; nz++){
 		for(size_t ny = 0; ny < Ny; ny++){
 			for(size_t nx = 0; nx < Nx; nx++){
 				float x = n.Dot(p - h1);
-				h = h1 + n * x;
-				float y = (p - h).Abs();
-				float x2 = x * a11 + y * a12;
-				float y2 = x * a21 + y * a22;
+				const Vector3 h = h1 + n * x;
+				const float y = (p - h).Abs();
+				const float x2 = x * a11 + y * a12;
+				const float y2 = x * a21 + y * a22;
 				float d = y2;
 
 				if(x2 < 0) d = (p - h1).Abs();
@@ -540,7 +547,7 @@ const static int8_t cap[144] =
 			1, 6, 4, 3, 6, 2, 1, 4, 1, 7, 4, 7, 6, 4, 4, 2, 0, 6, 4, 0, -1, -1,
 			-1};
 
-void Volume::MarchingCubes(void)
+void Volume::CalcSurface(void)
 {
 //	setlocale(LC_ALL, "C"); // To get a 3.1415 instead 3,1415 or else on every computer.
 //	wxTextFile temp(_T("~/octave/oneslice.m"));
@@ -778,8 +785,8 @@ void Volume::MarchingCubes(void)
 
 				}
 
-				if(i == Nx - 2){
-					v = 0;
+				if(i + 2 == Nx){
+					uint8_t v = 0;
 					if(v1 > surface) v |= 1;
 					if(v5 > surface) v |= 2;
 					if(v7 > surface) v |= 4;
@@ -823,7 +830,7 @@ void Volume::MarchingCubes(void)
 				}
 
 				if(j == 0){
-					v = 0;
+					uint8_t v = 0;
 					if(v0 > surface) v |= 1;
 					if(v4 > surface) v |= 2;
 					if(v5 > surface) v |= 4;
@@ -866,8 +873,8 @@ void Volume::MarchingCubes(void)
 
 				}
 
-				if(j == Ny - 2){
-					v = 0;
+				if(j + 2 == Ny){
+					uint8_t v = 0;
 					if(v2 > surface) v |= 1;
 					if(v3 > surface) v |= 2;
 					if(v7 > surface) v |= 4;
@@ -911,7 +918,7 @@ void Volume::MarchingCubes(void)
 				}
 
 				if(k == 0){
-					v = 0;
+					uint8_t v = 0;
 					if(v0 > surface) v |= 1;
 					if(v1 > surface) v |= 2;
 					if(v3 > surface) v |= 4;
@@ -954,8 +961,8 @@ void Volume::MarchingCubes(void)
 
 				}
 
-				if(k == Nz - 2){
-					v = 0;
+				if(k + 2 == Nz){
+					uint8_t v = 0;
 					if(v4 > surface) v |= 1;
 					if(v6 > surface) v |= 2;
 					if(v7 > surface) v |= 4;
@@ -1029,62 +1036,196 @@ void Volume::Paint(void) const
 	const size_t Ny = Size(2);
 	const size_t Nz = Size(3);
 
+	const uint_fast8_t NDim = ((Nx > 1)? 1 : 0) + ((Ny > 1)? 1 : 0)
+			+ ((Nz > 1)? 1 : 0);
+
 	glPushMatrix();
 	glTranslatef(origin.x, origin.y, origin.z);
 	glColor4f(color.x, color.y, color.z, 0.8);
 
-	if(false){
-		glPointSize(2.0);
-		glBegin(GL_POINTS);
-
-		Vector3 p(0, 0, 0);
-		unsigned int c = 0;
-		for(size_t k = 0; k < Nz - 1; k++){
-			for(size_t j = 0; j < Ny - 1; j++){
-				for(size_t i = 0; i < Nx - 1; i++){
-					const double v0 = buffer[c];
-
-					glColor3f(v0 * 5, v0 * 5, v0 * 5);
-					glVertex3f(p.x, p.y, p.z);
-
-					p.x += dx;
-					c++;
+	if(NDim == 2){
+		switch(display2D){
+		case Points2D:
+			{
+				glPointSize(2.0);
+				glBegin(GL_POINTS);
+				Vector3 p(0, 0, 0);
+				unsigned int c = 0;
+				for(size_t k = 0; k < Nz; k++){
+					for(size_t j = 0; j < Ny; j++){
+						for(size_t i = 0; i < Nx; i++){
+							const double v0 = buffer[c];
+							if(v0 > surface){
+								glColor3f(v0 * 5, v0 * 5, v0 * 5);
+								glVertex3f(p.x, p.y, p.z);
+							}
+							p.x += dx;
+							c++;
+						}
+						p.x = 0;
+						p.y += dy;
+					}
+					p.y = 0;
+					p.z += dz;
 				}
-				c++;
-				p.x = 0;
-				p.y += dy;
+				glEnd();
+				break;
 			}
-			c += Nx;
-			p.y = 0;
-			p.z += dz;
+		case Grid:
+			{
+				glDisable(GL_CULL_FACE);
+				glBegin(GL_QUADS);
+				glColor3f(1, 1, 1);
+				if(Ny == 1){
+					for(size_t x = 0; x < (Nx - 1); x++){
+						for(size_t z = 0; z < (Nz - 1); z++){
+							const double v0 = MatlabMatrix::GetValue(x, 0, z);
+							const double v1 = MatlabMatrix::GetValue(x, 0,
+									z + 1);
+							const double v2 = MatlabMatrix::GetValue(x + 1, 0,
+									z + 1);
+							const double v3 = MatlabMatrix::GetValue(x + 1, 0,
+									z);
+							if(v0 == DBL_MAX || v1 == DBL_MAX || v2 == DBL_MAX
+									|| v3 == DBL_MAX) continue;
+							glNormal3f(0, 0, 1);
+							glVertex3f((x) * dx, v0, (z) * dz);
+							glVertex3f((x) * dx, v3, (z + 1) * dz);
+							glVertex3f((x + 1) * dx, v2, (z + 1) * dz);
+							glVertex3f((x + 1) * dx, v1, (z) * dz);
+						}
+					}
+				}
+				if(Nz == 1){
+					for(size_t x = 0; x < (Nx - 1); x++){
+						for(size_t y = 0; y < (Ny - 1); y++){
+							const double v0 = MatlabMatrix::GetValue(x, y, 0);
+							const double v1 = MatlabMatrix::GetValue(x + 1, y,
+									0);
+							const double v2 = MatlabMatrix::GetValue(x + 1,
+									y + 1, 0);
+							const double v3 = MatlabMatrix::GetValue(x, y + 1,
+									0);
+							if(v0 == DBL_MAX || v1 == DBL_MAX || v2 == DBL_MAX
+									|| v3 == DBL_MAX) continue;
+							glNormal3f(0, 0, 1);
+							glVertex3f((x) * dx, (y) * dy, v0);
+							glVertex3f((x + 1) * dx, (y) * dy, v1);
+							glVertex3f((x + 1) * dx, (y + 1) * dy, v2);
+							glVertex3f((x) * dx, (y + 1) * dy, v3);
+						}
+					}
+				}
+				glEnd();
+				glEnable(GL_CULL_FACE);
+				break;
+			}
+		case Image:
+			{
+				const double min = this->Min();
+				const double max = this->Max();
+				const double a = (max != min)? (1 / (max - min)) : 1.0;
+				const double b = -min * a;
+				glNormal3f(0, 0, 1);
+				glBegin(GL_QUADS);
+				if(Ny == 1){
+					for(size_t x = 0; x < (Nx - 1); x++){
+						for(size_t z = 0; z < (Nz - 1); z++){
+							const double v0 = MatlabMatrix::GetValue(x, 0, z);
+							const double v1 = MatlabMatrix::GetValue(x, 0,
+									z + 1);
+							const double v2 = MatlabMatrix::GetValue(x + 1, 0,
+									z + 1);
+							const double v3 = MatlabMatrix::GetValue(x + 1, 0,
+									z);
+							if(v0 == DBL_MAX || v1 == DBL_MAX || v2 == DBL_MAX
+									|| v3 == DBL_MAX) continue;
+							const double c0 = a * v0 + b;
+							const double c1 = a * v1 + b;
+							const double c2 = a * v2 + b;
+							const double c3 = a * v3 + b;
+							glNormal3f(0, 0, 1);
+							glColor3d(c0, c0, c0);
+							glVertex3f((x) * dx, 0, (z) * dz);
+							glColor3d(c1, c1, c1);
+							glVertex3f((x) * dx, 0, (z + 1) * dz);
+							glColor3d(c2, c2, c2);
+							glVertex3f((x + 1) * dx, 0, (z + 1) * dz);
+							glColor3d(c3, c3, c3);
+							glVertex3f((x + 1) * dx, 0, (z) * dz);
+						}
+					}
+				}
+				if(Nz == 1){
+					for(size_t x = 0; x < (Nx - 1); x++){
+						for(size_t y = 0; y < (Ny - 1); y++){
+							const double v0 = MatlabMatrix::GetValue(x, y, 0);
+							const double v1 = MatlabMatrix::GetValue(x + 1, y,
+									0);
+							const double v2 = MatlabMatrix::GetValue(x + 1,
+									y + 1, 0);
+							const double v3 = MatlabMatrix::GetValue(x, y + 1,
+									0);
+							if(v0 == DBL_MAX || v1 == DBL_MAX || v2 == DBL_MAX
+									|| v3 == DBL_MAX) continue;
+							const double c0 = a * v0 + b;
+							const double c1 = a * v1 + b;
+							const double c2 = a * v2 + b;
+							const double c3 = a * v3 + b;
+							glColor3d(c0, c0, c0);
+							glVertex3f((x) * dx, (y) * dy, 0);
+							glColor3d(c1, c1, c1);
+							glVertex3f((x + 1) * dx, (y) * dy, 0);
+							glColor3d(c2, c2, c2);
+							glVertex3f((x + 1) * dx, (y + 1) * dy, 0);
+							glColor3d(c3, c3, c3);
+							glVertex3f((x) * dx, (y + 1) * dy, 0);
+						}
+					}
+				}
+				glEnd();
+				break;
+			}
 		}
-
-		glEnd();
 	}
 
-	if(true){
-		geometry.Paint(geometryColorNone);
-//		glBegin(GL_TRIANGLES);
-//		unsigned int n;
-//		for(n = 0; n < triangles.GetCount(); n++){
-//			glNormal3f(triangles[n].n[0].x, triangles[n].n[0].y,
-//					triangles[n].n[0].z);
-//			glVertex3f(triangles[n].p[0].x, triangles[n].p[0].y,
-//					triangles[n].p[0].z);
-//			glVertex3f(triangles[n].p[1].x, triangles[n].p[1].y,
-//					triangles[n].p[1].z);
-//			glVertex3f(triangles[n].p[2].x, triangles[n].p[2].y,
-//					triangles[n].p[2].z);
-//		}
-//		glEnd();
+	if(NDim == 3){
+		switch(display3D){
+		case MarchingCubes:
+			{
+				geometry.Paint(geometryColorNone);
+				break;
+			}
+		case Points3D:
+			{
+				glPointSize(2.0);
+				glBegin(GL_POINTS);
+				Vector3 p(0, 0, 0);
+				unsigned int c = 0;
+				for(size_t k = 0; k < Nz; k++){
+					for(size_t j = 0; j < Ny; j++){
+						for(size_t i = 0; i < Nx; i++){
+							const double v0 = buffer[c];
+							if(v0 > surface){
+								glColor3f(v0 * 5, v0 * 5, v0 * 5);
+								glVertex3f(p.x, p.y, p.z);
+							}
+							p.x += dx;
+							c++;
+						}
+						p.x = 0;
+						p.y += dy;
+					}
+					p.y = 0;
+					p.z += dz;
+				}
+				glEnd();
+				break;
+			}
+		}
 	}
 
 	glPopMatrix();
-}
-
-void Volume::SetOrigin(Vector3 origin)
-{
-	this->origin = origin;
 }
 
 double Volume::GetValue(Vector3 p) const
@@ -1109,7 +1250,7 @@ double Volume::GetValue(double x, double y, double z) const
 	const int ix = (int) px;
 	const int iy = (int) py;
 	const int iz = (int) pz;
-	if(ix < 0 || iy < 0 || iz < 0 || ix > Nx - 2 || iy > Ny - 2 || iz > Nz - 2) return 0.0;
+	if(ix < 0 || iy < 0 || iz < 0 || ix + 2 > Nx || iy + 2 > Ny || iz + 2 > Nz) return 0.0;
 	const int pos = ix + (iy + iz * Ny) * Nx;
 	double v = 0.0;
 	v += buffer[pos] * (1 - mx) * (1 - my) * (1 - mz);
@@ -1163,7 +1304,7 @@ Vector3 Volume::GetGrad(Vector3 p) const
 	const int iz = (int) pz;
 
 	Vector3 temp;
-	if(ix < 0 || iy < 0 || iz < 0 || ix > Nx - 2 || iy > Ny - 2 || iz > Nz - 2) return temp;
+	if(ix < 0 || iy < 0 || iz < 0 || ix + 2 > Nx || iy + 2 > Ny || iz + 2 > Nz) return temp;
 	const size_t pos = ix + (iy + iz * Ny) * Nx;
 	const double v0 = buffer[pos];
 	const double v1 = buffer[pos + 1];
@@ -1377,41 +1518,165 @@ void Volume::Mirror(Axis a)
 	}
 }
 
-void Volume::FillHeightField(HeightField* heightfield) const
+Volume Volume::SurfaceField(void) const
 {
 	const size_t Nx = Size(1);
 	const size_t Ny = Size(2);
 	const size_t Nz = Size(3);
-	heightfield->matrix.SetIdentity();
-	heightfield->matrix.TranslateGlobal(origin.x, origin.y, origin.z);
-	heightfield->SetCount(Nx, Ny, dx);
 
+	Volume temp;
+	temp.SetCount(Nx, Ny, 1, dx);
+	temp.SetOrigin(Vector3(origin.x, origin.y, origin.z));
+	temp.SetInsertPosition(0);
 	const size_t h = Nx * Ny;
-
-	double *temp = new double[h];
-	if(temp == NULL) throw(__FILE__ "FillHeightField() - Not enough memory.");
-
-	for(size_t n = 0; n < h; n++)
-		temp[n] = 0.0;
-
 	for(size_t i = 0; i < h; i++){
 		double v0 = buffer[i];
 		size_t j = i;
+		double v = DBL_MAX;
 		for(size_t k = 1; k < Nz; k++){
 			j += h;
 			if(buffer[j] > 0.5){
 				if(v0 > 0.5){
-					temp[i] = (double) (k - 1) * dz;
+					v = (double) (k - 1) * dz;
 				}else{
 					const double c = fmin(
 							fmax((0.5 - v0) / (buffer[j] - v0), 0), 1);
-					temp[i] = ((double) (k - 1) + c) * dz;
+					v = ((double) (k - 1) + c) * dz;
 				}
 				break;
 			}
 			v0 = buffer[j];
 		}
+		temp.Insert(v);
 	}
-	heightfield->SetValues(temp, h);
-	delete[] temp;
+	return temp;
+}
+
+Volume Volume::XRay(Method method) const
+{
+	const size_t Nx = Size(1);
+	const size_t Ny = Size(2);
+	const size_t Nz = Size(3);
+
+	Volume temp;
+	temp.SetCount(Nx, 1, Nz, dx);
+	temp.SetOrigin(Vector3(origin.x, origin.y, origin.z));
+	temp.SetInsertPosition(0);
+	for(size_t z = 0; z < Nz; z++){
+		for(size_t x = 0; x < Nx; x++){
+			switch(method){
+			case MaxValue:
+				{
+					double vm = -DBL_MAX;
+					for(size_t y = 0; y < Ny; y++){
+						const double v = MatlabMatrix::GetValue(x, y, z);
+						if(v > vm) vm = v;
+					}
+					temp.Insert(vm);
+					break;
+				}
+			case MinValue:
+				{
+					double vm = DBL_MAX;
+					for(size_t y = 0; y < Ny; y++){
+						const double v = MatlabMatrix::GetValue(x, y, z);
+						if(v < vm) vm = v;
+					}
+					temp.Insert(vm);
+					break;
+				}
+			case MeanValue:
+				{
+					double vm = 0;
+					for(size_t y = 0; y < Ny; y++){
+						const double v = MatlabMatrix::GetValue(x, y, z);
+						vm += v;
+					}
+					temp.Insert(vm / (double) Ny);
+					break;
+				}
+			case Sum:
+				{
+					double vm = 0;
+					for(size_t y = 0; y < Ny; y++){
+						const double v = MatlabMatrix::GetValue(x, y, z);
+						vm += v;
+					}
+					temp.Insert(vm);
+					break;
+					break;
+				}
+			}
+		}
+	}
+	return temp;
+}
+
+Polygon3 Volume::ToPolygon(void) const
+{
+	Polygon3 temp;
+	// TODO: Conversion to Polygon
+	return temp;
+}
+
+double Volume::Min(void) const
+{
+	double m = DBL_MAX;
+	for(size_t n = 0; n < size; n++){
+		const double v = buffer[n];
+		if(v == DBL_MAX || v == -DBL_MAX) continue;
+		m = fmin(m, v);
+	}
+	return m;
+}
+
+double Volume::Max(void) const
+{
+	double m = -DBL_MAX;
+	for(size_t n = 0; n < size; n++){
+		const double v = buffer[n];
+		if(v == DBL_MAX || v == -DBL_MAX) continue;
+		m = fmax(m, v);
+	}
+	return m;
+}
+
+double Volume::MaxAbs(void) const
+{
+	double v = -DBL_MAX;
+	for(size_t n = 0; n < size; n++)
+		v = fmax(v, fabs(buffer[n]));
+	return v;
+}
+
+void Volume::AlignAtZero(void)
+{
+	const double m = this->Min();
+	for(size_t n = 0; n < size; n++)
+		buffer[n] -= m;
+}
+
+void Volume::Normalize(double max)
+{
+	double m = this->MaxAbs();
+	if(m == 0.0) return;
+	m = max / m;
+	for(size_t n = 0; n < size; n++)
+		buffer[n] *= m;
+}
+
+void Volume::Normalize(double min, double max)
+{
+	if(max == min){
+		memset(buffer, 0, sizeof(double) * size);
+		return;
+	}
+	this->AlignAtZero();
+	double m = this->Max();
+	if(m == 0.0) return;
+	m = (max - min) / m;
+	for(size_t n = 0; n < size; n++){
+		buffer[n] *= m;
+		buffer[n] += min;
+	}
 }

@@ -31,7 +31,7 @@
  *
  * The dimension S1 has the stride 1.
  *
- * (Contrary to Torch.Tensor. Here the last dimension has stride 1.)
+ * (Contrary to Torch.Tensor. A Torch.Tensors last dimension has a stride 1.)
  *
  * \image html MatlabMatrix_Configuration.svg
  */
@@ -45,49 +45,61 @@ public:
 	MatlabMatrix();
 	MatlabMatrix(const size_t S1, const size_t S2 = 1, const size_t S3 = 1,
 			const size_t S4 = 1);
-	MatlabMatrix(const std::string &name, const size_t S1 = 0, const size_t S2 =
+	MatlabMatrix(const std::string& name, const size_t S1 = 0, const size_t S2 =
 			1, const size_t S3 = 1, const size_t S4 = 1);
-	MatlabMatrix(const MatlabMatrix &other); ///< Copy constructor
+	MatlabMatrix(const MatlabMatrix& other); ///< Copy constructor
+	MatlabMatrix& operator=(const MatlabMatrix& other); ///< Assignment operator
 	virtual ~MatlabMatrix();
+
+	void SetVariableName(const std::string& name);
+	const std::string& GetVariableName(void) const;
 
 	void Reset(void);
 	void Clear(void);
+	bool IsEmpty(void) const;
 
-	void SetVariableName(const std::string &name);
-	const std::string& GetVariableName(void) const;
 	void SetSize(const size_t S1, const size_t S2 = 1, const size_t S3 = 1,
 			const size_t S4 = 1);
-	void SetSize(const MatlabMatrix &other);
-	size_t GetRows(void) const;
-	size_t GetCols(void) const;
-	size_t Size(const size_t dim = 1) const;
+	void SetSize(const MatlabMatrix& other);
+	void SetSize(const std::vector <size_t>& dims);
+
 	size_t Numel(void) const;
-	/*! Move the insert position around
+	size_t Size(const size_t dim) const;
+	std::vector <size_t> Size(void) const;
+
+	/*! Move the insert-position around
 	 *
 	 * Every parameter defaults to 0.
 	 */
 	void SetInsertPosition(const size_t p1 = 0, const size_t p2 = 0,
 			const size_t p3 = 0, const size_t p4 = 0);
 	void Insert(const double value);
+	void Insert(const double value, const size_t p1, const size_t p2);
+	void Insert(const double value, const size_t p1, const size_t p2,
+			const size_t p3, const size_t p4 = 0);
 	void Insert(const double* value, const size_t count);
+	void Insert(const double* value, const size_t count, const size_t p2);
 	void Insert(const float* value, const size_t count);
 	void Insert(const bool* value, const size_t count);
-	void Insert(const size_t p1, const size_t p2, double value);
-	void Insert(const size_t p2, const double* value, const size_t count);
 
-	double& operator[](size_t const& index);
-	const double& operator[](size_t const& index) const;
-
+	double GetValue(const size_t pos) const;
 	double GetValue(const size_t p1, const size_t p2, const size_t p3 = 0,
 			const size_t p4 = 0) const;
-	double GetValue(const size_t pos) const;
+
+	double& operator[](const size_t& index);
+	const double& operator[](const size_t& index) const;
+
 	double* Pointer(void);
 	const double* Pointer(void) const;
 
-	bool IsEmpty(void) const;
-	void Transpose(void);
+	std::vector <size_t> GetMinDimensions(void) const;
+	void Squeeze(void);
+
 	void Reshape(const size_t S1 = 0, const size_t S2 = 1, const size_t S3 = 1,
 			const size_t S4 = 1);
+	void Reshape(const std::vector <size_t>& dims);
+
+	void Transpose(void);
 
 protected:
 	std::string variablename;

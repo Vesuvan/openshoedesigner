@@ -15,6 +15,6 @@ gmon.out
 /Debug
 /Release
 
-/doc/doxygen/html
-/doc/doxygen/latex
+/doc/html
+/doc/latex
 

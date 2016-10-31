@@ -48,6 +48,7 @@
 
 #include "LastGenerationThread.h"
 
+#include <wx/help.h>
 #include <wx/intl.h>
 #include <wx/config.h>
 
@@ -88,11 +89,12 @@ public:
 	virtual void OnSelectLanguage(wxCommandEvent& event);
 	virtual void OnDebug(wxCommandEvent& event);
 	virtual void OnToolClicked(wxCommandEvent& event);
+	virtual void OnHelp(wxCommandEvent& event);
 
 	wxConfig *config;
 	wxLocale *locale;
 	DisplaySettings settings;
-
+	wxHelpController* m_helpController;
 	Project project;
 
 	FrameShoe* dialogShoe;

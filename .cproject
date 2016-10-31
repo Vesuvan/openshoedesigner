@@ -41,7 +41,7 @@
 							</tool>
 							<tool commandLinePattern="${COMMAND} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS} ${FLAGS}" id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.291916725" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
 							<tool commandLinePattern="${COMMAND} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS} ${FLAGS}" id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.2064584918" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
-								<option id="gnu.cpp.link.option.flags.163469286" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="`wx-config --libs gl,core,base,xml,adv`" valueType="string"/>
+								<option id="gnu.cpp.link.option.flags.163469286" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="`wx-config --libs gl,core,base,html,xml,adv`" valueType="string"/>
 								<option id="gnu.cpp.link.option.libs.1095832593" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="GLU"/>
 								</option>

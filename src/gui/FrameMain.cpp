@@ -45,6 +45,9 @@ FrameMain::FrameMain(wxWindow* parent, wxLocale* locale, wxConfig* config) :
 	m_canvas->SetProject(&project);
 	settings.WriteToCanvas(m_canvas);
 
+	m_helpController = new wxHelpController;
+	m_helpController->Initialize(_T("doc/LastGenerator.hhp"));
+
 	thread = NULL;
 	updateVolume = false;
 
@@ -84,6 +87,8 @@ FrameMain::~FrameMain()
 			wxCommandEventHandler(FrameMain::UpdateMainGUI));
 	this->Disconnect(ID_REFRESH3DVIEW, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::RefreshMain));
+
+	delete m_helpController;
 
 	settings.WriteConfigTo(config);
 	delete config; // config is written back on deletion of object
@@ -151,7 +156,7 @@ void FrameMain::UpdateFullGUI(wxCommandEvent& event)
 
 void FrameMain::UpdateProject(wxCommandEvent& event)
 {
-	project.Evaluate();
+	project.UpdateFootPosition();
 
 	if(thread == NULL){
 		thread = new LastGenerationThread(this, &project);
@@ -211,7 +216,7 @@ void FrameMain::OnLoadFootModel(wxCommandEvent& event)
 	if(dialog.ShowModal() == wxID_OK){
 		wxFileName fileName(dialog.GetPath());
 		if(project.LoadModel(fileName.GetFullPath())){
-			project.Evaluate();
+			project.UpdateFootPosition();
 			settings.lastFootDirectory = fileName.GetPath();
 			TransferDataToWindow();
 		}
@@ -346,10 +351,6 @@ void FrameMain::OnSetupUnits(wxCommandEvent& event)
 {
 }
 
-void FrameMain::OnAbout(wxCommandEvent& event)
-{
-}
-
 void FrameMain::OnSelectLanguage(wxCommandEvent& event)
 {
 	long lng =
@@ -358,6 +359,15 @@ void FrameMain::OnSelectLanguage(wxCommandEvent& event)
 							"Please choose language:\nChanges will take place after restart!"),
 					_T("Language"), WXSIZEOF(langNames), langNames);
 	if(lng >= 0) config->Write(_T("Language"), langNames[lng]);
+}
+
+void FrameMain::OnHelp(wxCommandEvent& event)
+{
+	m_helpController->DisplayContents();
+}
+
+void FrameMain::OnAbout(wxCommandEvent& event)
+{
 }
 
 void FrameMain::OnDebug(wxCommandEvent& event)

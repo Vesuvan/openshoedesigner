@@ -121,6 +121,7 @@ class GUIFrameMain : public wxFrame
 		virtual void OnSetupStereo3D( wxCommandEvent& event ) = 0;
 		virtual void OnSetupUnits( wxCommandEvent& event ) = 0;
 		virtual void OnSelectLanguage( wxCommandEvent& event ) = 0;
+		virtual void OnHelp( wxCommandEvent& event ) = 0;
 		virtual void OnAbout( wxCommandEvent& event ) = 0;
 		virtual void OnDebug( wxCommandEvent& event ) = 0;
 		virtual void OnToolClicked( wxCommandEvent& event ) = 0;

@@ -28,9 +28,9 @@
 #define VOLUME_H_
 
 #include "MatlabMatrix.h"
-#include "HeightField.h"
 #include "AffineTransformMatrix.h"
 #include "Geometry.h"
+#include "Polygon3.h"
 #include "Vector3.h"
 
 /*!\class Volume
@@ -71,6 +71,15 @@ public:
 	enum Axis {
 		X, Y, Z
 	};
+	enum Method {
+		MaxValue, MinValue, MeanValue, Sum
+	};
+	enum Display3D {
+		Points3D, MarchingCubes
+	};
+	enum Display2D {
+		Points2D, Grid, Image
+	};
 
 public:
 	Volume();
@@ -99,15 +108,15 @@ public:
 
 	/*! \brief Marching cubes algorithm
 	 *
-	 * Rund the Marching-cubes algorithm to generate a geometry of the surface
+	 * Run the Marching-Cubes algorithm to generate a geometry of the surface
 	 * of the data in the volume. The surface is assumed at the level of the
 	 * internal variable "surface".
 	 */
-	void MarchingCubes(void);
+	void CalcSurface(void);
 
 	/*! \brief Render the data
 	 *
-	 * After the MarchingCubes algorithm has run, the generated Geometry can be
+	 * After the Marching-Cubes algorithm has run, the generated Geometry can be
 	 * rendered with OpenGL commands.
 	 */
 	void Paint(void) const;
@@ -156,6 +165,7 @@ public:
 	 *
 	 * Rotate the Volume around an axis. Some functions use this feature to access the model from all sides.
 	 *
+	 * @param a Axis of rotation (enum X,Y or Z).
 	 * @param quarters Number of 90 degree turns to do.
 	 */
 	void Rotate(Axis a, int quarters);
@@ -166,21 +176,33 @@ public:
 	 */
 	void Mirror(Axis a);
 
-	/*! \brief Fill a HeightField with the underside of the volume
+	/*! \brief Fill a Volume with the underside of the volume
 	 *
-	 * Calculate the lower surface of the volume and returns this data in a HeightField.
+	 * Calculate the lower surface of the volume and returns this data in a 2D-%Volume.
 	 *
-	 * @param heightfield Pointer to a HeightField
+	 * @return Volume with heightfield
 	 */
-	void FillHeightField(HeightField * heightfield) const;
+	Volume SurfaceField(void) const;
+	Volume XRay(Method method) const;
+	Polygon3 ToPolygon(void) const;
+
+	double Min(void) const;
+	double Max(void) const;
+	double MaxAbs(void) const;
+	void AlignAtZero(void);
+	void Normalize(double max = 1.0);
+	void Normalize(double min, double max);
+
+public:
 
 	Vector3 color; ///< Color of the volume
 	Geometry geometry; ///< Generated geometry
 
-private:
+	Vector3 origin; ///< Origin of the volume
 	double surface; ///< Value of the surface: values greater than surface are inside the volume
 
-	Vector3 origin; ///< Origin of the volume
+	Display2D display2D;
+	Display3D display3D;
 
 	float dx;
 	float dy;

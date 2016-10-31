@@ -42,7 +42,7 @@ void* LastGenerationThread::Entry()
 {
 	if(TestDestroy()) return NULL;
 
-	project->UpdateVolume();
+	project->UpdateAndGenerate();
 
 	wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, ID_THREADLASTDONE);
 	wxPostEvent(frame, event);

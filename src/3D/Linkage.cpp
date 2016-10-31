@@ -59,6 +59,17 @@ void Linkage::Accept(LinkageVisitor& visitor)
 	}
 }
 
+Linkage::Linkage(const Linkage& other)
+{
+	throw(__FILE__": Linkage(const Linkage& other): Not implemented.");
+}
+
+Linkage& Linkage::operator=(const Linkage& other)
+{
+	throw(__FILE__": operator=(const Linkage& other): Not implemented.");
+	return *this;
+}
+
 void Linkage::Paint(void)
 {
 	glPushMatrix();

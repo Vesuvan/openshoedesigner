@@ -99,7 +99,7 @@ void FrameFoot::OnText(wxCommandEvent& event)
 void FrameFoot::OnCellChange(wxGridEvent& event)
 {
 	TransferDataFromWindow();
-	project->Evaluate();
+	project->UpdateFootPosition();
 	TransferDataToWindow();
 	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEPROJECT);
 	ProcessEvent(selectEvent);
