@@ -106,9 +106,12 @@ private:
 
 	Volume last;
 	Volume sole;
-
-	Volume xray;
 	Pattern pattern;
+
+
+
+	OrientedMatrix xray;
+	OrientedMatrix heightfield;
 	Polygon3 bow;
 
 };

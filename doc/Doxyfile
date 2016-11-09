@@ -45,7 +45,7 @@ PROJECT_BRIEF          = "Generate Lasts for Shoemaking"
 # exceed 55 pixels and the maximum width should not exceed 200 pixels. 
 # Doxygen will copy the logo to the output directory.
 
-PROJECT_LOGO           = /home/toby/Projekte/LastGenerator/doc/images/Logo.png
+PROJECT_LOGO           = images/Logo.png
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) 
 # base path where the generated documentation will be put. 

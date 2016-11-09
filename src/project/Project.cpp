@@ -81,8 +81,8 @@ void Project::UpdateAndGenerate(void)
 //	last.Rotate(Volume::Z, -1);
 	last.CalcSurface();
 
-	sole = last.SurfaceField();
-	Volume temp = sole.XRay(Volume::MinValue);
+	heightfield = last.SurfaceField();
+	OrientedMatrix temp = heightfield.XRay(Volume::MinValue);
 
 	bow.Clear();
 	for(unsigned int i = 0; i < temp.Numel(); i++){
