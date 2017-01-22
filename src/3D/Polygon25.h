@@ -30,7 +30,8 @@
 /*!\class Polygon25
  * \brief Plane polygon in 3D
  *
- * Expansion of the Polygon3 class with functions for almost flat polygons.
+ * Expansion of the Polygon3 class with functions for 2.5D polygons.
+ *
  * All polygons are used as if they were flat polygons with a height assigned
  * to each point.
  *
@@ -39,7 +40,7 @@
 #include "Polygon3.h"
 
 #include <wx/dynarray.h>
-
+class ArrayOfPolygon25;
 class Polygon25:public Polygon3 {
 public:
 	Polygon25();
@@ -59,16 +60,24 @@ public:
 	void PolygonFillHoles(void);
 
 	/*! \brief MA Filter for polygons with the size of 3
+	 *
+	 * Replaces every vertex i with the average of the vertices i-1, i, i+1.
 	 */
 	void PolygonSmooth(void);
 
 	/*! \brief Move the point of the Polygon to the right (outside)
+	 *
+	 * The function uses the direction of the polygon in the XY plane to
+	 * determine outside / right. It assumes, that the polygon is defined
+	 * mathematically positive.
 	 *
 	 * @param r Distance to move the points of the polygon
 	 */
 	void PolygonExpand(double r);
 
 	/*! \brief Move the points of the polygon to the left (inside)
+	 *
+	 * Uses PolygonExpand with negative parameter.
 	 *
 	 * @param r Distance to move the points of the polygon
 	 */
@@ -81,9 +90,17 @@ public:
 	 * @param v Vector3 point
 	 * @return Boolean, if point is inside
 	 */
-	bool IsElementInside(const Vector3 v);
+	bool IsElementInside(const Vector3 &v) const;
+
+	bool IsPolygonInside(const Polygon25 &other) const;
+
+	static void SortPolygonsFromOutside(ArrayOfPolygon25 *array);
 
 	/*! \brief Find the closest distance of a line to an element on the polygon
+	 *
+	 * The algorithm projects the polygon into the xy plane.
+	 *
+	 * vx and vy also determine the length of the line.
 	 *
 	 * @param elementInPolygon Number of element in polygon
 	 * @param x Starting x-point of line
@@ -106,6 +123,8 @@ public:
 			double vy) const;
 
 	/*! \brief Rotate the polygon start to be close to a given point
+	 *
+	 * (Assumes a closed polygon.)
 	 *
 	 * @param x X Coordinate of the point
 	 * @param y Y Coordinate of the point

@@ -39,7 +39,6 @@
 #include "FrameFoot.h"
 #include "FrameShoe.h"
 #include "FrameWalkcycleSupport.h"
-#include "FramePattern.h"
 #include "DialogSetupStereo3D.h"
 #include "FrameDebugParser.h"
 #include "DisplaySettings.h"
@@ -74,7 +73,6 @@ public:
 	virtual void OnInitializeFootModel(wxCommandEvent& event);
 	virtual void OnSetupFoot(wxCommandEvent& event);
 	virtual void OnSetupShoe(wxCommandEvent& event);
-	virtual void OnEditPattern(wxCommandEvent& event);
 	virtual void OnEditWalkCycle(wxCommandEvent& event);
 	virtual void OnSaveLast(wxCommandEvent& event);
 	virtual void OnSaveInsole(wxCommandEvent& event);
@@ -100,7 +98,6 @@ public:
 	FrameShoe* dialogShoe;
 	FrameFoot* dialogFoot;
 	FrameWalkcycleSupport* dialogWalkcycleSupport;
-	FramePattern* dialogPattern;
 	DialogSetupStereo3D* dialogSetupStereo3D;
 	FrameDebugParser* dialogDebugParser;
 

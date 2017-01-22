@@ -54,7 +54,6 @@ FrameMain::FrameMain(wxWindow* parent, wxLocale* locale, wxConfig* config) :
 	dialogShoe = new FrameShoe(this, &project);
 	dialogFoot = new FrameFoot(this, &project);
 	dialogWalkcycleSupport = new FrameWalkcycleSupport(this, &project);
-	dialogPattern = new FramePattern(this, &project);
 	dialogSetupStereo3D = new DialogSetupStereo3D(this, &settings);
 	dialogDebugParser = new FrameDebugParser(this);
 
@@ -101,7 +100,6 @@ bool FrameMain::TransferDataToWindow()
 
 	m_menuFoot->Check(ID_SETUPFOOT, dialogFoot->IsShown());
 	m_menuShoe->Check(ID_SETUPSHOE, dialogShoe->IsShown());
-	m_menuShoe->Check(ID_EDITPATTERN, dialogPattern->IsShown());
 	m_menuShoe->Check(ID_EDITWALKCYCLE, dialogWalkcycleSupport->IsShown());
 
 	m_menuView->Check(ID_STEREO3D, m_canvas->stereoMode != stereoOff);
@@ -278,13 +276,6 @@ void FrameMain::OnSetupShoe(wxCommandEvent& event)
 {
 	dialogShoe->Show();
 	dialogShoe->Raise();
-	TransferDataToWindow();
-}
-
-void FrameMain::OnEditPattern(wxCommandEvent& event)
-{
-	dialogPattern->Show();
-	dialogPattern->Raise();
 	TransferDataToWindow();
 }
 

@@ -26,9 +26,12 @@
 
 #include "AffineTransformMatrix.h"
 
-#include <math.h>
 #include <wx/tokenzr.h>
-#include <wx/arrimpl.cpp> // this is a magic incantation which must be done!
+
+#include <math.h>
+#include <assert.h>
+
+#include <wx/arrimpl.cpp>
 WX_DEFINE_OBJARRAY(ArrayOfAffineTransformMatrix);
 
 AffineTransformMatrix::AffineTransformMatrix()
@@ -133,7 +136,7 @@ void AffineTransformMatrix::ToStream(wxTextOutputStream& stream)
 void AffineTransformMatrix::FromStream(wxTextInputStream& stream)
 {
 	for(unsigned int n = 0; n < 16; n++)
-		a[n] = stream.ReadDouble();
+		stream >> a[n];
 	TakeMatrixApart();
 }
 
@@ -259,9 +262,9 @@ const AffineTransformMatrix AffineTransformMatrix::Inverse() const
 	const double T11 = (a[0] * a[5] + (-a[1] * a[4])) * a[10]
 			+ ((-a[0] * a[6]) + a[2] * a[4]) * a[9]
 			+ (a[1] * a[6] + (-a[2] * a[5])) * a[8];
-	// T11 is the determinant of the matrix. This can not
+	// T11 is the determinant of the matrix. This can
 	// not be zero for a correct transformation matrix.
-	wxASSERT(T11!=0);
+	assert(T11!=0);
 
 	const double T12 = a[4] * a[9];
 	const double T13 = a[5] * a[8];

@@ -37,48 +37,46 @@
 #include "PanelWalkcycle.h"
 #include <wx/checkbox.h>
 #include "PanelPlotSimple.h"
-#include "PanelPattern.h"
 
 ///////////////////////////////////////////////////////////////////////////
 
-#define ID_LOADFOOTMODEL 1000
-#define ID_SAVEFOOTMODEL 1001
-#define ID_LOADSHOE 1002
-#define ID_SAVESHOE 1003
-#define ID_INITIALIZEFOOTMODEL 1004
-#define ID_SETUPFOOT 1005
-#define ID_SETUPSHOE 1006
-#define ID_EDITPATTERN 1007
-#define ID_EDITWALKCYCLE 1008
-#define ID_STEREO3D 1009
-#define ID_SHOWBONES 1010
-#define ID_SHOWLAST 1011
-#define ID_SHOWINSOLE 1012
-#define ID_SHOWSOLE 1013
-#define ID_SHOWUPPER 1014
-#define ID_SHOWCUTAWAY 1015
-#define ID_SHOWFLOOR 1016
-#define ID_SETUPSTEREO3D 1017
-#define ID_SETUPUNITS 1018
-#define ID_TOOLSETUPFOOT 1019
-#define ID_TOOLSETUPSHOE 1020
-#define ID_TEXTFOOTLENGTH 1021
-#define ID_TEXTFOOTWIDTH 1022
-#define ID_TEXTHEELWIDTH 1023
-#define ID_ANKLEWIDTH 1024
-#define ID_GRIDLENGTH 1025
-#define ID_GRIDDIAMETER 1026
-#define ID_GRIDSKIN 1027
-#define ID_GRIDLEG 1028
-#define ID_PRESETFLATS 1029
-#define ID_PRESETHHLOW 1030
-#define ID_PRESETPLATFORM 1031
-#define ID_PRESETCLASSIC 1032
-#define ID_PRESETHHMID 1033
-#define ID_PRESETPONY 1034
-#define ID_PRESETPLATEAU 1035
-#define ID_PRESETHHHIGH 1036
-#define ID_PRESETBALLET 1037
+#define ID_INITIALIZEFOOTMODEL 1000
+#define ID_LOADFOOTMODEL 1001
+#define ID_SAVEFOOTMODEL 1002
+#define ID_SETUPFOOT 1003
+#define ID_SETUPSHOE 1004
+#define ID_EDITWALKCYCLE 1005
+#define ID_LOADSHOE 1006
+#define ID_SAVESHOE 1007
+#define ID_STEREO3D 1008
+#define ID_SHOWBONES 1009
+#define ID_SHOWLAST 1010
+#define ID_SHOWINSOLE 1011
+#define ID_SHOWSOLE 1012
+#define ID_SHOWUPPER 1013
+#define ID_SHOWCUTAWAY 1014
+#define ID_SHOWFLOOR 1015
+#define ID_SETUPSTEREO3D 1016
+#define ID_SETUPUNITS 1017
+#define ID_TOOLSETUPFOOT 1018
+#define ID_TOOLSETUPSHOE 1019
+#define ID_TEXTFOOTLENGTH 1020
+#define ID_TEXTFOOTWIDTH 1021
+#define ID_TEXTHEELWIDTH 1022
+#define ID_ANKLEWIDTH 1023
+#define ID_GRIDLENGTH 1024
+#define ID_GRIDDIAMETER 1025
+#define ID_GRIDSKIN 1026
+#define ID_GRIDLEG 1027
+#define ID_PRESETFLATS 1028
+#define ID_PRESETHHLOW 1029
+#define ID_PRESETPLATFORM 1030
+#define ID_PRESETCLASSIC 1031
+#define ID_PRESETHHMID 1032
+#define ID_PRESETPONY 1033
+#define ID_PRESETPLATEAU 1034
+#define ID_PRESETHHHIGH 1035
+#define ID_PRESETBALLET 1036
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class GUIFrameMain
@@ -90,8 +88,13 @@ class GUIFrameMain : public wxFrame
 	protected:
 		wxMenuBar* m_menubar;
 		wxMenu* m_menuFile;
+		wxMenu* m_menuRecent;
+		wxMenu* m_menuEdit;
 		wxMenu* m_menuFoot;
+		wxMenu* m_menuFootModelType;
+		wxMenu* m_menuLast;
 		wxMenu* m_menuShoe;
+		wxMenu* m_menuPattern;
 		wxMenu* m_menuGeometry;
 		wxMenu* m_menuView;
 		wxMenu* m_menuSettings;
@@ -101,16 +104,15 @@ class GUIFrameMain : public wxFrame
 		wxToolBar* m_toolBar;
 		
 		// Virtual event handlers, overide them in your derived class
-		virtual void OnLoadFootModel( wxCommandEvent& event ) = 0;
-		virtual void OnSaveFootModel( wxCommandEvent& event ) = 0;
-		virtual void OnLoadShoe( wxCommandEvent& event ) = 0;
-		virtual void OnSaveShoe( wxCommandEvent& event ) = 0;
 		virtual void OnQuit( wxCommandEvent& event ) = 0;
 		virtual void OnInitializeFootModel( wxCommandEvent& event ) = 0;
+		virtual void OnLoadFootModel( wxCommandEvent& event ) = 0;
+		virtual void OnSaveFootModel( wxCommandEvent& event ) = 0;
 		virtual void OnSetupFoot( wxCommandEvent& event ) = 0;
 		virtual void OnSetupShoe( wxCommandEvent& event ) = 0;
-		virtual void OnEditPattern( wxCommandEvent& event ) = 0;
 		virtual void OnEditWalkCycle( wxCommandEvent& event ) = 0;
+		virtual void OnLoadShoe( wxCommandEvent& event ) = 0;
+		virtual void OnSaveShoe( wxCommandEvent& event ) = 0;
 		virtual void OnSaveLast( wxCommandEvent& event ) = 0;
 		virtual void OnSaveInsole( wxCommandEvent& event ) = 0;
 		virtual void OnSaveSole( wxCommandEvent& event ) = 0;
@@ -123,13 +125,12 @@ class GUIFrameMain : public wxFrame
 		virtual void OnSelectLanguage( wxCommandEvent& event ) = 0;
 		virtual void OnHelp( wxCommandEvent& event ) = 0;
 		virtual void OnAbout( wxCommandEvent& event ) = 0;
-		virtual void OnDebug( wxCommandEvent& event ) = 0;
 		virtual void OnToolClicked( wxCommandEvent& event ) = 0;
 		
 	
 	public:
 		
-		GUIFrameMain( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("LastGenerator"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 537,421 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		GUIFrameMain( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Open Shoe Designer"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 537,421 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		~GUIFrameMain();
 	
 };
@@ -288,36 +289,6 @@ class GUIFrameWalkcycleSupport : public wxFrame
 		
 		GUIFrameWalkcycleSupport( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Walkcycle Support"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 630,453 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxTAB_TRAVERSAL );
 		~GUIFrameWalkcycleSupport();
-	
-};
-
-///////////////////////////////////////////////////////////////////////////////
-/// Class GUIFramePattern
-///////////////////////////////////////////////////////////////////////////////
-class GUIFramePattern : public wxFrame 
-{
-	private:
-	
-	protected:
-		PanelPattern* m_panel;
-		wxStaticText* m_staticText17;
-		wxChoice* m_choicePreset;
-		wxStaticText* m_staticText18;
-		wxChoice* m_choiceStyle;
-		wxStaticText* m_staticText19;
-		wxSlider* m_sliderBootLength;
-		
-		// Virtual event handlers, overide them in your derived class
-		virtual void OnCloseX( wxCloseEvent& event ) = 0;
-		virtual void OnChoicePreset( wxCommandEvent& event ) = 0;
-		virtual void OnChoiceStyle( wxCommandEvent& event ) = 0;
-		virtual void OnScroll( wxScrollEvent& event ) = 0;
-		
-	
-	public:
-		
-		GUIFramePattern( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Pattern"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxTAB_TRAVERSAL );
-		~GUIFramePattern();
 	
 };
 
