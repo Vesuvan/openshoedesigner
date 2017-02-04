@@ -49,14 +49,16 @@
  *
  */
 
-#include "Foot.h"
+#include "foot/Foot.h"
 #include "Shoe.h"
-#include "Pattern.h"
+#include "pattern/Pattern.h"
 
 #include "../3D/Volume.h"
 #include "../3D/Polygon3.h"
+#include "last/Spline3.h"
 
 class Project {
+	friend class ProjectView;
 public:
 
 	enum Generator {
@@ -85,30 +87,19 @@ public:
 	bool SaveModel(wxString fileName);
 	bool SaveLast(wxString fileName);
 
-	// Painting:
-	void PaintBones(void) const;
-	void PaintLast(void) const;
-	void PaintInsole(void) const;
-	void PaintSole(void) const;
-	void PaintUpper(void) const;
-	void PaintCutaway(void) const;
-	void PaintFloor(void) const;
-
 public:
-	Generator generator;
 
+	Generator generator;
+	Spline3 test;
 private:
 
-	double floorLevel;
-
 	Foot footmodel;
-	Shoe shoe;
+	Volume foot;
 
 	Volume last;
+	Shoe shoe;
 	Volume sole;
 	Pattern pattern;
-
-
 
 	OrientedMatrix xray;
 	OrientedMatrix heightfield;

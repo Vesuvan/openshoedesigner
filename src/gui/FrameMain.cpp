@@ -42,11 +42,12 @@ FrameMain::FrameMain(wxWindow* parent, wxLocale* locale, wxConfig* config) :
 	this->locale = locale;
 	settings.GetConfigFrom(config);
 
-	m_canvas->SetProject(&project);
+	projectview.SetProject(&project);
+	m_canvas->SetProjectView(&projectview);
 	settings.WriteToCanvas(m_canvas);
 
 	m_helpController = new wxHelpController;
-	m_helpController->Initialize(_T("doc/LastGenerator.hhp"));
+	m_helpController->Initialize(_T("doc/OpenShoeDesigner.hhp"));
 
 	thread = NULL;
 	updateVolume = false;
@@ -104,26 +105,26 @@ bool FrameMain::TransferDataToWindow()
 
 	m_menuView->Check(ID_STEREO3D, m_canvas->stereoMode != stereoOff);
 
-	m_menuView->Check(ID_SHOWBONES, m_canvas->showBones);
-	m_menuView->Check(ID_SHOWLAST, m_canvas->showLast);
-	m_menuView->Check(ID_SHOWINSOLE, m_canvas->showInsole);
-	m_menuView->Check(ID_SHOWSOLE, m_canvas->showSole);
-	m_menuView->Check(ID_SHOWUPPER, m_canvas->showUpper);
-	m_menuView->Check(ID_SHOWCUTAWAY, m_canvas->showCutaway);
-	m_menuView->Check(ID_SHOWFLOOR, m_canvas->showFloor);
+	m_menuView->Check(ID_SHOWBONES, projectview.showBones);
+	m_menuView->Check(ID_SHOWLAST, projectview.showLast);
+	m_menuView->Check(ID_SHOWINSOLE, projectview.showInsole);
+	m_menuView->Check(ID_SHOWSOLE, projectview.showSole);
+	m_menuView->Check(ID_SHOWUPPER, projectview.showUpper);
+	m_menuView->Check(ID_SHOWCUTAWAY, projectview.showCutaway);
+	m_menuView->Check(ID_SHOWFLOOR, projectview.showFloor);
 
 	return true;
 }
 
 bool FrameMain::TransferDataFromWindow()
 {
-	m_canvas->showBones = m_menuView->IsChecked(ID_SHOWBONES);
-	m_canvas->showLast = m_menuView->IsChecked(ID_SHOWLAST);
-	m_canvas->showInsole = m_menuView->IsChecked(ID_SHOWINSOLE);
-	m_canvas->showUpper = m_menuView->IsChecked(ID_SHOWUPPER);
-	m_canvas->showSole = m_menuView->IsChecked(ID_SHOWSOLE);
-	m_canvas->showCutaway = m_menuView->IsChecked(ID_SHOWCUTAWAY);
-	m_canvas->showFloor = m_menuView->IsChecked(ID_SHOWFLOOR);
+	projectview.showBones = m_menuView->IsChecked(ID_SHOWBONES);
+	projectview.showLast = m_menuView->IsChecked(ID_SHOWLAST);
+	projectview.showInsole = m_menuView->IsChecked(ID_SHOWINSOLE);
+	projectview.showUpper = m_menuView->IsChecked(ID_SHOWUPPER);
+	projectview.showSole = m_menuView->IsChecked(ID_SHOWSOLE);
+	projectview.showCutaway = m_menuView->IsChecked(ID_SHOWCUTAWAY);
+	projectview.showFloor = m_menuView->IsChecked(ID_SHOWFLOOR);
 
 	return true;
 }

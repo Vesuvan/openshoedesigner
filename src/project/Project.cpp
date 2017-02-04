@@ -36,6 +36,14 @@
 Project::Project()
 {
 	generator = Basic;
+
+	test.AddVector(-0.04, 0, 0.12);
+	test.AddVector(0.0, 0, 0.11);
+	test.AddVector(0.1, 0, 0.003);
+	test.AddVector(0.15, 0, 0.0);
+	test.AddVector(0.1, 0.0, 0.5);
+	test.Close();
+	test.Calculate();
 	Reset();
 }
 
@@ -67,7 +75,7 @@ bool Project::UpdateFootPosition(void)
 	if(!shoe.Evaluate(footmodel.L, footmodel.W, footmodel.H, footmodel.A)) return false;
 	footmodel.SetPosition(shoe.heelHeight - shoe.ballHeight, shoe.toeAngle,
 			shoe.mixing);
-	floorLevel = footmodel.GetHeelHeight() - shoe.heelHeight;
+//	floorLevel = footmodel.GetHeelHeight() - shoe.heelHeight;
 	return true;
 }
 
@@ -134,9 +142,7 @@ bool Project::LoadModel(wxString fileName)
 	wxFileInputStream input(fileName);
 	wxTextInputStream text(input);
 
-	if(footmodel.LoadModel(&text))
-
-	{
+	if(footmodel.LoadModel(&text)){
 		footmodel.SetPosition(shoe.heelHeight, shoe.toeAngle, shoe.mixing);
 		return true;
 	}
@@ -158,60 +164,3 @@ bool Project::SaveLast(wxString fileName)
 	return true;
 }
 
-void Project::PaintBones(void) const
-{
-	footmodel.Render();
-}
-
-void Project::PaintLast(void) const
-{
-	last.Paint();
-}
-
-void Project::PaintInsole(void) const
-{
-	bow.Paint();
-
-//	glColor3f(0.0, 0.75, 0.0);
-//	glBegin(GL_LINES);
-//	for(unsigned int i = 0; i < bow.elements.GetCount() - 1; i++){
-//		Vector3 temp = bow.elements[i + 1] - bow.elements[i];
-//		temp.Normalize();
-//		glNormal3f(temp.x, temp.y, temp.z);
-//		temp = temp * Vector3(0, -1, 0);
-//		temp = last.GetSurface(bow.elements[i], temp);
-//
-//		glVertex3f(bow.elements[i].x, bow.elements[i].y, bow.elements[i].z);
-////		glVertex3f(bow.elements[i].x + temp.x, bow.elements[i].y + temp.y,
-////				bow.elements[i].z + temp.z);
-//		glVertex3f(temp.x, temp.y, temp.z);
-//	}
-//	glEnd();
-}
-
-void Project::PaintSole(void) const
-{
-	sole.Paint();
-	xray.Paint();
-}
-
-void Project::PaintUpper(void) const
-{
-
-}
-
-void Project::PaintCutaway(void) const
-{
-}
-
-void Project::PaintFloor(void) const
-{
-	glColor3f(0.4, 0.4, 0.4);
-	glBegin(GL_QUADS);
-	glNormal3f(0, 0, 1);
-	glVertex3f(-0.5, -0.5, floorLevel);
-	glVertex3f(0.5, -0.5, floorLevel);
-	glVertex3f(0.5, 0.5, floorLevel);
-	glVertex3f(-0.5, 0.5, floorLevel);
-	glEnd();
-}

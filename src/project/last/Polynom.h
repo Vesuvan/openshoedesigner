@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : PolyHull.h
-// Purpose            : 
-// Thread Safe        : Yes
+// Name               : Polynom.h
+// Purpose            :
+// Thread Safe        : No
 // Platform dependent : No
-// Compiler Options   :
-// Author             : Tobias Schaefer
-// Created            : 23.01.2017
+// Compiler Options   : -lm
+// Author             : toby
+// Created            : 28.01.2017
 // Copyright          : (C) 2017 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,29 +24,36 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef POLYHULL_H_
-#define POLYHULL_H_
+#ifndef POLYNOM_H_
+#define POLYNOM_H_
 
-/*!\class PolyHull
- * \brief ...
+/*!\class Polynom
+ * \brief Polynom up to an order of 4.
  *
- * ...
+ * This class contains a polynom with an order of 4. This polynom is intended for Spline3
+ * interpolation. The setting functions support a number of one to four points.
  */
 
-class PolyHull {
+class Polynom {
 public:
+	Polynom();
+	virtual ~Polynom();
 
-	class
+	double c0;
+	double c1;
+	double c2;
+	double c3;
 
+	void Set4(double r0, double v0, double r1, double v1, double r2, double v2,
+			double r3, double v3);
+	void Set3(double r0, double v0, double r1, double v1, double r2, double v2);
+	void Set2(double r0, double v0, double r1, double v1);
+	void Set1(double r0, double v0);
+	Polynom Derive() const;
+	Polynom Derive2() const;
+	Polynom Derive3() const;
 
-
-	PolyHull();
-	virtual ~PolyHull();
-
-
-	void Paint(void) const;
-
-
+	double Evaluate(double r) const;
 };
 
-#endif /* POLYHULL_H_ */
+#endif /* POLYNOM_H_ */

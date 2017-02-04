@@ -94,6 +94,7 @@ public:
 	DisplaySettings settings;
 	wxHelpController* m_helpController;
 	Project project;
+	ProjectView projectview;
 
 	FrameShoe* dialogShoe;
 	FrameFoot* dialogFoot;

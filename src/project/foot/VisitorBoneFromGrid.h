@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : PolyHull.cpp
+// Name               : VisitorBoneFromGrid.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 23.01.2017
-// Copyright          : (C) 2017 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 19.11.2015
+// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,16 +24,32 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "PolyHull.h"
+#ifndef VISITORBONEFROMGRID_H_
+#define VISITORBONEFROMGRID_H_
 
-PolyHull::PolyHull()
-{
-	// TODO Auto-generated constructor stub
-	
-}
+/*!\class VisitorBoneFromGrid
+ * \brief ...
+ *
+ * ...
+ */
+#include "../../StdInclude.h"
+#include "Bone.h"
+#include <wx/grid.h>
 
-PolyHull::~PolyHull()
-{
-	// TODO Auto-generated destructor stub
-}
+class VisitorBoneFromGrid:public LinkageVisitor {
+public:
+	VisitorBoneFromGrid(wxGrid* gridLength, wxGrid* gridDiameter,
+			wxGrid* gridSkin);
+	virtual ~VisitorBoneFromGrid();
 
+	void Visit(Bone &bone);
+
+private:
+	wxGrid* gridLength;
+	wxGrid* gridDiameter;
+	wxGrid* gridSkin;
+	unsigned int row;
+
+};
+
+#endif /* VISITORBONEFROMGRID_H_ */

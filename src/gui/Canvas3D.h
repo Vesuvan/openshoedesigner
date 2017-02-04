@@ -30,32 +30,22 @@
 /*!\class Canvas3D
  * \brief ...
  *
- * ...
+ * \note A copy-/ assignment-constructor is not needed because the pointers do not contain direct objects.
  */
 
-#include "../project/Project.h"
+#include "../project/ProjectView.h"
+
 #include "../3D/OpenGLCanvas.h"
-#include "../3D/Volume.h"
-#include "../3D/Vector3.h"
 
 class Canvas3D:public OpenGLCanvas {
 public:
 	Canvas3D(wxWindow* parent);
 	virtual ~Canvas3D();
-
-	void SetProject(Project* const project);
+	void SetProjectView(ProjectView* const projectview);
 	void Render();
 
-	bool showBones;
-	bool showLast;
-	bool showInsole;
-	bool showSole;
-	bool showUpper;
-	bool showCutaway;
-	bool showFloor;
-
 private:
-	Project *project;
+	ProjectView *projectview;
 };
 
 #endif /* CANVAS3D_H_ */

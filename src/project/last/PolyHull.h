@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Polynom2D.cpp
+// Name               : PolyHull.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
@@ -7,7 +7,7 @@
 // Author             : Tobias Schaefer
 // Created            : 23.01.2017
 // Copyright          : (C) 2017 Tobias Schaefer <tobiassch@users.sourceforge.net>
-// Licence            : GNU General Public License version 3.0 (GPLy(4))
+// Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,33 +24,22 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "Polynom2D.h"
+#ifndef POLYHULL_H_
+#define POLYHULL_H_
 
-#include <GL/gl.h>
+/*!\class PolyHull
+ * \brief ...
+ *
+ * ...
+ */
 
-Polynom2D::Point::Point()
-{
-	x = y = 0.0;
-	corner = false;
-}
-
-Polynom2D::Polynom2D()
-{
-	closed = false;
-}
-
-Polynom2D::~Polynom2D()
-{
+class PolyHull {
+public:
+	PolyHull();
+	virtual ~PolyHull();
 
 
+	void Paint(void) const;
+};
 
-}
-
-void Polynom2D::Paint(void) const
-{
-	std::vector<Point>::size_type N = points.size();
-  for (unsigned i=0; i<sz; i++){
-
-  }
-
-}
+#endif /* POLYHULL_H_ */

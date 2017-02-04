@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Polynom2D.h
+// Name               : ProjectView.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 23.01.2017
+// Created            : 28.01.2017
 // Copyright          : (C) 2017 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,44 +24,58 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef POLYNOM2D_H_
-#define POLYNOM2D_H_
-
-/*!\class Polynom2D
- * \brief ...
+#ifndef PROJECTVIEW_H_
+#define PROJECTVIEW_H_
+/*!\class ProjectView
+ * \brief Project view options
  *
- * ...
+ * This class contains viewing options for displaying the data of the project. Thus different windows can
+ * use the same project data and only display a different aspect.
  */
 
-#include <cstdbool>
 #include <vector>
 
-class Polynom2D {
-private:
-	class Point {
-	public:
-		Point();
-		double x;
-		double y;
-		bool corner;
-	};
-	class Polynom{
-		double a0;
-		double a1;
-		double a2;
-		double a3;
-	};
+#include "Project.h"
 
+#include "BackgroundImage.h"
 
-
-	std::vector <Point> points;
-	bool closed;
-
+class ProjectView {
 public:
-	Polynom2D();
-	virtual ~Polynom2D();
-
+	ProjectView();
+	virtual ~ProjectView();
+	void SetProject(Project *project);
+	void PaintBackground(void) const;
 	void Paint(void) const;
+
+	enum {
+		Left, Both, Right
+	};
+
+	Project *project;
+	std::vector <BackgroundImage> background;
+
+	bool showFootScan;
+	bool showFootModel;
+	bool showLastScan;
+	bool showLast;
+
+	bool showBones;
+	bool showInsole;
+	bool showSole;
+	bool showUpper;
+	bool showCutaway;
+	bool showFloor;
+
+	double floorLevel;
+
+private:
+	void PaintBones(void) const;
+	void PaintLast(void) const;
+	void PaintInsole(void) const;
+	void PaintSole(void) const;
+	void PaintUpper(void) const;
+	void PaintCutaway(void) const;
+	void PaintFloor(void) const;
 };
 
-#endif /* POLYNOM2D_H_ */
+#endif /* PROJECTVIEW_H_ */

@@ -25,33 +25,31 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "Canvas3D.h"
+
 #include <GL/gl.h>
+#include <stdint.h>
 
 Canvas3D::Canvas3D(wxWindow* parent) :
 		OpenGLCanvas(parent)
 {
-	project = NULL;
-
-	showBones = true;
-	showLast = true;
-	showInsole = false;
-	showSole = true;
-	showUpper = false;
-	showCutaway = false;
-	showFloor = false;
+	projectview = NULL;
 }
 
 Canvas3D::~Canvas3D()
 {
 }
 
-void Canvas3D::SetProject(Project* const project)
+void Canvas3D::SetProjectView(ProjectView* const projectview)
 {
-	this->project = project;
+	this->projectview = projectview;
 }
 
 void Canvas3D::Render()
 {
+	if(projectview == NULL) return;
+
+	projectview->PaintBackground();
+	glClear( GL_DEPTH_BUFFER_BIT);
 
 	glBegin(GL_LINES);
 	glNormal3f(0, -0.707, 0.707);
@@ -71,34 +69,27 @@ void Canvas3D::Render()
 
 	glEnd();
 
-	unsigned int n;
 	glColor3f(1, 0, 0);
 	glBegin(GL_LINE_LOOP);
-	for(n = 0; n < 64; n++){
+	for(uint_fast8_t n = 0; n < 64; n++){
 		glVertex3d(0.3, 0.04 * cos(M_PI / 32 * (double) n),
 				0.04 * sin(M_PI / 32 * (double) n));
 	}
 	glEnd();
 	glColor3f(0, 1, 0);
 	glBegin(GL_LINE_LOOP);
-	for(n = 0; n < 64; n++){
+	for(uint_fast8_t n = 0; n < 64; n++){
 		glVertex3d(0.04 * cos(M_PI / 32 * (double) n), 0.3,
 				0.04 * sin(M_PI / 32 * (double) n));
 	}
 	glEnd();
 	glColor3f(0, 0, 1);
 	glBegin(GL_LINE_LOOP);
-	for(n = 0; n < 64; n++){
+	for(uint_fast8_t n = 0; n < 64; n++){
 		glVertex3d(0.04 * cos(M_PI / 32 * (double) n),
 				0.04 * sin(M_PI / 32 * (double) n), 0.3);
 	}
 	glEnd();
 
-	if(showBones) project->PaintBones();
-	if(showInsole) project->PaintInsole();
-	if(showSole) project->PaintSole();
-	if(showUpper) project->PaintUpper();
-	if(showCutaway) project->PaintCutaway();
-	if(showFloor) project->PaintFloor();
-	if(showLast) project->PaintLast();
+	projectview->Paint();
 }

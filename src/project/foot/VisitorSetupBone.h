@@ -27,7 +27,7 @@
 #ifndef VISITORSETUPBONE_H_
 #define VISITORSETUPBONE_H_
 
-#include "../3D/LinkageVisitor.h"
+#include "LinkageVisitor.h"
 #include "Bone.h"
 
 /*!\class VisitorSetupBone
@@ -36,7 +36,7 @@
  * eValuate the formulas and set up the bones.
  */
 
-#include "../gui/MathParser.h"
+#include "../../gui/MathParser.h"
 
 class VisitorSetupBone:public LinkageVisitor {
 public:

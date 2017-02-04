@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Linkage.h
+// Name               : VisitorBoneToVolume.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 12.08.2015
+// Created            : 27.09.2015
 // Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,46 +24,28 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef LINKAGE_H_
-#define LINKAGE_H_
+#ifndef VISITORBONETOVOLUME_H_
+#define VISITORBONETOVOLUME_H_
 
-#include "AffineTransformMatrix.h"
-#include "Vector3.h"
-
-class LinkageVisitor;
-
-/*!\class Linkage
- * \brief Linked 3D object trees
+/*!\class VisitorBoneToVolume
+ * \brief ...
  *
- * Utilizes LinkageVisitor for traversing the object tree.
- *
+ * ...
  */
 
-class Linkage {
+#include "LinkageVisitor.h"
+#include "../../3D/Volume.h"
+#include "Bone.h"
+
+class VisitorBoneToVolume:public LinkageVisitor {
 public:
-	Linkage();
-	Linkage(const Linkage& other);
-	Linkage& operator=(const Linkage& other);
-	virtual ~Linkage();
+	VisitorBoneToVolume(Volume * volume);
+	virtual ~VisitorBoneToVolume();
 
-	Linkage* AddChild(Linkage* child);
-//	Linkage* AddChild(void);
-//	Linkage* AddChild(Vector3 const &position);
+	void Visit(Bone &bone);
 
-	void Accept(LinkageVisitor& visitor);
-	virtual void Process(LinkageVisitor& visitor) = 0;
-
-	void Paint(void);
-	virtual void Render(void)=0;
-
-	AffineTransformMatrix matrix;
-	Vector3 color;
-
-protected:
-	Linkage* parent;
 private:
-	Linkage* next;
-	Linkage* children;
+	Volume * volume;
 };
 
-#endif /* LINKAGE_H_ */
+#endif /* VISITORBONETOVOLUME_H_ */

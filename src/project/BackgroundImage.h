@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : main.h
-// Purpose            : Main entry point
+// Name               : BackgroundImage.h
+// Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 11.08.2015
-// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 30.01.2017
+// Copyright          : (C) 2017 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,35 +24,33 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef MAIN_H_
-#define MAIN_H_
+#ifndef BACKGROUNDIMAGE_H_
+#define BACKGROUNDIMAGE_H_
+/*!\class BackgroundImage
+ * \brief Image in 3D space for loading reference images
+ *
+ */
 
-#include "gui/FrameMain.h"
-#include "StdInclude.h"
-#include <wx/app.h>
-#include <wx/intl.h>
-#include <wx/config.h>
+#include "../3D/OpenGLImage.h"
 
-class FrameMain;
-
-class OpenShoeDesigner:public wxApp {
-	// Constructor
+class BackgroundImage:public OpenGLImage {
 public:
-	OpenShoeDesigner();
-	virtual ~OpenShoeDesigner();
-	// Member variables
-public:
-	FrameMain* frame;
+	enum Orientation {
+		Front, Back, Right, Left, Top, Bottom
+	};
 
-protected:
-	wxLocale locale;
-	wxConfig* config;
+	BackgroundImage();
+	virtual ~BackgroundImage();
 
-	// Methods
-public:
-	virtual bool OnInit();
+	void Paint(void) const;
 
+	Orientation orientation;
+	bool showFront;
+	bool showBack;
+	GLfloat scale;
+	GLfloat centerx;
+	GLfloat centery;
+	GLfloat rotate;
 };
-DECLARE_APP(OpenShoeDesigner)
 
-#endif /* MAIN_H_ */
+#endif /* BACKGROUNDIMAGE_H_ */

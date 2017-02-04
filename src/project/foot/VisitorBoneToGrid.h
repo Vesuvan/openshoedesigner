@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : VisitorBoneFromGrid.h
+// Name               : VisitorBoneToGrid.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
@@ -24,23 +24,24 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef VISITORBONEFROMGRID_H_
-#define VISITORBONEFROMGRID_H_
+#ifndef VISITORBONETOGRID_H_
+#define VISITORBONETOGRID_H_
 
-/*!\class VisitorBoneFromGrid
+/*!\class VisitorBoneToGrid
  * \brief ...
  *
  * ...
  */
-#include "../StdInclude.h"
+
+#include "../../StdInclude.h"
 #include "Bone.h"
 #include <wx/grid.h>
 
-class VisitorBoneFromGrid:public LinkageVisitor {
+
+class VisitorBoneToGrid:public LinkageVisitor {
 public:
-	VisitorBoneFromGrid(wxGrid* gridLength, wxGrid* gridDiameter,
-			wxGrid* gridSkin);
-	virtual ~VisitorBoneFromGrid();
+	VisitorBoneToGrid(wxGrid* gridLength, wxGrid* gridDiameter,wxGrid* gridSkin );
+	virtual ~VisitorBoneToGrid();
 
 	void Visit(Bone &bone);
 
@@ -49,7 +50,6 @@ private:
 	wxGrid* gridDiameter;
 	wxGrid* gridSkin;
 	unsigned int row;
-
 };
 
-#endif /* VISITORBONEFROMGRID_H_ */
+#endif /* VISITORBONETOGRID_H_ */

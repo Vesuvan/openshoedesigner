@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : VisitorBoneToVolume.h
+// Name               : PolyHull.cpp
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 27.09.2015
-// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 23.01.2017
+// Copyright          : (C) 2017 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,28 +24,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef VISITORBONETOVOLUME_H_
-#define VISITORBONETOVOLUME_H_
+#include "PolyHull.h"
 
-/*!\class VisitorBoneToVolume
- * \brief ...
- *
- * ...
- */
+PolyHull::PolyHull()
+{
+}
 
-#include "../3D/LinkageVisitor.h"
-#include "../3D/Volume.h"
-#include "Bone.h"
+PolyHull::~PolyHull()
+{
+}
 
-class VisitorBoneToVolume:public LinkageVisitor {
-public:
-	VisitorBoneToVolume(Volume * volume);
-	virtual ~VisitorBoneToVolume();
-
-	void Visit(Bone &bone);
-
-private:
-	Volume * volume;
-};
-
-#endif /* VISITORBONETOVOLUME_H_ */

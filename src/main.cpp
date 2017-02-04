@@ -28,12 +28,12 @@
 #include <cstdlib>
 #include "languages.h"
 
-IMPLEMENT_APP(LastGenerator)
+IMPLEMENT_APP(OpenShoeDesigner)
 
-LastGenerator::LastGenerator()
+OpenShoeDesigner::OpenShoeDesigner()
 {
 	frame = NULL;
-	config = new wxConfig(_T("LastGenerator"));
+	config = new wxConfig(_T("OpenShoeDesigner"));
 
 	unsigned int selectedLanguage = wxLocale::GetSystemLanguage();
 	if(selectedLanguage == wxLANGUAGE_UNKNOWN) selectedLanguage =
@@ -61,7 +61,7 @@ LastGenerator::LastGenerator()
 	//	wxLogMessage(_T("name language :") + locale.GetCanonicalName());
 
 	locale.AddCatalogLookupPathPrefix(_T("i18n"));
-	bool catalogLoaded = locale.AddCatalog(_T("LastGenerator"));
+	bool catalogLoaded = locale.AddCatalog(_T("OpenShoeDesigner"));
 	if(!catalogLoaded){
 		wxString temp;
 		temp =
@@ -69,13 +69,15 @@ LastGenerator::LastGenerator()
 		_T(" was not loaded !");
 		wxLogError(temp);
 	}
+
+	::wxInitAllImageHandlers(); // Load all image handlers for reading in background images.
 }
 
-LastGenerator::~LastGenerator()
+OpenShoeDesigner::~OpenShoeDesigner()
 {
 }
 
-bool LastGenerator::OnInit()
+bool OpenShoeDesigner::OnInit()
 {
 	if(!wxApp::OnInit()) return false;
 	frame = new FrameMain(NULL, &locale, config);

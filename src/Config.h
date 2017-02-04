@@ -39,7 +39,7 @@
 //#define _DEBUGMODE
 
 // Components used in this project:
-//#define _USE_3DPICKING
+#define _USE_3DPICKING
 //#define _USE_6DOFCONTROLLER
 #define _USE_UNIT
 

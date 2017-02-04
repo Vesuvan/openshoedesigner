@@ -68,8 +68,8 @@
 
 #include "Bone.h"
 
-#include "../3D/Volume.h"
-#include "../3D/Polygon3.h"
+#include "../../3D/Volume.h"
+#include "../../3D/Polygon3.h"
 
 #include <wx/txtstrm.h>
 #include <wx/grid.h>
