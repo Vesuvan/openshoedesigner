@@ -27,7 +27,7 @@
 #ifndef ORIENTEDMATRIX_H_
 #define ORIENTEDMATRIX_H_
 
-#include "MathMatrix.h"
+#include "../math/MathMatrix.h"
 #include "Vector3.h"
 /*!\class OrientedMatrix
  * \brief Field in 3D-space

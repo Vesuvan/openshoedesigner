@@ -30,7 +30,6 @@
 #include "OrientedMatrix.h"
 #include "AffineTransformMatrix.h"
 #include "Geometry.h"
-#include "Polygon3.h"
 #include "Vector3.h"
 
 /*!\class Volume
@@ -105,12 +104,9 @@ public:
 	 */
 	Vector3 GetSurface(Vector3 p0, Vector3 n) const;
 
-	Polygon3 ToPolygon(void) const;
-
 public:
 	Vector3 color; ///< Color of the volume
 	Geometry geometry; ///< Generated geometry
-
 
 };
 

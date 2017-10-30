@@ -76,6 +76,7 @@ double MathMatrix::MaxAbs(void) const
 double MathMatrix::Interp1(const double x) const
 {
 //	assert(::Nummel()==)
+	throw("Not implemented.");
 }
 
 void MathMatrix::AlignAtZero(void)

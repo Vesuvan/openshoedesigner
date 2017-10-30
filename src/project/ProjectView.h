@@ -33,26 +33,31 @@
  * use the same project data and only display a different aspect.
  */
 
+#include "Project.h"
+#include "../3D/BackgroundImage.h"
+
+#include <wx/docview.h>
 #include <vector>
 
-#include "Project.h"
-
-#include "BackgroundImage.h"
-
-class ProjectView {
+class ProjectView:public wxView {
 public:
+	enum DisplaySide {
+		Left, Right, Both
+	};
+	enum FrameType {
+		mainframe, patternframe, walkcycleframe
+	};
 	ProjectView();
 	virtual ~ProjectView();
-	void SetProject(Project *project);
-	void PaintBackground(void) const;
+
 	void Paint(void) const;
+	void PaintBackground(void) const;
 
-	enum {
-		Left, Both, Right
-	};
+	DisplaySide side;
 
-	Project *project;
 	std::vector <BackgroundImage> background;
+
+	bool showBackground;
 
 	bool showFootScan;
 	bool showFootModel;
@@ -68,6 +73,14 @@ public:
 
 	double floorLevel;
 
+	virtual bool OnCreate(wxDocument* doc, long flags);
+	virtual void OnDraw(wxDC *dc);
+	virtual void OnUpdate(wxView *sender, wxObject *hint = NULL);
+	virtual bool OnClose(bool deleteWindow = true);
+
+private:
+	wxFrame *m_frame;
+
 private:
 	void PaintBones(void) const;
 	void PaintLast(void) const;
@@ -76,6 +89,8 @@ private:
 	void PaintUpper(void) const;
 	void PaintCutaway(void) const;
 	void PaintFloor(void) const;
+
+DECLARE_DYNAMIC_CLASS(ProjectView);
 };
 
 #endif /* PROJECTVIEW_H_ */

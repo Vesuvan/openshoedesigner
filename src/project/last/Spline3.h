@@ -52,6 +52,9 @@ public:
 		{
 			corner = false;
 			r0 = 0.0;
+			dvx = 0.0;
+			dvy = 0.0;
+			dvz = 0.0;
 			length = 1.0;
 		}
 		Polynom px;
@@ -59,6 +62,9 @@ public:
 		Polynom pz;
 		double r0;
 		double length;
+		double dvx;
+		double dvy;
+		double dvz;
 		bool corner;
 	};
 	Spline3();
@@ -68,6 +74,8 @@ public:
 
 	Vector3 color;
 	bool closed;
+	bool normalized;
+	bool symmetric;
 	unsigned int pointsize;
 	double length;
 
@@ -75,9 +83,12 @@ public:
 	void AddVector(const Vector3 &vector, bool corner = false);
 	void AddVector(float x, float y, float z = 0.0, bool corner = false);
 	void Close(bool close = true);
-	void Calculate(bool symmetric = false);
-	void SetZeroAt(size_t pos);
-	void SetZeroOnPlane(size_t afterPos, Vector3 normal);
+	void Symmetric(bool symmetric = true);
+	void Normalize(bool normalize = true);
+	void Calculate(void);
+
+	Vector3 Evaluate(double r);
+
 	void Paint(void) const;
 };
 

@@ -39,7 +39,7 @@
 
 #include "../3D/OpenGLCanvas.h"
 
-#include "Unit.h"
+#include "../math/Unit.h"
 
 class DisplaySettings {
 	friend class DialogSetupUnits;

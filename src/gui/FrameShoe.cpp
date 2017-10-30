@@ -42,7 +42,7 @@ FrameShoe::~FrameShoe()
 
 bool FrameShoe::TransferDataToWindow()
 {
-	Shoe * shoe = project->GetShoe();
+	Shoe * shoe = &(project->shoe);
 	m_textCtrlHeelHeight->SetValue(shoe->exprHeelHeight);
 	m_textCtrlBallHeight->SetValue(shoe->exprBallHeight);
 	m_textCtrlToeAngle->SetValue(shoe->exprToeAngle);
@@ -75,7 +75,7 @@ void FrameShoe::OnTextEnter(wxCommandEvent& event)
 
 void FrameShoe::OnPreset(wxCommandEvent& event)
 {
-	Shoe * shoe = project->GetShoe();
+	Shoe * shoe = &(project->shoe);
 	// 0.26 m is the average footlength (= size EU 39).
 	switch(event.GetId()){
 	case ID_PRESETFLATS:
@@ -131,14 +131,14 @@ void FrameShoe::OnPreset(wxCommandEvent& event)
 
 void FrameShoe::OnScroll(wxScrollEvent& event)
 {
-	Shoe * shoe = project->GetShoe();
+	Shoe * shoe = &(project->shoe);
 	shoe->mixing = ((double) event.GetPosition()) / 100.0;
 	TransferDataToWindow();
 }
 
 void FrameShoe::OnScrollChange(wxScrollEvent& event)
 {
-	Shoe * shoe = project->GetShoe();
+	Shoe * shoe = &(project->shoe);
 	shoe->mixing = ((double) event.GetPosition()) / 100.0;
 	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEPROJECT);
 	ProcessEvent(selectEvent);

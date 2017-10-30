@@ -2,20 +2,607 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenShoeDesigner\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-11-14 13:39+0100\n"
-"PO-Revision-Date: 2015-11-14 13:41+0100\n"
+"POT-Creation-Date: 2017-10-30 00:53+0100\n"
+"PO-Revision-Date: 2017-10-30 00:57+0100\n"
 "Last-Translator: Tobias Schaefer <tobiassch@users.sourceforge.net>\n"
 "Language-Team: \n"
-"Language: \n"
+"Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-KeywordsList: _;gettext;gettext_noop\n"
 "X-Poedit-Basepath: .\n"
-"X-Poedit-Language: German\n"
-"X-Poedit-Country: GERMANY\n"
-"X-Poedit-SourceCharset: iso-8859-7\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Generator: Poedit 1.8.7.1\n"
 "X-Poedit-SearchPath-0: ../../src\n"
+
+#: ../../src/gui/FrameMain.cpp:48
+msgid "&Recently opened"
+msgstr ""
+
+#: ../../src/gui/FrameMain.cpp:56
+msgid "Print Setup..."
+msgstr ""
+
+#: ../../src/gui/FrameMain.cpp:65 ../../src/gui/FrameParent.cpp:48
+#: ../../src/gui/gui.cpp:212
+msgid "&Help"
+msgstr "&Hilfe"
+
+#: ../../src/gui/FrameMain.cpp:241
+msgid "Open Foot Model..."
+msgstr ""
+
+#: ../../src/gui/FrameMain.cpp:242 ../../src/gui/FrameMain.cpp:265
+msgid "Foot Model (*.fmd; *.txt)|*.fmd;*.txt|All Files|*.*"
+msgstr ""
+
+#: ../../src/gui/FrameMain.cpp:264
+msgid "Save Foot Model As..."
+msgstr ""
+
+#: ../../src/gui/FrameMain.cpp:324
+msgid "Save last..."
+msgstr "Leisten speichern..."
+
+#: ../../src/gui/FrameMain.cpp:325
+msgid "STL file (*.stl)|*.stl|All files|*.*"
+msgstr "STL Date (*.stl)|*.stl|Alle Dateien|*.*"
+
+#: ../../src/gui/gui.cpp:26
+msgid "&File"
+msgstr "&Datei"
+
+#: ../../src/gui/gui.cpp:29
+msgid "&Edit"
+msgstr "&Bearbeiten"
+
+#: ../../src/gui/gui.cpp:33
+msgid "Quick &Initialization"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:39
+msgid "Load Footmodel"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:43
+msgid "Save foot model"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:49
+msgid "Type of foot model"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:51
+msgid "Purely scan-based"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:55
+msgid "Bone-based Footmodel"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:64
+msgid "Load STL data"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:68
+msgid "Setup &Footmodel"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:71
+msgid "F&oot"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:75
+msgid "Load Last from STL"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:78
+msgid "&Last"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:82
+msgid "Setup &Shoe"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:86
+msgid "&Construction method"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:88
+msgid "&Experimental generator"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:88
+msgid "Generator for alogithm development"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:92
+msgid "Classic, &welded construction"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:96
+msgid "&Cemented construction"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:100
+msgid "Injection-&molded sole"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:104
+msgid "&Dutch Clog"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:110
+msgid "Define &Walkcycle Support"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:114
+msgid "Load Shoe"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:118
+msgid "Save Shoe"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:121
+msgid "&Shoe"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:125
+msgid "Show Flattening"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:128
+msgid "&Pattern"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:132
+msgid "Save &Last"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:136
+msgid "Save &Insole"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:140
+msgid "Save &Sole Prototype"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:144
+msgid "Save &Cutaway Object"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:150
+msgid "Pack a Zip with &Everything"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:153
+msgid "&Geometry"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:157
+msgid "Toggle Stereo &3D"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:157
+msgid "Toggle 3D view on/off."
+msgstr ""
+
+#: ../../src/gui/gui.cpp:163
+msgid "Show &Bones"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:167
+msgid "Show &Last"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:171
+msgid "Show &Insole"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:175
+msgid "Show &Sole"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:179
+msgid "Show &Upper"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:183
+msgid "Show &Cutaway Block"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:187
+msgid "Show &Floor"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:190
+msgid "&View"
+msgstr "Ansicht"
+
+#: ../../src/gui/gui.cpp:194
+msgid "Setup &Stereo3D"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:198 ../../src/gui/gui.cpp:715
+msgid "Setup &Units"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:202
+msgid "Select &Language"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:205
+msgid "S&ettings"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:209
+msgid "Debug Mathparser"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:209
+msgid "Opens a "
+msgstr ""
+
+#: ../../src/gui/gui.cpp:227
+msgid "FootDefinition"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:227
+msgid "Enter the measurements."
+msgstr ""
+
+#: ../../src/gui/gui.cpp:229
+msgid "Setup Shoe"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:229
+msgid "Setup the shoetype."
+msgstr ""
+
+#: ../../src/gui/gui.cpp:233 ../../src/gui/gui.cpp:235
+#: ../../src/gui/gui.cpp:237
+msgid "tool"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:333
+msgid "Shoesize:"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:337
+msgid "39"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:340
+msgid "EU"
+msgstr "EU"
+
+#: ../../src/gui/gui.cpp:340
+msgid "US"
+msgstr "US"
+
+#: ../../src/gui/gui.cpp:340
+msgid "CN"
+msgstr "CN"
+
+#: ../../src/gui/gui.cpp:340
+msgid "UK"
+msgstr "UK"
+
+#: ../../src/gui/gui.cpp:340
+msgid "JP"
+msgstr "JP"
+
+#: ../../src/gui/gui.cpp:340
+msgid "AU"
+msgstr "AU"
+
+#: ../../src/gui/gui.cpp:340
+msgid "mm"
+msgstr "mm"
+
+#: ../../src/gui/gui.cpp:340 ../../src/gui/guiSetupStereo3D.cpp:128
+#: ../../src/gui/guiSetupStereo3D.cpp:147
+msgid "cm"
+msgstr "cm"
+
+#: ../../src/gui/gui.cpp:340
+msgid "in"
+msgstr "in"
+
+#: ../../src/gui/gui.cpp:340
+msgid "ft"
+msgstr "ft"
+
+#: ../../src/gui/gui.cpp:352
+msgid "small"
+msgstr "klein"
+
+#: ../../src/gui/gui.cpp:355
+msgid "medium"
+msgstr "mittel"
+
+#: ../../src/gui/gui.cpp:359
+msgid "wide"
+msgstr "weit"
+
+#: ../../src/gui/gui.cpp:368
+msgid "Init"
+msgstr "Initialisieren"
+
+#: ../../src/gui/gui.cpp:371
+msgid "Abort"
+msgstr "Abbrechen"
+
+#: ../../src/gui/gui.cpp:414
+msgid "Foot length (L):"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:421
+msgid "Ball width (W):"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:428
+msgid "Heel width (H):"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:435
+msgid "Ankle width (A):"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:445
+msgid "Set by shoesize"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:449
+msgid "Shoesizes"
+msgstr "Schuhgrößen"
+
+#: ../../src/gui/gui.cpp:459
+msgid "EU:"
+msgstr "EU:"
+
+#: ../../src/gui/gui.cpp:466
+msgid "US:"
+msgstr "US:"
+
+#: ../../src/gui/gui.cpp:473
+msgid "UK:"
+msgstr "UK:"
+
+#: ../../src/gui/gui.cpp:480
+msgid "CN:"
+msgstr "CN:"
+
+#: ../../src/gui/gui.cpp:487
+msgid "JP:"
+msgstr "JP:"
+
+#: ../../src/gui/gui.cpp:494
+msgid "AU:"
+msgstr "AU:"
+
+#: ../../src/gui/gui.cpp:511
+msgid "Measurements"
+msgstr "Abmessungen"
+
+#: ../../src/gui/gui.cpp:531
+msgid "Length (Formula)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:532
+msgid "Length (Value)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:551
+msgid "Bone Length"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:573
+msgid "r1 (Formula)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:574
+msgid "r1 (Value)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:575
+msgid "r2 (Formula)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:576
+msgid "r2 (Value)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:594
+msgid "Bone Diameter"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:616
+msgid "s1 (Formula)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:617
+msgid "s1 (Value)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:618
+msgid "s2 (Formula)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:619
+msgid "s2 (Value)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:637
+msgid "Skin Thickness"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:659
+msgid "Height (Formula)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:660
+msgid "Height (Value)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:661
+msgid "Circumfence (Formula)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:662
+msgid "Circumfence (Value)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:676
+msgid "(This table is only needed for boot designs.)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:684
+msgid "Leg"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:694
+msgid "&Initialize"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:694
+msgid "Initialize measurements from shoe-size."
+msgstr ""
+
+#: ../../src/gui/gui.cpp:698
+msgid "&Load Model"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:702
+msgid "&Save Model"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:708
+msgid "&Close"
+msgstr "S&chließen"
+
+#: ../../src/gui/gui.cpp:711
+msgid "&Foot Setup"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:718
+msgid "&Settings"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:767
+msgid "Heel Height:"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:777
+msgid "Ball Height:"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:787
+msgid "Toe Angle:"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:797
+msgid "Angle Mixing:"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:802
+#, c-format
+msgid ""
+"Mixing determines how much of the needed bending of the foot is done by the "
+"heel and how much is spread on the forefoot. 0% is all heel, 100% is all "
+"forefoot. 100% is impractical unless some serious misalignment of the foot "
+"is to be compensated."
+msgstr ""
+
+#: ../../src/gui/gui.cpp:815
+msgid "Flats"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:818
+msgid "High Heel (low)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:821
+msgid "Platform Heel"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:824
+msgid "Classic"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:827
+msgid "High Heel (mid)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:830
+msgid "Pony"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:833
+msgid "Plateau"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:836
+msgid "High Heel (high)"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:839
+msgid "Ballet"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:918
+msgid "Walkcycle"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:923
+msgid "Lock Ankle"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:930
+msgid "Forces, Moments"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:935
+msgid "Kneeline"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:935
+msgid "Force"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:935
+msgid "Moment"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:935
+msgid "Crossforce"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:973
+msgid "Input (Number / Calculation / Formula / Unit):"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:980
+msgid "Numeric Value:"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:987
+msgid "Error:"
+msgstr "Fehler:"
+
+#: ../../src/gui/gui.cpp:994
+msgid "Unit Text:"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:1001
+msgid "SI Base Units:"
+msgstr ""
+
+#: ../../src/gui/gui.cpp:1038
+msgid "Close"
+msgstr "Schließen"
 
 #: ../../src/gui/guiSetupStereo3D.cpp:29
 msgid "Left Eye"
@@ -29,13 +616,11 @@ msgstr "Rechtes Auge"
 msgid "<-   Swap Colors   ->"
 msgstr "<- Farben vertauschen ->"
 
-#: ../../src/gui/guiSetupStereo3D.cpp:89
-#: ../../src/gui/guiSetupStereo3D.cpp:160
+#: ../../src/gui/guiSetupStereo3D.cpp:89 ../../src/gui/guiSetupStereo3D.cpp:160
 msgid "R:"
 msgstr "R:"
 
-#: ../../src/gui/guiSetupStereo3D.cpp:96
-#: ../../src/gui/guiSetupStereo3D.cpp:167
+#: ../../src/gui/guiSetupStereo3D.cpp:96 ../../src/gui/guiSetupStereo3D.cpp:167
 msgid "G:"
 msgstr "G:"
 
@@ -48,24 +633,38 @@ msgstr "B:"
 msgid "Eye Distance:"
 msgstr "Augenabstand:"
 
-#: ../../src/gui/guiSetupStereo3D.cpp:128
-#: ../../src/gui/guiSetupStereo3D.cpp:147
-msgid "cm"
-msgstr "cm"
-
 #: ../../src/gui/guiSetupStereo3D.cpp:140
 msgid "Focal Distance:"
 msgstr "Objektabstand:"
 
-#: ../../src/gui/FrameMain.cpp:272
-msgid "Save last..."
-msgstr "Leisten speichern..."
+#: ../../src/gui/gui.h:151
+msgid "Open Shoe Designer"
+msgstr ""
 
-#: ../../src/gui/FrameMain.cpp:273
-msgid "STL file (*.stl)|*.stl|All files|*.*"
-msgstr "STL Date (*.stl)|*.stl|Alle Dateien|*.*"
+#: ../../src/gui/gui.h:181
+msgid "Initialize Settings"
+msgstr ""
+
+#: ../../src/gui/gui.h:240
+msgid "Foot Setup"
+msgstr ""
+
+#: ../../src/gui/gui.h:286
+msgid "Basic Shoe Setup"
+msgstr ""
+
+#: ../../src/gui/gui.h:314
+msgid "Walkcycle Support"
+msgstr ""
+
+#: ../../src/gui/gui.h:346
+msgid "Test Parser and Units"
+msgstr ""
+
+#: ../../src/gui/gui.h:365
+msgid "About..."
+msgstr "Über..."
 
 #: ../../src/gui/guiSetupStereo3D.h:99
 msgid "Setup Stereo "
 msgstr "Setup Stereo"
-

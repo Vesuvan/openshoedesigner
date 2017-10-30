@@ -189,9 +189,13 @@ void OpenGLCanvas::InitGL()
 	glEnable(GL_BLEND);
 	glEnable(GL_POINT_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
+#if defined (__WIN32__)
+	glEnable(GL_NORMALIZE);
+#else
 	glEnable(GL_RESCALE_NORMAL);
-
+#endif
 	glFrontFace(GL_CCW);
+	glCullFace(GL_BACK);
 	glEnable(GL_CULL_FACE);
 
 	SetupLighting();
@@ -326,18 +330,19 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	glCullFace(GL_BACK);
 	glLoadIdentity();
 
+	if(stereoMode == stereoAnaglyph){
+		glColorMask((leftEyeR == 0)? GL_FALSE : GL_TRUE,
+				(leftEyeG == 0)? GL_FALSE : GL_TRUE,
+				(leftEyeB == 0)? GL_FALSE : GL_TRUE, GL_TRUE);
+		glEnable(GL_COLOR_MATERIAL);
+		glColor3ub(leftEyeR, leftEyeG, leftEyeB);
+		glDisable(GL_COLOR_MATERIAL);
+	}
+	if(stereoMode == stereoShutter){
+		glDrawBuffer(GL_BACK_LEFT);
+	}
+
 	if(stereoMode != stereoOff){
-		if(stereoMode == stereoAnaglyph){
-			glColorMask((leftEyeR == 0)? GL_FALSE : GL_TRUE,
-					(leftEyeG == 0)? GL_FALSE : GL_TRUE,
-					(leftEyeB == 0)? GL_FALSE : GL_TRUE, GL_TRUE);
-			glEnable(GL_COLOR_MATERIAL);
-			glColor3ub(leftEyeR, leftEyeG, leftEyeB);
-			glDisable(GL_COLOR_MATERIAL);
-		}
-		if(stereoMode == stereoShutter){
-			glDrawBuffer(GL_BACK_LEFT);
-		}
 		glRotatef(atan(eyeDistance / 2 / focalDistance) * 180.0 / M_PI, 0, 1,
 				0);
 		glTranslatef(eyeDistance / 2, 0, 0);
@@ -374,19 +379,21 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	if(stereoMode != stereoOff){
 		glCullFace(GL_BACK);
 		glLoadIdentity();
+        }
 
-		if(stereoMode == stereoAnaglyph){
-			glColorMask((rightEyeR == 0)? GL_FALSE : GL_TRUE,
-					(rightEyeG == 0)? GL_FALSE : GL_TRUE,
-					(rightEyeB == 0)? GL_FALSE : GL_TRUE, GL_TRUE);
-			glEnable(GL_COLOR_MATERIAL);
-			glColor3ub(rightEyeR, rightEyeG, rightEyeB);
-			glDisable(GL_COLOR_MATERIAL);
-		}
-		if(stereoMode == stereoShutter){
-			glDrawBuffer(GL_BACK_RIGHT);
-		}
+	if(stereoMode == stereoAnaglyph){
+		glColorMask((rightEyeR == 0)? GL_FALSE : GL_TRUE,
+				(rightEyeG == 0)? GL_FALSE : GL_TRUE,
+				(rightEyeB == 0)? GL_FALSE : GL_TRUE, GL_TRUE);
+		glEnable(GL_COLOR_MATERIAL);
+		glColor3ub(rightEyeR, rightEyeG, rightEyeB);
+		glDisable(GL_COLOR_MATERIAL);
+	}
+	if(stereoMode == stereoShutter){
+		glDrawBuffer(GL_BACK_RIGHT);
+	}
 
+	if(stereoMode != stereoOff){
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glRotatef(-atan(eyeDistance / 2 / focalDistance) * 180.0 / M_PI, 0, 1,
 				0);
@@ -499,33 +506,33 @@ void OpenGLCanvas::OnMouseEvent(wxMouseEvent& event)
 	if(event.Dragging() && event.RightIsDown()){
 		switch(rotationMode){
 		case rotateTrackball:
-			{
-				const double r = (double) ((w < h)? w : h) / 2.2;
-				rotmat = AffineTransformMatrix::RotateTrackball(
-						(double) (x - w / 2), (double) (h / 2 - y),
-						(double) (event.m_x - w / 2),
-						(double) (h / 2 - event.m_y), r) * rotmat;
-				break;
-			}
+		{
+			const double r = (double) ((w < h)? w : h) / 2.2;
+			rotmat = AffineTransformMatrix::RotateTrackball(
+					(double) (x - w / 2), (double) (h / 2 - y),
+					(double) (event.m_x - w / 2), (double) (h / 2 - event.m_y),
+					r) * rotmat;
+			break;
+		}
 		case rotateInterwoven:
-			{
-				rotmat = AffineTransformMatrix::RotateXY(event.m_x - x,
-						event.m_y - y, 0.5) * rotmat;
-				break;
-			}
+		{
+			rotmat = AffineTransformMatrix::RotateXY(event.m_x - x,
+					event.m_y - y, 0.5) * rotmat;
+			break;
+		}
 		case rotateTurntable:
-			{
-				rotmat = AffineTransformMatrix::RotateAroundVector(
-						Vector3(1, 0, 0), -M_PI / 2);
-				turntableX += (double) (event.m_x - x) / 100;
-				turntableY += (double) (event.m_y - y) / 100;
-				rotmat = AffineTransformMatrix::RotateAroundVector(
-						Vector3(1, 0, 0), turntableY) * rotmat;
-				rotmat = rotmat
-						* AffineTransformMatrix::RotateAroundVector(
-								Vector3(0, 0, 1), turntableX);
-				break;
-			}
+		{
+			rotmat = AffineTransformMatrix::RotateAroundVector(Vector3(1, 0, 0),
+					-M_PI / 2);
+			turntableX += (double) (event.m_x - x) / 100;
+			turntableY += (double) (event.m_y - y) / 100;
+			rotmat = AffineTransformMatrix::RotateAroundVector(Vector3(1, 0, 0),
+					turntableY) * rotmat;
+			rotmat = rotmat
+					* AffineTransformMatrix::RotateAroundVector(
+							Vector3(0, 0, 1), turntableX);
+			break;
+		}
 		}
 		x = event.m_x;
 		y = event.m_y;

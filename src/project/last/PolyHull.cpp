@@ -26,11 +26,33 @@
 
 #include "PolyHull.h"
 
+PolyHull::Level::Level()
+{
+
+}
+
 PolyHull::PolyHull()
 {
+	Level temp;
+
+	temp.AddVector(-0.04, 0, 0.12);
+	temp.AddVector(0.0, 0, 0.11);
+	temp.AddVector(0.1, 0, 0.003);
+	temp.AddVector(0.15, 0, 0.0);
+	temp.AddVector(0.1, 0.0, 0.2);
+	temp.Normalize();
+	temp.Calculate();
+
+	levels.push_back(temp);
 }
 
 PolyHull::~PolyHull()
 {
 }
 
+void PolyHull::Paint(void) const
+{
+	for(std::vector <Level>::const_iterator level = levels.begin();
+			level != levels.end(); ++level)
+		level->Paint();
+}

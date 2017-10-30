@@ -34,36 +34,44 @@
  *
  * Upon calling Setup with a FootParameters object, the parameters of bones and skin are recalculated.
  *
- * Tibia
- * Fibula
- * Talus
- * Talus2
- * Calcaneus
- * Cuboideum
- * Naviculare
- * Cuneiforme1
- * Cuneiforme2
- * Cuneiforme3
- * Metatarsalis1
- * Metatarsalis2
- * Metatarsalis3
- * Metatarsalis4
- * Metatarsalis5
- * PhalanxI1
- * PhalanxI2
- * PhalanxI3
- * PhalanxI4
- * PhalanxI5
- * PhalanxII1
- * PhalanxII2
- * PhalanxII3
- * PhalanxII4
- * PhalanxII5
- * PhalanxIII1
- * PhalanxIII2
- * PhalanxIII3
- * PhalanxIII4
+ *\dot
+ * digraph classes {
+ *     rankdir = LR
  *
+ *	 node [fontname=Helvetica, fontsize=10];
+ *
+ *   Tibia -> Talus
+ *   Tibia -> Fibula
+ *   Talus -> Cuboideum
+ *   Talus -> Naviculare
+ *   Talus -> Calcaneus
+ *   Talus -> Talus2
+ *   Naviculare -> Cuneiforme3
+ *   Naviculare -> Cuneiforme2
+ *   Naviculare -> Cuneiforme1
+ *   Cuboideum -> Metatarsalis1
+ *   Cuboideum -> Metatarsalis2
+ *   Cuneiforme3 -> Metatarsalis3
+ *   Cuneiforme2 -> Metatarsalis4
+ *   Cuneiforme1 -> Metatarsalis5
+ *   Metatarsalis1 -> PhalanxI1
+ *   Metatarsalis2 -> PhalanxI2
+ *   Metatarsalis3 -> PhalanxI3
+ *   Metatarsalis4 -> PhalanxI4
+ *   Metatarsalis5 -> PhalanxI5
+ *   PhalanxI1 -> PhalanxII1
+ *   PhalanxI2 -> PhalanxII2
+ *   PhalanxI3 -> PhalanxII3
+ *   PhalanxI4 -> PhalanxII4
+ *   PhalanxI5 -> PhalanxII5
+ *   PhalanxII1 -> PhalanxIII1
+ *   PhalanxII2 -> PhalanxIII2
+ *   PhalanxII3 -> PhalanxIII3
+ *   PhalanxII4 -> PhalanxIII4
+ * }
+ * \enddot
+ *
+ * (Talus2 is a extra bone-element to get the form of the Talus right.)
  */
 
 #include "Bone.h"
@@ -79,7 +87,8 @@ class Foot {
 public:
 	Foot();
 	virtual ~Foot();
-	void Render(void) const;
+
+	void Paint(bool mirror = false) const;
 
 	unsigned int GetBoneCount(void) const;
 	bool LoadModel(wxTextInputStream* stream);
@@ -103,7 +112,12 @@ private:
 	void Update(void);
 
 public:
-	double L, W, H, A;
+	bool defined; ///< Flag that this foot is defined. If it is not, use the other one.
+
+	double length;
+	double width;
+	double H;
+	double A;
 
 private:
 	Bone* Tibia; /// Schienbein

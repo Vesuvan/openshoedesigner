@@ -94,6 +94,42 @@ void Polynom::Set4(double r0, double v0, double r1, double v1, double r2,
 			+ ((-r2 + r1) * T15 + (T12 - T5) * r3 - T39 + T40) * v0) / T26;
 }
 
+void Polynom::Set4(double r0, double v0, double dv0, double r1, double v1,
+		double dv1)
+{
+	const double T3 = r0 * r0;
+	const double T4 = r1 * r1;
+	const double T2 = r1 * T4;
+	const double T5 = r0 * T3;
+	const double T6 = -3 * r0 * T4;
+	const double T7 = 3 * T3 * r1;
+	const double T8 = T2 + T6 + T7 - T5;
+	const double T9 = 3 * r1;
+	const double T10 = 3 * r0;
+	const double T11 = -dv1 + (-2 * dv0);
+	const double T12 = -dv1 + dv0;
+	const double T13 = 2 * dv1 + dv0;
+	c0 = ((T7 - T5) * v1 + (T2 + T6) * v0 + (-dv0 * r0 * T2) + T12 * T3 * T4
+			+ dv1 * T5 * r1) / T8;
+	c1 = ((-6 * r0 * r1 * v1) + 6 * r0 * r1 * v0 + dv0 * T2 + T13 * r0 * T4
+			+ T11 * T3 * r1 + (-dv1 * T5)) / T8;
+	c2 = ((T9 + T10) * v1 + (-T9 - T10) * v0 + T11 * T4 + T12 * r0 * r1
+			+ T13 * T3) / T8;
+	c3 = ((-2 * v1) + 2 * v0 + (dv1 + dv0) * r1 + (-dv1 - dv0) * r0) / T8;
+}
+
+void Polynom::Set3(double r0, double v0, double dv0, double r1, double v1)
+{
+	const double T2 = r1 * r1;
+	const double T3 = r0 * r0;
+	const double T4 = -2 * r0 * r1;
+	const double T5 = T2 + T4 + T3;
+	c0 = (T3 * v1 + (T2 + T4) * v0 + (-dv0 * r0 * T2) + dv0 * T3 * r1) / T5;
+	c1 = ((-2 * r0 * v1) + 2 * r0 * v0 + dv0 * T2 + (-dv0 * T3)) / T5;
+	c2 = (v1 - v0 + (-dv0 * r1) + dv0 * r0) / T5;
+	c3 = 0.0;
+}
+
 void Polynom::Set3(double r0, double v0, double r1, double v1, double r2,
 		double v2)
 {
@@ -117,6 +153,14 @@ void Polynom::Set2(double r0, double v0, double r1, double v1)
 	const double T2 = r1 - r0;
 	c0 = ((-r0 * v1) + r1 * v0) / T2;
 	c1 = (v1 - v0) / T2;
+	c2 = 0.0;
+	c3 = 0.0;
+}
+
+void Polynom::Set2(double r0, double v0, double dv0)
+{
+	c0 = v0 + (-dv0 * r0);
+	c1 = dv0;
 	c2 = 0.0;
 	c3 = 0.0;
 }

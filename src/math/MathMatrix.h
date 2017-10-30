@@ -28,7 +28,7 @@
 #define MATHMATRIX_H_
 
 /*!\class MathMatrix
- * \brief Additional mathematical function for MatlabMatrix
+ * \brief Additional mathematical function for MatlabMatrix.
  *
  */
 
@@ -46,13 +46,13 @@ public:
 	MathMatrix();
 	virtual ~MathMatrix();
 
-	double Min(void) const;
-	double Max(void) const;
-	double MaxAbs(void) const;
+	double Min(void) const; ///< Minimum value of all elemts of the matrix
+	double Max(void) const; ///< Maximum value of all elements in the matrix
+	double MaxAbs(void) const; ///< Maximum absolue value of all elements in the matrix
 
-	void AlignAtZero(void);
-	void Normalize(double max = 1.0);
-	void Normalize(double min, double max);
+	void AlignAtZero(void); ///< Shift the offset of the values in the matrix to align the smallest element at zero
+	void Normalize(double max = 1.0); ///< Rescale the matrix to the value of max as the maximum value
+	void Normalize(double min, double max); ///< Normalize the values to be exactly between min and max
 
 	double Interp1(const double x) const;
 

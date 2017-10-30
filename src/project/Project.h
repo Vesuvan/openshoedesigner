@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Project.bow
-// Purpose            : 
+// Name               : Project.h
+// Purpose            : Project data
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
@@ -42,6 +42,9 @@
  * Here it runs off into various generators.
  *
  * - Basic generator
+ * - Generator for classic construction
+ * - Generator for cemented shoes
+ * - Generator for injection molded shoes
  * - Dutch clog generator
  *
  * This process is started by calling UpdateFootPosition() followed by UpdateAndGenerate().
@@ -49,20 +52,35 @@
  *
  */
 
-#include "foot/Foot.h"
 #include "Shoe.h"
+#include "foot/Foot.h"
+#include "last/Last.h"
+
 #include "pattern/Pattern.h"
 
 #include "../3D/Volume.h"
 #include "../3D/Polygon3.h"
-#include "last/Spline3.h"
+#include "last/PolyHull.h"
 
-class Project {
-	friend class ProjectView;
+#include <wx/docview.h>
+
+#if wxUSE_STD_IOSTREAM
+typedef wxSTD istream DocumentIstream;
+typedef wxSTD ostream DocumentOstream;
+#else // !wxUSE_STD_IOSTREAM
+typedef wxInputStream DocumentIstream;
+typedef wxOutputStream DocumentOstream;
+#endif // wxUSE_STD_IOSTREAM/!wxUSE_STD_IOSTREAM
+
+class Project:public wxDocument {
+//	friend class ProjectView;
 public:
 
 	enum Generator {
-		Basic = 0, //!< Standard generator: Generates last, insole, sole, upper pattern and cutout
+		Experimental, //!< Default generator for development of algorithms
+		Welted, //!< Welt sewn shoes: Generates last, insole, sole, upper pattern and cutout
+		Cemented, //!< for cemented soles (simple, glued-together shoes)
+		Molded, //!< for industrial shoes, where the sole is injection-molded to the upper
 		Dutch //!< Generator for dutch wooden clogs: Generates last, insole and clog
 	};
 
@@ -70,12 +88,12 @@ public:
 	virtual ~Project();
 
 	void Reset(void);
+
+	DocumentOstream& SaveObject(DocumentOstream& ostream);
+	DocumentIstream& LoadObject(DocumentIstream& istream);
+
 	bool UpdateFootPosition(void);
 	void UpdateAndGenerate(void);
-
-	// Get the parts of the model
-	Foot* GetFoot(void);
-	Shoe* GetShoe(void);
 
 	// Setup model:
 	void AddFootToGrid(wxGrid* gridLength, wxGrid* gridDiameter,
@@ -89,22 +107,29 @@ public:
 
 public:
 
-	Generator generator;
-	Spline3 test;
-private:
-
-	Foot footmodel;
-	Volume foot;
-
-	Volume last;
 	Shoe shoe;
-	Volume sole;
+
+	Foot footL;
+	Foot footR;
+	Last lastL;
+	Last lastR;
+
 	Pattern pattern;
+
+	Generator generator;
+	PolyHull test;
+
+public:
+
+	Volume footvol;
+	Volume lastvol;
+	Volume sole;
 
 	OrientedMatrix xray;
 	OrientedMatrix heightfield;
 	Polygon3 bow;
 
+DECLARE_DYNAMIC_CLASS (Project);
 };
 
 #endif /* PROJECT_H_ */

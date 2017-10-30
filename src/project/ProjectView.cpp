@@ -26,49 +26,49 @@
 
 #include "ProjectView.h"
 
+#include "../main.h"
+IMPLEMENT_DYNAMIC_CLASS(ProjectView, wxView)
+
 ProjectView::ProjectView()
+		: wxView()
 {
-	project = NULL;
-	floorLevel = 0.0;
+	m_frame = NULL;
+
+	side = Both;
+	showBackground = true;
 	showFootScan = false;
 	showFootModel = false;
 	showLastScan = false;
 	showLast = false;
-
 	showBones = false;
 	showInsole = false;
 	showSole = false;
 	showUpper = false;
 	showCutaway = false;
 	showFloor = false;
-	
-	BackgroundImage temp;
-	temp.LoadFile(_T("blender/images/Skel_right.jpg"), wxBITMAP_TYPE_JPEG);
-//	background.push_back(temp);
+	floorLevel = 0.0;
 }
 
 ProjectView::~ProjectView()
 {
 }
 
-void ProjectView::SetProject(Project* const project)
+bool ProjectView::OnCreate(wxDocument* doc, long flags)
 {
-	this->project = project;
-}
+	if(!wxView::OnCreate(doc, flags)) return false;
+	wxFrame* frame = wxGetApp().CreateChildFrame(this, mainframe);
+	wxASSERT(frame == GetFrame());
 
-void ProjectView::PaintBackground(void) const
-{
-	for(std::vector <BackgroundImage>::const_iterator image =
-			background.begin(); image != background.end(); ++image)
-		image->Paint();
+	BackgroundImage temp;
+	temp.LoadFile(_T("blender/images/Skel_right.jpg"), wxBITMAP_TYPE_JPEG);
+	background.push_back(temp);
+
+	frame->Show();
+	return true;
 }
 
 void ProjectView::Paint(void) const
 {
-	if(project == NULL) return;
-
-	project->test.Paint();
-
 	if(showBones) PaintBones();
 	if(showInsole) PaintInsole();
 	if(showSole) PaintSole();
@@ -78,18 +78,32 @@ void ProjectView::Paint(void) const
 	if(showLast) PaintLast();
 }
 
+void ProjectView::PaintBackground(void) const
+{
+	if(!showBackground) return;
+	for(std::vector <BackgroundImage>::const_iterator image =
+			background.begin(); image != background.end(); ++image)
+		image->Paint();
+}
+
 void ProjectView::PaintBones(void) const
 {
-	project->footmodel.Render();
+	Project* project = wxStaticCast(this->GetDocument(), Project);
+	project->footL.Paint();
 }
 
 void ProjectView::PaintLast(void) const
 {
-	project->last.Paint();
+	Project* project = wxStaticCast(this->GetDocument(), Project);
+
+	project->lastvol.Paint();
+	project->lastvol.PaintSurface();
 }
 
 void ProjectView::PaintInsole(void) const
 {
+	Project* project = wxStaticCast(this->GetDocument(), Project);
+
 	project->bow.Paint();
 
 //	glColor3f(0.0, 0.75, 0.0);
@@ -99,7 +113,7 @@ void ProjectView::PaintInsole(void) const
 //		temp.Normalize();
 //		glNormal3f(temp.x, temp.y, temp.z);
 //		temp = temp * Vector3(0, -1, 0);
-//		temp = last.GetSurface(bow.elements[i], temp);
+//		temp = lastvol.GetSurface(bow.elements[i], temp);
 //
 //		glVertex3f(bow.elements[i].x, bow.elements[i].y, bow.elements[i].z);
 //		glVertex3f(bow.elements[i].x + temp.x, bow.elements[i].y + temp.y,
@@ -111,6 +125,8 @@ void ProjectView::PaintInsole(void) const
 
 void ProjectView::PaintSole(void) const
 {
+	Project* project = wxStaticCast(this->GetDocument(), Project);
+
 	project->sole.Paint();
 	project->xray.Paint();
 }
@@ -136,3 +152,22 @@ void ProjectView::PaintFloor(void) const
 	glEnd();
 }
 
+void ProjectView::OnDraw(wxDC* dc)
+{
+}
+
+void ProjectView::OnUpdate(wxView* sender, wxObject* hint)
+{
+}
+
+bool ProjectView::OnClose(bool deleteWindow)
+{
+	if(!wxView::OnClose(deleteWindow)) return false;
+	Activate(false);
+//	GetDocument()->DeleteContents();
+	if(deleteWindow){
+		GetFrame()->Destroy();
+		SetFrame(NULL);
+	}
+	return true;
+}

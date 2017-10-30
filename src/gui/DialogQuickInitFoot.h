@@ -34,7 +34,7 @@
  */
 
 #include "gui.h"
-#include "MathParser.h"
+#include "../math/MathParser.h"
 
 class DialogQuickInitFoot:public GUIDialogQuickInitFoot {
 public:

@@ -1,0 +1,140 @@
+/** \defgroup document Project data
+ 
+This describes the parts that make up the data.
+ 
+\dot
+  digraph classes {
+	node [shape=record, fontname=Helvetica, fontsize=10];
+    pvi [ label="Project View" URL="\ref ProjectView"];
+    pro [ label="Project" URL="\ref Project"];
+    sho [ label="Shoe" URL="\ref Shoe"];
+    bim [ label="Background Image" URL="\ref BackgroundImage"];
+    fot [ label="Foot" URL="\ref Foot"];
+    las [ label="Last" URL="\ref Last"];
+    pat [ label="Pattern" URL="\ref Pattern"];
+    fla [ label="Flattening" URL="\ref Flattening"];
+    bon [ label="Bone" URL="\ref Bone"];
+    phu [ label="Poly Hull" URL="\ref PolyHull"];
+    pno [ label="Polynom" URL="\ref Polynom"];
+    spl [ label="Spline" URL="\ref Spline"];
+   	sol [ label="Sole" URL="\ref Sole"];
+   	ins [ label="Insole" URL="\ref Insole"];
+   	
+   	
+   	pvi -> pro [style=dashed constraint=false];
+	pro -> las
+	pro -> fot
+	pro -> sho
+	pro -> sol
+	pro -> ins
+	sho -> pat
+    pat -> fla
+    fot -> bon
+    
+    las -> pno
+    las -> phu
+    las -> spl
+    
+    pvi -> bim
+  }
+  \enddot
+
+  The Shoe uses data from the Foot 
+	
+	- Foot length
+	- Ankle angle offset
+	
+  to calculate the parameters of the Shoe
+	
+	- Heel height
+	- Ball height or toe height
+	- Toe angle
+	- Ankle angle
+	 
+  The Foot is transformed, rendered and projected into the Last.
+	
+  The Pattern is designed / projected onto the Last. The Flattening is calculated.
+  A Sole is derived from the Last. From Foot and Sole the Insole is calculated.
+  
+  All settings are dependend on the construction method.
+
+  Default way of calculating the shoe:
+  \dot
+  digraph classes {
+    rankdir = LR
+	node [shape=record, fontname=Helvetica, fontsize=10];
+    sho [ label="Shoe" URL="\ref Shoe"];
+    fot [ label="Foot" URL="\ref Foot"];
+    las [ label="Last" URL="\ref Last"];
+    pat [ label="Pattern" URL="\ref Pattern"];
+    fla [ label="Flattening" URL="\ref Flattening"];
+    sol [ label="Sole" URL="\ref Sole"];
+    ins [ label="Insole" URL="\ref Insole"];
+
+	sho -> fot [style=dashed ]
+	sho -> pat [style=dashed ]
+	fot -> las
+	las -> sol
+	las -> fla
+	pat -> fla
+	sol -> ins
+	las -> ins
+   	
+  }
+  \enddot
+
+  If a scan of the Last is the starting point:
+  \dot
+  digraph classes {
+    rankdir = LR
+	node [shape=record, fontname=Helvetica, fontsize=10];
+    sho [ label="Shoe" URL="\ref Shoe"];
+    fot [ label="Foot" URL="\ref Foot"];
+    las [ label="Last" URL="\ref Last"];
+    pat [ label="Pattern" URL="\ref Pattern"];
+    fla [ label="Flattening" URL="\ref Flattening"];
+    sol [ label="Sole" URL="\ref Sole"];
+    ins [ label="Insole" URL="\ref Insole"];
+
+	sho -> pat [style=dashed ]
+	las -> sho [style=dashed ]
+	las -> sol
+	las -> fla
+	pat -> fla
+	sol -> ins
+	las -> ins
+   	
+  }
+  \enddot  
+   
+   
+  If a modelled sole is on stock this process is followed:
+  \dot
+  digraph classes {
+    rankdir = LR
+	node [shape=record, fontname=Helvetica, fontsize=10];
+    sho [ label="Shoe" URL="\ref Shoe"];
+    fot [ label="Foot" URL="\ref Foot"];
+    las [ label="Last" URL="\ref Last"];
+    pat [ label="Pattern" URL="\ref Pattern"];
+    fla [ label="Flattening" URL="\ref Flattening"];
+    sol [ label="Sole" URL="\ref Sole"];
+    ins [ label="Insole" URL="\ref Insole"];
+
+	sho -> pat [style=dashed ]
+	fot -> sho [style=dashed ]
+	sol -> fot
+	fot -> las
+	las -> fla
+	pat -> fla
+	sol -> ins
+	las -> ins
+   	
+  }
+  \enddot  
+   
+  Reconstruction of Pattern from disassembled shoes is not supported.
+  In this case axis-parallel photos from overy side are recommended
+  for remodelling (via BackgroundImage). 
+   
+**/

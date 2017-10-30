@@ -47,13 +47,13 @@
 
 #include "LastGenerationThread.h"
 
-#include <wx/help.h>
 #include <wx/intl.h>
 #include <wx/config.h>
 
 class FrameMain:public GUIFrameMain {
 public:
-	FrameMain(wxWindow* parent, wxLocale* locale, wxConfig* config);
+	FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
+			wxDocParentFrame* parent);
 	virtual ~FrameMain();
 
 	bool TransferDataToWindow();
@@ -65,36 +65,33 @@ public:
 	void UpdateProject(wxCommandEvent& event);
 	void LastCalculationDone(wxCommandEvent& event);
 
-	virtual void OnLoadFootModel(wxCommandEvent& event);
-	virtual void OnSaveFootModel(wxCommandEvent& event);
-	virtual void OnLoadShoe(wxCommandEvent& event);
-	virtual void OnSaveShoe(wxCommandEvent& event);
-	virtual void OnQuit(wxCommandEvent& event);
-	virtual void OnInitializeFootModel(wxCommandEvent& event);
-	virtual void OnSetupFoot(wxCommandEvent& event);
-	virtual void OnSetupShoe(wxCommandEvent& event);
-	virtual void OnEditWalkCycle(wxCommandEvent& event);
-	virtual void OnSaveLast(wxCommandEvent& event);
-	virtual void OnSaveInsole(wxCommandEvent& event);
-	virtual void OnSaveSole(wxCommandEvent& event);
-	virtual void OnSaveCutaway(wxCommandEvent& event);
-	virtual void OnPackZip(wxCommandEvent& event);
-	virtual void OnToggleStereo3D(wxCommandEvent& event);
-	virtual void OnViewChange(wxCommandEvent& event);
-	virtual void OnSetupStereo3D(wxCommandEvent& event);
-	virtual void OnSetupUnits(wxCommandEvent& event);
-	virtual void OnAbout(wxCommandEvent& event);
-	virtual void OnSelectLanguage(wxCommandEvent& event);
-	virtual void OnDebug(wxCommandEvent& event);
-	virtual void OnToolClicked(wxCommandEvent& event);
-	virtual void OnHelp(wxCommandEvent& event);
+	void OnInitializeFootModel(wxCommandEvent& event);
+	void OnLoadFootModel(wxCommandEvent& event);
+	void OnSaveFootModel(wxCommandEvent& event);
+	void OnSetupFoot(wxCommandEvent& event);
+	void OnSetupShoe(wxCommandEvent& event);
+	void OnConstructionSelection(wxCommandEvent& event);
+	void OnEditWalkCycle(wxCommandEvent& event);
+	void OnLoadShoe(wxCommandEvent& event);
+	void OnSaveShoe(wxCommandEvent& event);
+	void OnSaveLast(wxCommandEvent& event);
+	void OnSaveInsole(wxCommandEvent& event);
+	void OnSaveSole(wxCommandEvent& event);
+	void OnSaveCutaway(wxCommandEvent& event);
+	void OnPackZip(wxCommandEvent& event);
+	void OnToggleStereo3D(wxCommandEvent& event);
+	void OnViewChange(wxCommandEvent& event);
+	void OnSetupStereo3D(wxCommandEvent& event);
+	void OnSetupUnits(wxCommandEvent& event);
+	void OnSelectLanguage(wxCommandEvent& event);
+	void OnDebugParser(wxCommandEvent& event);
+
+	void OnToolClicked(wxCommandEvent& event);
 
 	wxConfig *config;
 	wxLocale *locale;
+
 	DisplaySettings settings;
-	wxHelpController* m_helpController;
-	Project project;
-	ProjectView projectview;
 
 	FrameShoe* dialogShoe;
 	FrameFoot* dialogFoot;

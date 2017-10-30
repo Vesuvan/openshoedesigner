@@ -26,7 +26,7 @@
 
 #include "Shoe.h"
 
-#include "../gui/MathParser.h"
+#include "../math/MathParser.h"
 
 Shoe::Shoe()
 {

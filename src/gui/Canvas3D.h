@@ -28,7 +28,7 @@
 #define CANVAS3D_H_
 
 /*!\class Canvas3D
- * \brief ...
+ * \brief Connection between display and ProjectView
  *
  * \note A copy-/ assignment-constructor is not needed because the pointers do not contain direct objects.
  */
@@ -41,11 +41,11 @@ class Canvas3D:public OpenGLCanvas {
 public:
 	Canvas3D(wxWindow* parent);
 	virtual ~Canvas3D();
-	void SetProjectView(ProjectView* const projectview);
+	void SetProjectView(const ProjectView* projectview);
 	void Render();
 
 private:
-	ProjectView *projectview;
+	const ProjectView* projectview;
 };
 
 #endif /* CANVAS3D_H_ */

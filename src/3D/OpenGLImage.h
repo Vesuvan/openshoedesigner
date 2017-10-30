@@ -29,13 +29,14 @@
 
 /*!\class OpenGLImage
  * \brief Displaying an image in 3D space.
+ * \ingroup View3D
  *
  * This class is derived from wxImage. Upon loading an image it creates a glTexture to
  * display the image in 3D space.
  *
  * This class is intended to display a reference image in the background while modelling.
  *
- * It adds an extra layer to the LoadFile function to facilitate to conversion to glTextures.
+ * It adds an extra layer to the LoadFile function to facilitate the conversion to glTextures.
  */
 
 #include <wx/image.h>
@@ -59,9 +60,12 @@ public:
 	bool LoadFile(wxInputStream& stream, const wxString& mimetype, int index =
 			-1);
 
+	void SetAlphaColor(unsigned char red, unsigned char green,
+			unsigned char blue);
+
 	void Paint(void) const;
-private:
-	static uint32_t NextPowerOfTwo(uint32_t v);
+protected:
+	void Update(void) const;
 	mutable bool refresh;
 	mutable GLfloat w;
 	mutable GLfloat h;
@@ -69,6 +73,8 @@ private:
 	mutable GLfloat tex_h;
 	mutable GLuint textureID;
 	mutable bool isOGLInit;
+private:
+	static uint32_t NextPowerOfTwo(uint32_t v);
 };
 
 #endif /* OPENGLIMAGE_H_ */

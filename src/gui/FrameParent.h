@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : BackgroundImage.h
+// Name               : FrameParent.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 30.01.2017
+// Created            : 26.10.2017
 // Copyright          : (C) 2017 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,33 +24,34 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef BACKGROUNDIMAGE_H_
-#define BACKGROUNDIMAGE_H_
-/*!\class BackgroundImage
- * \brief Image in 3D space for loading reference images
+#ifndef SRC_GUI_FRAMEPARENT_H_
+#define SRC_GUI_FRAMEPARENT_H_
+
+/*!\class FrameParent
+ * \brief Parentframe for the application
  *
+ * Parent frame for the SDI application.
  */
 
-#include "../3D/OpenGLImage.h"
+#include "../StdInclude.h"
+#include "../Config.h"
+#include <wx/docview.h>
+#include <wx/help.h>
 
-class BackgroundImage:public OpenGLImage {
+class FrameParent:public wxDocParentFrame {
 public:
-	enum Orientation {
-		Front, Back, Right, Left, Top, Bottom
-	};
+	FrameParent(wxDocManager *manager, wxFrame *parent, wxWindowID id,
+			const wxString& title);
+	virtual ~FrameParent();
 
-	BackgroundImage();
-	virtual ~BackgroundImage();
+public:
+	void OnAbout(wxCommandEvent& WXUNUSED(event));
+	void OnHelp(wxCommandEvent& WXUNUSED(event));
 
-	void Paint(void) const;
+private:
+	wxHelpController* m_helpController;
 
-	Orientation orientation;
-	bool showFront;
-	bool showBack;
-	GLfloat scale;
-	GLfloat centerx;
-	GLfloat centery;
-	GLfloat rotate;
+wxDECLARE_EVENT_TABLE();
 };
 
-#endif /* BACKGROUNDIMAGE_H_ */
+#endif /* SRC_GUI_FRAMEPARENT_H_ */

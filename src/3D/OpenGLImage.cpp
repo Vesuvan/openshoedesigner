@@ -120,7 +120,7 @@ bool OpenGLImage::LoadFile(wxInputStream& stream, const wxString& mimetype,
 	return temp;
 }
 
-void OpenGLImage::Paint(void) const
+void OpenGLImage::Update(void) const
 {
 	if(!isOGLInit){
 		glEnable(GL_TEXTURE_2D);
@@ -160,16 +160,74 @@ void OpenGLImage::Paint(void) const
 		temp.Rescale(w, h);
 		temp.Resize(wxSize(tex_w, tex_h), wxPoint(0, 0), 255, 255, 100);
 
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex_w, tex_h, 0, GL_RGB,
-		GL_UNSIGNED_BYTE, temp.GetData());
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glDisable(GL_TEXTURE_2D);
+		if(HasAlpha()){
 
+			unsigned char * rgba = new unsigned char[tex_w * tex_h * 4];
+			size_t i = 0;
+			for(size_t y = 0; y < tex_h; y++){
+				for(size_t x = 0; x < tex_w; x++){
+					rgba[i++] = GetRed(x, y);
+					rgba[i++] = GetGreen(x, y);
+					rgba[i++] = GetBlue(x, y);
+					rgba[i++] = GetAlpha(x, y);
+
+				}
+			}
+			glEnable( GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, textureID);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_w, tex_h, 0, GL_RGBA,
+			GL_UNSIGNED_BYTE, rgba);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glDisable( GL_TEXTURE_2D);
+			delete[] rgba;
+
+		}else{
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, textureID);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex_w, tex_h, 0, GL_RGB,
+			GL_UNSIGNED_BYTE, temp.GetData());
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glDisable(GL_TEXTURE_2D);
+		}
 		refresh = false;
 	}
+}
+
+void OpenGLImage::SetAlphaColor(unsigned char red, unsigned char green,
+		unsigned char blue)
+{
+	if(~HasAlpha()) InitAlpha();
+	for(size_t i = 0; i < GetWidth(); i++){
+		for(size_t j = 0; j < GetHeight(); j++){
+			if(GetRed(i, j) == red && GetGreen(i, j) == green
+					&& GetBlue(i, j) == blue){
+				SetAlpha(i, j, 0);
+			}else{
+				SetAlpha(i, j, 255);
+			}
+		}
+	}
+}
+
+uint32_t OpenGLImage::NextPowerOfTwo(uint32_t v)
+{
+	// Algorithm by Sean Anderson (September 2001) and William Lewis (February 1997).
+	// From http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+	v--;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	v |= v >> 16;
+	v++;
+	return v;
+}
+
+void OpenGLImage::Paint(void) const
+{
+	Update();
 
 	glColor3f(1, 1, 1);
 	glBindTexture(GL_TEXTURE_2D, textureID);
@@ -188,16 +246,3 @@ void OpenGLImage::Paint(void) const
 	glDisable(GL_TEXTURE_2D);
 }
 
-uint32_t OpenGLImage::NextPowerOfTwo(uint32_t v)
-{
-	// Algorithm by Sean Anderson (Sepember 2001) and William Lewis (February 1997).
-	// From http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
-	v--;
-	v |= v >> 1;
-	v |= v >> 2;
-	v |= v >> 4;
-	v |= v >> 8;
-	v |= v >> 16;
-	v++;
-	return v;
-}

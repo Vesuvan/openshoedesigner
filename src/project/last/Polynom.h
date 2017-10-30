@@ -32,6 +32,8 @@
  *
  * This class contains a polynom with an order of 4. This polynom is intended for Spline3
  * interpolation. The setting functions support a number of one to four points.
+ *
+ * All formulas are calculated with the AXIOM computer algebra system.
  */
 
 class Polynom {
@@ -46,9 +48,14 @@ public:
 
 	void Set4(double r0, double v0, double r1, double v1, double r2, double v2,
 			double r3, double v3);
+	void Set4(double r0, double v0, double dv0, double r1, double v1,
+			double dv1);
 	void Set3(double r0, double v0, double r1, double v1, double r2, double v2);
+	void Set3(double r0, double v0, double dv0, double r1, double v1);
 	void Set2(double r0, double v0, double r1, double v1);
+	void Set2(double r0, double v0, double dv0);
 	void Set1(double r0, double v0);
+
 	Polynom Derive() const;
 	Polynom Derive2() const;
 	Polynom Derive3() const;

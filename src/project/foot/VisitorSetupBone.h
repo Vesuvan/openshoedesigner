@@ -31,12 +31,12 @@
 #include "Bone.h"
 
 /*!\class VisitorSetupBone
- * \brief Setup all bones
+ * \brief Visitor Pattern: setup all bones
  *
- * eValuate the formulas and set up the bones.
+ * Evaluate the parameter formulas of the bones and setup the angles and length and skin-thicknesses.
  */
 
-#include "../../gui/MathParser.h"
+#include "../../math/MathParser.h"
 
 class VisitorSetupBone:public LinkageVisitor {
 public:

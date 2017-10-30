@@ -37,7 +37,7 @@
  *    1 rpm = 1/60 1/s, factor = 1/60
  *
  *
- * Powers:
+ *    Powers:
  *    'y',-24
  *    'z',-21
  *    'a',-18
@@ -59,6 +59,9 @@
  *    'E',18
  *    'Z',21
  *    'Y',24
+ *
+ *
+ *
  *
  * HINT: The available types for the units are maintained in the DialogSetupUnits.
  */
@@ -98,9 +101,9 @@ public:
 	double FromSI(const double value);
 	double ToSI(const double value);
 
-	wxString TextFromSI(const double value, unsigned int digitsAfterComma = 3);
+	wxString TextFromSI(const double value, int digitsAfterComma = -1);
 	wxString TextFromSIWithUnit(const double value,
-			unsigned int digitsAfterComma = 3);
+			 int digitsAfterComma = -1);
 
 	double SIFromString(const wxString &text, bool useEvaluator = true);
 
@@ -166,6 +169,7 @@ private:
 	int mol; ///< Power of Molar Mass
 	int cd; ///< Power of Brightness
 	int cur; ///< Power of Currency
+
 };
 
 #endif /* UNIT_H_ */

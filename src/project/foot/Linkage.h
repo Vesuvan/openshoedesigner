@@ -56,6 +56,7 @@ public:
 	void Paint(void);
 	virtual void Render(void)=0;
 
+	//TODO: Move everything OpenGL into the Bone class.
 	AffineTransformMatrix matrix;
 	Vector3 color;
 

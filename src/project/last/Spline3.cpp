@@ -26,11 +26,14 @@
 #include "Spline3.h"
 
 #include <GL/gl.h>
+#include <math.h>
 
 Spline3::Spline3()
 {
 	color.Set(1.0, 1.0, 1.0);
 	closed = false;
+	normalized = true;
+	symmetric = false;
 	pointsize = 5;
 	length = 1.0;
 }
@@ -52,19 +55,54 @@ void Spline3::AddVector(const Vector3& vector, bool corner)
 	points.push_back(temp);
 }
 
-void Spline3::Close(bool close)
+void Spline3::AddVector(float x, float y, float z, bool corner)
 {
-	closed = close;
+	Point temp;
+	temp.Set(x, y, z);
+	temp.corner = corner;
+	points.push_back(temp);
 }
 
-void Spline3::Calculate(bool symmetric)
+void Spline3::Close(bool close)
+{
+	this->closed = close;
+}
+
+void Spline3::Symmetric(bool symmetric)
+{
+	this->symmetric = symmetric;
+}
+
+void Spline3::Normalize(bool normalize)
+{
+	this->normalized = normalize;
+}
+
+void Spline3::Calculate(void)
 {
 	const size_t N = points.size();
 	if(N == 0) return;
 	points[0].r0 = 0.0;
+	if(N == 1){
+		points[0].length = 0.0;
+		points[0].px.Set1(points[0].r0, points[0].x);
+		points[0].py.Set1(points[0].r0, points[0].y);
+		points[0].pz.Set1(points[0].r0, points[0].z);
+		return;
+	}
 	for(size_t n = 0; n < N - 1; n++)
 		points[n].length = (points[n + 1] - points[n]).Abs();
-	if(N == 1) return;
+	points[N - 1].length = (points[0] - points[N - 1]).Abs();
+
+	if(normalized){
+		double L = 0.0;
+		for(size_t n = 0; n < N; n++)
+			L += points[n].length;
+		if(closed) L *= 2 * M_PI;
+		for(size_t n = 0; n < N; n++)
+			points[n].length /= L;
+	}
+
 	if(symmetric && N > 2){
 		for(size_t n = 0; n < ((N - 1) / 2); n++)
 			points[n + 1].r0 = points[n].r0 + points[n].length;
@@ -79,20 +117,26 @@ void Spline3::Calculate(bool symmetric)
 		points[0].px.Set2(points[0].r0, points[0].x, points[1].r0, points[1].x);
 		points[0].py.Set2(points[0].r0, points[0].y, points[1].r0, points[1].y);
 		points[0].pz.Set2(points[0].r0, points[0].z, points[1].r0, points[1].z);
-		if(symmetric){
-			points[1].px.Set2(points[0].r0 - points[1].length, points[1].x,
-					points[0].r0, points[0].x);
-			points[1].py.Set2(points[0].r0 - points[1].length, points[1].y,
-					points[0].r0, points[0].y);
-			points[1].pz.Set2(points[0].r0 - points[1].length, points[1].z,
-					points[0].r0, points[0].z);
+		if(closed){
+			if(symmetric){
+				points[1].px.Set2(points[0].r0 - points[1].length, points[1].x,
+						points[0].r0, points[0].x);
+				points[1].py.Set2(points[0].r0 - points[1].length, points[1].y,
+						points[0].r0, points[0].y);
+				points[1].pz.Set2(points[0].r0 - points[1].length, points[1].z,
+						points[0].r0, points[0].z);
+			}else{
+				points[1].px.Set2(points[1].r0, points[1].x,
+						points[1].r0 + points[1].length, points[0].x);
+				points[1].py.Set2(points[1].r0, points[1].y,
+						points[1].r0 + points[1].length, points[0].y);
+				points[1].pz.Set2(points[1].r0, points[1].z,
+						points[1].r0 + points[1].length, points[0].z);
+			}
 		}else{
-			points[1].px.Set2(points[1].r0, points[1].x,
-					points[1].r0 + points[1].length, points[0].x);
-			points[1].py.Set2(points[1].r0, points[1].y,
-					points[1].r0 + points[1].length, points[0].y);
-			points[1].pz.Set2(points[1].r0, points[1].z,
-					points[1].r0 + points[1].length, points[0].z);
+			points[1].px.Set1(points[1].r0, points[1].x);
+			points[1].py.Set1(points[1].r0, points[1].y);
+			points[1].pz.Set1(points[1].r0, points[1].z);
 		}
 		return;
 	}
@@ -103,115 +147,112 @@ void Spline3::Calculate(bool symmetric)
 //	}
 //	printf("\n");
 
-	size_t m0 = N - 3;
-	size_t m1 = N - 2;
-	size_t m2 = N - 1;
-	size_t m3 = 0;
-	signed char c = 0;
-	if(closed){
-		if(!points[m3].corner){
-			c++;
-			if(!points[m2].corner){
-				c++;
-				if(!points[m1].corner){
-					c++;
-				}
-			}
-		}
+//	for(size_t n = 0; n < N; n++){
+//		points[n].length = 1.0;
+//	}
+
+	{
+		const double L0 = points[N - 2].length;
+		const double L1 = points[N - 1].length;
+		const double L2 = points[0].length;
+		points[N - 1].dvx = (points[0].x - points[N - 2].x) / (L0 + L1);
+		points[N - 1].dvy = (points[0].y - points[N - 2].y) / (L0 + L1);
+		points[N - 1].dvz = (points[0].z - points[N - 2].z) / (L0 + L1);
+		points[0].dvx = (points[1].x - points[N - 1].x) / (L1 + L2);
+		points[0].dvy = (points[1].y - points[N - 1].y) / (L1 + L2);
+		points[0].dvz = (points[1].z - points[N - 1].z) / (L1 + L2);
 	}
+	for(size_t n = 1; n < (N - 1); n++){
+		const double L0 = points[n - 1].length;
+		const double L1 = points[n].length;
+		points[n].dvx = (points[n + 1].x - points[n - 1].x) / (L0 + L1);
+		points[n].dvy = (points[n + 1].y - points[n - 1].y) / (L0 + L1);
+		points[n].dvz = (points[n + 1].z - points[n - 1].z) / (L0 + L1);
+	}
+
 	for(size_t n = 0; n < N; n++){
-		switch(c){
-		case 0:
-			break;
-		case 1:
-			{
-				const double r2 = points[m2].r0;
-				const double r3 = r2 + points[m2].length;
-				points[m2].px.Set2(r2, points[m2].x, r3, points[m3].x);
-				points[m2].py.Set2(r2, points[m2].y, r3, points[m3].y);
-				points[m2].pz.Set2(r2, points[m2].z, r3, points[m3].z);
-				break;
-			}
-		case 2:
-			{
-				const double r2 = points[m2].r0;
-				const double r3 = r2 + points[m2].length;
-				points[m2].px.Set2(r2, points[m2].x, r3, points[m3].x);
-				points[m2].py.Set2(r2, points[m2].y, r3, points[m3].y);
-				points[m2].pz.Set2(r2, points[m2].z, r3, points[m3].z);
-				break;
-			}
-		case 3:
-			{
-				const double r2 = points[m2].r0;
-				const double r3 = r2 + points[m2].length;
-				points[m2].px.Set2(r2, points[m2].x, r3, points[m3].x);
-				points[m2].py.Set2(r2, points[m2].y, r3, points[m3].y);
-				points[m2].pz.Set2(r2, points[m2].z, r3, points[m3].z);
-				break;
-			}
-		case 4:
-			{
-				const double r2 = points[m2].r0;
-				const double r3 = r2 + points[m2].length;
-				points[m2].px.Set2(r2, points[m2].x, r3, points[m3].x);
-				points[m2].py.Set2(r2, points[m2].y, r3, points[m3].y);
-				points[m2].pz.Set2(r2, points[m2].z, r3, points[m3].z);
-				break;
-			}
-		}
+		const size_t n1 = (n + 1) % N;
+		const bool C0 = ((n == 0 || n == (N - 1)) && !closed)
+				|| points[n].corner;
+		const bool C1 = ((n1 == 0 || n1 == (N - 1)) && !closed)
+				|| points[n1].corner;
+		const double r0 = points[n].r0;
+		const double r1 = points[n].r0 + points[n].length;
 
-		if(points[m2].corner){
-			c = 1;
-		}else{
-			if(c < 4) c++;
+		if(C0 && C1){
+			points[n].px.Set2(r0, points[n].x, r1, points[n1].x);
+			points[n].py.Set2(r0, points[n].y, r1, points[n1].y);
+			points[n].pz.Set2(r0, points[n].z, r1, points[n1].z);
 		}
-		m0 = m1;
-		m1 = m2;
-		m2 = m3;
-		m3 = n;
+		if(C0 && !C1){
+			points[n].px.Set3(r1, points[n1].x, points[n1].dvx, r0,
+					points[n].x);
+			points[n].py.Set3(r1, points[n1].y, points[n1].dvy, r0,
+					points[n].y);
+			points[n].pz.Set3(r1, points[n1].z, points[n1].dvz, r0,
+					points[n].z);
+		}
+		if(!C0 && C1){
+			points[n].px.Set3(r0, points[n].x, points[n].dvx, r1, points[n1].x);
+			points[n].py.Set3(r0, points[n].y, points[n].dvy, r1, points[n1].y);
+			points[n].pz.Set3(r0, points[n].z, points[n].dvz, r1, points[n1].z);
+		}
+		if(!C0 && !C1){
+			points[n].px.Set4(r0, points[n].x, points[n].dvx, r1, points[n1].x,
+					points[n1].dvx);
+			points[n].py.Set4(r0, points[n].y, points[n].dvy, r1, points[n1].y,
+					points[n1].dvy);
+			points[n].pz.Set4(r0, points[n].z, points[n].dvz, r1, points[n1].z,
+					points[n1].dvz);
+		}
 	}
 }
 
-void Spline3::SetZeroAt(size_t pos)
+Vector3 Spline3::Evaluate(double r)
 {
-}
+	Vector3 temp;
+	const size_t N = points.size();
+	size_t m = 0;
+	if(symmetric) m = ((N -1)/ 2)+1;
+	for(size_t n=0;n<N;n++){
 
-void Spline3::SetZeroOnPlane(size_t afterPos, Vector3 normal)
-{
-}
 
-void Spline3::AddVector(float x, float y, float z, bool corner)
-{
-	Point temp;
-	temp.Set(x, y, z);
-	temp.corner = corner;
-	points.push_back(temp);
+	}
+	return temp;
 }
 
 void Spline3::Paint(void) const
 {
+	{
+		if(closed)
+			glBegin(GL_LINE_LOOP);
+		else
+			glBegin(GL_LINE_STRIP);
+		glNormal3f(0, 0, 1);
+		glColor3f(0.4, 0.4, 0.0);
+		size_t N = points.size();
+		for(size_t i = 0; i < N; i++){
+			glVertex3f(points[i].x, points[i].y, points[i].z);
+		}
+		glEnd();
+	}
+
 	if(closed)
 		glBegin(GL_LINE_LOOP);
 	else
 		glBegin(GL_LINE_STRIP);
 	glNormal3f(0, 0, 1);
-	glColor3f(0.4, 0.4, 0.4);
-	size_t N = points.size();
-	for(size_t i = 0; i < N; i++){
-		glVertex3f(points[i].x, points[i].y, points[i].z);
-	}
-	glEnd();
-
-	glBegin(GL_LINE_STRIP);
-	glNormal3f(0, 0, 1);
 	glColor3f(color.x, color.y, color.z);
-	N = 301;
-	float D = points[3].r0 - points[0].r0;
-	for(size_t i = 0; i < N; i++){
-		glVertex3f(points[0].px.Evaluate(D * i / N),
-				points[0].py.Evaluate(D * i / N),
-				points[0].pz.Evaluate(D * i / N));
+	const unsigned int Nd = 301;
+	const size_t N = points.size() - (closed? 0 : 1);
+	for(size_t n = 0; n < N; n++){
+		const float delta = points[n].length / (float) Nd;
+		float r = points[n].r0;
+		for(size_t i = 0; i < Nd; i++){
+			glVertex3f(points[n].px.Evaluate(r), points[n].py.Evaluate(r),
+					points[n].pz.Evaluate(r));
+			r += delta;
+		}
 	}
 	glEnd();
 }

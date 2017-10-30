@@ -33,11 +33,21 @@
  * ...
  */
 
+#include "Spline3.h"
+#include <vector>
+
 class PolyHull {
 public:
+
+	class Level:public Spline3 {
+	public:
+		Level();
+	};
+
 	PolyHull();
 	virtual ~PolyHull();
 
+	std::vector <Level> levels;
 
 	void Paint(void) const;
 };

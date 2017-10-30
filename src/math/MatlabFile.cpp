@@ -86,6 +86,7 @@ void MatlabFile::Close(void)
 
 void MatlabFile::SetVersion(Version version)
 {
+	if(this->version == version) return;
 	if(fhd != NULL) throw __FILE__ ": SetVersion: Cannot change version while file is open.";
 	this->version = version;
 }

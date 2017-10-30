@@ -28,7 +28,7 @@
 #define SHOE_H_
 
 /*!\class Shoe
- * \brief Parameters describing the shape of the last
+ * \brief Definition of a shoe
  *
  * Objects of this class keep a list of all the parameters describing
  * the bones. Furthermore the skin surrounding the bones is describes.

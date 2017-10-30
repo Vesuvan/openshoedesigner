@@ -29,8 +29,8 @@
 #include <GL/gl.h>
 #include <stdint.h>
 
-Canvas3D::Canvas3D(wxWindow* parent) :
-		OpenGLCanvas(parent)
+Canvas3D::Canvas3D(wxWindow* parent)
+		: OpenGLCanvas(parent)
 {
 	projectview = NULL;
 }
@@ -39,7 +39,7 @@ Canvas3D::~Canvas3D()
 {
 }
 
-void Canvas3D::SetProjectView(ProjectView* const projectview)
+void Canvas3D::SetProjectView(const ProjectView* projectview)
 {
 	this->projectview = projectview;
 }
@@ -49,6 +49,7 @@ void Canvas3D::Render()
 	if(projectview == NULL) return;
 
 	projectview->PaintBackground();
+
 	glClear( GL_DEPTH_BUFFER_BIT);
 
 	glBegin(GL_LINES);

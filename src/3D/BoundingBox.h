@@ -46,16 +46,17 @@ public:
 
 	// Member variables
 public:
-	Vector3 color;
-	float alpha;
-	float overlap;
-
-	bool displayBox;
-	bool displaySides;
-
 	double xmin, xmax;
 	double ymin, ymax;
 	double zmin, zmax;
+
+	bool displayBox; ///< Show a box (default: true)
+	bool displaySides; ///< Display the sides of the box as overlapping single colored planes. The colors are the 1st, 2nd and 3rd component of the color variable.
+
+	Vector3 color; ///< Color for displaying as box
+	float alpha; ///< Alphy value
+
+	float overlap; ///< Length of the overlap (absolute value)
 
 	// Methods
 public:
@@ -77,18 +78,17 @@ public:
 	//! Insert a single Triangle.
 	void Insert(const Triangle& tri);
 
-	/*!\brief Translate BoundingBox by matrix
+	/*!\brief Transform BoundingBox by matrix
 	 *
-	 * Only the translatory components are used.
 	 * @param matrix AffineTransformMatrix
 	 */
-	void Translate(const AffineTransformMatrix matrix);
+	void Transform(const AffineTransformMatrix matrix);
 
-	//! Check if the box is empty.
+	//! Check if the box is empty, i.e. nothing was inserted.
 	bool IsEmpty(void) const;
 
 	/*!\brief Check if the box has zero volume.
-	 * This function checks if all points inserted are the same point.
+	 * This function checks if the box has no thickness in any direction.
 	 * This is not the same as a check for IsEmpty.
 	 */
 	bool IsVolumeZero(void) const;

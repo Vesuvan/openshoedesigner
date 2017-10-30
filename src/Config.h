@@ -36,7 +36,8 @@
 
 #define _LASTGENERATOR_USEMULTITHREADING
 
-//#define _DEBUGMODE
+
+//	#define _DEBUGMODE
 
 // Components used in this project:
 #define _USE_3DPICKING

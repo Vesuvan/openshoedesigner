@@ -34,12 +34,12 @@ FrameFoot::FrameFoot(wxWindow* parent, Project* project) :
 {
 	this->project = project;
 
-	const Foot *foot = project->GetFoot();
+	const Foot *foot = &(project->footL);
 
 	m_textCtrlFootLength->SetValue(
-			wxString::Format(_T("%.1f cm"), foot->L * 100));
+			wxString::Format(_T("%.1f cm"), foot->length * 100));
 	m_textCtrlFootWidth->SetValue(
-			wxString::Format(_T("%.1f cm"), foot->W * 100));
+			wxString::Format(_T("%.1f cm"), foot->width * 100));
 	m_textCtrlHeelWidth->SetValue(
 			wxString::Format(_T("%.1f cm"), foot->H * 100));
 	m_textCtrlAnkleWidth->SetValue(
@@ -87,8 +87,8 @@ void FrameFoot::OnSetByShoeSize(wxCommandEvent& event)
 {
 	DialogQuickInitFoot dialog(this);
 	if(dialog.ShowModal() == wxID_OK){
-		Foot * foot = project->GetFoot();
-//		foot->L = dialog.
+		Foot * foot = &(project->footL);
+//		foot->length = dialog.
 	}
 
 }

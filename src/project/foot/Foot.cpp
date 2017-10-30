@@ -100,15 +100,15 @@ Foot::Foot()
 	PhalanxI3->AddChild(PhalanxII3);
 	PhalanxI4->AddChild(PhalanxII4);
 	PhalanxI5->AddChild(PhalanxII5);
-	
+
 	PhalanxII1->AddChild(PhalanxIII1);
 	PhalanxII2->AddChild(PhalanxIII2);
 	PhalanxII3->AddChild(PhalanxIII3);
 	PhalanxII4->AddChild(PhalanxIII4);
 
-	L = 28.67e-2;
-	W = 9.56e-2;
-	H = W - 2e-2;
+	length = 28.67e-2;
+	width = 9.56e-2;
+	H = width - 2e-2;
 	A = H - 1e-2;
 
 	InitBones();
@@ -121,7 +121,7 @@ Foot::~Foot()
 	delete Tibia;
 }
 
-void Foot::Render(void) const
+void Foot::Paint(bool mirror) const
 {
 	Tibia->Paint();
 }
@@ -177,8 +177,8 @@ void Foot::SetPosition(double heelheight, double toeAngle, double mixing)
 
 void Foot::SetSize(double L, double W, double H, double A)
 {
-	this->L = L;
-	this->W = W;
+	this->length = L;
+	this->width = W;
 	this->H = H;
 	this->A = A;
 }
@@ -226,8 +226,8 @@ void Foot::Update(void)
 {
 	// Run the VisitorSetupBone visitor to recalculate each single bone.
 	VisitorSetupBone set;
-	set.parser.SetVariable(_T("L"), L);
-	set.parser.SetVariable(_T("W"), W);
+	set.parser.SetVariable(_T("L"), length);
+	set.parser.SetVariable(_T("W"), width);
 	set.parser.SetVariable(_T("H"), H);
 	set.parser.SetVariable(_T("A"), A);
 	Tibia->Accept(set);

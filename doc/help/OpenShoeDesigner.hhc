@@ -1,0 +1,29 @@
+<ul>
+<li><object type="text/sitemap">
+	<param name="Name" value="Overview">
+	<param name="Local" value="index.html">
+</object></li>
+<li><object type="text/sitemap">
+	<param name="Name" value="Workflow">
+	<param name="Local" value="workflow.html">
+</object></li>
+<li><object type="text/sitemap">
+	<param name="Name" value="Shoemaking">
+	<param name="Local" value="shoemaking.html">
+</object></li>
+<li><object type="text/sitemap">
+	<param name="Name" value="Parts of a shoe">
+	<param name="Local" value="shoeparts.html">
+</object>
+<ul>
+<li><object type="text/sitemap"><param name="Name" value="Tip"><param name="Local" value="shoeparts.html"></object></li>
+<li><object type="text/sitemap"><param name="Name" value="Vamp"><param name="Local" value="shoeparts.html"></object></li>
+<li><object type="text/sitemap"><param name="Name" value="Quarters"><param name="Local" value="shoeparts.html"></object></li>
+<li><object type="text/sitemap"><param name="Name" value="Tongue"><param name="Local" value="shoeparts.html"></object></li>
+</ul>
+</li>
+<li><object type="text/sitemap">
+	<param name="Name" value="Examples">
+	<param name="Local" value="examples.html">
+</object></li>
+</ul>

@@ -27,8 +27,10 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-#include "gui/FrameMain.h"
 #include "StdInclude.h"
+#include "project/Project.h"
+#include "project/ProjectView.h"
+
 #include <wx/app.h>
 #include <wx/intl.h>
 #include <wx/config.h>
@@ -36,13 +38,12 @@
 class FrameMain;
 
 class OpenShoeDesigner:public wxApp {
-	// Constructor
 public:
 	OpenShoeDesigner();
 	virtual ~OpenShoeDesigner();
 	// Member variables
 public:
-	FrameMain* frame;
+//	FrameMain* frame;
 
 protected:
 	wxLocale locale;
@@ -51,7 +52,9 @@ protected:
 	// Methods
 public:
 	virtual bool OnInit();
-
+	virtual int OnExit();
+	wxFrame* CreateChildFrame(wxView* view, ProjectView::FrameType frametype);
+	wxDECLARE_NO_COPY_CLASS(OpenShoeDesigner);
 };
 DECLARE_APP(OpenShoeDesigner)
 

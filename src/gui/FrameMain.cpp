@@ -31,34 +31,60 @@
 #include "../3D/FileSTL.h"
 #include "../languages.h"
 //#include <wx/file.h>
+#include <wx/cmdproc.h>
 #include <wx/filedlg.h>
 #include <wx/filename.h>
 #include <wx/dir.h>
 
-FrameMain::FrameMain(wxWindow* parent, wxLocale* locale, wxConfig* config) :
-		GUIFrameMain(parent)
+FrameMain::FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
+		wxDocParentFrame* parent)
+		: GUIFrameMain(doc, view, parent)
 {
+	m_menuFile->Append(wxID_NEW);
+	m_menuFile->Append(wxID_OPEN);
+	m_menuFile->Append(wxID_REVERT_TO_SAVED);
+	wxMenu* m_menuRecent = new wxMenu();
+	m_menuFile->Append(
+			new wxMenuItem(m_menuFile, wxID_ANY, _("&Recently opened"),
+					wxEmptyString, wxITEM_NORMAL, m_menuRecent));
+	doc->GetDocumentManager()->FileHistoryAddFilesToMenu(m_menuRecent);
+	m_menuFile->Append(wxID_SAVE);
+	m_menuFile->Append(wxID_SAVEAS);
+	m_menuFile->AppendSeparator();
+	m_menuFile->Append(wxID_PRINT);
+	m_menuFile->Append(wxID_PREVIEW);
+	m_menuFile->Append(wxID_PRINT_SETUP, _("Print Setup..."));
+	m_menuFile->AppendSeparator();
+	m_menuFile->Append(wxID_CLOSE);
+	m_menuFile->Append(wxID_EXIT);
+
+	m_menuEdit->Append(wxID_UNDO);
+	m_menuEdit->Append(wxID_REDO);
+
+	m_menuHelp->AppendSeparator();
+	m_menuHelp->Append(wxID_HELP, _("&Help") + wxT("\tF1"));
+	m_menuHelp->Append(wxID_ABOUT);
+
+	m_canvas->SetProjectView(wxStaticCast(view, ProjectView));
+
 	this->config = config;
-	this->locale = locale;
+	doc->GetCommandProcessor()->SetEditMenu(m_menuEdit);
+	doc->GetCommandProcessor()->Initialize();
 	settings.GetConfigFrom(config);
-
-	projectview.SetProject(&project);
-	m_canvas->SetProjectView(&projectview);
 	settings.WriteToCanvas(m_canvas);
-
-	m_helpController = new wxHelpController;
-	m_helpController->Initialize(_T("doc/OpenShoeDesigner.hhp"));
 
 	thread = NULL;
 	updateVolume = false;
 
-	dialogShoe = new FrameShoe(this, &project);
-	dialogFoot = new FrameFoot(this, &project);
-	dialogWalkcycleSupport = new FrameWalkcycleSupport(this, &project);
+	Project* project = wxStaticCast(GetDocument(), Project);
+	dialogShoe = new FrameShoe(this, project);
+	dialogFoot = new FrameFoot(this, project);
+	dialogWalkcycleSupport = new FrameWalkcycleSupport(this, project);
 	dialogSetupStereo3D = new DialogSetupStereo3D(this, &settings);
 	dialogDebugParser = new FrameDebugParser(this);
 
 	TransferDataToWindow();
+
 	this->Connect(ID_REFRESH3DVIEW, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::RefreshMain));
 	this->Connect(ID_REFRESHMAINGUI, wxEVT_COMMAND_MENU_SELECTED,
@@ -69,6 +95,7 @@ FrameMain::FrameMain(wxWindow* parent, wxLocale* locale, wxConfig* config) :
 			wxCommandEventHandler(FrameMain::UpdateProject));
 	this->Connect(ID_THREADLASTDONE, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::LastCalculationDone));
+
 }
 
 FrameMain::~FrameMain()
@@ -88,10 +115,7 @@ FrameMain::~FrameMain()
 	this->Disconnect(ID_REFRESH3DVIEW, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::RefreshMain));
 
-	delete m_helpController;
-
 	settings.WriteConfigTo(config);
-	delete config; // config is written back on deletion of object
 }
 
 bool FrameMain::TransferDataToWindow()
@@ -105,26 +129,30 @@ bool FrameMain::TransferDataToWindow()
 
 	m_menuView->Check(ID_STEREO3D, m_canvas->stereoMode != stereoOff);
 
-	m_menuView->Check(ID_SHOWBONES, projectview.showBones);
-	m_menuView->Check(ID_SHOWLAST, projectview.showLast);
-	m_menuView->Check(ID_SHOWINSOLE, projectview.showInsole);
-	m_menuView->Check(ID_SHOWSOLE, projectview.showSole);
-	m_menuView->Check(ID_SHOWUPPER, projectview.showUpper);
-	m_menuView->Check(ID_SHOWCUTAWAY, projectview.showCutaway);
-	m_menuView->Check(ID_SHOWFLOOR, projectview.showFloor);
+	ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
+
+	m_menuView->Check(ID_SHOWBONES, projectview->showBones);
+	m_menuView->Check(ID_SHOWLAST, projectview->showLast);
+	m_menuView->Check(ID_SHOWINSOLE, projectview->showInsole);
+	m_menuView->Check(ID_SHOWSOLE, projectview->showSole);
+	m_menuView->Check(ID_SHOWUPPER, projectview->showUpper);
+	m_menuView->Check(ID_SHOWCUTAWAY, projectview->showCutaway);
+	m_menuView->Check(ID_SHOWFLOOR, projectview->showFloor);
 
 	return true;
 }
 
 bool FrameMain::TransferDataFromWindow()
 {
-	projectview.showBones = m_menuView->IsChecked(ID_SHOWBONES);
-	projectview.showLast = m_menuView->IsChecked(ID_SHOWLAST);
-	projectview.showInsole = m_menuView->IsChecked(ID_SHOWINSOLE);
-	projectview.showUpper = m_menuView->IsChecked(ID_SHOWUPPER);
-	projectview.showSole = m_menuView->IsChecked(ID_SHOWSOLE);
-	projectview.showCutaway = m_menuView->IsChecked(ID_SHOWCUTAWAY);
-	projectview.showFloor = m_menuView->IsChecked(ID_SHOWFLOOR);
+	ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
+
+	projectview->showBones = m_menuView->IsChecked(ID_SHOWBONES);
+	projectview->showLast = m_menuView->IsChecked(ID_SHOWLAST);
+	projectview->showInsole = m_menuView->IsChecked(ID_SHOWINSOLE);
+	projectview->showUpper = m_menuView->IsChecked(ID_SHOWUPPER);
+	projectview->showSole = m_menuView->IsChecked(ID_SHOWSOLE);
+	projectview->showCutaway = m_menuView->IsChecked(ID_SHOWCUTAWAY);
+	projectview->showFloor = m_menuView->IsChecked(ID_SHOWFLOOR);
 
 	return true;
 }
@@ -155,10 +183,11 @@ void FrameMain::UpdateFullGUI(wxCommandEvent& event)
 
 void FrameMain::UpdateProject(wxCommandEvent& event)
 {
-	project.UpdateFootPosition();
+	Project* project = wxStaticCast(GetDocument(), Project);
+	project->UpdateFootPosition();
 
 	if(thread == NULL){
-		thread = new LastGenerationThread(this, &project);
+		thread = new LastGenerationThread(this, project);
 		thread->Create();
 		thread->Run();
 		updateVolume = false;
@@ -178,13 +207,18 @@ void FrameMain::LastCalculationDone(wxCommandEvent& event)
 		thread = NULL;
 	}
 	if(updateVolume){
-		thread = new LastGenerationThread(this, &project);
+		Project* project = wxStaticCast(GetDocument(), Project);
+		thread = new LastGenerationThread(this, project);
 		thread->Create();
 		thread->Run();
 	}
 	m_canvas->Refresh();
 	Refresh();
 	updateVolume = false;
+}
+
+void FrameMain::OnConstructionSelection(wxCommandEvent& event)
+{
 }
 
 void FrameMain::OnToolClicked(wxCommandEvent& event)
@@ -214,8 +248,10 @@ void FrameMain::OnLoadFootModel(wxCommandEvent& event)
 
 	if(dialog.ShowModal() == wxID_OK){
 		wxFileName fileName(dialog.GetPath());
-		if(project.LoadModel(fileName.GetFullPath())){
-			project.UpdateFootPosition();
+		Project* project = wxStaticCast(GetDocument(), Project);
+
+		if(project->LoadModel(fileName.GetFullPath())){
+			project->UpdateFootPosition();
 			settings.lastFootDirectory = fileName.GetPath();
 			TransferDataToWindow();
 		}
@@ -238,7 +274,8 @@ void FrameMain::OnSaveFootModel(wxCommandEvent& event)
 
 	if(dialog.ShowModal() == wxID_OK){
 		wxFileName fileName(dialog.GetPath());
-		if(project.SaveModel(fileName.GetFullPath())){
+		Project* project = wxStaticCast(GetDocument(), Project);
+		if(project->SaveModel(fileName.GetFullPath())){
 			settings.lastFootDirectory = fileName.GetPath();
 			TransferDataToWindow();
 		}
@@ -251,11 +288,6 @@ void FrameMain::OnLoadShoe(wxCommandEvent& event)
 
 void FrameMain::OnSaveShoe(wxCommandEvent& event)
 {
-}
-
-void FrameMain::OnQuit(wxCommandEvent& event)
-{
-	Close();
 }
 
 void FrameMain::OnInitializeFootModel(wxCommandEvent& event)
@@ -296,7 +328,8 @@ void FrameMain::OnSaveLast(wxCommandEvent& event)
 	if(dialog.ShowModal() == wxID_OK){
 		wxFileName fileName;
 		fileName = dialog.GetPath();
-		project.SaveLast(fileName.GetFullPath());
+		Project* project = wxStaticCast(GetDocument(), Project);
+		project->SaveLast(fileName.GetFullPath());
 	}
 }
 
@@ -353,17 +386,7 @@ void FrameMain::OnSelectLanguage(wxCommandEvent& event)
 	if(lng >= 0) config->Write(_T("Language"), langNames[lng]);
 }
 
-void FrameMain::OnHelp(wxCommandEvent& event)
-{
-	m_helpController->DisplayContents();
-}
-
-void FrameMain::OnAbout(wxCommandEvent& event)
-{
-}
-
-void FrameMain::OnDebug(wxCommandEvent& event)
+void FrameMain::OnDebugParser(wxCommandEvent& event)
 {
 	dialogDebugParser->Show();
 }
-

@@ -1001,7 +1001,10 @@ void Volume::CalcSurface(void)
 
 void Volume::PaintSurface(void) const
 {
+	glPushMatrix();
+	glTranslated(origin.x, origin.y, origin.z);
 	geometry.Paint(geometryColorNone);
+	glPopMatrix();
 }
 
 Vector3 Volume::GetSurface(Vector3 p0, Vector3 n) const
@@ -1025,9 +1028,3 @@ Vector3 Volume::GetSurface(Vector3 p0, Vector3 n) const
 	return (p0 + n * d);
 }
 
-Polygon3 Volume::ToPolygon(void) const
-{
-	Polygon3 temp;
-	// TODO: Conversion to Polygon
-	return temp;
-}

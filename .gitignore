@@ -2,6 +2,7 @@
 OpenShoeDesigner
 
 *~
+*.bak
 gmon.out
 /out
 
@@ -14,6 +15,8 @@ gmon.out
 /Debug_Linux
 /Debug
 /Release
+
+/data
 
 /doc/html
 /doc/latex
