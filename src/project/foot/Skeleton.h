@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : VisitorBoneToGrid.h
+// Name               : Skeleton.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 19.11.2015
-// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 18.02.2018
+// Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,32 +24,39 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef VISITORBONETOGRID_H_
-#define VISITORBONETOGRID_H_
+#ifndef SRC_PROJECT_FOOT_SKELETON_H_
+#define SRC_PROJECT_FOOT_SKELETON_H_
 
-/*!\class VisitorBoneToGrid
+/*!\class Skeleton
  * \brief ...
  *
  * ...
  */
 
-#include "../../StdInclude.h"
 #include "Bone.h"
-#include <wx/grid.h>
+#include "../../math/MathParser.h"
+#include <wx/string.h>
+#include <vector>
 
-
-class VisitorBoneToGrid:public LinkageVisitor {
+class Skeleton {
 public:
-	VisitorBoneToGrid(wxGrid* gridLength, wxGrid* gridDiameter,wxGrid* gridSkin );
-	virtual ~VisitorBoneToGrid();
+	Skeleton();
+	virtual ~Skeleton();
 
-	void Visit(Bone &bone);
+	Bone* AddBone(wxString name);
 
-private:
-	wxGrid* gridLength;
-	wxGrid* gridDiameter;
-	wxGrid* gridSkin;
-	unsigned int row;
+	bool Connect(wxString name1, wxString name2);
+
+	void Setup(void);
+	void Render(void) const;
+
+	size_t GetBoneCount(void) const;
+
+	void UpdateBonesFromFormula(MathParser* parser);
+
+
+
+	std::vector <Bone> bones;
 };
 
-#endif /* VISITORBONETOGRID_H_ */
+#endif /* SRC_PROJECT_FOOT_SKELETON_H_ */

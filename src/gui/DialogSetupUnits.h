@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : VisitorBoneToVolume.h
-// Purpose            : 
+// Name               : DialogSetupUnits.h
+// Purpose            :
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 27.09.2015
-// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 03.07.2011
+// Copyright          : (C) 2011 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,28 +24,39 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef VISITORBONETOVOLUME_H_
-#define VISITORBONETOVOLUME_H_
+#ifndef DIALOGSETUPUNITS_H_
+#define DIALOGSETUPUNITS_H_
 
-/*!\class VisitorBoneToVolume
+/*!\class DialogSetupUnits
  * \brief ...
  *
  * ...
  */
 
-#include "LinkageVisitor.h"
-#include "../../3D/Volume.h"
-#include "Bone.h"
+#include "../StdInclude.h"
+#include "DisplaySettings.h"
+#include "gui.h"
 
-class VisitorBoneToVolume:public LinkageVisitor {
+class DialogSetupUnits:public GUIFrameSetupUnits {
+	// Constructor/ Destructor
+
 public:
-	VisitorBoneToVolume(Volume * volume);
-	virtual ~VisitorBoneToVolume();
+	DialogSetupUnits(wxWindow* parent, DisplaySettings * settings);
+	virtual ~DialogSetupUnits();
+	// Member variables
+private:
 
-	void Visit(Bone &bone);
+	DisplaySettings * settings;
+
+	// Methods
+private:
+	bool TransferDataToWindow(void);
+	bool TransferDataFromWindow(void);
 
 private:
-	Volume * volume;
+	void OnClose(wxCommandEvent& event);
+	void OnCloseX(wxCloseEvent& event);
+	void OnChangeUnit(wxCommandEvent& event);
 };
 
-#endif /* VISITORBONETOVOLUME_H_ */
+#endif /* DIALOGSETUPUNITS_H_ */

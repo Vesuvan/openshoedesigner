@@ -267,10 +267,11 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	if(!GetContext()) return;
 #endif
 
+	//TODO: Rewrite the Context handling for wxWidgets >= 3.0
 	wxGLCanvas::SetCurrent(); // Link OpenGL to this area
 	wxPaintDC(this); // Set the clipping for this area
 
-	// Init OpenGL once, but after SetCurrent
+	// Init OpenGL once for each Canvas. Has to be done after SetCurrent.
 	if(!isInitialized){
 		InitGL();
 		isInitialized = true;

@@ -43,7 +43,13 @@ public:
 
 	MathParser parser;
 	virtual void OnText(wxCommandEvent& event);
-	virtual void OnChoice(wxCommandEvent& event);
+	void OnOK(wxCommandEvent& event);
+
+	double length;
+	double width;
+
+private:
+	void ParseText(wxString text);
 };
 
 #endif /* DIALOGQUICKINITFOOT_H_ */

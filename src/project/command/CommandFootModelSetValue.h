@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : VisitorSetupBone.h
+// Name               : CommandFootModelSetValue.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 03.10.2015
-// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 19.02.2018
+// Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,28 +24,28 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef VISITORSETUPBONE_H_
-#define VISITORSETUPBONE_H_
+#ifndef SRC_PROJECT_FOOT_COMMANDFOOTMODELSETVALUE_H_
+#define SRC_PROJECT_FOOT_COMMANDFOOTMODELSETVALUE_H_
 
-#include "LinkageVisitor.h"
-#include "Bone.h"
+#include <wx/cmdproc.h>
+#include <wx/string.h>
 
-/*!\class VisitorSetupBone
- * \brief Visitor Pattern: setup all bones
- *
- * Evaluate the parameter formulas of the bones and setup the angles and length and skin-thicknesses.
- */
+#include "../Project.h"
 
-#include "../../math/MathParser.h"
-
-class VisitorSetupBone:public LinkageVisitor {
+class CommandFootModelSetValue:public wxCommand {
 public:
-	VisitorSetupBone();
-	virtual ~VisitorSetupBone();
+	CommandFootModelSetValue(const wxString& name, Project* project,
+			size_t boneNr, Bone::stringIdentifier field, wxString newFormula);
 
-	MathParser parser; ///< The mathparser stores the configuration.
+	bool Do(void);
+	bool Undo(void);
 
-	void Visit(Bone &bone);
+protected:
+	Project* project;
+	size_t boneNr;
+	Bone::stringIdentifier field;
+	wxString newFormula;
+	wxString oldFormula;
 };
 
-#endif /* VISITORSETUPBONE_H_ */
+#endif /* SRC_PROJECT_FOOT_COMMANDFOOTMODELSETVALUE_H_ */

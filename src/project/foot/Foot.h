@@ -71,32 +71,31 @@
  * }
  * \enddot
  *
- * (Talus2 is a extra bone-element to get the form of the Talus right.)
+ * (Talus2 is an extra bone-element to get the form of the Talus right.)
  */
 
-#include "Bone.h"
+#include "Skeleton.h"
 
 #include "../../3D/Volume.h"
 #include "../../3D/Polygon3.h"
 
 #include <wx/txtstrm.h>
-#include <wx/grid.h>
 
-class Foot {
+class Foot:public Skeleton {
 
 public:
+
+	enum sizetype {
+		EU, US, CN, UK, JP, AU, mm, cm, in, ft
+	};
+
 	Foot();
 	virtual ~Foot();
 
 	void Paint(bool mirror = false) const;
 
-	unsigned int GetBoneCount(void) const;
 	bool LoadModel(wxTextInputStream* stream);
 	bool SaveModel(wxTextOutputStream* stream);
-
-	void AddToGrid(wxGrid* gridLength, wxGrid* gridDiameter, wxGrid* gridSkin);
-	void GetFromGrid(wxGrid* gridLength, wxGrid* gridDiameter,
-			wxGrid* gridSkin);
 
 	void SetPosition(double heelheight, double toeAngle, double mixing = 0.5);
 	void SetSize(double L, double W, double H, double A);
@@ -105,7 +104,7 @@ public:
 	double GetBallHeight(void) const;
 	Polygon3 GetCenterline(void) const;
 
-	void AddToVolume(Volume* vol);
+	double GetSize(sizetype type) const;
 
 private:
 	void InitBones(void);
@@ -119,6 +118,8 @@ public:
 	double H;
 	double A;
 
+private:
+	static const unsigned int NBones;
 private:
 	Bone* Tibia; /// Schienbein
 	Bone* Fibula; /// Wadenbein
@@ -149,9 +150,6 @@ private:
 	Bone* PhalanxIII2;
 	Bone* PhalanxIII3;
 	Bone* PhalanxIII4;
-
-private:
-	static const unsigned int NBones;
 };
 
 #endif /* FOOT_H_ */

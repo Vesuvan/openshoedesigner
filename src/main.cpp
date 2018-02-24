@@ -35,11 +35,11 @@
 #include <wx/cmdline.h>
 #include <cstdlib>
 
-IMPLEMENT_APP(OpenShoeDesigner)
+IMPLEMENT_APP(openshoedesigner)
 
-OpenShoeDesigner::OpenShoeDesigner()
+openshoedesigner::openshoedesigner()
 {
-	config = new wxConfig(_T("OpenShoeDesigner"));
+	config = new wxConfig(_T("openshoedesigner"));
 
 	unsigned int selectedLanguage = wxLANGUAGE_DEFAULT;
 
@@ -54,28 +54,30 @@ OpenShoeDesigner::OpenShoeDesigner()
 	}
 
 	if(!locale.Init(selectedLanguage, wxLOCALE_DONT_LOAD_DEFAULT)){
-		wxLogError(_T("This language is not supported by the system."));
+		wxLogError
+		(_T("This language is not supported by the system."));
 		return;
 	}
 
 	locale.AddCatalogLookupPathPrefix(_T("i18n"));
-	bool catalogLoaded = locale.AddCatalog(_T("OpenShoeDesigner"));
+	bool catalogLoaded = locale.AddCatalog(_T("openshoedesigner"));
 	if(!catalogLoaded){
 		wxString temp;
 		temp =
 		_T("The translation catalog for ") + locale.GetCanonicalName() +
 		_T(" was not loaded !");
-		wxLogError(temp);
+		wxLogError
+		(temp);
 	}
 	locale.AddCatalog("wxstd");
 }
 
-OpenShoeDesigner::~OpenShoeDesigner()
+openshoedesigner::~openshoedesigner()
 {
 	delete config; // config is written back on deletion of object
 }
 
-bool OpenShoeDesigner::OnInit()
+bool openshoedesigner::OnInit()
 {
 	if(!wxApp::OnInit()) return false;
 	::wxInitAllImageHandlers(); // Load all image handlers for reading in background images.
@@ -111,7 +113,7 @@ bool OpenShoeDesigner::OnInit()
 	parent = new FrameParent(docManager, NULL, wxID_ANY, GetAppDisplayName());
 
 	SetTopWindow(parent);
-	parent->Show(true);
+	parent->Show(false);
 
 	Project* project;
 	if(cmd_found == 1){
@@ -125,21 +127,29 @@ bool OpenShoeDesigner::OnInit()
 	return true;
 }
 
-int OpenShoeDesigner::OnExit()
+int openshoedesigner::OnExit()
 {
 	wxDocManager* const docManager = wxDocManager::GetDocumentManager();
 	docManager->FileHistorySave(*config);
 	delete docManager;
+	printf("Exiting Application\n");
 	return wxApp::OnExit();
 }
 
-wxFrame* OpenShoeDesigner::CreateChildFrame(wxView* view,
+wxFrame* openshoedesigner::CreateChildFrame(wxView* view,
 		ProjectView::FrameType frametype)
 {
 	wxFrame *subframe;
 	wxDocument *doc = view->GetDocument();
 
-	subframe = new FrameMain(doc, view, config,
-			wxStaticCast(GetTopWindow(), wxDocParentFrame));
+	switch(frametype){
+	case ProjectView::FrameType::mainframe:
+		subframe = new FrameMain(doc, view, config,
+				wxStaticCast(GetTopWindow(), wxDocParentFrame));
+		break;
+
+	default:
+		throw(std::logic_error("CreateChildFrame - Unsupported windowtype."));
+	}
 	return subframe;
 }

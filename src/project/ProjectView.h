@@ -51,13 +51,17 @@ public:
 	virtual ~ProjectView();
 
 	void Paint(void) const;
-	void PaintBackground(void) const;
+	void PaintBackground(bool showBehind = true) const;
 
 	DisplaySide side;
 
 	std::vector <BackgroundImage> background;
 
-	bool showBackground;
+	bool showLeft;
+	bool showRight;
+
+	Foot* foot;
+	Shoe* shoe;
 
 	bool showFootScan;
 	bool showFootModel;
@@ -70,6 +74,8 @@ public:
 	bool showUpper;
 	bool showCutaway;
 	bool showFloor;
+
+	bool showBackground;
 
 	double floorLevel;
 
@@ -90,7 +96,8 @@ private:
 	void PaintCutaway(void) const;
 	void PaintFloor(void) const;
 
-DECLARE_DYNAMIC_CLASS(ProjectView);
+DECLARE_DYNAMIC_CLASS(ProjectView)
+	;
 };
 
 #endif /* PROJECTVIEW_H_ */

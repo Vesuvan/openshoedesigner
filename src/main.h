@@ -37,10 +37,10 @@
 
 class FrameMain;
 
-class OpenShoeDesigner:public wxApp {
+class openshoedesigner:public wxApp {
 public:
-	OpenShoeDesigner();
-	virtual ~OpenShoeDesigner();
+	openshoedesigner();
+	virtual ~openshoedesigner();
 	// Member variables
 public:
 //	FrameMain* frame;
@@ -54,8 +54,8 @@ public:
 	virtual bool OnInit();
 	virtual int OnExit();
 	wxFrame* CreateChildFrame(wxView* view, ProjectView::FrameType frametype);
-	wxDECLARE_NO_COPY_CLASS(OpenShoeDesigner);
+	wxDECLARE_NO_COPY_CLASS(openshoedesigner);
 };
-DECLARE_APP(OpenShoeDesigner)
+DECLARE_APP(openshoedesigner)
 
 #endif /* MAIN_H_ */

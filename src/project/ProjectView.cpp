@@ -26,6 +26,7 @@
 
 #include "ProjectView.h"
 
+#include <cstdio>
 #include "../main.h"
 IMPLEMENT_DYNAMIC_CLASS(ProjectView, wxView)
 
@@ -33,14 +34,18 @@ ProjectView::ProjectView()
 		: wxView()
 {
 	m_frame = NULL;
+	foot = NULL;
+	shoe = NULL;
 
+	showLeft = false;
+	showRight = true;
 	side = Both;
-	showBackground = true;
+	showBackground = false;
 	showFootScan = false;
 	showFootModel = false;
 	showLastScan = false;
 	showLast = false;
-	showBones = false;
+	showBones = true;
 	showInsole = false;
 	showSole = false;
 	showUpper = false;
@@ -51,6 +56,7 @@ ProjectView::ProjectView()
 
 ProjectView::~ProjectView()
 {
+	printf("Destructing view\n");
 }
 
 bool ProjectView::OnCreate(wxDocument* doc, long flags)
@@ -63,12 +69,17 @@ bool ProjectView::OnCreate(wxDocument* doc, long flags)
 	temp.LoadFile(_T("blender/images/Skel_right.jpg"), wxBITMAP_TYPE_JPEG);
 	background.push_back(temp);
 
+	Project* project = wxStaticCast(this->GetDocument(), Project);
+	foot = &(project->footL);
+
 	frame->Show();
 	return true;
 }
 
 void ProjectView::Paint(void) const
 {
+	glPushMatrix();
+	glTranslated(0, 0, floorLevel);
 	if(showBones) PaintBones();
 	if(showInsole) PaintInsole();
 	if(showSole) PaintSole();
@@ -76,14 +87,17 @@ void ProjectView::Paint(void) const
 	if(showCutaway) PaintCutaway();
 	if(showFloor) PaintFloor();
 	if(showLast) PaintLast();
+	if(showBackground) PaintBackground(false);
+	glPopMatrix();
 }
 
-void ProjectView::PaintBackground(void) const
+void ProjectView::PaintBackground(bool showBehind) const
 {
 	if(!showBackground) return;
 	for(std::vector <BackgroundImage>::const_iterator image =
-			background.begin(); image != background.end(); ++image)
-		image->Paint();
+			background.begin(); image != background.end(); ++image){
+		if(image->showBehindGeometry == showBehind) image->Paint();
+	}
 }
 
 void ProjectView::PaintBones(void) const
@@ -142,31 +156,62 @@ void ProjectView::PaintCutaway(void) const
 
 void ProjectView::PaintFloor(void) const
 {
+	Project* project = wxStaticCast(this->GetDocument(), Project);
+
+	const double lev = project->footL.GetHeelHeight()
+			- project->shoe.heelHeight;
+	const float d = 0.5;
+
+	glPushMatrix();
+	glTranslated(0, 0, lev);
 	glColor3f(0.4, 0.4, 0.4);
 	glBegin(GL_QUADS);
 	glNormal3f(0, 0, 1);
-	glVertex3f(-0.5, -0.5, floorLevel);
-	glVertex3f(0.5, -0.5, floorLevel);
-	glVertex3f(0.5, 0.5, floorLevel);
-	glVertex3f(-0.5, 0.5, floorLevel);
+	glVertex3f(-d, -d, 0);
+	glVertex3f(d, -d, 0);
+	glVertex3f(d, d, 0);
+	glVertex3f(-d, d, 0);
 	glEnd();
+	glPopMatrix();
 }
 
 void ProjectView::OnDraw(wxDC* dc)
 {
+	printf("ProjectView::OnDraw called...\n");
+
 }
 
 void ProjectView::OnUpdate(wxView* sender, wxObject* hint)
 {
+	wxView::OnUpdate(sender, hint);
+	printf("ProjectView::OnUpdate called...\n");
 }
 
 bool ProjectView::OnClose(bool deleteWindow)
 {
+	wxDocument* doc = GetDocument();
+	wxDocManager* manager = doc->GetDocumentManager();
+	wxList tempDocs = manager->GetDocuments();
+	wxList tempViews = doc->GetViews();
+
+	printf("In view: %u docs, %u views\n", tempDocs.GetCount(),
+			tempViews.GetCount());
+	printf("Closing View\n");
+
 	if(!wxView::OnClose(deleteWindow)) return false;
 	Activate(false);
 //	GetDocument()->DeleteContents();
+	wxWindow* frame = this->GetFrame();
+	if(tempDocs.GetCount() <= 1 && tempViews.GetCount() <= 1 && frame != NULL){
+		wxWindow* parent = frame->GetParent();
+		printf("Closing Application from Frame\n");
+		wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, wxID_EXIT);
+		wxPostEvent(parent, event);
+	}
+
 	if(deleteWindow){
-		GetFrame()->Destroy();
+		printf("Request destruction of Frame\n");
+		frame->Destroy();
 		SetFrame(NULL);
 	}
 	return true;

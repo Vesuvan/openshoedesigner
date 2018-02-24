@@ -28,7 +28,8 @@
 
 #include "gui.h"
 #include <cstdio>
-wxBEGIN_EVENT_TABLE(FrameParent, wxDocParentFrame) EVT_MENU(wxID_ABOUT, FrameParent::OnAbout)
+wxBEGIN_EVENT_TABLE(FrameParent, wxDocParentFrame)
+EVT_MENU(wxID_ABOUT, FrameParent::OnAbout)
 EVT_MENU(wxID_HELP, FrameParent::OnHelp)
 wxEND_EVENT_TABLE()
 

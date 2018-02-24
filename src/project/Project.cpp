@@ -27,6 +27,8 @@
 #include "Project.h"
 
 #include <wx/log.h>
+#include <cstdio>
+
 #include "../3D/FileSTL.h"
 #include "../math/MathParser.h"
 
@@ -45,7 +47,6 @@ Project::Project()
 		: wxDocument()
 {
 	generator = Experimental;
-
 	Reset();
 }
 
@@ -55,21 +56,12 @@ Project::~Project()
 
 void Project::Reset(void)
 {
-	lastvol.SetSize(0.40, 0.3, 0.4, 0.0075);
-	lastvol.SetOrigin(Vector3(-0.15, -0.1, -0.3));
-
-//	lastvol.AddHalfplane(Vector3(0, 0, 1), -0.10, 0.01);
-//	lastvol.AddSphere(Vector3(0, 0.1, 0), 0.15, 0.1);
-//	lastvol.AddSphere(Vector3(0.13, 0, 0.0), 0.19, 0.01);
-//	lastvol.AddCylinder(Vector3(0.0, 0, 0.0), Vector3(0.05 * 1, 0, -0.00), 0.04,
-//			0.04, 0.02, 0.04);
-
 	wxFileInputStream input(_T("data/FootModelDefault.txt"));
 	wxTextInputStream text(input);
 	footL.LoadModel(&text);
 
 	UpdateFootPosition();
-	UpdateAndGenerate();
+	Update();
 }
 
 bool Project::UpdateFootPosition(void)
@@ -77,15 +69,33 @@ bool Project::UpdateFootPosition(void)
 	if(!shoe.Evaluate(footL.length, footL.width, footL.H, footL.A)) return false;
 	footL.SetPosition(shoe.heelHeight - shoe.ballHeight, shoe.toeAngle,
 			shoe.mixing);
-//	floorLevel = foot.GetHeelHeight() - shoe.heelHeight;
 	return true;
 }
 
-void Project::UpdateAndGenerate(void)
+void Project::Update(void)
 {
+
+	UpdateFootPosition();
+
 	// Calculate the Footmodel
+	lastvol.SetSize(0.40, 0.3, 0.4, 0.0075);
+	lastvol.SetOrigin(Vector3(-0.15, -0.1, -0.3));
+	//	lastvol.AddHalfplane(Vector3(0, 0, 1), -0.10, 0.01);
+	//	lastvol.AddSphere(Vector3(0, 0.1, 0), 0.15, 0.1);
+	//	lastvol.AddSphere(Vector3(0.13, 0, 0.0), 0.19, 0.01);
+	//	lastvol.AddCylinder(Vector3(0.0, 0, 0.0), Vector3(0.05 * 1, 0, -0.00), 0.04,
+	//			0.04, 0.02, 0.04);
 	lastvol.Clear();
-	footL.AddToVolume(&lastvol);
+
+	for(size_t n = 0; n < footL.bones.size(); n++){
+		lastvol.AddCylinder(footL.bones[n].p1, footL.bones[n].p2,
+				footL.bones[n].r1 + footL.bones[n].s1,
+				footL.bones[n].r2 + footL.bones[n].s2,
+				(footL.bones[n].s1 + footL.bones[n].s2) / 2.0);
+		//	volume->AddCylinder(footL.bones[n].p1,footL.bones[n].p2,footL.bones[n].r1,footL.bones[n].r2,footL.bones[n].s1,footL.bones[n].s2);
+	}
+
+//	footL.AddToVolume(&lastvol);
 //	lastvol.Rotate(Volume::Z, 2);
 //	lastvol.Rotate(Volume::Z, -1);
 //	lastvol.Rotate(Volume::Z, -1);
@@ -116,18 +126,6 @@ void Project::UpdateAndGenerate(void)
 //	bow.Resample(50);
 //	bow.Filter(20);
 
-}
-
-void Project::AddFootToGrid(wxGrid* gridLength, wxGrid* gridDiameter,
-		wxGrid* gridSkin)
-{
-	footL.AddToGrid(gridLength, gridDiameter, gridSkin);
-}
-
-void Project::GetFootFromGrid(wxGrid* gridLength, wxGrid* gridDiameter,
-		wxGrid* gridSkin)
-{
-	footL.GetFromGrid(gridLength, gridDiameter, gridSkin);
 }
 
 bool Project::LoadModel(wxString fileName)
@@ -177,7 +175,8 @@ DocumentIstream& Project::LoadObject(DocumentIstream& istream)
 	stream >> count;
 
 	if(false){
-		wxLogWarning("File could not be read.");
+		wxLogWarning
+		("File could not be read.");
 #if wxUSE_STD_IOSTREAM
 		istream.clear(std::ios::badbit);
 #else
@@ -198,3 +197,4 @@ bool Project::SaveLast(wxString fileName)
 	temp.WriteStream(outStream, lastvol.geometry);
 	return true;
 }
+

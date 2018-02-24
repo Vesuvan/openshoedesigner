@@ -73,7 +73,7 @@ typedef wxOutputStream DocumentOstream;
 #endif // wxUSE_STD_IOSTREAM/!wxUSE_STD_IOSTREAM
 
 class Project:public wxDocument {
-//	friend class ProjectView;
+	friend class ProjectView;
 public:
 
 	enum Generator {
@@ -92,14 +92,10 @@ public:
 	DocumentOstream& SaveObject(DocumentOstream& ostream);
 	DocumentIstream& LoadObject(DocumentIstream& istream);
 
+	void Update(void);
 	bool UpdateFootPosition(void);
-	void UpdateAndGenerate(void);
 
 	// Setup model:
-	void AddFootToGrid(wxGrid* gridLength, wxGrid* gridDiameter,
-			wxGrid* gridSkin);
-	void GetFootFromGrid(wxGrid* gridLength, wxGrid* gridDiameter,
-			wxGrid* gridSkin);
 
 	bool LoadModel(wxString fileName);
 	bool SaveModel(wxString fileName);
@@ -119,7 +115,7 @@ public:
 	Generator generator;
 	PolyHull test;
 
-public:
+protected:
 
 	Volume footvol;
 	Volume lastvol;
@@ -129,7 +125,8 @@ public:
 	OrientedMatrix heightfield;
 	Polygon3 bow;
 
-DECLARE_DYNAMIC_CLASS (Project);
+DECLARE_DYNAMIC_CLASS (Project)
+	;
 };
 
 #endif /* PROJECT_H_ */

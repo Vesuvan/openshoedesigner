@@ -96,6 +96,9 @@ public:
 	void SetSize(float sx, float sy, float sz, float origx = 0.0, float origy =
 			0.0, float origz = 0.0);
 
+	void SetOrigin(float origx = 0.0, float origy = 0.0, float origz = 0.0);
+	void SetOrigin(const Vector3 &orig);
+
 	//! Get the volume of the box.
 	double GetVolume(void) const;
 
@@ -119,6 +122,9 @@ public:
 		if(zmax < zmin) return 0.0;
 		return zmax - zmin;
 	}
+
+	bool Overlaps(const BoundingBox &other) const;
+	bool IsInside(const Vector3 &v) const;
 
 	//! Put the box into a textstream.
 	void ToStream(wxTextOutputStream & stream) const;

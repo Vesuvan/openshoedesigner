@@ -32,6 +32,7 @@
 Bone::Bone(const wxString &name)
 {
 	this->name = name;
+	connectTo = 0;
 	r1 = 0.0;
 	r2 = 0.0;
 	anchorD = 0;
@@ -46,22 +47,35 @@ Bone::~Bone()
 {
 }
 
-void Bone::Render(void)
+void Bone::Vertex(const Vector3 v) const
 {
+	::glVertex3f(v.x, v.y, v.z);
+}
+
+void Bone::Normal(const Vector3 v) const
+{
+	::glNormal3f(v.x, v.y, v.z);
+}
+
+void Bone::Render(void) const
+{
+	const int N = 32; // Cap segments
+	const int M = 16; // Segments around the bone
+
 	if(r1 == 0.0 && r2 == 0.0) return;
-	float d = (p2 - p1).Abs();
-	float r = fabs(r1 - r2);
-	int n;
-	const int N = 32;
-	int m;
-	const int M = 16;
+	const float L = (p2 - p1).Abs(); // Length of the vector between the points.
+	const float dr = fabs(r1 - r2); // Difference between the radii.
 
-	float dv = 2.0 * M_PI / N;
+	int n, m;
+
+	const float dv = 2.0 * M_PI / N;
 	float v = 0.0;
-	float dw = 2.0 * M_PI / M;
+	const float dw = 2.0 * M_PI / M;
 	float w = 0.0;
-	if(d <= r){
 
+	if(L <= dr){
+		// Only one sphere need to be rendered.
+		// The bigger one is rendered
 		if(r1 > r2){
 			v = 0;
 			for(n = 0; n <= N; n++){
@@ -107,8 +121,10 @@ void Bone::Render(void)
 		return;
 	}
 
-	float s1 = (r1 * r1 - r1 * r2) / d;
-	float s2 = (r1 * r2 - r2 * r2) / d;
+	// Complete rendering of the bone.
+
+	const float s1 = (r1 * r1 - r1 * r2) / L;
+	const float s2 = (r1 * r2 - r2 * r2) / L;
 	Vector3 s = p2 - p1;
 	Vector3 g;
 	if(s.x <= s.y && s.x <= s.z) g.Set(0, s.z, -s.y);
@@ -120,8 +136,8 @@ void Bone::Render(void)
 	h = s * g;
 	h.Normalize();
 
-	double h1 = sqrt(r1 * r1 - s1 * s1);
-	double h2 = sqrt(r2 * r2 - s2 * s2);
+	const double h1 = sqrt(r1 * r1 - s1 * s1);
+	const double h2 = sqrt(r2 * r2 - s2 * s2);
 //	double f = s1 / r1;
 
 	Vector3 zyl;
@@ -184,11 +200,6 @@ void Bone::Render(void)
 
 }
 
-void Bone::Normal(const Vector3 v) const
-{
-	::glNormal3f(v.x, v.y, v.z);
-}
-
 bool Bone::Set(wxString text)
 {
 	wxString temp = text.BeforeFirst(_T('|'));
@@ -243,25 +254,12 @@ wxString Bone::Get(void) const
 	temp += r1v + _T("|");
 	temp += r2v + _T("|");
 	temp += s1v + _T("|");
-	temp += s2v +_T("\n");
+	temp += s2v + _T("\n");
 	return temp;
 }
 
-void Bone::Vertex(const Vector3 v) const
+void Bone::Setup(Bone *parent)
 {
-	::glVertex3f(v.x, v.y, v.z);
-}
-
-void Bone::Process(LinkageVisitor& visitor)
-{
-	// GoF visitor pattern
-	visitor.Visit(*this);
-}
-
-void Bone::Setup(void)
-{
-	Bone *parent = (Bone*) this->parent;
-
 	double rLocal;
 
 	if(parent == NULL){
@@ -272,9 +270,12 @@ void Bone::Setup(void)
 		rLocal = 1.0;
 	}else{
 		matrix = parent->matrix;
+		// Set the base point of the bone.
 		anchor = parent->normal * (parent->length * anchorD);
 
-		double h = fmin(fmax(parent->anchorD, 0.0), 1.0);
+		// Position of the anchorpoint along the parent bone
+		const double h = fmin(fmax(parent->anchorD, 0.0), 1.0);
+
 		rLocal = parent->r1 + (parent->r2 - parent->r1) * h;
 		anchor += anchorN * rLocal;
 	}

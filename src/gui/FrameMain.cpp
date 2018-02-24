@@ -28,6 +28,8 @@
 
 #include "IDs.h"
 #include "DialogQuickInitFoot.h"
+#include "FrameDebugParser.h"
+
 #include "../3D/FileSTL.h"
 #include "../languages.h"
 //#include <wx/file.h>
@@ -35,6 +37,9 @@
 #include <wx/filedlg.h>
 #include <wx/filename.h>
 #include <wx/dir.h>
+#include <math.h>
+
+#include "../project/command/CommandFootModelSetValue.h"
 
 FrameMain::FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
 		wxDocParentFrame* parent)
@@ -58,39 +63,42 @@ FrameMain::FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
 	m_menuFile->Append(wxID_CLOSE);
 	m_menuFile->Append(wxID_EXIT);
 
-	m_menuEdit->Append(wxID_UNDO);
-	m_menuEdit->Append(wxID_REDO);
+//	m_menuEdit->Append(wxID_UNDO);
+//	m_menuEdit->Append(wxID_REDO);
+//	m_menuEdit->Append(
+//			new wxMenuItem(m_menuEdit, wxID_UNDO,
+//					wxString(_("&Undo")) + wxT('\t') + wxT("CTRL+Z"),
+//					_("Undo last command"), wxITEM_NORMAL));
+//	m_menuEdit->Append(
+//			new wxMenuItem(m_menuEdit, wxID_REDO,
+//					wxString(_("&Redo")) + wxT('\t') + wxT("CTRL+Y"),
+//					_("Redo last undone command"), wxITEM_NORMAL));
 
 	m_menuHelp->AppendSeparator();
 	m_menuHelp->Append(wxID_HELP, _("&Help") + wxT("\tF1"));
 	m_menuHelp->Append(wxID_ABOUT);
 
-	m_canvas->SetProjectView(wxStaticCast(view, ProjectView));
+//	doc->GetCommandProcessor()->SetEditMenu(m_menuEdit);
+	doc->GetCommandProcessor()->Initialize();
 
 	this->config = config;
-	doc->GetCommandProcessor()->SetEditMenu(m_menuEdit);
-	doc->GetCommandProcessor()->Initialize();
 	settings.GetConfigFrom(config);
-	settings.WriteToCanvas(m_canvas);
+
+	m_canvas3D->SetProjectView(wxStaticCast(view, ProjectView));
+	settings.WriteToCanvas(m_canvas3D);
 
 	thread = NULL;
 	updateVolume = false;
 
-	Project* project = wxStaticCast(GetDocument(), Project);
-	dialogShoe = new FrameShoe(this, project);
-	dialogFoot = new FrameFoot(this, project);
-	dialogWalkcycleSupport = new FrameWalkcycleSupport(this, project);
 	dialogSetupStereo3D = new DialogSetupStereo3D(this, &settings);
-	dialogDebugParser = new FrameDebugParser(this);
+	dialogSetupUnits = new DialogSetupUnits(this, &settings);
 
 	TransferDataToWindow();
 
 	this->Connect(ID_REFRESH3DVIEW, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::RefreshMain));
-	this->Connect(ID_REFRESHMAINGUI, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::UpdateMainGUI));
-	this->Connect(ID_REFRESHALLGUI, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::UpdateFullGUI));
+			wxCommandEventHandler(FrameMain::RefreshCanvas));
+	this->Connect(ID_REFRESHVIEW, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::RefreshView));
 	this->Connect(ID_UPDATEPROJECT, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::UpdateProject));
 	this->Connect(ID_THREADLASTDONE, wxEVT_COMMAND_MENU_SELECTED,
@@ -100,37 +108,53 @@ FrameMain::FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
 
 FrameMain::~FrameMain()
 {
+	printf("Destructing Frame\n");
 	if(thread != NULL){
 		thread->Wait();
 		delete thread;
 	}
+
 	this->Disconnect(ID_THREADLASTDONE, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::LastCalculationDone));
 	this->Disconnect(ID_UPDATEPROJECT, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::UpdateProject));
-	this->Disconnect(ID_REFRESHALLGUI, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::UpdateFullGUI));
-	this->Disconnect(ID_REFRESHMAINGUI, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::UpdateMainGUI));
+	this->Disconnect(ID_REFRESHVIEW, wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(FrameMain::RefreshView));
 	this->Disconnect(ID_REFRESH3DVIEW, wxEVT_COMMAND_MENU_SELECTED,
-			wxCommandEventHandler(FrameMain::RefreshMain));
+			wxCommandEventHandler(FrameMain::RefreshCanvas));
 
 	settings.WriteConfigTo(config);
 }
 
+void FrameMain::OnClose(wxCloseEvent& event)
+{
+	wxDocument* doc = this->GetDocument();
+	wxList tempDocs = doc->GetDocumentManager()->GetDocuments();
+	wxList tempViews = doc->GetViews();
+
+	printf("In frame: %u docs, %u views\n", tempDocs.GetCount(),
+			tempViews.GetCount());
+
+	printf("Closing Frame\n");
+
+	if(tempDocs.GetCount() > 1){
+		event.Skip(); // Only close this window, by passing the event to the default handler.
+		return;
+	}
+	if(tempViews.GetCount() > 1){
+		event.Skip(); // Only close this window, by passing the event to the default handler.
+		return;
+	}
+	wxWindow* main = this->GetParent();
+	printf("Closing Application from Frame\n");
+	main->Close(); // Exit app by closing main window, this will close this window as well.
+}
+
 bool FrameMain::TransferDataToWindow()
 {
-	m_toolBar->ToggleTool(ID_TOOLSETUPFOOT, dialogFoot->IsShown());
-	m_toolBar->ToggleTool(ID_TOOLSETUPSHOE, dialogShoe->IsShown());
-
-	m_menuFoot->Check(ID_SETUPFOOT, dialogFoot->IsShown());
-	m_menuShoe->Check(ID_SETUPSHOE, dialogShoe->IsShown());
-	m_menuShoe->Check(ID_EDITWALKCYCLE, dialogWalkcycleSupport->IsShown());
-
-	m_menuView->Check(ID_STEREO3D, m_canvas->stereoMode != stereoOff);
-
 	ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
 
+	m_menuView->Check(ID_STEREO3D, m_canvas3D->stereoMode != stereoOff);
 	m_menuView->Check(ID_SHOWBONES, projectview->showBones);
 	m_menuView->Check(ID_SHOWLAST, projectview->showLast);
 	m_menuView->Check(ID_SHOWINSOLE, projectview->showInsole);
@@ -139,12 +163,103 @@ bool FrameMain::TransferDataToWindow()
 	m_menuView->Check(ID_SHOWCUTAWAY, projectview->showCutaway);
 	m_menuView->Check(ID_SHOWFLOOR, projectview->showFloor);
 
+	m_menuView->Check(ID_SHOWBACKGROUND, projectview->showBackground);
+
+	Project* project = wxStaticCast(GetDocument(), Project);
+	const Foot *foot = &(project->footL);
+
+	m_textCtrlFootLength->SetValue(
+			settings.Distance.TextFromSIWithUnit(foot->length, 1));
+	m_textCtrlFootWidth->SetValue(
+			settings.Distance.TextFromSIWithUnit(foot->width, 1));
+	m_textCtrlHeelWidth->SetValue(
+			settings.Distance.TextFromSIWithUnit(foot->H, 1));
+	m_textCtrlAnkleWidth->SetValue(
+			settings.Distance.TextFromSIWithUnit(foot->A, 1));
+
+	m_textCtrlShoeSizeEU->SetValue(
+			wxString::Format(_T("%g"), round(foot->GetSize(Foot::EU))));
+	m_textCtrlShoeSizeUS->SetValue(
+			wxString::Format(_T("%g"), round(foot->GetSize(Foot::US))));
+	m_textCtrlShoeSizeUK->SetValue(
+			wxString::Format(_T("%g"), round(foot->GetSize(Foot::UK))));
+	m_textCtrlShoeSizeCN->SetValue(
+			wxString::Format(_T("%g"), round(foot->GetSize(Foot::CN))));
+	m_textCtrlShoeSizeJP->SetValue(
+			wxString::Format(_T("%g"), round(foot->GetSize(Foot::JP))));
+	m_textCtrlShoeSizeAU->SetValue(
+			wxString::Format(_T("%g"), round(foot->GetSize(Foot::AU))));
+
+	const unsigned int N = foot->GetBoneCount();
+	if(m_gridBoneLength->GetNumberRows() == 0) m_gridBoneLength->AppendRows(N);
+	for(size_t n = 0; n < foot->bones.size(); n++){
+		m_gridBoneLength->SetRowLabelValue(n, foot->bones[n].name);
+		m_gridBoneLength->SetCellValue(n, 0, foot->bones[n].lengthv);
+		m_gridBoneLength->SetCellValue(n, 1,
+				settings.SmallDistance.TextFromSIWithUnit(foot->bones[n].length,
+						1));
+		m_gridBoneLength->SetReadOnly(n, 1);
+		m_gridBoneLength->SetCellAlignment(n, 1, wxALIGN_RIGHT, wxALIGN_TOP);
+	}
+
+	if(m_gridBoneDiameter->GetNumberRows() == 0) m_gridBoneDiameter->AppendRows(
+			N);
+	for(size_t n = 0; n < foot->bones.size(); n++){
+		m_gridBoneDiameter->SetRowLabelValue(n, foot->bones[n].name);
+		m_gridBoneDiameter->SetCellValue(n, 0, foot->bones[n].r1v);
+		m_gridBoneDiameter->SetCellValue(n, 1,
+				settings.SmallDistance.TextFromSIWithUnit(foot->bones[n].r1,
+						1));
+		m_gridBoneDiameter->SetCellValue(n, 2, foot->bones[n].r2v);
+		m_gridBoneDiameter->SetCellValue(n, 3,
+				settings.SmallDistance.TextFromSIWithUnit(foot->bones[n].r2,
+						1));
+		m_gridBoneDiameter->SetReadOnly(n, 1);
+		m_gridBoneDiameter->SetReadOnly(n, 3);
+		m_gridBoneDiameter->SetCellAlignment(n, 1, wxALIGN_RIGHT, wxALIGN_TOP);
+		m_gridBoneDiameter->SetCellAlignment(n, 3, wxALIGN_RIGHT, wxALIGN_TOP);
+	}
+
+	if(m_gridSkin->GetNumberRows() == 0) m_gridSkin->AppendRows(N);
+	for(size_t n = 0; n < foot->bones.size(); n++){
+		m_gridSkin->SetRowLabelValue(n, foot->bones[n].name);
+		m_gridSkin->SetCellValue(n, 0, foot->bones[n].s1v);
+		m_gridSkin->SetCellValue(n, 1,
+				settings.SmallDistance.TextFromSIWithUnit(foot->bones[n].s1,
+						1));
+		m_gridSkin->SetCellValue(n, 2, foot->bones[n].s2v);
+		m_gridSkin->SetCellValue(n, 3,
+				settings.SmallDistance.TextFromSIWithUnit(foot->bones[n].s2,
+						1));
+		m_gridSkin->SetReadOnly(n, 1);
+		m_gridSkin->SetReadOnly(n, 3);
+		m_gridSkin->SetCellAlignment(n, 1, wxALIGN_RIGHT, wxALIGN_TOP);
+		m_gridSkin->SetCellAlignment(n, 3, wxALIGN_RIGHT, wxALIGN_TOP);
+	}
+
+	Shoe * shoe = &(project->shoe);
+	m_textCtrlHeelHeight->SetValue(shoe->exprHeelHeight);
+	m_textCtrlBallHeight->SetValue(shoe->exprBallHeight);
+	m_textCtrlToeAngle->SetValue(shoe->exprToeAngle);
+	m_sliderMixing->SetValue(shoe->mixing * 100.0);
+	m_textCtrlResultHeelHeight->SetValue(
+			settings.Distance.TextFromSIWithUnit(shoe->heelHeight, 1));
+	m_textCtrlResultBallHeight->SetValue(
+			settings.Distance.TextFromSIWithUnit(shoe->ballHeight, 1));
+	m_textCtrlResultToeAngle->SetValue(
+			settings.Angle.TextFromSIWithUnit(shoe->toeAngle, 1));
+	m_textCtrlResultMixing->SetValue(
+			settings.Percent.TextFromSIWithUnit(shoe->mixing, 1));
+
+	if(dialogSetupStereo3D->IsShown()) dialogSetupStereo3D->TransferDataToWindow();
+
 	return true;
 }
 
 bool FrameMain::TransferDataFromWindow()
 {
 	ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
+	Project* project = wxStaticCast(GetDocument(), Project);
 
 	projectview->showBones = m_menuView->IsChecked(ID_SHOWBONES);
 	projectview->showLast = m_menuView->IsChecked(ID_SHOWLAST);
@@ -153,35 +268,85 @@ bool FrameMain::TransferDataFromWindow()
 	projectview->showSole = m_menuView->IsChecked(ID_SHOWSOLE);
 	projectview->showCutaway = m_menuView->IsChecked(ID_SHOWCUTAWAY);
 	projectview->showFloor = m_menuView->IsChecked(ID_SHOWFLOOR);
+	projectview->showBackground = m_menuView->IsChecked(ID_SHOWBACKGROUND);
 
+	Foot *foot = projectview->foot;
+
+	for(size_t n = 0; n < foot->bones.size(); n++){
+		wxString temp = m_gridBoneLength->GetCellValue(n, 0);
+		temp = temp.Trim(false).Trim(true);
+		if(foot->bones[n].lengthv.Cmp(temp) != 0){
+			project->GetCommandProcessor()->Submit(
+					new CommandFootModelSetValue(
+							_("Set ") + foot->bones[n].name
+									+ _(" length to ") + temp, project, n,
+							Bone::stringIdentifier::stringLength, temp));
+			project->GetCommandProcessor()->SetMenuStrings();
+		}
+	}
+	for(size_t n = 0; n < foot->bones.size(); n++){
+		wxString temp = m_gridBoneDiameter->GetCellValue(n, 0);
+		temp = temp.Trim(false).Trim(true);
+		if(foot->bones[n].r1v.Cmp(temp) != 0){
+			project->GetCommandProcessor()->Submit(
+					new CommandFootModelSetValue(
+					_("Set ") + foot->bones[n].name + _(" r1 to ") + temp,
+							project, n, Bone::stringIdentifier::stringR1,
+							temp));
+			project->GetCommandProcessor()->SetMenuStrings();
+		}
+
+		temp = m_gridBoneDiameter->GetCellValue(n, 2);
+		temp = temp.Trim(false).Trim(true);
+		if(foot->bones[n].r2v.Cmp(temp) != 0){
+			project->GetCommandProcessor()->Submit(
+					new CommandFootModelSetValue(
+					_("Set ") + foot->bones[n].name + _(" r2 to ") + temp,
+							project, n, Bone::stringIdentifier::stringR2,
+							temp));
+			project->GetCommandProcessor()->SetMenuStrings();
+		}
+	}
+	for(size_t n = 0; n < foot->bones.size(); n++){
+		wxString temp = m_gridSkin->GetCellValue(n, 0);
+		temp = temp.Trim(false).Trim(true);
+		if(foot->bones[n].s1v.Cmp(temp) != 0){
+			project->GetCommandProcessor()->Submit(
+					new CommandFootModelSetValue(
+					_("Set ") + foot->bones[n].name + _(" s1 to ") + temp,
+							project, n, Bone::stringIdentifier::stringS1,
+							temp));
+			project->GetCommandProcessor()->SetMenuStrings();
+		}
+
+		temp = m_gridSkin->GetCellValue(n, 2);
+		temp = temp.Trim(false).Trim(true);
+		if(foot->bones[n].s2v.Cmp(temp) != 0){
+			project->GetCommandProcessor()->Submit(
+					new CommandFootModelSetValue(
+					_("Set ") + foot->bones[n].name + _(" s2 to ") + temp,
+							project, n, Bone::stringIdentifier::stringS2,
+							temp));
+			project->GetCommandProcessor()->SetMenuStrings();
+		}
+	}
 	return true;
 }
 
-void FrameMain::RefreshMain(wxCommandEvent& event)
+void FrameMain::RefreshCanvas(wxCommandEvent& event)
 {
-	settings.WriteToCanvas(m_canvas);
-	m_canvas->Refresh();
+	settings.WriteToCanvas(m_canvas3D);
+	m_canvas3D->Refresh();
 	Refresh();
 }
 
-void FrameMain::UpdateMainGUI(wxCommandEvent& event)
+void FrameMain::RefreshView(wxCommandEvent& event)
 {
 	TransferDataToWindow();
-}
-
-void FrameMain::UpdateFullGUI(wxCommandEvent& event)
-{
-	TransferDataToWindow();
-
-//	dialogFoot->TransferDataToWindow();
-	dialogShoe->TransferDataToWindow();
-//	dialogPattern->TransferDataToWindow();
-//	dialogWalkcycleSupport->TransferDataToWindow();
-
 	this->Refresh(); // FIXME: Recursive refresh not work with GTK1. Call Refresh on every child-dialog by hand.
 }
 
-void FrameMain::UpdateProject(wxCommandEvent& event)
+void FrameMain::UpdateProject(wxCommandEvent& WXUNUSED(event))
 {
 	Project* project = wxStaticCast(GetDocument(), Project);
 	project->UpdateFootPosition();
@@ -194,8 +359,9 @@ void FrameMain::UpdateProject(wxCommandEvent& event)
 	}else{
 		updateVolume = true;
 	}
+	m_canvas3D->Refresh();
 
-	m_canvas->Refresh();
+	TransferDataToWindow();
 	Refresh();
 }
 
@@ -207,33 +373,18 @@ void FrameMain::LastCalculationDone(wxCommandEvent& event)
 		thread = NULL;
 	}
 	if(updateVolume){
+		updateVolume = false;
 		Project* project = wxStaticCast(GetDocument(), Project);
 		thread = new LastGenerationThread(this, project);
 		thread->Create();
 		thread->Run();
 	}
-	m_canvas->Refresh();
+	m_canvas3D->Refresh();
 	Refresh();
-	updateVolume = false;
 }
 
 void FrameMain::OnConstructionSelection(wxCommandEvent& event)
 {
-}
-
-void FrameMain::OnToolClicked(wxCommandEvent& event)
-{
-	if(m_toolBar->GetToolState(ID_TOOLSETUPFOOT)){
-		dialogFoot->Show();
-	}else{
-		dialogFoot->Hide();
-	}
-	if(m_toolBar->GetToolState(ID_TOOLSETUPSHOE)){
-		dialogShoe->Show();
-	}else{
-		dialogShoe->Hide();
-	}
-	TransferDataToWindow();
 }
 
 void FrameMain::OnLoadFootModel(wxCommandEvent& event)
@@ -282,41 +433,27 @@ void FrameMain::OnSaveFootModel(wxCommandEvent& event)
 	}
 }
 
-void FrameMain::OnLoadShoe(wxCommandEvent& event)
+void FrameMain::OnLoadPattern(wxCommandEvent& event)
 {
 }
 
-void FrameMain::OnSaveShoe(wxCommandEvent& event)
+void FrameMain::OnSavePattern(wxCommandEvent& event)
 {
-}
-
-void FrameMain::OnInitializeFootModel(wxCommandEvent& event)
-{
-	DialogQuickInitFoot dialog(this);
-	if(dialog.ShowModal() == wxID_OK){
-
-	}
 }
 
 void FrameMain::OnSetupFoot(wxCommandEvent& event)
 {
-	dialogFoot->Show();
-	dialogFoot->Raise();
-	TransferDataToWindow();
+
 }
 
 void FrameMain::OnSetupShoe(wxCommandEvent& event)
 {
-	dialogShoe->Show();
-	dialogShoe->Raise();
-	TransferDataToWindow();
+
 }
 
 void FrameMain::OnEditWalkCycle(wxCommandEvent& event)
 {
-	dialogWalkcycleSupport->Show();
-	dialogWalkcycleSupport->Raise();
-	TransferDataToWindow();
+
 }
 
 void FrameMain::OnSaveLast(wxCommandEvent& event)
@@ -351,12 +488,12 @@ void FrameMain::OnPackZip(wxCommandEvent& event)
 
 void FrameMain::OnToggleStereo3D(wxCommandEvent& event)
 {
-	if(m_canvas->stereoMode == stereoOff){
-		m_canvas->stereoMode = stereoAnaglyph;
+	if(m_canvas3D->stereoMode == stereoOff){
+		m_canvas3D->stereoMode = stereoAnaglyph;
 	}else{
-		m_canvas->stereoMode = stereoOff;
+		m_canvas3D->stereoMode = stereoOff;
 	}
-	m_menuView->Check(ID_STEREO3D, m_canvas->stereoMode != stereoOff);
+	m_menuView->Check(ID_STEREO3D, m_canvas3D->stereoMode != stereoOff);
 	Refresh();
 }
 
@@ -374,6 +511,8 @@ void FrameMain::OnSetupStereo3D(wxCommandEvent& event)
 
 void FrameMain::OnSetupUnits(wxCommandEvent& event)
 {
+	dialogSetupUnits->Show();
+	dialogSetupUnits->Raise();
 }
 
 void FrameMain::OnSelectLanguage(wxCommandEvent& event)
@@ -388,5 +527,211 @@ void FrameMain::OnSelectLanguage(wxCommandEvent& event)
 
 void FrameMain::OnDebugParser(wxCommandEvent& event)
 {
-	dialogDebugParser->Show();
+	(new FrameDebugParser(this))->Show();
 }
+
+void FrameMain::OnPageChange(wxNotebookEvent& event)
+{
+}
+
+void FrameMain::OnSetByShoeSize(wxCommandEvent& event)
+{
+	DialogQuickInitFoot dialog(this);
+	if(dialog.ShowModal() == wxID_OK){
+		ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
+		Foot *foot = projectview->foot;
+		foot->length = dialog.length;
+		foot->width = dialog.width;
+		foot->A = dialog.width;
+		foot->H = dialog.width;
+		UpdateProject(event);
+	}
+
+}
+void FrameMain::OnText(wxCommandEvent& event)
+{
+	Project* project = wxStaticCast(GetDocument(), Project);
+	ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
+	Foot *foot = projectview->foot;
+
+	MathParser parser(false);
+	parser.AddAllowedUnit(_T("mm"), 1e-3);
+	parser.AddAllowedUnit(_T("cm"), 1e-2);
+	parser.AddAllowedUnit(_T("m"), 1);
+	parser.AddAllowedUnit(_T("in"), 2.54e-2);
+	parser.AddAllowedUnit(_T("ft"), 0.3048);
+	parser.AddAllowedUnit(_T("%"), 1e-2);
+	parser.AddAllowedUnit(_T("rad"), 1);
+	parser.AddAllowedUnit(_T("deg"), 0.017453);
+	parser.AddAllowedUnit(_T("gon"), 0.015708);
+
+	switch(event.GetId()){
+	case ID_TEXTFOOTLENGTH:
+		foot->length = parser.GetNumber(event.GetString());
+		break;
+	case ID_TEXTFOOTWIDTH:
+		foot->width = parser.GetNumber(event.GetString());
+		break;
+	case ID_TEXTHEELWIDTH:
+		foot->H = parser.GetNumber(event.GetString());
+		break;
+	case ID_TEXTANKLEWIDTH:
+		foot->A = parser.GetNumber(event.GetString());
+		break;
+	case ID_TEXTHEELHEIGHT:
+		project->shoe.exprHeelHeight = event.GetString();
+		break;
+	case ID_TEXTBALLHEIGHT:
+		project->shoe.exprBallHeight = event.GetString();
+		break;
+	case ID_TEXTTOEPITCH:
+		project->shoe.exprToeAngle = event.GetString();
+		break;
+	case ID_TEXTMIXINGANGLE:
+		project->shoe.mixing = parser.GetNumber(event.GetString());
+		break;
+	}
+
+	UpdateProject(event);
+//	project->Update();
+//	TransferDataToWindow();
+//	Refresh();
+}
+
+void FrameMain::OnCellChange(wxGridEvent& event)
+{
+	Project* project = wxStaticCast(GetDocument(), Project);
+
+	TransferDataFromWindow();
+	project->UpdateFootPosition();
+	TransferDataToWindow();
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEPROJECT);
+	ProcessEvent(selectEvent);
+}
+
+void FrameMain::OnPreset(wxCommandEvent& event)
+{
+	Project* project = wxStaticCast(GetDocument(), Project);
+
+	Shoe * shoe = &(project->shoe);
+	// 0.26 m is the average footlength (= size EU 39).
+	switch(event.GetId()){
+	case ID_PRESETFLATS:
+		shoe->exprHeelHeight = _T("0 cm");
+		shoe->exprBallHeight = _T("0 cm");
+		shoe->exprToeAngle = _T("0 deg");
+		break;
+	case ID_PRESETCLASSIC:
+		shoe->exprHeelHeight = _T("3 cm");
+		shoe->exprBallHeight = _T("1.5 cm");
+		shoe->exprToeAngle = _T("0 deg");
+		break;
+	case ID_PRESETPLATEAU:
+		shoe->exprHeelHeight = _T("11 cm");
+		shoe->exprBallHeight = _T("9 cm");
+		shoe->exprToeAngle = _T("0 deg");
+		break;
+	case ID_PRESETHHLOW:
+		shoe->exprHeelHeight = _T("7 cm * (L/26cm)");
+		shoe->exprBallHeight = _T("0 cm");
+		shoe->exprToeAngle = _T("0 deg");
+		break;
+	case ID_PRESETHHMID:
+		shoe->exprHeelHeight = _T("10 cm * (L/26cm)");
+		shoe->exprBallHeight = _T("0 cm");
+		shoe->exprToeAngle = _T("0 deg");
+		break;
+	case ID_PRESETHHHIGH:
+		shoe->exprHeelHeight = _T("13 cm * (L/26cm)");
+		shoe->exprBallHeight = _T("0 cm");
+		shoe->exprToeAngle = _T("0 deg");
+		break;
+	case ID_PRESETPLATFORM:
+		shoe->exprHeelHeight = _T("15 cm * (L/26cm)");
+		shoe->exprBallHeight = _T("5 cm * (L/26cm)");
+		shoe->exprToeAngle = _T("0 deg");
+		break;
+	case ID_PRESETPONY:
+		shoe->exprHeelHeight = _T("16 cm * (L/26cm)");
+		shoe->exprBallHeight = _T("0 cm");
+		shoe->exprToeAngle = _T("45 deg");
+		break;
+	case ID_PRESETBALLET:
+		shoe->exprHeelHeight = _T("20 cm * (L/26cm)");
+		shoe->exprBallHeight = _T("0 cm");
+		shoe->exprToeAngle = _T("90 deg");
+		break;
+	}
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEPROJECT);
+	ProcessEvent(selectEvent);
+	TransferDataToWindow();
+}
+
+void FrameMain::OnScroll(wxScrollEvent& event)
+{
+	Project* project = wxStaticCast(GetDocument(), Project);
+
+	Shoe * shoe = &(project->shoe);
+	shoe->mixing = ((double) event.GetPosition()) / 100.0;
+	TransferDataToWindow();
+}
+
+void FrameMain::OnScrollChange(wxScrollEvent& event)
+{
+	Project* project = wxStaticCast(GetDocument(), Project);
+
+	Shoe * shoe = &(project->shoe);
+	shoe->mixing = ((double) event.GetPosition()) / 100.0;
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_UPDATEPROJECT);
+	ProcessEvent(selectEvent);
+	TransferDataToWindow();
+}
+
+void FrameMain::OnToggleAnkleLock(wxCommandEvent& event)
+{
+}
+
+void FrameMain::OnUndo(wxCommandEvent& event)
+{
+	printf("Undo\n");
+	wxDocument *doc = GetDocument();
+	doc->GetCommandProcessor()->Undo();
+	TransferDataToWindow();
+	Refresh();
+}
+
+void FrameMain::OnRedo(wxCommandEvent& event)
+{
+	printf("Redo\n");
+	wxDocument *doc = GetDocument();
+	doc->GetCommandProcessor()->Redo();
+	TransferDataToWindow();
+	Refresh();
+}
+
+void FrameMain::OnLoadFootSTL(wxCommandEvent& event)
+{
+}
+
+void FrameMain::OnSetSymmetry(wxCommandEvent& event)
+{
+	switch(event.GetId()){
+	case ID_FULLSYMMETRY:
+		break;
+	case ID_SYMMETRICMODEL:
+		break;
+	case ID_INDIVIDUALMODEL:
+		break;
+	default:
+		break;
+	}
+}
+
+void FrameMain::OnCopyMeasurements(wxCommandEvent& event)
+{
+}
+
+void FrameMain::OnChoiceDisplay(wxCommandEvent& event)
+{
+}
+

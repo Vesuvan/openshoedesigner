@@ -26,85 +26,86 @@
 
 #include "Foot.h"
 
-#include "VisitorBoneToGrid.h"
-#include "VisitorBoneFromGrid.h"
-#include "VisitorBoneToVolume.h"
-#include "VisitorSetupBone.h"
-
 #include <GL/gl.h>
+#include <cassert>
 
+#include "../../math/NelderMeadOptimizer.h"
 const unsigned int Foot::NBones = 29;
 Foot::Foot()
 {
-	Tibia = new Bone(_T("Tibia"));
-	Fibula = new Bone(_T("Fibula"));
-	Talus = new Bone(_T("Talus"));
-	Talus2 = new Bone(_T("Talus2"));
-	Calcaneus = new Bone(_T("Calcaneus"));
-	Cuboideum = new Bone(_T("Cuboideum"));
-	Naviculare = new Bone(_T("Naviculare"));
-	Cuneiforme1 = new Bone(_T("Cuneiforme1"));
-	Cuneiforme2 = new Bone(_T("Cuneiforme2"));
-	Cuneiforme3 = new Bone(_T("Cuneiforme3"));
-	Metatarsalis1 = new Bone(_T("Metatarsalis1"));
-	Metatarsalis2 = new Bone(_T("Metatarsalis2"));
-	Metatarsalis3 = new Bone(_T("Metatarsalis3"));
-	Metatarsalis4 = new Bone(_T("Metatarsalis4"));
-	Metatarsalis5 = new Bone(_T("Metatarsalis5"));
+	bones.reserve(NBones); //TODO Move away from using pointers.
 
-	PhalanxI1 = new Bone(_T("PhalanxI1"));
-	PhalanxI2 = new Bone(_T("PhalanxI2"));
-	PhalanxI3 = new Bone(_T("PhalanxI3"));
-	PhalanxI4 = new Bone(_T("PhalanxI4"));
-	PhalanxI5 = new Bone(_T("PhalanxI5"));
+	Tibia = Skeleton::AddBone(_T("Tibia"));
+	Fibula = Skeleton::AddBone(_T("Fibula"));
+	Talus = Skeleton::AddBone(_T("Talus"));
+	Talus2 = Skeleton::AddBone(_T("Talus2"));
+	Calcaneus = Skeleton::AddBone(_T("Calcaneus"));
+	Cuboideum = Skeleton::AddBone(_T("Cuboideum"));
+	Naviculare = Skeleton::AddBone(_T("Naviculare"));
+	Cuneiforme1 = Skeleton::AddBone(_T("Cuneiforme1"));
+	Cuneiforme2 = Skeleton::AddBone(_T("Cuneiforme2"));
+	Cuneiforme3 = Skeleton::AddBone(_T("Cuneiforme3"));
+	Metatarsalis1 = Skeleton::AddBone(_T("Metatarsalis1"));
+	Metatarsalis2 = Skeleton::AddBone(_T("Metatarsalis2"));
+	Metatarsalis3 = Skeleton::AddBone(_T("Metatarsalis3"));
+	Metatarsalis4 = Skeleton::AddBone(_T("Metatarsalis4"));
+	Metatarsalis5 = Skeleton::AddBone(_T("Metatarsalis5"));
 
-	PhalanxII1 = new Bone(_T("PhalanxII1"));
-	PhalanxII2 = new Bone(_T("PhalanxII2"));
-	PhalanxII3 = new Bone(_T("PhalanxII3"));
-	PhalanxII4 = new Bone(_T("PhalanxII4"));
-	PhalanxII5 = new Bone(_T("PhalanxII5"));
+	PhalanxI1 = Skeleton::AddBone(_T("PhalanxI1"));
+	PhalanxI2 = Skeleton::AddBone(_T("PhalanxI2"));
+	PhalanxI3 = Skeleton::AddBone(_T("PhalanxI3"));
+	PhalanxI4 = Skeleton::AddBone(_T("PhalanxI4"));
+	PhalanxI5 = Skeleton::AddBone(_T("PhalanxI5"));
 
-	PhalanxIII1 = new Bone(_T("PhalanxIII1"));
-	PhalanxIII2 = new Bone(_T("PhalanxIII2"));
-	PhalanxIII3 = new Bone(_T("PhalanxIII3"));
-	PhalanxIII4 = new Bone(_T("PhalanxIII4"));
+	PhalanxII1 = Skeleton::AddBone(_T("PhalanxII1"));
+	PhalanxII2 = Skeleton::AddBone(_T("PhalanxII2"));
+	PhalanxII3 = Skeleton::AddBone(_T("PhalanxII3"));
+	PhalanxII4 = Skeleton::AddBone(_T("PhalanxII4"));
+	PhalanxII5 = Skeleton::AddBone(_T("PhalanxII5"));
 
-	Tibia->AddChild(Fibula);
+	PhalanxIII1 = Skeleton::AddBone(_T("PhalanxIII1"));
+	PhalanxIII2 = Skeleton::AddBone(_T("PhalanxIII2"));
+	PhalanxIII3 = Skeleton::AddBone(_T("PhalanxIII3"));
+	PhalanxIII4 = Skeleton::AddBone(_T("PhalanxIII4"));
 
-	Tibia->AddChild(Talus);
-	Talus->AddChild(Talus2);
-	Talus->AddChild(Calcaneus);
+	assert(bones.size() == NBones);
 
-	Talus->AddChild(Cuboideum);
-	Talus->AddChild(Naviculare);
-	Naviculare->AddChild(Cuneiforme1);
-	Naviculare->AddChild(Cuneiforme2);
-	Naviculare->AddChild(Cuneiforme3);
+	Skeleton::Connect(_T("Tibia"), _T("Fibula"));
 
-	Cuboideum->AddChild(Metatarsalis1);
-	Cuboideum->AddChild(Metatarsalis2);
+	Skeleton::Connect(_T("Tibia"), _T("Talus"));
+	Skeleton::Connect(_T("Talus"), _T("Talus2"));
+	Skeleton::Connect(_T("Talus"), _T("Calcaneus"));
+
+	Skeleton::Connect(_T("Talus"), _T("Cuboideum"));
+	Skeleton::Connect(_T("Talus"), _T("Naviculare"));
+	Skeleton::Connect(_T("Naviculare"), _T("Cuneiforme1"));
+	Skeleton::Connect(_T("Naviculare"), _T("Cuneiforme2"));
+	Skeleton::Connect(_T("Naviculare"), _T("Cuneiforme3"));
+
+	Skeleton::Connect(_T("Cuboideum"), _T("Metatarsalis1"));
+	Skeleton::Connect(_T("Cuboideum"), _T("Metatarsalis2"));
 
 	// Yes, this is correct: 3->3, 4->2, 5->1
-	Cuneiforme3->AddChild(Metatarsalis3);
-	Cuneiforme2->AddChild(Metatarsalis4);
-	Cuneiforme1->AddChild(Metatarsalis5);
+	Skeleton::Connect(_T("Cuneiforme3"), _T("Metatarsalis3"));
+	Skeleton::Connect(_T("Cuneiforme2"), _T("Metatarsalis4"));
+	Skeleton::Connect(_T("Cuneiforme1"), _T("Metatarsalis5"));
 
-	Metatarsalis1->AddChild(PhalanxI1);
-	Metatarsalis2->AddChild(PhalanxI2);
-	Metatarsalis3->AddChild(PhalanxI3);
-	Metatarsalis4->AddChild(PhalanxI4);
-	Metatarsalis5->AddChild(PhalanxI5);
+	Skeleton::Connect(_T("Metatarsalis1"), _T("PhalanxI1"));
+	Skeleton::Connect(_T("Metatarsalis2"), _T("PhalanxI2"));
+	Skeleton::Connect(_T("Metatarsalis3"), _T("PhalanxI3"));
+	Skeleton::Connect(_T("Metatarsalis4"), _T("PhalanxI4"));
+	Skeleton::Connect(_T("Metatarsalis5"), _T("PhalanxI5"));
 
-	PhalanxI1->AddChild(PhalanxII1);
-	PhalanxI2->AddChild(PhalanxII2);
-	PhalanxI3->AddChild(PhalanxII3);
-	PhalanxI4->AddChild(PhalanxII4);
-	PhalanxI5->AddChild(PhalanxII5);
+	Skeleton::Connect(_T("PhalanxI1"), _T("PhalanxII1"));
+	Skeleton::Connect(_T("PhalanxI2"), _T("PhalanxII2"));
+	Skeleton::Connect(_T("PhalanxI3"), _T("PhalanxII3"));
+	Skeleton::Connect(_T("PhalanxI4"), _T("PhalanxII4"));
+	Skeleton::Connect(_T("PhalanxI5"), _T("PhalanxII5"));
 
-	PhalanxII1->AddChild(PhalanxIII1);
-	PhalanxII2->AddChild(PhalanxIII2);
-	PhalanxII3->AddChild(PhalanxIII3);
-	PhalanxII4->AddChild(PhalanxIII4);
+	Skeleton::Connect(_T("PhalanxII1"), _T("PhalanxIII1"));
+	Skeleton::Connect(_T("PhalanxII2"), _T("PhalanxIII2"));
+	Skeleton::Connect(_T("PhalanxII3"), _T("PhalanxIII3"));
+	Skeleton::Connect(_T("PhalanxII4"), _T("PhalanxIII4"));
 
 	length = 28.67e-2;
 	width = 9.56e-2;
@@ -118,48 +119,31 @@ Foot::Foot()
 
 Foot::~Foot()
 {
-	delete Tibia;
 }
 
 void Foot::Paint(bool mirror) const
 {
-	Tibia->Paint();
-}
-
-void Foot::AddToVolume(Volume* vol)
-{
-	VisitorBoneToVolume b2v(vol);
-	Tibia->Accept(b2v);
+	Skeleton::Render();
 }
 
 void Foot::SetPosition(double heelheight, double toeAngle, double mixing)
 {
-	Talus->roty = 0;
-	Talus->rotx = 0;
-	Calcaneus->rotx = 0;
-	PhalanxI1->roty = 0;
-	PhalanxI2->roty = 0;
-	PhalanxI3->roty = 0;
-	PhalanxI4->roty = 0;
-	PhalanxI5->roty = 0;
 
-	Update();
+	NelderMeadOptimizer opti;
+	opti.param.push_back(fmin(fmax(toeAngle - PhalanxI1->roty, -0.5), 1.2));
+	opti.simplexSpread = 1.0;
+	opti.evalLimit = 30;
+	opti.errorLimit = 0.001;
+	opti.reevalBest = true;
 
-	double h;
-	double ang = 0.0;
-	double inc = 2.0;
-	int c;
-	for(c = 0; c < 10; c++){
-		inc /= 2.0;
-		h = GetHeelHeight() - GetBallHeight();
-		if(h < heelheight){
-			ang = fmin(ang + inc, 1.2);
-		}
-		if(h > heelheight){
-			ang = fmax(ang - inc, -0.5);
-		}
+	opti.Start();
+	while(opti.IsRunning()){
+		const double ang = opti.param[0];
 
 		Talus->roty = ang * (1 - mixing);
+		Talus->rotx = 0;
+
+		Calcaneus->rotx = 0;
 
 		Cuboideum->roty = ang * mixing;
 		Cuneiforme1->roty = ang * mixing;
@@ -171,7 +155,15 @@ void Foot::SetPosition(double heelheight, double toeAngle, double mixing)
 		PhalanxI3->roty = -ang + toeAngle;
 		PhalanxI4->roty = -ang + toeAngle;
 		PhalanxI5->roty = -ang + toeAngle;
+
 		Update();
+
+		if(ang > 1.2) opti.SetError(ang * 1000);
+		if(ang < -0.5) opti.SetError(-ang * 1000);
+		if(ang <= 1.2 && ang >= -0.5){
+			const double h = GetHeelHeight() - GetBallHeight();
+			opti.SetError(fabs(h - heelheight));
+		}
 	}
 }
 
@@ -222,33 +214,106 @@ Polygon3 Foot::GetCenterline(void) const
 	return temp;
 }
 
+double Foot::GetSize(sizetype type) const
+{
+	switch(type){
+	case EU:
+		return (length + 1.5e-2) * 150;
+	case US:
+		return (length) / 2.54e-2 * 3 - 21.5;
+	case UK:
+		return (length + 1.5e-2) / 8.46e-3 - 25;
+	case JP:
+		return round((length * 1000) / 5) * 5;
+	case CN:
+		return round((length * 100) / 0.5) * 0.5;
+	case AU:
+		return (length + 1.5e-2) / 8.46e-3 - 25;
+	default:
+		return 0;
+	}
+}
+
 void Foot::Update(void)
 {
-	// Run the VisitorSetupBone visitor to recalculate each single bone.
-	VisitorSetupBone set;
-	set.parser.SetVariable(_T("L"), length);
-	set.parser.SetVariable(_T("W"), width);
-	set.parser.SetVariable(_T("H"), H);
-	set.parser.SetVariable(_T("A"), A);
-	Tibia->Accept(set);
+	MathParser parser;
+	parser.SetVariable(_T("L"), length);
+	parser.SetVariable(_T("W"), width);
+	parser.SetVariable(_T("H"), H);
+	parser.SetVariable(_T("A"), A);
+
+	UpdateBonesFromFormula(&parser);
 }
 
-void Foot::AddToGrid(wxGrid* gridLength, wxGrid* gridDiameter, wxGrid* gridSkin)
+bool Foot::LoadModel(wxTextInputStream* stream)
 {
-	VisitorBoneToGrid togrid(gridLength, gridDiameter, gridSkin);
-	Tibia->Accept(togrid);
+	if(!Tibia->Set(stream->ReadLine())) return false;
+	if(!Fibula->Set(stream->ReadLine())) return false;
+	if(!Talus->Set(stream->ReadLine())) return false;
+	if(!Talus2->Set(stream->ReadLine())) return false;
+	if(!Calcaneus->Set(stream->ReadLine())) return false;
+	if(!Cuboideum->Set(stream->ReadLine())) return false;
+	if(!Naviculare->Set(stream->ReadLine())) return false;
+	if(!Cuneiforme1->Set(stream->ReadLine())) return false;
+	if(!Cuneiforme2->Set(stream->ReadLine())) return false;
+	if(!Cuneiforme3->Set(stream->ReadLine())) return false;
+	if(!Metatarsalis1->Set(stream->ReadLine())) return false;
+	if(!Metatarsalis2->Set(stream->ReadLine())) return false;
+	if(!Metatarsalis3->Set(stream->ReadLine())) return false;
+	if(!Metatarsalis4->Set(stream->ReadLine())) return false;
+	if(!Metatarsalis5->Set(stream->ReadLine())) return false;
+	if(!PhalanxI1->Set(stream->ReadLine())) return false;
+	if(!PhalanxI2->Set(stream->ReadLine())) return false;
+	if(!PhalanxI3->Set(stream->ReadLine())) return false;
+	if(!PhalanxI4->Set(stream->ReadLine())) return false;
+	if(!PhalanxI5->Set(stream->ReadLine())) return false;
+	if(!PhalanxII1->Set(stream->ReadLine())) return false;
+	if(!PhalanxII2->Set(stream->ReadLine())) return false;
+	if(!PhalanxII3->Set(stream->ReadLine())) return false;
+	if(!PhalanxII4->Set(stream->ReadLine())) return false;
+	if(!PhalanxII5->Set(stream->ReadLine())) return false;
+	if(!PhalanxIII1->Set(stream->ReadLine())) return false;
+	if(!PhalanxIII2->Set(stream->ReadLine())) return false;
+	if(!PhalanxIII3->Set(stream->ReadLine())) return false;
+	if(!PhalanxIII4->Set(stream->ReadLine())) return false;
+
+	Update();
+
+	return true;
 }
 
-void Foot::GetFromGrid(wxGrid* gridLength, wxGrid* gridDiameter,
-		wxGrid* gridSkin)
+bool Foot::SaveModel(wxTextOutputStream* stream)
 {
-	VisitorBoneFromGrid togrid(gridLength, gridDiameter, gridSkin);
-	Tibia->Accept(togrid);
-}
-
-unsigned int Foot::GetBoneCount(void) const
-{
-	return NBones;
+	stream->WriteString(Tibia->Get());
+	stream->WriteString(Fibula->Get());
+	stream->WriteString(Talus->Get());
+	stream->WriteString(Talus2->Get());
+	stream->WriteString(Calcaneus->Get());
+	stream->WriteString(Cuboideum->Get());
+	stream->WriteString(Naviculare->Get());
+	stream->WriteString(Cuneiforme1->Get());
+	stream->WriteString(Cuneiforme2->Get());
+	stream->WriteString(Cuneiforme3->Get());
+	stream->WriteString(Metatarsalis1->Get());
+	stream->WriteString(Metatarsalis2->Get());
+	stream->WriteString(Metatarsalis3->Get());
+	stream->WriteString(Metatarsalis4->Get());
+	stream->WriteString(Metatarsalis5->Get());
+	stream->WriteString(PhalanxI1->Get());
+	stream->WriteString(PhalanxI2->Get());
+	stream->WriteString(PhalanxI3->Get());
+	stream->WriteString(PhalanxI4->Get());
+	stream->WriteString(PhalanxI5->Get());
+	stream->WriteString(PhalanxII1->Get());
+	stream->WriteString(PhalanxII2->Get());
+	stream->WriteString(PhalanxII3->Get());
+	stream->WriteString(PhalanxII4->Get());
+	stream->WriteString(PhalanxII5->Get());
+	stream->WriteString(PhalanxIII1->Get());
+	stream->WriteString(PhalanxIII2->Get());
+	stream->WriteString(PhalanxIII3->Get());
+	stream->WriteString(PhalanxIII4->Get());
+	return true;
 }
 
 void Foot::InitBones(void)
@@ -514,76 +579,5 @@ void Foot::InitBones(void)
 	PhalanxIII4->r2 = 0.00288448;
 	PhalanxIII4->s1 = 0.01;
 	PhalanxIII4->s2 = 0.01;
-}
-
-bool Foot::LoadModel(wxTextInputStream* stream)
-{
-	if(!Tibia->Set(stream->ReadLine())) return false;
-	if(!Fibula->Set(stream->ReadLine())) return false;
-	if(!Talus->Set(stream->ReadLine())) return false;
-	if(!Talus2->Set(stream->ReadLine())) return false;
-	if(!Calcaneus->Set(stream->ReadLine())) return false;
-	if(!Cuboideum->Set(stream->ReadLine())) return false;
-	if(!Naviculare->Set(stream->ReadLine())) return false;
-	if(!Cuneiforme1->Set(stream->ReadLine())) return false;
-	if(!Cuneiforme2->Set(stream->ReadLine())) return false;
-	if(!Cuneiforme3->Set(stream->ReadLine())) return false;
-	if(!Metatarsalis1->Set(stream->ReadLine())) return false;
-	if(!Metatarsalis2->Set(stream->ReadLine())) return false;
-	if(!Metatarsalis3->Set(stream->ReadLine())) return false;
-	if(!Metatarsalis4->Set(stream->ReadLine())) return false;
-	if(!Metatarsalis5->Set(stream->ReadLine())) return false;
-	if(!PhalanxI1->Set(stream->ReadLine())) return false;
-	if(!PhalanxI2->Set(stream->ReadLine())) return false;
-	if(!PhalanxI3->Set(stream->ReadLine())) return false;
-	if(!PhalanxI4->Set(stream->ReadLine())) return false;
-	if(!PhalanxI5->Set(stream->ReadLine())) return false;
-	if(!PhalanxII1->Set(stream->ReadLine())) return false;
-	if(!PhalanxII2->Set(stream->ReadLine())) return false;
-	if(!PhalanxII3->Set(stream->ReadLine())) return false;
-	if(!PhalanxII4->Set(stream->ReadLine())) return false;
-	if(!PhalanxII5->Set(stream->ReadLine())) return false;
-	if(!PhalanxIII1->Set(stream->ReadLine())) return false;
-	if(!PhalanxIII2->Set(stream->ReadLine())) return false;
-	if(!PhalanxIII3->Set(stream->ReadLine())) return false;
-	if(!PhalanxIII4->Set(stream->ReadLine())) return false;
-
-	Update();
-
-	return true;
-}
-
-bool Foot::SaveModel(wxTextOutputStream* stream)
-{
-	stream->WriteString(Tibia->Get());
-	stream->WriteString(Fibula->Get());
-	stream->WriteString(Talus->Get());
-	stream->WriteString(Talus2->Get());
-	stream->WriteString(Calcaneus->Get());
-	stream->WriteString(Cuboideum->Get());
-	stream->WriteString(Naviculare->Get());
-	stream->WriteString(Cuneiforme1->Get());
-	stream->WriteString(Cuneiforme2->Get());
-	stream->WriteString(Cuneiforme3->Get());
-	stream->WriteString(Metatarsalis1->Get());
-	stream->WriteString(Metatarsalis2->Get());
-	stream->WriteString(Metatarsalis3->Get());
-	stream->WriteString(Metatarsalis4->Get());
-	stream->WriteString(Metatarsalis5->Get());
-	stream->WriteString(PhalanxI1->Get());
-	stream->WriteString(PhalanxI2->Get());
-	stream->WriteString(PhalanxI3->Get());
-	stream->WriteString(PhalanxI4->Get());
-	stream->WriteString(PhalanxI5->Get());
-	stream->WriteString(PhalanxII1->Get());
-	stream->WriteString(PhalanxII2->Get());
-	stream->WriteString(PhalanxII3->Get());
-	stream->WriteString(PhalanxII4->Get());
-	stream->WriteString(PhalanxII5->Get());
-	stream->WriteString(PhalanxIII1->Get());
-	stream->WriteString(PhalanxIII2->Get());
-	stream->WriteString(PhalanxIII3->Get());
-	stream->WriteString(PhalanxIII4->Get());
-	return true;
 }
 

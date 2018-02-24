@@ -164,6 +164,9 @@ size_t MatlabMatrix::Numel(void) const
 
 size_t MatlabMatrix::Size(const size_t dim) const
 {
+	if(dim < 1) throw(std::out_of_range(
+			std::string(__FILE__)
+					+ ": Size(dim): Dimensions are one-based (1, 2, 3, 4, ...)."));
 	if(dim > dimension.size()) return 1;
 	return dimension[dim - 1];
 }
@@ -266,6 +269,12 @@ void MatlabMatrix::Insert(const bool* value, const size_t count)
 		buffer[bufferpos++] = value[i]? 1.0 : 0.0;
 }
 
+bool MatlabMatrix::IsFilled(void) const
+{
+	if(buffer == NULL) return true;
+	return bufferpos >= size;
+}
+
 double MatlabMatrix::GetValue(const size_t pos) const
 {
 	assert(buffer != NULL);
@@ -302,6 +311,38 @@ const double& MatlabMatrix::operator[](const size_t& index) const
 	if(index >= size) throw(std::out_of_range(
 			std::string(__FILE__) + ": operator[]: Access out of bounds!"));
 	return buffer[index];
+}
+
+double& MatlabMatrix::At(const size_t p1, const size_t p2, const size_t p3,
+		const size_t p4)
+{
+	assert(buffer != NULL);
+	if(p1 >= this->Size(1)) throw(std::out_of_range(
+			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p1 >= S1."));
+	if(p2 >= this->Size(2)) throw(std::out_of_range(
+			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p2 >= S2."));
+	if(p3 >= this->Size(3)) throw(std::out_of_range(
+			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p3 >= S3."));
+	if(p4 >= this->Size(4)) throw(std::out_of_range(
+			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p4 >= S4."));
+	const size_t pos = p1 + (p2 + (p3 + p4 * Size(3)) * Size(2)) * Size(1);
+	return buffer[pos];
+}
+
+const double& MatlabMatrix::At(const size_t p1, const size_t p2,
+		const size_t p3, const size_t p4) const
+{
+	assert(buffer != NULL);
+	if(p1 >= this->Size(1)) throw(std::out_of_range(
+			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p1 >= S1."));
+	if(p2 >= this->Size(2)) throw(std::out_of_range(
+			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p2 >= S2."));
+	if(p3 >= this->Size(3)) throw(std::out_of_range(
+			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p3 >= S3."));
+	if(p4 >= this->Size(4)) throw(std::out_of_range(
+			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p4 >= S4."));
+	const size_t pos = p1 + (p2 + (p3 + p4 * Size(3)) * Size(2)) * Size(1);
+	return buffer[pos];
 }
 
 double* MatlabMatrix::Pointer()

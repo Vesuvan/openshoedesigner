@@ -30,6 +30,7 @@ BackgroundImage::BackgroundImage()
 {
 	showFront = true;
 	showBack = true;
+	showBehindGeometry = false;
 	orientation = Right;
 	scale = 0.35;
 	centerx = 0.35;

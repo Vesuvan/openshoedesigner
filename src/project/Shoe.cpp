@@ -47,8 +47,7 @@ Shoe::~Shoe()
 
 bool Shoe::Evaluate(double L, double W, double H, double A)
 {
-	MathParser parser;
-	parser.autoEvaluate = false;
+	MathParser parser(false);
 	parser.AddAllowedUnit(_T("mm"), 1e-3);
 	parser.AddAllowedUnit(_T("cm"), 1e-2);
 	parser.AddAllowedUnit(_T("m"), 1);

@@ -186,6 +186,21 @@ void BoundingBox::SetSize(float sx, float sy, float sz, float origx,
 	zmax = zmin + sz;
 }
 
+void BoundingBox::SetOrigin(float origx, float origy, float origz)
+{
+	xmax = xmax - xmin + origx;
+	ymax = ymax - ymin + origy;
+	zmax = zmax - zmin + origz;
+	xmin = origx;
+	ymin = origy;
+	zmin = origz;
+}
+
+void BoundingBox::SetOrigin(const Vector3& orig)
+{
+	SetOrigin(orig.x, orig.y, orig.z);
+}
+
 double BoundingBox::GetVolume(void) const
 {
 	if(xmax <= xmin) return 0.0;
@@ -349,5 +364,27 @@ bool BoundingBox::FromStream(wxTextInputStream& stream)
 	stream >> color.y;
 	stream >> color.z;
 	stream >> alpha;
+	return true;
+}
+
+bool BoundingBox::Overlaps(const BoundingBox& other) const
+{
+	if(other.xmin > xmax) return false;
+	if(other.xmax < xmin) return false;
+	if(other.ymin > ymax) return false;
+	if(other.ymax < ymin) return false;
+	if(other.zmin > zmax) return false;
+	if(other.zmax < zmin) return false;
+	return true;
+}
+
+bool BoundingBox::IsInside(const Vector3& v) const
+{
+	if(v.x < xmin) return false;
+	if(v.x > xmax) return false;
+	if(v.y < ymin) return false;
+	if(v.y > ymax) return false;
+	if(v.z < zmin) return false;
+	if(v.z > zmax) return false;
 	return true;
 }

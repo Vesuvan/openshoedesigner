@@ -52,16 +52,23 @@
  *
  */
 
-#include "LinkageVisitor.h"
-#include "Linkage.h"
 #include <wx/string.h>
 
-class Bone:public Linkage {
+#include "../../3D/AffineTransformMatrix.h"
+#include "../../3D/Vector3.h"
+
+class Bone {
 public:
 	Bone(const wxString &name);
 	virtual ~Bone();
 
+	enum stringIdentifier {
+		stringAnchorD, stringLength, stringR1, stringR2, stringS1, stringS2
+	};
+
 	wxString name;
+
+	size_t connectTo;
 
 	// Formulas:
 	wxString anchorNx;
@@ -89,32 +96,35 @@ public:
 	// + linkN*rLocalParent
 	Vector3 anchorN; ///< Point from the parent bone
 
-	// Second calculate p1. It is the link-point + anchor*(rLocalParent+r1)
-	Vector3 p1;
-	Vector3 link;
-
-	// Third calculate p2 by adding p1 + normal*length
-	Vector3 p2;
 	Vector3 normal;
 	double length;
 
-	double r1;
-	double r2;
+	double r1; //!< Radius of 1st sphere
+	double r2; //!< Radius of 2nd sphere
 
-	double s1;
-	double s2;
+	double s1; //!< Skin thickness on 1st sphere
+	double s2; //!< Skin thickness on 2nd sphere
 
-	double rotx;
-	double roty;
+	double rotx; //!< Rotation along the x axis
+	double roty; //!< Rotation along the y axis
+
+	// Second calculate p1. It is the link-point + anchor*(rLocalParent+r1)
+	Vector3 p1; //!< First point of bone.
+	Vector3 link;
+
+	// Third calculate p2 by adding p1 + normal*length
+	Vector3 p2; //!< Second point of bone.
+
+	AffineTransformMatrix matrix;
 
 	bool Set(wxString text);
 	wxString Get(void) const;
-	void Setup(void);
-	void Render(void);
 
-	void Process(LinkageVisitor &visitor);
+	void Setup(Bone *parent);
+
+	void Render(void) const;
+
 private:
-
 	void Normal(const Vector3 v) const;
 	void Vertex(const Vector3 v) const;
 };

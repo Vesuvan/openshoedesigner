@@ -230,8 +230,9 @@ void OpenGLImage::Paint(void) const
 	Update();
 
 	glColor3f(1, 1, 1);
-	glBindTexture(GL_TEXTURE_2D, textureID);
 	glEnable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textureID);
 	glBegin(GL_QUADS);
 	glNormal3f(0, 0, 1);
 	glTexCoord2f(0, this->tex_h);
@@ -243,6 +244,7 @@ void OpenGLImage::Paint(void) const
 	glTexCoord2f(0, 0);
 	glVertex3f(0, this->h, 0);
 	glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisable(GL_TEXTURE_2D);
 }
 

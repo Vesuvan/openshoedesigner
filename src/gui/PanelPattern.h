@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : FrameShoe.h
-// Purpose            : 
-// Thread Safe        : Yes
+// Name               : PanelPattern.h
+// Purpose            :
+// Thread Safe        : No
 // Platform dependent : No
-// Compiler Options   :
-// Author             : Tobias Schaefer
-// Created            : 04.10.2015
-// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Compiler Options   : -lm
+// Author             : toby
+// Created            : 01.11.2017
+// Copyright          : (C) 2017 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,30 +24,39 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef FRAMESHOE_H_
-#define FRAMESHOE_H_
+#ifndef PANELPATTERN_H_
+#define PANELPATTERN_H_
 
-/*!\class FrameShoe
- * \brief GUI for setting up a last
+/*!\class PanelPattern
+ * \brief ...
+ *
+ * ...
  */
 
-#include "../project/Project.h"
-#include "gui.h"
+#include <wx/panel.h>
 
-class FrameShoe:public GUIFrameShoe {
+class PanelPattern:public wxPanel {
 public:
-	FrameShoe(wxWindow* parent, Project* project);
-	virtual ~FrameShoe();
+	PanelPattern(wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos =
+			wxDefaultPosition, const wxSize& size = wxDefaultSize, long style =
+			wxTAB_TRAVERSAL);
+	virtual ~PanelPattern();
 
-	bool TransferDataToWindow();
-	virtual void OnCloseX(wxCloseEvent& event);
-	virtual void OnTextEnter(wxCommandEvent& event);
-	virtual void OnPreset(wxCommandEvent& event);
-	virtual void OnScroll(wxScrollEvent& event);
-	virtual void OnScrollChange(wxScrollEvent& event);
+	// Member Variables
+public:
 
 private:
-	Project* project;
+
+	//Methods
+public:
+
+private:
+
+	void OnPaint(wxPaintEvent& event);
+	void OnSize(wxSizeEvent &event);
+
+	void OnMotion(wxMouseEvent& event);
+	void OnLeftDown(wxMouseEvent& event);
 };
 
-#endif /* FRAMESHOE_H_ */
+#endif /* PANELPATTERN_H_ */

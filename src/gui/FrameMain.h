@@ -34,13 +34,10 @@
  * All other windows and dialogs are children of this frame.
  */
 
+#include <wx/cmdproc.h>
 #include "gui.h"
 
-#include "FrameFoot.h"
-#include "FrameShoe.h"
-#include "FrameWalkcycleSupport.h"
 #include "DialogSetupStereo3D.h"
-#include "FrameDebugParser.h"
 #include "DisplaySettings.h"
 
 #include "../project/Project.h"
@@ -50,6 +47,7 @@
 #include <wx/intl.h>
 #include <wx/config.h>
 
+#include "DialogSetupUnits.h"
 class FrameMain:public GUIFrameMain {
 public:
 	FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
@@ -59,21 +57,26 @@ public:
 	bool TransferDataToWindow();
 	bool TransferDataFromWindow();
 
-	void RefreshMain(wxCommandEvent& event);
-	void UpdateMainGUI(wxCommandEvent& event);
-	void UpdateFullGUI(wxCommandEvent& event);
+	void RefreshCanvas(wxCommandEvent& event);
+	void RefreshView(wxCommandEvent& event);
 	void UpdateProject(wxCommandEvent& event);
 	void LastCalculationDone(wxCommandEvent& event);
 
-	void OnInitializeFootModel(wxCommandEvent& event);
+	void OnClose(wxCloseEvent& event);
+	void OnUndo(wxCommandEvent& event);
+	void OnRedo(wxCommandEvent& event);
+
+	void OnSetSymmetry(wxCommandEvent& event);
+	void OnCopyMeasurements(wxCommandEvent& event);
 	void OnLoadFootModel(wxCommandEvent& event);
 	void OnSaveFootModel(wxCommandEvent& event);
+	void OnLoadFootSTL(wxCommandEvent& event);
 	void OnSetupFoot(wxCommandEvent& event);
 	void OnSetupShoe(wxCommandEvent& event);
 	void OnConstructionSelection(wxCommandEvent& event);
 	void OnEditWalkCycle(wxCommandEvent& event);
-	void OnLoadShoe(wxCommandEvent& event);
-	void OnSaveShoe(wxCommandEvent& event);
+	void OnLoadPattern(wxCommandEvent& event);
+	void OnSavePattern(wxCommandEvent& event);
 	void OnSaveLast(wxCommandEvent& event);
 	void OnSaveInsole(wxCommandEvent& event);
 	void OnSaveSole(wxCommandEvent& event);
@@ -85,19 +88,25 @@ public:
 	void OnSetupUnits(wxCommandEvent& event);
 	void OnSelectLanguage(wxCommandEvent& event);
 	void OnDebugParser(wxCommandEvent& event);
-
-	void OnToolClicked(wxCommandEvent& event);
+	void OnPageChange( wxNotebookEvent& event);
+	void OnSetByShoeSize(wxCommandEvent& event);
+	void OnText(wxCommandEvent& event);
+	void OnCellChange(wxGridEvent& event);
+	void OnScroll(wxScrollEvent& event);
+	void OnScrollChange(wxScrollEvent& event);
+	void OnPreset(wxCommandEvent& event);
+	void OnToggleAnkleLock(wxCommandEvent& event);
+	void OnChoiceDisplay(wxCommandEvent& event);
 
 	wxConfig *config;
 	wxLocale *locale;
 
+//	wxCommandProcessor *commandProcessor;
+
 	DisplaySettings settings;
 
-	FrameShoe* dialogShoe;
-	FrameFoot* dialogFoot;
-	FrameWalkcycleSupport* dialogWalkcycleSupport;
 	DialogSetupStereo3D* dialogSetupStereo3D;
-	FrameDebugParser* dialogDebugParser;
+	DialogSetupUnits* dialogSetupUnits;
 
 	LastGenerationThread* thread;
 

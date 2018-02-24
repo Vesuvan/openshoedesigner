@@ -52,7 +52,7 @@ WX_DECLARE_STRING_HASH_MAP(double, Variables);
 
 class MathParser {
 public:
-	MathParser();
+	MathParser(bool autoEvaluate = true);
 
 	// Member functions
 public:

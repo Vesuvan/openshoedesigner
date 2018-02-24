@@ -26,14 +26,15 @@
 
 #include "FrameDebugParser.h"
 
-FrameDebugParser::FrameDebugParser(wxWindow* parent) :
-		GUIFrameDebugParser(parent)
+FrameDebugParser::FrameDebugParser(wxWindow* parent)
+		: GUIFrameDebugParser(parent)
 {
-	parser.AddAllowedUnit(_T("mm"), 1e-3);
-	parser.AddAllowedUnit(_T("cm"), 1e-2);
-	parser.AddAllowedUnit(_T("m"), 1);
-	parser.AddAllowedUnit(_T("in"), 2.54e-2);
-	parser.AddAllowedUnit(_T("ft"), 0.3048);
+	parser.autoEvaluate = true;
+//	parser.AddAllowedUnit(_T("mm"), 1e-3);
+//	parser.AddAllowedUnit(_T("cm"), 1e-2);
+//	parser.AddAllowedUnit(_T("m"), 1);
+//	parser.AddAllowedUnit(_T("in"), 2.54e-2);
+//	parser.AddAllowedUnit(_T("ft"), 0.3048);
 }
 
 FrameDebugParser::~FrameDebugParser()

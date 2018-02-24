@@ -85,11 +85,11 @@ public:
 	unsigned char leftEyeB;
 
 	RotationType rotationMode;
-
-protected:
 	AffineTransformMatrix rotmat;
 	AffineTransformMatrix transmat;
 	float scale;
+
+protected:
 	float turntableX;
 	float turntableY;
 	float unitAtOrigin;

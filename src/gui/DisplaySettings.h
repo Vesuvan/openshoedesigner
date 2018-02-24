@@ -53,6 +53,7 @@ public:
 	Unit SmallDistance;
 	Unit Tolerance;
 	Unit Angle;
+	Unit Percent;
 
 	wxString lastFootDirectory;
 	wxString lastShoeDirectory;

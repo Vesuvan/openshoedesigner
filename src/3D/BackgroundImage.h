@@ -45,6 +45,7 @@ public:
 	void Paint(void) const;
 
 	Orientation orientation;
+	bool showBehindGeometry;
 	bool showFront;
 	bool showBack;
 	GLfloat scale;

@@ -81,6 +81,7 @@ public:
 	void Insert(const double* value, const size_t count, const size_t p2);
 	void Insert(const float* value, const size_t count);
 	void Insert(const bool* value, const size_t count);
+	bool IsFilled(void) const;
 
 	double GetValue(const size_t pos) const;
 	double GetValue(const size_t p1, const size_t p2, const size_t p3 = 0,
@@ -88,6 +89,11 @@ public:
 
 	double& operator[](const size_t& index);
 	const double& operator[](const size_t& index) const;
+
+	double& At(const size_t p1, const size_t p2, const size_t p3 = 0,
+			const size_t p4 = 0);
+	const double& At(const size_t p1, const size_t p2, const size_t p3 = 0,
+			const size_t p4 = 0) const;
 
 	double* Pointer(void);
 	const double* Pointer(void) const;
