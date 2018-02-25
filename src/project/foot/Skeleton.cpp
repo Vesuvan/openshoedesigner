@@ -26,8 +26,11 @@
 
 #include "Skeleton.h"
 
+#include <GL/gl.h>
+
 Skeleton::Skeleton()
 {
+	mirrored = false;
 }
 
 Skeleton::~Skeleton()
@@ -37,7 +40,7 @@ Skeleton::~Skeleton()
 Bone* Skeleton::AddBone(wxString name)
 {
 	bones.push_back(Bone(name));
-	return &(bones[bones.size()-1]);
+	return &(bones[bones.size() - 1]);
 }
 
 size_t Skeleton::GetBoneCount(void) const
@@ -78,8 +81,11 @@ void Skeleton::Setup(void)
 
 void Skeleton::Render(void) const
 {
-	for(size_t n = 0; n < bones.size(); n++)
+	for(size_t n = 0; n < bones.size(); n++){
+		::glPushName(n);
 		bones[n].Render();
+		::glPopName();
+	}
 }
 
 void Skeleton::UpdateBonesFromFormula(MathParser *parser)
@@ -100,6 +106,11 @@ void Skeleton::UpdateBonesFromFormula(MathParser *parser)
 		bones[n].r2 = parser->GetNumber(bones[n].r2v);
 		bones[n].s1 = parser->GetNumber(bones[n].s1v);
 		bones[n].s2 = parser->GetNumber(bones[n].s2v);
+
+		if(mirrored){
+			bones[n].anchorN.y = -bones[n].anchorN.y;
+			bones[n].link.y = -bones[n].link.y;
+			bones[n].normal.y = -bones[n].normal.y;
+		}
 	}
-	Setup();
 }

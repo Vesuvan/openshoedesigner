@@ -28,6 +28,7 @@
 
 #include <cstdio>
 #include "../main.h"
+
 IMPLEMENT_DYNAMIC_CLASS(ProjectView, wxView)
 
 ProjectView::ProjectView()
@@ -35,23 +36,23 @@ ProjectView::ProjectView()
 {
 	m_frame = NULL;
 	foot = NULL;
-	shoe = NULL;
 
-	showLeft = false;
-	showRight = true;
-	side = Both;
-	showBackground = false;
-	showFootScan = false;
-	showFootModel = false;
-	showLastScan = false;
-	showLast = false;
+	showLeft = true;
+	showRight = false;
 	showBones = true;
+	showSkin = false;
+	showLeg = false;
+	showLast = false;
 	showInsole = false;
 	showSole = false;
 	showUpper = false;
 	showCutaway = false;
 	showFloor = false;
-	floorLevel = 0.0;
+	showCoordinateSystem = true;
+	showBackground = false;
+
+	showFootScan = false;
+	showLastScan = false;
 }
 
 ProjectView::~ProjectView()
@@ -78,40 +79,63 @@ bool ProjectView::OnCreate(wxDocument* doc, long flags)
 
 void ProjectView::Paint(void) const
 {
-	glPushMatrix();
-	glTranslated(0, 0, floorLevel);
-	if(showBones) PaintBones();
-	if(showInsole) PaintInsole();
-	if(showSole) PaintSole();
-	if(showUpper) PaintUpper();
-	if(showCutaway) PaintCutaway();
-	if(showFloor) PaintFloor();
-	if(showLast) PaintLast();
-	if(showBackground) PaintBackground(false);
-	glPopMatrix();
-}
+	const bool shiftapart = (showLeft && showRight);
 
-void ProjectView::PaintBackground(bool showBehind) const
-{
-	if(!showBackground) return;
-	for(std::vector <BackgroundImage>::const_iterator image =
-			background.begin(); image != background.end(); ++image){
-		if(image->showBehindGeometry == showBehind) image->Paint();
-	}
-}
-
-void ProjectView::PaintBones(void) const
-{
 	Project* project = wxStaticCast(this->GetDocument(), Project);
-	project->footL.Paint();
+
+	if(showLeft){
+		glPushMatrix();
+
+		if(shiftapart) glTranslatef(0, project->footL.ballwidth, 0);
+
+		glLoadName(0);
+		glPushName(1);
+		if(showBones) project->footL.PaintBones();
+		glPopName();
+		glPushName(2);
+		if(showSkin) project->footL.PaintSkin();
+		glPopName();
+
+		glPopMatrix();
+	}
+	if(showRight){
+		glPushMatrix();
+		if(shiftapart) glTranslatef(0, -project->footR.ballwidth, 0);
+
+		glLoadName(1);
+		glPushName(1);
+		if(showBones) project->footR.PaintBones();
+		glPopName();
+		glPushName(2);
+		if(showSkin) project->footR.PaintSkin();
+		glPopName();
+
+		glPopMatrix();
+	}
+
+	glLoadName(10);
+	if(showLast) PaintLast();
+	glLoadName(11);
+	if(showInsole) PaintInsole();
+	glLoadName(12);
+	if(showSole) PaintSole();
+	glLoadName(13);
+	if(showUpper) PaintUpper();
+	glLoadName(14);
+	if(showCutaway) PaintCutaway();
+
+	glLoadName(16);
+	if(showFloor) PaintFloor();
+	glLoadName(17);
+	if(showBackground) PaintBackground(false);
 }
 
 void ProjectView::PaintLast(void) const
 {
-	Project* project = wxStaticCast(this->GetDocument(), Project);
+//	Project* project = wxStaticCast(this->GetDocument(), Project);
 
-	project->lastvol.Paint();
-	project->lastvol.PaintSurface();
+//	project->lastvol.Paint();
+//	project->lastvol.PaintSurface();
 }
 
 void ProjectView::PaintInsole(void) const
@@ -139,10 +163,9 @@ void ProjectView::PaintInsole(void) const
 
 void ProjectView::PaintSole(void) const
 {
-	Project* project = wxStaticCast(this->GetDocument(), Project);
+//	Project* project = wxStaticCast(this->GetDocument(), Project);
 
-	project->sole.Paint();
-	project->xray.Paint();
+//	project->sole.Paint();
 }
 
 void ProjectView::PaintUpper(void) const
@@ -152,18 +175,14 @@ void ProjectView::PaintUpper(void) const
 
 void ProjectView::PaintCutaway(void) const
 {
+	Project* project = wxStaticCast(this->GetDocument(), Project);
+	project->xray.Paint();
 }
 
 void ProjectView::PaintFloor(void) const
 {
-	Project* project = wxStaticCast(this->GetDocument(), Project);
-
-	const double lev = project->footL.GetHeelHeight()
-			- project->shoe.heelHeight;
 	const float d = 0.5;
 
-	glPushMatrix();
-	glTranslated(0, 0, lev);
 	glColor3f(0.4, 0.4, 0.4);
 	glBegin(GL_QUADS);
 	glNormal3f(0, 0, 1);
@@ -172,7 +191,15 @@ void ProjectView::PaintFloor(void) const
 	glVertex3f(d, d, 0);
 	glVertex3f(-d, d, 0);
 	glEnd();
-	glPopMatrix();
+}
+
+void ProjectView::PaintBackground(bool showBehind) const
+{
+	if(!showBackground) return;
+	for(std::vector <BackgroundImage>::const_iterator image =
+			background.begin(); image != background.end(); ++image){
+		if(image->showBehindGeometry == showBehind) image->Paint();
+	}
 }
 
 void ProjectView::OnDraw(wxDC* dc)

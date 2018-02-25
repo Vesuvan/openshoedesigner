@@ -108,212 +108,32 @@ Foot::Foot()
 	Skeleton::Connect(_T("PhalanxII4"), _T("PhalanxIII4"));
 
 	length = 28.67e-2;
-	width = 9.56e-2;
-	H = width - 2e-2;
-	A = H - 1e-2;
+	ballwidth = 9.56e-2;
+	heelwidth = ballwidth - 2e-2;
+	anklewidth = heelwidth - 1e-2;
 
 	InitBones();
-
-	Update();
+	UpdateModel();
 }
 
 Foot::~Foot()
 {
 }
 
-void Foot::Paint(bool mirror) const
+void Foot::PaintBones(void) const
 {
+	glPushMatrix();
+	glMultMatrixd(origin.a);
 	Skeleton::Render();
+	glPopMatrix();
 }
 
-void Foot::SetPosition(double heelheight, double toeAngle, double mixing)
+void Foot::PaintSkin(void) const
 {
-
-	NelderMeadOptimizer opti;
-	opti.param.push_back(fmin(fmax(toeAngle - PhalanxI1->roty, -0.5), 1.2));
-	opti.simplexSpread = 1.0;
-	opti.evalLimit = 30;
-	opti.errorLimit = 0.001;
-	opti.reevalBest = true;
-
-	opti.Start();
-	while(opti.IsRunning()){
-		const double ang = opti.param[0];
-
-		Talus->roty = ang * (1 - mixing);
-		Talus->rotx = 0;
-
-		Calcaneus->rotx = 0;
-
-		Cuboideum->roty = ang * mixing;
-		Cuneiforme1->roty = ang * mixing;
-		Cuneiforme2->roty = ang * mixing;
-		Cuneiforme3->roty = ang * mixing;
-
-		PhalanxI1->roty = -ang + toeAngle;
-		PhalanxI2->roty = -ang + toeAngle;
-		PhalanxI3->roty = -ang + toeAngle;
-		PhalanxI4->roty = -ang + toeAngle;
-		PhalanxI5->roty = -ang + toeAngle;
-
-		Update();
-
-		if(ang > 1.2) opti.SetError(ang * 1000);
-		if(ang < -0.5) opti.SetError(-ang * 1000);
-		if(ang <= 1.2 && ang >= -0.5){
-			const double h = GetHeelHeight() - GetBallHeight();
-			opti.SetError(fabs(h - heelheight));
-		}
-	}
-}
-
-void Foot::SetSize(double L, double W, double H, double A)
-{
-	this->length = L;
-	this->width = W;
-	this->H = H;
-	this->A = A;
-}
-
-double Foot::GetHeelHeight(void) const
-{
-	return Calcaneus->p2.z - Calcaneus->r2 - Calcaneus->s2;
-}
-
-double Foot::GetBallHeight(void) const
-{
-	return PhalanxI5->p1.z - PhalanxI5->r1 - PhalanxI5->s1;
-}
-
-Polygon3 Foot::GetCenterline(void) const
-{
-	Polygon3 temp;
-
-	temp.InsertPoint(
-			Calcaneus->p1.x
-					+ (-Calcaneus->r1 - Calcaneus->s1) * cos(Talus->roty - 0.4),
-			Calcaneus->p1.y,
-			Calcaneus->p1.z
-					- (-Calcaneus->r1 - Calcaneus->s1)
-							* sin(Talus->roty - 0.4));
-
-	temp.InsertPoint(Calcaneus->p1);
-	temp.InsertPoint(Talus->p2);
-	temp.InsertPoint(Naviculare->p1);
-	temp.InsertPoint(Metatarsalis4->p1);
-	temp.InsertPoint(PhalanxI4->p1);
-	temp.InsertPoint(PhalanxIII4->p2);
-
-	temp.InsertPoint(
-			PhalanxIII4->p1
-					+ (PhalanxIII4->p2 - PhalanxIII4->p1)
-							* (1
-									+ (PhalanxIII4->r2 + PhalanxIII4->s2)
-											/ (PhalanxIII4->p2 - PhalanxIII4->p1).Abs()));
-
-	return temp;
-}
-
-double Foot::GetSize(sizetype type) const
-{
-	switch(type){
-	case EU:
-		return (length + 1.5e-2) * 150;
-	case US:
-		return (length) / 2.54e-2 * 3 - 21.5;
-	case UK:
-		return (length + 1.5e-2) / 8.46e-3 - 25;
-	case JP:
-		return round((length * 1000) / 5) * 5;
-	case CN:
-		return round((length * 100) / 0.5) * 0.5;
-	case AU:
-		return (length + 1.5e-2) / 8.46e-3 - 25;
-	default:
-		return 0;
-	}
-}
-
-void Foot::Update(void)
-{
-	MathParser parser;
-	parser.SetVariable(_T("L"), length);
-	parser.SetVariable(_T("W"), width);
-	parser.SetVariable(_T("H"), H);
-	parser.SetVariable(_T("A"), A);
-
-	UpdateBonesFromFormula(&parser);
-}
-
-bool Foot::LoadModel(wxTextInputStream* stream)
-{
-	if(!Tibia->Set(stream->ReadLine())) return false;
-	if(!Fibula->Set(stream->ReadLine())) return false;
-	if(!Talus->Set(stream->ReadLine())) return false;
-	if(!Talus2->Set(stream->ReadLine())) return false;
-	if(!Calcaneus->Set(stream->ReadLine())) return false;
-	if(!Cuboideum->Set(stream->ReadLine())) return false;
-	if(!Naviculare->Set(stream->ReadLine())) return false;
-	if(!Cuneiforme1->Set(stream->ReadLine())) return false;
-	if(!Cuneiforme2->Set(stream->ReadLine())) return false;
-	if(!Cuneiforme3->Set(stream->ReadLine())) return false;
-	if(!Metatarsalis1->Set(stream->ReadLine())) return false;
-	if(!Metatarsalis2->Set(stream->ReadLine())) return false;
-	if(!Metatarsalis3->Set(stream->ReadLine())) return false;
-	if(!Metatarsalis4->Set(stream->ReadLine())) return false;
-	if(!Metatarsalis5->Set(stream->ReadLine())) return false;
-	if(!PhalanxI1->Set(stream->ReadLine())) return false;
-	if(!PhalanxI2->Set(stream->ReadLine())) return false;
-	if(!PhalanxI3->Set(stream->ReadLine())) return false;
-	if(!PhalanxI4->Set(stream->ReadLine())) return false;
-	if(!PhalanxI5->Set(stream->ReadLine())) return false;
-	if(!PhalanxII1->Set(stream->ReadLine())) return false;
-	if(!PhalanxII2->Set(stream->ReadLine())) return false;
-	if(!PhalanxII3->Set(stream->ReadLine())) return false;
-	if(!PhalanxII4->Set(stream->ReadLine())) return false;
-	if(!PhalanxII5->Set(stream->ReadLine())) return false;
-	if(!PhalanxIII1->Set(stream->ReadLine())) return false;
-	if(!PhalanxIII2->Set(stream->ReadLine())) return false;
-	if(!PhalanxIII3->Set(stream->ReadLine())) return false;
-	if(!PhalanxIII4->Set(stream->ReadLine())) return false;
-
-	Update();
-
-	return true;
-}
-
-bool Foot::SaveModel(wxTextOutputStream* stream)
-{
-	stream->WriteString(Tibia->Get());
-	stream->WriteString(Fibula->Get());
-	stream->WriteString(Talus->Get());
-	stream->WriteString(Talus2->Get());
-	stream->WriteString(Calcaneus->Get());
-	stream->WriteString(Cuboideum->Get());
-	stream->WriteString(Naviculare->Get());
-	stream->WriteString(Cuneiforme1->Get());
-	stream->WriteString(Cuneiforme2->Get());
-	stream->WriteString(Cuneiforme3->Get());
-	stream->WriteString(Metatarsalis1->Get());
-	stream->WriteString(Metatarsalis2->Get());
-	stream->WriteString(Metatarsalis3->Get());
-	stream->WriteString(Metatarsalis4->Get());
-	stream->WriteString(Metatarsalis5->Get());
-	stream->WriteString(PhalanxI1->Get());
-	stream->WriteString(PhalanxI2->Get());
-	stream->WriteString(PhalanxI3->Get());
-	stream->WriteString(PhalanxI4->Get());
-	stream->WriteString(PhalanxI5->Get());
-	stream->WriteString(PhalanxII1->Get());
-	stream->WriteString(PhalanxII2->Get());
-	stream->WriteString(PhalanxII3->Get());
-	stream->WriteString(PhalanxII4->Get());
-	stream->WriteString(PhalanxII5->Get());
-	stream->WriteString(PhalanxIII1->Get());
-	stream->WriteString(PhalanxIII2->Get());
-	stream->WriteString(PhalanxIII3->Get());
-	stream->WriteString(PhalanxIII4->Get());
-	return true;
+	glPushMatrix();
+	glMultMatrixd(origin.a);
+	skin.PaintSurface();
+	glPopMatrix();
 }
 
 void Foot::InitBones(void)
@@ -579,5 +399,259 @@ void Foot::InitBones(void)
 	PhalanxIII4->r2 = 0.00288448;
 	PhalanxIII4->s1 = 0.01;
 	PhalanxIII4->s2 = 0.01;
+}
+
+bool Foot::LoadModel(wxTextInputStream* stream)
+{
+	if(!Tibia->Set(stream->ReadLine())) return false;
+	if(!Fibula->Set(stream->ReadLine())) return false;
+	if(!Talus->Set(stream->ReadLine())) return false;
+	if(!Talus2->Set(stream->ReadLine())) return false;
+	if(!Calcaneus->Set(stream->ReadLine())) return false;
+	if(!Cuboideum->Set(stream->ReadLine())) return false;
+	if(!Naviculare->Set(stream->ReadLine())) return false;
+	if(!Cuneiforme1->Set(stream->ReadLine())) return false;
+	if(!Cuneiforme2->Set(stream->ReadLine())) return false;
+	if(!Cuneiforme3->Set(stream->ReadLine())) return false;
+	if(!Metatarsalis1->Set(stream->ReadLine())) return false;
+	if(!Metatarsalis2->Set(stream->ReadLine())) return false;
+	if(!Metatarsalis3->Set(stream->ReadLine())) return false;
+	if(!Metatarsalis4->Set(stream->ReadLine())) return false;
+	if(!Metatarsalis5->Set(stream->ReadLine())) return false;
+	if(!PhalanxI1->Set(stream->ReadLine())) return false;
+	if(!PhalanxI2->Set(stream->ReadLine())) return false;
+	if(!PhalanxI3->Set(stream->ReadLine())) return false;
+	if(!PhalanxI4->Set(stream->ReadLine())) return false;
+	if(!PhalanxI5->Set(stream->ReadLine())) return false;
+	if(!PhalanxII1->Set(stream->ReadLine())) return false;
+	if(!PhalanxII2->Set(stream->ReadLine())) return false;
+	if(!PhalanxII3->Set(stream->ReadLine())) return false;
+	if(!PhalanxII4->Set(stream->ReadLine())) return false;
+	if(!PhalanxII5->Set(stream->ReadLine())) return false;
+	if(!PhalanxIII1->Set(stream->ReadLine())) return false;
+	if(!PhalanxIII2->Set(stream->ReadLine())) return false;
+	if(!PhalanxIII3->Set(stream->ReadLine())) return false;
+	if(!PhalanxIII4->Set(stream->ReadLine())) return false;
+
+	UpdateModel();
+
+	return true;
+}
+
+bool Foot::SaveModel(wxTextOutputStream* stream)
+{
+	stream->WriteString(Tibia->Get());
+	stream->WriteString(Fibula->Get());
+	stream->WriteString(Talus->Get());
+	stream->WriteString(Talus2->Get());
+	stream->WriteString(Calcaneus->Get());
+	stream->WriteString(Cuboideum->Get());
+	stream->WriteString(Naviculare->Get());
+	stream->WriteString(Cuneiforme1->Get());
+	stream->WriteString(Cuneiforme2->Get());
+	stream->WriteString(Cuneiforme3->Get());
+	stream->WriteString(Metatarsalis1->Get());
+	stream->WriteString(Metatarsalis2->Get());
+	stream->WriteString(Metatarsalis3->Get());
+	stream->WriteString(Metatarsalis4->Get());
+	stream->WriteString(Metatarsalis5->Get());
+	stream->WriteString(PhalanxI1->Get());
+	stream->WriteString(PhalanxI2->Get());
+	stream->WriteString(PhalanxI3->Get());
+	stream->WriteString(PhalanxI4->Get());
+	stream->WriteString(PhalanxI5->Get());
+	stream->WriteString(PhalanxII1->Get());
+	stream->WriteString(PhalanxII2->Get());
+	stream->WriteString(PhalanxII3->Get());
+	stream->WriteString(PhalanxII4->Get());
+	stream->WriteString(PhalanxII5->Get());
+	stream->WriteString(PhalanxIII1->Get());
+	stream->WriteString(PhalanxIII2->Get());
+	stream->WriteString(PhalanxIII3->Get());
+	stream->WriteString(PhalanxIII4->Get());
+	return true;
+}
+
+void Foot::CopyModel(const Foot& other)
+{
+	for(size_t n = 0; n < bones.size(); n++){
+		bones[n].name = other.bones[n].name;
+		bones[n].anchorNx = other.bones[n].anchorNx;
+		bones[n].anchorNy = other.bones[n].anchorNy;
+		bones[n].anchorNz = other.bones[n].anchorNz;
+		bones[n].linkx = other.bones[n].linkx;
+		bones[n].linky = other.bones[n].linky;
+		bones[n].linkz = other.bones[n].linkz;
+		bones[n].normalx = other.bones[n].normalx;
+		bones[n].normaly = other.bones[n].normaly;
+		bones[n].normalz = other.bones[n].normalz;
+		bones[n].anchorDv = other.bones[n].anchorDv;
+		bones[n].lengthv = other.bones[n].lengthv;
+		bones[n].r1v = other.bones[n].r1v;
+		bones[n].r2v = other.bones[n].r2v;
+		bones[n].s1v = other.bones[n].s1v;
+		bones[n].s2v = other.bones[n].s2v;
+	}
+}
+
+void Foot::SetModelParameter(double L, double W, double H, double A)
+{
+	this->length = L;
+	this->ballwidth = W;
+	this->heelwidth = H;
+	this->anklewidth = A;
+}
+
+void Foot::CopyModelParameter(const Foot& other)
+{
+	this->length = other.length;
+	this->ballwidth = other.ballwidth;
+	this->heelwidth = other.heelwidth;
+	this->anklewidth = other.anklewidth;
+}
+
+void Foot::UpdateModel(void)
+{
+	MathParser parser;
+	parser.SetVariable(_T("L"), length);
+	parser.SetVariable(_T("W"), ballwidth);
+	parser.SetVariable(_T("H"), heelwidth);
+	parser.SetVariable(_T("A"), anklewidth);
+
+	UpdateBonesFromFormula(&parser);
+	Skeleton::Setup();
+}
+
+void Foot::UpdatePosition(void)
+{
+	Skeleton::Setup();
+}
+
+double Foot::GetHeelHeight(void) const
+{
+	return Calcaneus->p2.z - Calcaneus->r2 - Calcaneus->s2;
+}
+
+double Foot::GetBallHeight(void) const
+{
+	return PhalanxI5->p1.z - PhalanxI5->r1 - PhalanxI5->s1;
+}
+
+void Foot::SetPosition(double heelheight, double ballheight, double toeAngle,
+		double mixing)
+{
+
+	NelderMeadOptimizer opti;
+	opti.param.push_back(0);
+	opti.simplexSpread = 1.0;
+	opti.evalLimit = 30;
+	opti.errorLimit = 0.001;
+	opti.reevalBest = true;
+
+	opti.param[0] = fmin(fmax(toeAngle - PhalanxI1->roty, -0.5), 1.2);
+	opti.Start();
+	while(opti.IsRunning()){
+		const double ang = opti.param[0];
+
+		Talus->roty = ang * (1 - mixing);
+		Talus->rotx = 0;
+
+		Calcaneus->rotx = 0;
+
+		Cuboideum->roty = ang * mixing;
+		Cuneiforme1->roty = ang * mixing;
+		Cuneiforme2->roty = ang * mixing;
+		Cuneiforme3->roty = ang * mixing;
+
+		PhalanxI1->roty = -ang + toeAngle;
+		PhalanxI2->roty = -ang + toeAngle;
+		PhalanxI3->roty = -ang + toeAngle;
+		PhalanxI4->roty = -ang + toeAngle;
+		PhalanxI5->roty = -ang + toeAngle;
+
+		UpdatePosition();
+
+		if(ang > 1.2) opti.SetError(ang * 1000);
+		if(ang < -0.5) opti.SetError(-ang * 1000);
+		if(ang <= 1.2 && ang >= -0.5){
+			const double h = GetHeelHeight() - GetBallHeight();
+			opti.SetError(fabs(h - heelheight + ballheight));
+		}
+	}
+	origin = AffineTransformMatrix::Identity();
+	origin.TranslateLocal(0, 0, -GetHeelHeight() + heelheight);
+}
+
+double Foot::GetSize(sizetype type) const
+{
+	switch(type){
+	case EU:
+		return (length + 1.5e-2) * 150;
+	case US:
+		return (length) / 2.54e-2 * 3 - 21.5;
+	case UK:
+		return (length + 1.5e-2) / 8.46e-3 - 25;
+	case JP:
+		return round((length * 1000) / 5) * 5;
+	case CN:
+		return round((length * 100) / 0.5) * 0.5;
+	case AU:
+		return (length + 1.5e-2) / 8.46e-3 - 25;
+	default:
+		return 0;
+	}
+}
+
+void Foot::CalculateSkin(void)
+{
+	// Calculate the Footmodel
+	skin.SetSize(0.40, 0.3, 0.4, 0.0075);
+	skin.SetOrigin(Vector3(-0.15, -0.1, -0.3));
+	//	volume.AddHalfplane(Vector3(0, 0, 1), -0.10, 0.01);
+	//	volume.AddSphere(Vector3(0, 0.1, 0), 0.15, 0.1);
+	//	volume.AddSphere(Vector3(0.13, 0, 0.0), 0.19, 0.01);
+	//	volume.AddCylinder(Vector3(0.0, 0, 0.0), Vector3(0.05 * 1, 0, -0.00), 0.04,
+	//			0.04, 0.02, 0.04);
+	skin.Clear();
+
+	for(size_t n = 0; n < bones.size(); n++){
+		skin.AddCylinder(bones[n].p1, bones[n].p2, bones[n].r1 + bones[n].s1,
+				bones[n].r2 + bones[n].s2, (bones[n].s1 + bones[n].s2) / 2.0);
+		//	volume->AddCylinder(footL.bones[n].p1,footL.bones[n].p2,footL.bones[n].r1,footL.bones[n].r2,footL.bones[n].s1,footL.bones[n].s2);
+	}
+
+//	footL.AddToVolume(&volume);
+//	volume.Rotate(Volume::Z, 2);
+//	volume.Rotate(Volume::Z, -1);
+//	volume.Rotate(Volume::Z, -1);
+	skin.CalcSurface();
+}
+Polygon3 Foot::GetCenterline(void) const
+{
+	Polygon3 temp;
+
+	temp.InsertPoint(
+			Calcaneus->p1.x
+					+ (-Calcaneus->r1 - Calcaneus->s1) * cos(Talus->roty - 0.4),
+			Calcaneus->p1.y,
+			Calcaneus->p1.z
+					- (-Calcaneus->r1 - Calcaneus->s1)
+							* sin(Talus->roty - 0.4));
+
+	temp.InsertPoint(Calcaneus->p1);
+	temp.InsertPoint(Talus->p2);
+	temp.InsertPoint(Naviculare->p1);
+	temp.InsertPoint(Metatarsalis4->p1);
+	temp.InsertPoint(PhalanxI4->p1);
+	temp.InsertPoint(PhalanxIII4->p2);
+
+	temp.InsertPoint(
+			PhalanxIII4->p1
+					+ (PhalanxIII4->p2 - PhalanxIII4->p1)
+							* (1
+									+ (PhalanxIII4->r2 + PhalanxIII4->s2)
+											/ (PhalanxIII4->p2 - PhalanxIII4->p1).Abs()));
+
+	return temp;
 }
 

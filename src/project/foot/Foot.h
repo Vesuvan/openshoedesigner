@@ -74,53 +74,61 @@
  * (Talus2 is an extra bone-element to get the form of the Talus right.)
  */
 
+#include <wx/txtstrm.h>
+#include "../../3D/Polygon3.h"
+#include "../../3D/BoundingBox.h"
+#include "../../3D/Volume.h"
 #include "Skeleton.h"
 
-#include "../../3D/Volume.h"
-#include "../../3D/Polygon3.h"
-
-#include <wx/txtstrm.h>
-
 class Foot:public Skeleton {
-
 public:
-
-	enum sizetype {
+		enum sizetype {
 		EU, US, CN, UK, JP, AU, mm, cm, in, ft
 	};
 
 	Foot();
 	virtual ~Foot();
 
-	void Paint(bool mirror = false) const;
+	void PaintBones(void) const;
+	void PaintSkin(void) const;
 
 	bool LoadModel(wxTextInputStream* stream);
 	bool SaveModel(wxTextOutputStream* stream);
+	void CopyModel(const Foot &other);
+	void SetModelParameter(double L, double W, double H, double A);
+	void CopyModelParameter(const Foot &other);
+	void UpdateModel(void);
 
-	void SetPosition(double heelheight, double toeAngle, double mixing = 0.5);
-	void SetSize(double L, double W, double H, double A);
+	void SetPosition(double heelheight,double ballheight, double toeAngle, double mixing = 0.5);
+	double GetSize(sizetype type) const;
 
-	double GetHeelHeight(void) const;
-	double GetBallHeight(void) const;
+	void CalculateSkin(void);
+
 	Polygon3 GetCenterline(void) const;
 
-	double GetSize(sizetype type) const;
+	AffineTransformMatrix origin; //!< Origin for drawing. The origin of the model is the ankle.
+
+	BoundingBox bounds;
+	Volume skin;
 
 private:
 	void InitBones(void);
-	void Update(void);
+	double GetHeelHeight(void) const;
+	double GetBallHeight(void) const;
+	void UpdatePosition(void);
+
 
 public:
 	bool defined; ///< Flag that this foot is defined. If it is not, use the other one.
 
 	double length;
-	double width;
-	double H;
-	double A;
+	double ballwidth;
+	double heelwidth;
+	double anklewidth;
 
 private:
 	static const unsigned int NBones;
-private:
+
 	Bone* Tibia; /// Schienbein
 	Bone* Fibula; /// Wadenbein
 	Bone* Talus; /// Sprungbein

@@ -27,8 +27,8 @@
 #include "LastGenerationThread.h"
 #include "IDs.h"
 
-LastGenerationThread::LastGenerationThread(wxFrame* frame, Project * project) :
-		wxThread(wxTHREAD_JOINABLE)
+LastGenerationThread::LastGenerationThread(wxFrame* frame, Project * project)
+		: wxThread(wxTHREAD_JOINABLE)
 {
 	this->frame = frame;
 	this->project = project;
@@ -41,9 +41,13 @@ LastGenerationThread::~LastGenerationThread()
 void* LastGenerationThread::Entry()
 {
 	if(TestDestroy()) return NULL;
-
-	project->Update();
-
+	if(project->updateState < 1) return NULL;
+	while(project->Update()){
+		if(TestDestroy()){
+			project->updateState = 1;
+			return NULL;
+		}
+	}
 	wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, ID_THREADLASTDONE);
 	wxPostEvent(frame, event);
 	return NULL;

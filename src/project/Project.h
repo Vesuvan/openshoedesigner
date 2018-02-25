@@ -73,8 +73,14 @@ typedef wxOutputStream DocumentOstream;
 #endif // wxUSE_STD_IOSTREAM/!wxUSE_STD_IOSTREAM
 
 class Project:public wxDocument {
-	friend class ProjectView;
 public:
+	enum Symmetry {
+		No, OnlyModel, Full
+	};
+
+	enum Side {
+		Left, Right
+	};
 
 	enum Generator {
 		Experimental, //!< Default generator for development of algorithms
@@ -92,18 +98,21 @@ public:
 	DocumentOstream& SaveObject(DocumentOstream& ostream);
 	DocumentIstream& LoadObject(DocumentIstream& istream);
 
-	void Update(void);
-	bool UpdateFootPosition(void);
-
-	// Setup model:
+	void FlagForUpdate(void);
+	bool Update(void); //!< Pump function for updating the project
 
 	bool LoadModel(wxString fileName);
 	bool SaveModel(wxString fileName);
-	bool SaveLast(wxString fileName);
+	bool SaveSkin(wxString fileName);
 
 public:
+	double legLengthDifference;
+	Symmetry symmetry;
+	Side active;
 
 	Shoe shoe;
+
+	Foot* activeFoot;
 
 	Foot footL;
 	Foot footR;
@@ -111,21 +120,18 @@ public:
 	Last lastR;
 
 	Pattern pattern;
-
 	Generator generator;
 	PolyHull test;
 
-protected:
-
-	Volume footvol;
-	Volume lastvol;
-	Volume sole;
+	int updateState; //!< state of the update
 
 	OrientedMatrix xray;
 	OrientedMatrix heightfield;
 	Polygon3 bow;
+private:
+	bool UpdateFootPosition(void);
 
-DECLARE_DYNAMIC_CLASS (Project)
+DECLARE_DYNAMIC_CLASS(Project)
 	;
 };
 

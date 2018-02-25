@@ -59,7 +59,7 @@ public:
 
 	void RefreshCanvas(wxCommandEvent& event);
 	void RefreshView(wxCommandEvent& event);
-	void UpdateProject(wxCommandEvent& event);
+	void UpdateProject(void);
 	void LastCalculationDone(wxCommandEvent& event);
 
 	void OnClose(wxCloseEvent& event);
@@ -67,6 +67,7 @@ public:
 	void OnRedo(wxCommandEvent& event);
 
 	void OnSetSymmetry(wxCommandEvent& event);
+	void OnSetupBackgroundImages(wxCommandEvent& event);
 	void OnCopyMeasurements(wxCommandEvent& event);
 	void OnLoadFootModel(wxCommandEvent& event);
 	void OnSaveFootModel(wxCommandEvent& event);
@@ -83,6 +84,7 @@ public:
 	void OnSaveCutaway(wxCommandEvent& event);
 	void OnPackZip(wxCommandEvent& event);
 	void OnToggleStereo3D(wxCommandEvent& event);
+	void On3DSelect(wxMouseEvent& event);
 	void OnViewChange(wxCommandEvent& event);
 	void OnSetupStereo3D(wxCommandEvent& event);
 	void OnSetupUnits(wxCommandEvent& event);

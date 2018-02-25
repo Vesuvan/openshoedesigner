@@ -75,7 +75,7 @@ bool CommandFootModelSetValue::Do(void)
 		return false;
 	}
 
-	project->Update();
+	project->FlagForUpdate();
 	return true;
 }
 
@@ -109,6 +109,6 @@ bool CommandFootModelSetValue::Undo(void)
 		return false;
 	}
 
-	project->Update();
+	project->FlagForUpdate();
 	return true;
 }

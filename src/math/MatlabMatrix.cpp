@@ -167,7 +167,7 @@ size_t MatlabMatrix::Size(const size_t dim) const
 	if(dim < 1) throw(std::out_of_range(
 			std::string(__FILE__)
 					+ ": Size(dim): Dimensions are one-based (1, 2, 3, 4, ...)."));
-	if(dim > dimension.size()) return 1;
+	if(dim > dimension.size()) return (size > 0)? 1 : 0;
 	return dimension[dim - 1];
 }
 

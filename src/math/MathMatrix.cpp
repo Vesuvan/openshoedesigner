@@ -301,6 +301,9 @@ MathMatrix MathMatrix::XRay(Method method) const
 	MathMatrix temp;
 	temp.SetSize(Nx, 1, Nz);
 	temp.SetInsertPosition(0);
+
+
+
 	for(size_t z = 0; z < Nz; z++){
 		for(size_t x = 0; x < Nx; x++){
 			switch(method){

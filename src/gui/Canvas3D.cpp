@@ -47,50 +47,73 @@ void Canvas3D::SetProjectView(const ProjectView* projectview)
 void Canvas3D::Render()
 {
 	if(projectview == NULL) return;
-
-	projectview->PaintBackground();
+	projectview->PaintBackground(true);
 
 	glClear( GL_DEPTH_BUFFER_BIT);
 
-	glBegin(GL_LINES);
-	glNormal3f(0, -0.707, 0.707);
-	glColor3f(0.8, 0.0, 0.0);
-	glVertex3f(-0.3, 0, 0);
-	glVertex3f(0.3, 0, 0);
+	if(projectview->showCoordinateSystem){
 
-	glNormal3f(-0.707, 0.0, 0.707);
-	glColor3f(0.0, 0.8, 0.0);
-	glVertex3f(0, -0.3, 0);
-	glVertex3f(0, 0.3, 0);
+		const double len = 0.3;
+		const double rad = 0.04;
+		const uint_fast8_t N = 4;
 
-	glNormal3f(0.0, 0.0, 1.0);
-	glColor3f(0.0, 0.0, 0.8);
-	glVertex3f(0, 0, -0.3);
-	glVertex3f(0, 0, 0.3);
+		glBegin(GL_LINES);
+		glColor3f(0.8, 0.0, 0.0);
+		glNormal3f(-1, 0, 0);
+		glVertex3f(-len, 0, 0);
+		glNormal3f(1, 0, 0);
+		glVertex3f(len, 0, 0);
 
-	glEnd();
+		glColor3f(0.0, 0.8, 0.0);
+		glNormal3f(0, -1, 0);
+		glVertex3f(0, -len, 0);
+		glNormal3f(0, 1, 0);
+		glVertex3f(0, len, 0);
 
-	glColor3f(1, 0, 0);
-	glBegin(GL_LINE_LOOP);
-	for(uint_fast8_t n = 0; n < 64; n++){
-		glVertex3d(0.3, 0.04 * cos(M_PI / 32 * (double) n),
-				0.04 * sin(M_PI / 32 * (double) n));
+		glColor3f(0.0, 0.0, 0.8);
+		glNormal3f(0.0, 0.0, -1.0);
+		glVertex3f(0, 0, -len);
+		glNormal3f(0.0, 0.0, 1.0);
+		glVertex3f(0, 0, len);
+		glEnd();
+
+		const double n0 = cos(M_PI_4);
+		const double n1 = sin(M_PI_4);
+
+		glColor3f(1, 0, 0);
+		glBegin(GL_LINES);
+		for(uint_fast8_t n = 0; n < N; n++){
+			const double a = 2 * M_PI / N * (double) n;
+			const double c = cos(a);
+			const double s = sin(a);
+
+			glNormal3d(n0, c * n1, s * n1);
+			glVertex3d(len, 0, 0);
+			glVertex3d(len - rad, rad * c, rad * s);
+		}
+		glEnd();
+		glColor3f(0, 1, 0);
+		glBegin(GL_LINES);
+		for(uint_fast8_t n = 0; n < N; n++){
+			const double a = 2 * M_PI / N * (double) n;
+			const double c = cos(a);
+			const double s = sin(a);
+			glNormal3d(s * n1, n0, c * n1);
+			glVertex3d(0, len, 0);
+			glVertex3d(rad * s, len - rad, rad * c);
+		}
+		glEnd();
+		glColor3f(0, 0, 1);
+		glBegin(GL_LINES);
+		for(uint_fast8_t n = 0; n < N; n++){
+			const double a = 2 * M_PI / N * (double) n;
+			const double c = cos(a);
+			const double s = sin(a);
+			glNormal3d(c * n1, s * n1, n0);
+			glVertex3d(0, 0, len);
+			glVertex3d(rad * c, rad * s, len - rad);
+		}
+		glEnd();
 	}
-	glEnd();
-	glColor3f(0, 1, 0);
-	glBegin(GL_LINE_LOOP);
-	for(uint_fast8_t n = 0; n < 64; n++){
-		glVertex3d(0.04 * cos(M_PI / 32 * (double) n), 0.3,
-				0.04 * sin(M_PI / 32 * (double) n));
-	}
-	glEnd();
-	glColor3f(0, 0, 1);
-	glBegin(GL_LINE_LOOP);
-	for(uint_fast8_t n = 0; n < 64; n++){
-		glVertex3d(0.04 * cos(M_PI / 32 * (double) n),
-				0.04 * sin(M_PI / 32 * (double) n), 0.3);
-	}
-	glEnd();
-
 	projectview->Paint();
 }

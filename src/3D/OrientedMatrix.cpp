@@ -165,6 +165,9 @@ OrientedMatrix OrientedMatrix::SurfaceField(void) const
 	temp.SetCount(Nx, Ny, 1, dx);
 	temp.SetOrigin(Vector3(origin.x, origin.y, origin.z));
 	temp.SetInsertPosition(0);
+
+	if(buffer == NULL) return temp;
+
 	const size_t h = Nx * Ny;
 	for(size_t i = 0; i < h; i++){
 		double v0 = buffer[i];

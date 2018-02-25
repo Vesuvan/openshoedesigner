@@ -54,7 +54,7 @@ public:
 
 	void UpdateBonesFromFormula(MathParser* parser);
 
-
+	bool mirrored;
 
 	std::vector <Bone> bones;
 };

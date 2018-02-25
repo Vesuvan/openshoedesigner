@@ -41,9 +41,6 @@
 
 class ProjectView:public wxView {
 public:
-	enum DisplaySide {
-		Left, Right, Both
-	};
 	enum FrameType {
 		mainframe, patternframe, walkcycleframe
 	};
@@ -53,31 +50,26 @@ public:
 	void Paint(void) const;
 	void PaintBackground(bool showBehind = true) const;
 
-	DisplaySide side;
-
 	std::vector <BackgroundImage> background;
+
+	const Foot * foot;
 
 	bool showLeft;
 	bool showRight;
-
-	Foot* foot;
-	Shoe* shoe;
-
-	bool showFootScan;
-	bool showFootModel;
-	bool showLastScan;
-	bool showLast;
-
 	bool showBones;
+	bool showSkin;
+	bool showLeg;
+	bool showLast;
 	bool showInsole;
 	bool showSole;
 	bool showUpper;
 	bool showCutaway;
 	bool showFloor;
-
+	bool showCoordinateSystem;
 	bool showBackground;
 
-	double floorLevel;
+	bool showFootScan;
+	bool showLastScan;
 
 	virtual bool OnCreate(wxDocument* doc, long flags);
 	virtual void OnDraw(wxDC *dc);
@@ -88,7 +80,6 @@ private:
 	wxFrame *m_frame;
 
 private:
-	void PaintBones(void) const;
 	void PaintLast(void) const;
 	void PaintInsole(void) const;
 	void PaintSole(void) const;

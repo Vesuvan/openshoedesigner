@@ -75,37 +75,40 @@
 #define ID_SHOWLEFT 1021
 #define ID_SHOWRIGHT 1022
 #define ID_SHOWBONES 1023
-#define ID_SHOWLAST 1024
-#define ID_SHOWINSOLE 1025
-#define ID_SHOWSOLE 1026
-#define ID_SHOWUPPER 1027
-#define ID_SHOWCUTAWAY 1028
-#define ID_SHOWFLOOR 1029
-#define ID_SHOWBACKGROUND 1030
-#define ID_SETUPSTEREO3D 1031
-#define ID_SETUPUNITS 1032
-#define ID_TEXTFOOTLENGTH 1033
-#define ID_TEXTFOOTWIDTH 1034
-#define ID_TEXTHEELWIDTH 1035
-#define ID_TEXTANKLEWIDTH 1036
-#define ID_TEXTLEGLENGTH 1037
-#define ID_GRIDLENGTH 1038
-#define ID_GRIDDIAMETER 1039
-#define ID_GRIDSKIN 1040
-#define ID_GRIDLEG 1041
-#define ID_TEXTHEELHEIGHT 1042
-#define ID_TEXTBALLHEIGHT 1043
-#define ID_TEXTTOEPITCH 1044
-#define ID_TEXTMIXINGANGLE 1045
-#define ID_PRESETFLATS 1046
-#define ID_PRESETHHLOW 1047
-#define ID_PRESETPLATFORM 1048
-#define ID_PRESETCLASSIC 1049
-#define ID_PRESETHHMID 1050
-#define ID_PRESETPONY 1051
-#define ID_PRESETPLATEAU 1052
-#define ID_PRESETHHHIGH 1053
-#define ID_PRESETBALLET 1054
+#define ID_SHOWSKIN 1024
+#define ID_SHOWLEG 1025
+#define ID_SHOWLAST 1026
+#define ID_SHOWINSOLE 1027
+#define ID_SHOWSOLE 1028
+#define ID_SHOWUPPER 1029
+#define ID_SHOWCUTAWAY 1030
+#define ID_SHOWFLOOR 1031
+#define ID_SHOWCOORDINATESYSTEM 1032
+#define ID_SHOWBACKGROUND 1033
+#define ID_SETUPSTEREO3D 1034
+#define ID_SETUPUNITS 1035
+#define ID_TEXTFOOTLENGTH 1036
+#define ID_TEXTFOOTWIDTH 1037
+#define ID_TEXTHEELWIDTH 1038
+#define ID_TEXTANKLEWIDTH 1039
+#define ID_TEXTLEGLENGTH 1040
+#define ID_GRIDLENGTH 1041
+#define ID_GRIDDIAMETER 1042
+#define ID_GRIDSKIN 1043
+#define ID_GRIDLEG 1044
+#define ID_TEXTHEELHEIGHT 1045
+#define ID_TEXTBALLHEIGHT 1046
+#define ID_TEXTTOEPITCH 1047
+#define ID_TEXTMIXINGANGLE 1048
+#define ID_PRESETFLATS 1049
+#define ID_PRESETHHLOW 1050
+#define ID_PRESETPLATFORM 1051
+#define ID_PRESETCLASSIC 1052
+#define ID_PRESETHHMID 1053
+#define ID_PRESETPONY 1054
+#define ID_PRESETPLATEAU 1055
+#define ID_PRESETHHHIGH 1056
+#define ID_PRESETBALLET 1057
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class GUIFrameMain
@@ -232,6 +235,7 @@ class GUIFrameMain : public wxDocChildFrame
 		virtual void OnPackZip( wxCommandEvent& event ) = 0;
 		virtual void OnToggleStereo3D( wxCommandEvent& event ) = 0;
 		virtual void OnViewChange( wxCommandEvent& event ) = 0;
+		virtual void OnSetupBackgroundImages( wxCommandEvent& event ) = 0;
 		virtual void OnSetupStereo3D( wxCommandEvent& event ) = 0;
 		virtual void OnSetupUnits( wxCommandEvent& event ) = 0;
 		virtual void OnSelectLanguage( wxCommandEvent& event ) = 0;
@@ -242,6 +246,7 @@ class GUIFrameMain : public wxDocChildFrame
 		virtual void OnScroll( wxScrollEvent& event ) = 0;
 		virtual void OnScrollChange( wxScrollEvent& event ) = 0;
 		virtual void OnPreset( wxCommandEvent& event ) = 0;
+		virtual void On3DSelect( wxMouseEvent& event ) = 0;
 		virtual void OnToggleAnkleLock( wxCommandEvent& event ) = 0;
 		virtual void OnChoiceDisplay( wxCommandEvent& event ) = 0;
 		
