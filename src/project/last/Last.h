@@ -28,19 +28,21 @@
 #define LAST_H_
 
 /*!\class Last
- * \brief Last with continuous hull
+ * \brief Last with NURBS hull
  *
  *
  */
+
+#include "NURBS.h"
 
 class Last {
 public:
 	Last();
 	virtual ~Last();
 
-	void Paint(bool mirror = false) const;
+	void Paint(void) const;
 
-	bool defined; ///< Flag that this foot is defined. If it is not, use the other one.
+	NURBS nurbs;
 
 };
 
