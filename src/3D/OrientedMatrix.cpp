@@ -45,7 +45,7 @@ OrientedMatrix::~OrientedMatrix()
 {
 }
 
-void OrientedMatrix::SetCount(unsigned int nx, unsigned int ny, unsigned int nz,
+void OrientedMatrix::SetSize(unsigned int nx, unsigned int ny, unsigned int nz,
 		float resolution)
 {
 	MatlabMatrix::SetSize(nx, ny, nz);
@@ -54,7 +54,7 @@ void OrientedMatrix::SetCount(unsigned int nx, unsigned int ny, unsigned int nz,
 	dz = resolution;
 }
 
-void OrientedMatrix::SetSize(float x, float y, float z, float resolution)
+void OrientedMatrix::SetExtent(float x, float y, float z, float resolution)
 {
 	size_t nx = (unsigned int) ceil(x / resolution);
 	size_t ny = (unsigned int) ceil(y / resolution);
@@ -162,7 +162,7 @@ OrientedMatrix OrientedMatrix::SurfaceField(void) const
 	const size_t Nz = Size(3);
 
 	OrientedMatrix temp;
-	temp.SetCount(Nx, Ny, 1, dx);
+	temp.SetSize(Nx, Ny, 1, dx);
 	temp.SetOrigin(Vector3(origin.x, origin.y, origin.z));
 	temp.SetInsertPosition(0);
 

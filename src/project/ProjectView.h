@@ -47,12 +47,10 @@ public:
 	ProjectView();
 	virtual ~ProjectView();
 
-	void Paint(void) const;
+	void Paint(bool usePicking) const;
 	void PaintBackground(bool showBehind = true) const;
 
 	std::vector <BackgroundImage> background;
-
-	const Foot * foot;
 
 	bool showLeft;
 	bool showRight;
@@ -71,13 +69,10 @@ public:
 	bool showFootScan;
 	bool showLastScan;
 
-	virtual bool OnCreate(wxDocument* doc, long flags);
-	virtual void OnDraw(wxDC *dc);
-	virtual void OnUpdate(wxView *sender, wxObject *hint = NULL);
-	virtual bool OnClose(bool deleteWindow = true);
-
-private:
-	wxFrame *m_frame;
+	bool OnCreate(wxDocument* doc, long flags);
+	void OnDraw(wxDC *dc);
+	void OnUpdate(wxView *sender, wxObject *hint = NULL);
+	bool OnClose(bool deleteWindow = true);
 
 private:
 	void PaintLast(void) const;

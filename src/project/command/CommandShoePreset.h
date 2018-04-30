@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : LastGenerationThread.cpp
-// Purpose            : 
-// Thread Safe        : Yes
+// Name               : CommandShoePreset.h
+// Purpose            :
+// Thread Safe        : No
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 05.10.2015
-// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 01.05.2018
+// Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,35 +24,27 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "LastGenerationThread.h"
-#include "IDs.h"
+#ifndef __COMMANDSHOEPRESET_H__
+#define __COMMANDSHOEPRESET_H__
 
-LastGenerationThread::LastGenerationThread(wxFrame* frame, Project * project)
-		: wxThread(wxTHREAD_JOINABLE)
-{
-	this->frame = frame;
-	this->project = project;
-}
+#include <wx/cmdproc.h>
+#include <wx/string.h>
+#include "../Project.h"
 
-LastGenerationThread::~LastGenerationThread()
-{
-}
+class CommandShoePreset:public wxCommand {
+public:
+	CommandShoePreset(const wxString& name, Project* project, int preset);
 
-void* LastGenerationThread::Entry()
-{
-	if(TestDestroy()) return NULL;
-	if(project->updateState < 1) return NULL;
-	while(project->Update()){
-		if(TestDestroy()){
-			project->updateState = 1;
-			return NULL;
-		}
-	}
-	wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, ID_THREADLASTDONE);
-	wxPostEvent(frame, event);
-	return NULL;
-}
+	bool Do(void);
+	bool Undo(void);
 
-void LastGenerationThread::OnExit()
-{
-}
+protected:
+	Project* project;
+	int preset;
+
+	wxString oldExprHeelHeight;
+	wxString oldExprBallHeight;
+	wxString oldExprToeAngle;
+};
+
+#endif /* __COMMANDSHOEPRESET_H__ */

@@ -47,17 +47,10 @@ public:
 	Shoe();
 	virtual ~Shoe();
 
-	bool Evaluate(double L, double W, double H, double A);
-
 public:
 	wxString exprHeelHeight;
 	wxString exprBallHeight;
 	wxString exprToeAngle;
-
-	double heelHeight;
-	double ballHeight;
-	double toeAngle;
-	double mixing;
 };
 
 #endif /* SHOE_H_ */

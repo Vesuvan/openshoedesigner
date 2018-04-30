@@ -34,43 +34,9 @@ Shoe::Shoe()
 	exprBallHeight = _T("0 deg");
 	exprToeAngle = _T("0 deg");
 
-	heelHeight = 0.02;
-	ballHeight = 0.0;
-	toeAngle = 0.0;
 
-	mixing = 0.1;
 }
 
 Shoe::~Shoe()
 {
-}
-
-bool Shoe::Evaluate(double L, double W, double H, double A)
-{
-	MathParser parser(false);
-	parser.AddAllowedUnit(_T("mm"), 1e-3);
-	parser.AddAllowedUnit(_T("cm"), 1e-2);
-	parser.AddAllowedUnit(_T("m"), 1);
-	parser.AddAllowedUnit(_T("in"), 2.54e-2);
-	parser.AddAllowedUnit(_T("ft"), 0.3048);
-	parser.AddAllowedUnit(_T("rad"), 1);
-	parser.AddAllowedUnit(_T("deg"), 0.017453);
-	parser.AddAllowedUnit(_T("gon"), 0.015708);
-
-	parser.SetVariable(_T("L"), L);
-	parser.SetVariable(_T("W"), W);
-	parser.SetVariable(_T("H"), H);
-	parser.SetVariable(_T("A"), A);
-
-	parser.SetString(exprHeelHeight);
-	if(!parser.Evaluate()) return false;
-	heelHeight = parser.GetNumber();
-	parser.SetString(exprBallHeight);
-	if(!parser.Evaluate()) return false;
-	ballHeight = parser.GetNumber();
-	parser.SetString(exprToeAngle);
-	if(!parser.Evaluate()) return false;
-	toeAngle = parser.GetNumber();
-
-	return true;
 }

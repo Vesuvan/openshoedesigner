@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Skeleton.h
-// Purpose            : 
-// Thread Safe        : Yes
+// Name               : CommandProjectSetLegLengthDifference.cpp
+// Purpose            :
+// Thread Safe        : No
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 18.02.2018
+// Created            : 30.04.2018
 // Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,44 +24,30 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef SRC_PROJECT_FOOT_SKELETON_H_
-#define SRC_PROJECT_FOOT_SKELETON_H_
+#include "CommandProjectSetLegLengthDifference.h"
 
-/*!\class Skeleton
- * \brief Collection of bones.
- *
- * Bones are enumerated for easier handling. A std::map<std::string, Bone> would be cleaner, but
- * in the end more difficult to use.
- */
+CommandProjectSetLegLengthDifference::CommandProjectSetLegLengthDifference(
+		const wxString& name, Project* project, double value)
+		: wxCommand(true, name)
+{
+	this->project = project;
+	this->value = value;
+	this->oldValue = 0.0;
+}
 
-#include "Bone.h"
-#include "../../math/MathParser.h"
-#include <wx/string.h>
-#include <GL/gl.h>
-#include <vector>
+bool CommandProjectSetLegLengthDifference::Do(void)
+{
+	if(project == NULL) return false;
+	oldValue = project->legLengthDifference;
+	project->legLengthDifference = value;
+	project->Update(Project::UpdateFoot, Project::Both);
+	return true;
+}
 
-class Skeleton {
-public:
-	Skeleton();
-	virtual ~Skeleton();
-
-	Bone* AddBone(wxString name);
-
-	bool Connect(wxString name1, wxString name2);
-
-	void Setup(void);
-	void Render(void) const;
-
-	size_t GetBoneCount(void) const;
-
-	void UpdateBonesFromFormula(MathParser* parser);
-
-	bool mirrored;
-
-	std::vector <Bone> bones;
-private:
-	mutable GLuint m_gllist;
-	mutable bool update;
-};
-
-#endif /* SRC_PROJECT_FOOT_SKELETON_H_ */
+bool CommandProjectSetLegLengthDifference::Undo(void)
+{
+	if(project == NULL) return false;
+	project->legLengthDifference = oldValue;
+	project->Update(Project::UpdateFoot, Project::Both);
+	return true;
+}

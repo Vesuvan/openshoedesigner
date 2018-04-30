@@ -29,7 +29,9 @@
 #include <GL/gl.h>
 #include <cassert>
 
+#include "../Shoe.h"
 #include "../../math/NelderMeadOptimizer.h"
+
 const unsigned int Foot::NBones = 29;
 Foot::Foot()
 {
@@ -111,6 +113,11 @@ Foot::Foot()
 	ballwidth = 9.56e-2;
 	heelwidth = ballwidth - 2e-2;
 	anklewidth = heelwidth - 1e-2;
+	mixing = 0.1;
+
+	heelHeight = 0.02;
+	ballHeight = 0.0;
+	toeAngle = 0.0;
 
 	InitBones();
 	UpdateModel();
@@ -502,14 +509,6 @@ void Foot::SetModelParameter(double L, double W, double H, double A)
 	this->anklewidth = A;
 }
 
-void Foot::CopyModelParameter(const Foot& other)
-{
-	this->length = other.length;
-	this->ballwidth = other.ballwidth;
-	this->heelwidth = other.heelwidth;
-	this->anklewidth = other.anklewidth;
-}
-
 void Foot::UpdateModel(void)
 {
 	MathParser parser;
@@ -519,11 +518,6 @@ void Foot::UpdateModel(void)
 	parser.SetVariable(_T("A"), anklewidth);
 
 	UpdateBonesFromFormula(&parser);
-	Skeleton::Setup();
-}
-
-void Foot::UpdatePosition(void)
-{
 	Skeleton::Setup();
 }
 
@@ -537,9 +531,31 @@ double Foot::GetBallHeight(void) const
 	return PhalanxI5->p1.z - PhalanxI5->r1 - PhalanxI5->s1;
 }
 
-void Foot::SetPosition(double heelheight, double ballheight, double toeAngle,
-		double mixing)
+void Foot::UpdatePosition(const Shoe* shoe, double offset)
 {
+	MathParser parser(false);
+	parser.AddAllowedUnit(_T("mm"), 1e-3);
+	parser.AddAllowedUnit(_T("cm"), 1e-2);
+	parser.AddAllowedUnit(_T("m"), 1);
+	parser.AddAllowedUnit(_T("in"), 2.54e-2);
+	parser.AddAllowedUnit(_T("ft"), 0.3048);
+	parser.AddAllowedUnit(_T("rad"), 1);
+	parser.AddAllowedUnit(_T("deg"), 0.017453);
+	parser.AddAllowedUnit(_T("gon"), 0.015708);
+
+	parser.SetVariable(_T("L"), length);
+	parser.SetVariable(_T("W"), ballwidth);
+	parser.SetVariable(_T("H"), heelwidth);
+	parser.SetVariable(_T("A"), anklewidth);
+
+	parser.SetString(shoe->exprHeelHeight);
+	if(parser.Evaluate()) heelHeight = parser.GetNumber();
+	parser.SetString(shoe->exprBallHeight);
+	if(parser.Evaluate()) ballHeight = parser.GetNumber();
+	parser.SetString(shoe->exprToeAngle);
+	if(parser.Evaluate()) toeAngle = parser.GetNumber();
+
+	heelHeight += offset; // Compensation for legs of different length
 
 	NelderMeadOptimizer opti;
 	opti.param.push_back(0);
@@ -569,17 +585,17 @@ void Foot::SetPosition(double heelheight, double ballheight, double toeAngle,
 		PhalanxI4->roty = -ang + toeAngle;
 		PhalanxI5->roty = -ang + toeAngle;
 
-		UpdatePosition();
+		Skeleton::Setup();
 
 		if(ang > 1.2) opti.SetError(ang * 1000);
 		if(ang < -0.5) opti.SetError(-ang * 1000);
 		if(ang <= 1.2 && ang >= -0.5){
 			const double h = GetHeelHeight() - GetBallHeight();
-			opti.SetError(fabs(h - heelheight + ballheight));
+			opti.SetError(fabs(h - heelHeight + ballHeight));
 		}
 	}
 	origin = AffineTransformMatrix::Identity();
-	origin.TranslateLocal(0, 0, -GetHeelHeight() + heelheight);
+	origin.TranslateLocal(0, 0, -GetHeelHeight() + heelHeight);
 }
 
 double Foot::GetSize(sizetype type) const
@@ -605,7 +621,7 @@ double Foot::GetSize(sizetype type) const
 void Foot::CalculateSkin(void)
 {
 	// Calculate the Footmodel
-	skin.SetSize(0.40, 0.3, 0.4, 0.0075);
+	skin.SetExtent(0.40, 0.3, 0.4, 0.0075);
 	skin.SetOrigin(Vector3(-0.15, -0.1, -0.3));
 	//	volume.AddHalfplane(Vector3(0, 0, 1), -0.10, 0.01);
 	//	volume.AddSphere(Vector3(0, 0.1, 0), 0.15, 0.1);

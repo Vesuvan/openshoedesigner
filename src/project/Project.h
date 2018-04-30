@@ -52,8 +52,8 @@
  *
  */
 
-#include "Shoe.h"
 #include "foot/Foot.h"
+#include "Shoe.h"
 #include "last/Last.h"
 
 #include "pattern/Pattern.h"
@@ -61,6 +61,7 @@
 #include "../3D/Volume.h"
 #include "../3D/Polygon3.h"
 #include "last/PolyHull.h"
+#include "WorkerThread.h"
 
 #include <wx/docview.h>
 
@@ -79,7 +80,10 @@ public:
 	};
 
 	enum Side {
-		Left, Right
+		Left, Right, Both
+	};
+	enum PartToUpdate {
+		UpdateFoot, UpdateLast, UpdateSole, UpdatePattern, UpdateFlattening
 	};
 
 	enum Generator {
@@ -98,38 +102,45 @@ public:
 	DocumentOstream& SaveObject(DocumentOstream& ostream);
 	DocumentIstream& LoadObject(DocumentIstream& istream);
 
-	void FlagForUpdate(void);
-	bool Update(void); //!< Pump function for updating the project
-
 	bool LoadModel(wxString fileName);
 	bool SaveModel(wxString fileName);
 	bool SaveSkin(wxString fileName);
 
+	void Update(PartToUpdate part = UpdateFoot, Side side = Both);
+	void Recalculate(void);
+	bool ThreadNeedsCalculations(size_t threadNr) const;
+	void ThreadCalculate(size_t threadNr);
+	void OnCalculationDone(wxCommandEvent& event);
+	void OnRefreshViews(wxCommandEvent& event);
+
+	const Foot * GetActiveFoot(void) const;
+
 public:
-	double legLengthDifference;
-	Symmetry symmetry;
 	Side active;
 
-	Shoe shoe;
-
-	Foot* activeFoot;
-
+	double legLengthDifference;
+	Symmetry symmetry;
 	Foot footL;
 	Foot footR;
 	Last lastL;
 	Last lastR;
 
+	Shoe shoe;
+
 	Pattern pattern;
 	Generator generator;
+
 	PolyHull test;
-
-	int updateState; //!< state of the update
-
+//	Volume vol;
 	OrientedMatrix xray;
 	OrientedMatrix heightfield;
 	Polygon3 bow;
 private:
-	bool UpdateFootPosition(void);
+	int stateLeft;
+	int stateRight;
+	WorkerThread* thread0;
+	WorkerThread* thread1;
+	wxCriticalSection CS;
 
 DECLARE_DYNAMIC_CLASS(Project)
 	;

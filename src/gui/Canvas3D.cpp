@@ -26,8 +26,16 @@
 
 #include "Canvas3D.h"
 
-#include <GL/gl.h>
+#include "../StdInclude.h"
 #include <stdint.h>
+
+#ifdef __WXMAC__
+#include "OpenGL/glu.h"
+//#include "OpenGL/gl.h"
+#else
+#include <GL/glu.h>
+//#include <GL/gl.h>
+#endif
 
 Canvas3D::Canvas3D(wxWindow* parent)
 		: OpenGLCanvas(parent)
@@ -38,6 +46,46 @@ Canvas3D::Canvas3D(wxWindow* parent)
 Canvas3D::~Canvas3D()
 {
 }
+
+//void Canvas3D::ConnectMouseEvents(void)
+//{
+//	this->Connect(wxEVT_MOTION, wxMouseEventHandler(Canvas3D::OnMouseEvent),
+//	NULL, this);
+//	this->Connect(wxEVT_MOUSEWHEEL, wxMouseEventHandler(Canvas3D::OnMouseEvent),
+//	NULL, this);
+//	this->Connect(wxEVT_RIGHT_DOWN, wxMouseEventHandler(Canvas3D::OnMouseEvent),
+//	NULL, this);
+//	this->Connect(wxEVT_RIGHT_DCLICK,
+//			wxMouseEventHandler(Canvas3D::OnMouseEvent), NULL, this);
+//	this->Connect(wxEVT_MIDDLE_DOWN,
+//			wxMouseEventHandler(Canvas3D::OnMouseEvent), NULL, this);
+//	this->Connect(wxEVT_LEFT_DOWN, wxMouseEventHandler(Canvas3D::OnMouseEvent),
+//	NULL, this);
+//	this->Connect(wxEVT_LEFT_DCLICK,
+//			wxMouseEventHandler(Canvas3D::OnMouseEvent), NULL, this);
+//	this->Connect(wxEVT_LEFT_UP, wxMouseEventHandler(Canvas3D::OnMouseEvent),
+//	NULL, this);
+//}
+//
+//void Canvas3D::DisconnectMouseEvents(void)
+//{
+//	this->Connect(wxEVT_LEFT_UP, wxMouseEventHandler(Canvas3D::OnMouseEvent),
+//	NULL, this);
+//	this->Connect(wxEVT_LEFT_DCLICK,
+//			wxMouseEventHandler(Canvas3D::OnMouseEvent), NULL, this);
+//	this->Connect(wxEVT_LEFT_DOWN, wxMouseEventHandler(Canvas3D::OnMouseEvent),
+//	NULL, this);
+//	this->Connect(wxEVT_MIDDLE_DOWN,
+//			wxMouseEventHandler(Canvas3D::OnMouseEvent), NULL, this);
+//	this->Connect(wxEVT_RIGHT_DCLICK,
+//			wxMouseEventHandler(Canvas3D::OnMouseEvent), NULL, this);
+//	this->Connect(wxEVT_RIGHT_DOWN, wxMouseEventHandler(Canvas3D::OnMouseEvent),
+//	NULL, this);
+//	this->Connect(wxEVT_MOUSEWHEEL, wxMouseEventHandler(Canvas3D::OnMouseEvent),
+//	NULL, this);
+//	this->Connect(wxEVT_MOTION, wxMouseEventHandler(Canvas3D::OnMouseEvent),
+//	NULL, this);
+//}
 
 void Canvas3D::SetProjectView(const ProjectView* projectview)
 {
@@ -115,5 +163,49 @@ void Canvas3D::Render()
 		}
 		glEnd();
 	}
-	projectview->Paint();
+	{
+		glColor3f(1, 1, 1);
+		glBegin(GL_LINES);
+		Vector3 c = a + b;
+		glVertex3d(a.x, a.y, a.z);
+		glVertex3d(c.x, c.y, c.z);
+		glEnd();
+	}
+
+	projectview->Paint(false);
 }
+
+void Canvas3D::RenderPick()
+{
+	if(projectview == NULL) return;
+	glClear( GL_DEPTH_BUFFER_BIT);
+	projectview->Paint(true);
+}
+
+//void Canvas3D::OnMouseEvent(wxMouseEvent& event)
+//{
+//	event.Skip();
+//	if(projectview == NULL) return;
+//	Project* project = wxStaticCast(projectview->GetDocument(), Project);
+//
+//	if(event.Moving()){
+//		int x = event.GetX();
+//		int y = event.GetY();
+//		OpenGLPick result;
+//		this->OnPick(result, x, y);
+//		if(result.HasHits()){
+//			result.SortByNear();
+//			if(result.Get(1) == 3){
+//				double u = project->lastL.nurbs.GetU(result.Get(2));
+//				double v = project->lastL.nurbs.GetV(result.Get(3));
+//
+//				a = project->lastL.nurbs.Position(u, v);
+//				b = project->lastL.nurbs.Normal(u, v);
+//				Refresh();
+//			}
+//
+//		}
+//
+//	}
+//	OpenGLCanvas::OnMouseEvent(event);
+//}

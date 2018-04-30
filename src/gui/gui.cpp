@@ -20,14 +20,6 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_menubar->Append( m_menuFile, _("&File") ); 
 	
 	m_menuEdit = new wxMenu();
-	wxMenuItem* m_menuItemUndo;
-	m_menuItemUndo = new wxMenuItem( m_menuEdit, ID_UNDO, wxString( _("&Undo") ) + wxT('\t') + wxT("Ctrl+Z"), _("Undo last command"), wxITEM_NORMAL );
-	m_menuEdit->Append( m_menuItemUndo );
-	
-	wxMenuItem* m_menuItemRedo;
-	m_menuItemRedo = new wxMenuItem( m_menuEdit, ID_REDO, wxString( _("&Redo") ) + wxT('\t') + wxT("Ctrl+Y"), _("Redo last undone command"), wxITEM_NORMAL );
-	m_menuEdit->Append( m_menuItemRedo );
-	
 	m_menubar->Append( m_menuEdit, _("&Edit") ); 
 	
 	m_menuFoot = new wxMenu();
@@ -386,10 +378,13 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	fgSizer2->Add( m_textCtrlLegLengthDifference, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 5 );
 	
 	
-	bSizer16->Add( fgSizer2, 0, 0, 5 );
+	bSizer16->Add( fgSizer2, 0, wxALIGN_CENTER_HORIZONTAL, 5 );
 	
 	
 	bSizer281->Add( bSizer16, 0, wxEXPAND, 5 );
+	
+	
+	bSizer281->Add( 0, 0, 1, wxEXPAND, 5 );
 	
 	wxStaticBoxSizer* sbSizerShoeSizes;
 	sbSizerShoeSizes = new wxStaticBoxSizer( new wxStaticBox( m_panelPageFoot, wxID_ANY, _("Shoesizes") ), wxVERTICAL );
@@ -461,10 +456,10 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	bSizer281->Add( sbSizerShoeSizes, 0, 0, 5 );
 	
 	
-	bSizerFoot->Add( bSizer281, 1, wxEXPAND, 5 );
+	bSizer281->Add( 0, 0, 1, wxEXPAND, 5 );
 	
-	m_propertyGrid1 = new wxPropertyGrid(m_panelPageFoot, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_DEFAULT_STYLE);
-	bSizerFoot->Add( m_propertyGrid1, 1, wxALL|wxEXPAND, 5 );
+	
+	bSizerFoot->Add( bSizer281, 0, wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizer11;
 	bSizer11 = new wxBoxSizer( wxVERTICAL );
@@ -915,8 +910,7 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	
 	// Connect Events
 	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameMain::OnClose ) );
-	this->Connect( m_menuItemUndo->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnUndo ) );
-	this->Connect( m_menuItemRedo->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnRedo ) );
+	this->Connect( wxEVT_IDLE, wxIdleEventHandler( GUIFrameMain::OnIdle ) );
 	this->Connect( m_menuItemInitalizeFootModel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetByShoeSize ) );
 	this->Connect( m_menuItemFullSymmetry->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
 	this->Connect( m_menuItemSymmetricModel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
@@ -994,7 +988,6 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_buttonPlateau->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnPreset ), NULL, this );
 	m_buttonHHHigh->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnPreset ), NULL, this );
 	m_buttonBallet->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnPreset ), NULL, this );
-	m_canvas3D->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( GUIFrameMain::On3DSelect ), NULL, this );
 	m_checkBoxLockAnkle->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleAnkleLock ), NULL, this );
 	m_choiceDisplay->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChoiceDisplay ), NULL, this );
 }
@@ -1003,8 +996,7 @@ GUIFrameMain::~GUIFrameMain()
 {
 	// Disconnect Events
 	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameMain::OnClose ) );
-	this->Disconnect( ID_UNDO, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnUndo ) );
-	this->Disconnect( ID_REDO, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnRedo ) );
+	this->Disconnect( wxEVT_IDLE, wxIdleEventHandler( GUIFrameMain::OnIdle ) );
 	this->Disconnect( ID_INITIALIZEFOOTMODEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetByShoeSize ) );
 	this->Disconnect( ID_FULLSYMMETRY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
 	this->Disconnect( ID_SYMMETRICMODEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
@@ -1082,7 +1074,6 @@ GUIFrameMain::~GUIFrameMain()
 	m_buttonPlateau->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnPreset ), NULL, this );
 	m_buttonHHHigh->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnPreset ), NULL, this );
 	m_buttonBallet->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnPreset ), NULL, this );
-	m_canvas3D->Disconnect( wxEVT_LEFT_DOWN, wxMouseEventHandler( GUIFrameMain::On3DSelect ), NULL, this );
 	m_checkBoxLockAnkle->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleAnkleLock ), NULL, this );
 	m_choiceDisplay->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChoiceDisplay ), NULL, this );
 	

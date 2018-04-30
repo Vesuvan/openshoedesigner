@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Skeleton.h
-// Purpose            : 
-// Thread Safe        : Yes
+// Name               : CommandProjectSetLegLengthDifference.h
+// Purpose            :
+// Thread Safe        : No
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 18.02.2018
+// Created            : 30.04.2018
 // Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,44 +24,25 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef SRC_PROJECT_FOOT_SKELETON_H_
-#define SRC_PROJECT_FOOT_SKELETON_H_
+#ifndef __COMMANDPROJECTSETLEGLENGTHDIFFERENCE_H__
+#define __COMMANDPROJECTSETLEGLENGTHDIFFERENCE_H__
 
-/*!\class Skeleton
- * \brief Collection of bones.
- *
- * Bones are enumerated for easier handling. A std::map<std::string, Bone> would be cleaner, but
- * in the end more difficult to use.
- */
-
-#include "Bone.h"
-#include "../../math/MathParser.h"
+#include <wx/cmdproc.h>
 #include <wx/string.h>
-#include <GL/gl.h>
-#include <vector>
 
-class Skeleton {
+#include "../Project.h"
+
+class CommandProjectSetLegLengthDifference:public wxCommand {
 public:
-	Skeleton();
-	virtual ~Skeleton();
+    CommandProjectSetLegLengthDifference(const wxString& name, Project* project,double value);
 
-	Bone* AddBone(wxString name);
+    bool Do(void);
+    bool Undo(void);
 
-	bool Connect(wxString name1, wxString name2);
-
-	void Setup(void);
-	void Render(void) const;
-
-	size_t GetBoneCount(void) const;
-
-	void UpdateBonesFromFormula(MathParser* parser);
-
-	bool mirrored;
-
-	std::vector <Bone> bones;
-private:
-	mutable GLuint m_gllist;
-	mutable bool update;
+protected:
+    Project* project;
+    double value;
+    double oldValue;
 };
 
-#endif /* SRC_PROJECT_FOOT_SKELETON_H_ */
+#endif /* __COMMANDPROJECTSETLEGLENGTHDIFFERENCE_H__ */

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : LastGenerationThread.h
+// Name               : WorkerThread.cpp
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
@@ -24,30 +24,37 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef LASTGENERATIONTHREAD_H_
-#define LASTGENERATIONTHREAD_H_
+#include "WorkerThread.h"
+#include "Project.h"
+#include "../gui/IDs.h"
 
-#include "../project/Project.h"
-#include <wx/thread.h>
-#include <wx/frame.h>
+WorkerThread::WorkerThread(Project * project, size_t threadNr)
+		: wxThread(wxTHREAD_JOINABLE)
+{
+	this->project = project;
+	this->threadNr = threadNr;
+}
 
-/*!\class LastGenerationThread
- * \brief Thread for the loadheavy calculation of the volume
- *
- * This thread inscribes the volume with the bones of the foot.
- */
+WorkerThread::~WorkerThread()
+{
+}
 
-class LastGenerationThread:public wxThread {
-public:
-	LastGenerationThread(wxFrame * frame, Project* project);
-	virtual ~LastGenerationThread();
-
-	virtual void *Entry();
-	virtual void OnExit();
-
-public:
-	wxFrame * frame;
-	Project * project;
-};
-
-#endif /* LASTGENERATIONTHREAD_H_ */
+wxThread::ExitCode WorkerThread::Entry()
+{
+	if(threadNr > 1) return (wxThread::ExitCode) 1;
+	if(TestDestroy()) return (wxThread::ExitCode) 2;
+	while(project->ThreadNeedsCalculations(threadNr) && !TestDestroy()){
+		project->ThreadCalculate(threadNr);
+		wxQueueEvent(project,
+				new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_REFRESH));
+	}
+	if(threadNr == 0){
+		wxQueueEvent(project, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED,
+		ID_THREADDONE_0));
+	}
+	if(threadNr == 1){
+		wxQueueEvent(project, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED,
+		ID_THREADDONE_1));
+	}
+	return (wxThread::ExitCode) 0;
+}

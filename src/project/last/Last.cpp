@@ -31,23 +31,23 @@
 Last::Last()
 {
 	nurbs.Initialize(5, 3, true, false, true, false);
-	nurbs.InsertData(Vector3(0, -1, -1), 1);
-	nurbs.InsertData(Vector3(-1, -1, -1), 0.354);
-	nurbs.InsertData(Vector3(-1, 0, -1), 1);
-	nurbs.InsertData(Vector3(-1, 1, -1), 0.354);
-	nurbs.InsertData(Vector3(0, 1, -1), 1);
+	nurbs.InsertData(Vector3(-0.05, -0.05, 0.2), 1);
+	nurbs.InsertData(Vector3(0.1, -0.05, 0.2), 1);
+	nurbs.InsertData(Vector3(0.15, 0, 0.2), 1);
+	nurbs.InsertData(Vector3(0.1, 0.05, 0.2), 1);
+	nurbs.InsertData(Vector3(-0.05, 0.05, 0.2), 1);
 
-	nurbs.InsertData(Vector3(0, -1, 1), 1);
-	nurbs.InsertData(Vector3(-1, -1, 1), 3.354);
-	nurbs.InsertData(Vector3(-1, 0, 1), 1);
-	nurbs.InsertData(Vector3(-1, 1, 1), 0.354);
-	nurbs.InsertData(Vector3(0, 1, 1), 1);
+	nurbs.InsertData(Vector3(-0.05, -0.05, 0.3), 1);
+	nurbs.InsertData(Vector3(0.1, -0.05, 0.25),1);
+	nurbs.InsertData(Vector3(0.15, 0, 0.22), 1);
+	nurbs.InsertData(Vector3(0.1, 0.05, 0.25), 1);
+	nurbs.InsertData(Vector3(-0.05, 0.05, 0.3), 1);
 
-	nurbs.InsertData(Vector3(0, -1, 2), 1);
-	nurbs.InsertData(Vector3(-1, -1, 2), 0.001);
-	nurbs.InsertData(Vector3(-3, 0, 3), 1);
-	nurbs.InsertData(Vector3(-1, 1, 2), 1);
-	nurbs.InsertData(Vector3(0, 1, 2), 1);
+	nurbs.InsertData(Vector3(-0.05, -0.05, 0.4), 1);
+	nurbs.InsertData(Vector3(0.05, -0.05, 0.4), 1);
+	nurbs.InsertData(Vector3(0.05, 0, 0.4), 1);
+	nurbs.InsertData(Vector3(0.05, 0.05, 0.4), 1);
+	nurbs.InsertData(Vector3(-0.05, 0.05, 0.4), 1);
 
 }
 

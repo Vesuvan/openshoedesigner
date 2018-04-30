@@ -28,8 +28,6 @@
 #include <wx/textctrl.h>
 #include <wx/sizer.h>
 #include <wx/statbox.h>
-#include <wx/propgrid/propgrid.h>
-#include <wx/propgrid/advprops.h>
 #include <wx/grid.h>
 #include <wx/panel.h>
 #include <wx/notebook.h>
@@ -51,64 +49,62 @@
 
 ///////////////////////////////////////////////////////////////////////////
 
-#define ID_UNDO 1000
-#define ID_REDO 1001
-#define ID_INITIALIZEFOOTMODEL 1002
-#define ID_FULLSYMMETRY 1003
-#define ID_SYMMETRICMODEL 1004
-#define ID_INDIVIDUALMODEL 1005
-#define ID_COPYLEFTTORIGHT 1006
-#define ID_COPYRIGHTTOLEFT 1007
-#define ID_LOADFOOTMODEL 1008
-#define ID_SAVEFOOTMODEL 1009
-#define ID_SETUPFOOT 1010
-#define ID_SETUPSHOE 1011
-#define ID_CONSTRUCTIONEXPERIMENTAL 1012
-#define ID_CONSTRUCTIONWELDED 1013
-#define ID_CONSTRUCTIONCEMENTED 1014
-#define ID_CONSTRUCTIONMOLDED 1015
-#define ID_CONSTRUCTIONDUTCH 1016
-#define ID_EDITWALKCYCLE 1017
-#define ID_LOADPATTERN 1018
-#define ID_SAVEPATTERN 1019
-#define ID_STEREO3D 1020
-#define ID_SHOWLEFT 1021
-#define ID_SHOWRIGHT 1022
-#define ID_SHOWBONES 1023
-#define ID_SHOWSKIN 1024
-#define ID_SHOWLEG 1025
-#define ID_SHOWLAST 1026
-#define ID_SHOWINSOLE 1027
-#define ID_SHOWSOLE 1028
-#define ID_SHOWUPPER 1029
-#define ID_SHOWCUTAWAY 1030
-#define ID_SHOWFLOOR 1031
-#define ID_SHOWCOORDINATESYSTEM 1032
-#define ID_SHOWBACKGROUND 1033
-#define ID_SETUPSTEREO3D 1034
-#define ID_SETUPUNITS 1035
-#define ID_TEXTFOOTLENGTH 1036
-#define ID_TEXTFOOTWIDTH 1037
-#define ID_TEXTHEELWIDTH 1038
-#define ID_TEXTANKLEWIDTH 1039
-#define ID_TEXTLEGLENGTH 1040
-#define ID_GRIDLENGTH 1041
-#define ID_GRIDDIAMETER 1042
-#define ID_GRIDSKIN 1043
-#define ID_GRIDLEG 1044
-#define ID_TEXTHEELHEIGHT 1045
-#define ID_TEXTBALLHEIGHT 1046
-#define ID_TEXTTOEPITCH 1047
-#define ID_TEXTMIXINGANGLE 1048
-#define ID_PRESETFLATS 1049
-#define ID_PRESETHHLOW 1050
-#define ID_PRESETPLATFORM 1051
-#define ID_PRESETCLASSIC 1052
-#define ID_PRESETHHMID 1053
-#define ID_PRESETPONY 1054
-#define ID_PRESETPLATEAU 1055
-#define ID_PRESETHHHIGH 1056
-#define ID_PRESETBALLET 1057
+#define ID_INITIALIZEFOOTMODEL 1000
+#define ID_FULLSYMMETRY 1001
+#define ID_SYMMETRICMODEL 1002
+#define ID_INDIVIDUALMODEL 1003
+#define ID_COPYLEFTTORIGHT 1004
+#define ID_COPYRIGHTTOLEFT 1005
+#define ID_LOADFOOTMODEL 1006
+#define ID_SAVEFOOTMODEL 1007
+#define ID_SETUPFOOT 1008
+#define ID_SETUPSHOE 1009
+#define ID_CONSTRUCTIONEXPERIMENTAL 1010
+#define ID_CONSTRUCTIONWELDED 1011
+#define ID_CONSTRUCTIONCEMENTED 1012
+#define ID_CONSTRUCTIONMOLDED 1013
+#define ID_CONSTRUCTIONDUTCH 1014
+#define ID_EDITWALKCYCLE 1015
+#define ID_LOADPATTERN 1016
+#define ID_SAVEPATTERN 1017
+#define ID_STEREO3D 1018
+#define ID_SHOWLEFT 1019
+#define ID_SHOWRIGHT 1020
+#define ID_SHOWBONES 1021
+#define ID_SHOWSKIN 1022
+#define ID_SHOWLEG 1023
+#define ID_SHOWLAST 1024
+#define ID_SHOWINSOLE 1025
+#define ID_SHOWSOLE 1026
+#define ID_SHOWUPPER 1027
+#define ID_SHOWCUTAWAY 1028
+#define ID_SHOWFLOOR 1029
+#define ID_SHOWCOORDINATESYSTEM 1030
+#define ID_SHOWBACKGROUND 1031
+#define ID_SETUPSTEREO3D 1032
+#define ID_SETUPUNITS 1033
+#define ID_TEXTFOOTLENGTH 1034
+#define ID_TEXTFOOTWIDTH 1035
+#define ID_TEXTHEELWIDTH 1036
+#define ID_TEXTANKLEWIDTH 1037
+#define ID_TEXTLEGLENGTH 1038
+#define ID_GRIDLENGTH 1039
+#define ID_GRIDDIAMETER 1040
+#define ID_GRIDSKIN 1041
+#define ID_GRIDLEG 1042
+#define ID_TEXTHEELHEIGHT 1043
+#define ID_TEXTBALLHEIGHT 1044
+#define ID_TEXTTOEPITCH 1045
+#define ID_TEXTMIXINGANGLE 1046
+#define ID_PRESETFLATS 1047
+#define ID_PRESETHHLOW 1048
+#define ID_PRESETPLATFORM 1049
+#define ID_PRESETCLASSIC 1050
+#define ID_PRESETHHMID 1051
+#define ID_PRESETPONY 1052
+#define ID_PRESETPLATEAU 1053
+#define ID_PRESETHHHIGH 1054
+#define ID_PRESETBALLET 1055
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class GUIFrameMain
@@ -160,7 +156,6 @@ class GUIFrameMain : public wxDocChildFrame
 		wxTextCtrl* m_textCtrlShoeSizeJP;
 		wxStaticText* m_staticTextShoeSizeAU;
 		wxTextCtrl* m_textCtrlShoeSizeAU;
-		wxPropertyGrid* m_propertyGrid1;
 		wxNotebook* m_notebook1;
 		wxPanel* m_panelBone;
 		wxGrid* m_gridBoneLength;
@@ -214,8 +209,7 @@ class GUIFrameMain : public wxDocChildFrame
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnClose( wxCloseEvent& event ) = 0;
-		virtual void OnUndo( wxCommandEvent& event ) = 0;
-		virtual void OnRedo( wxCommandEvent& event ) = 0;
+		virtual void OnIdle( wxIdleEvent& event ) = 0;
 		virtual void OnSetByShoeSize( wxCommandEvent& event ) = 0;
 		virtual void OnSetSymmetry( wxCommandEvent& event ) = 0;
 		virtual void OnCopyMeasurements( wxCommandEvent& event ) = 0;
@@ -246,7 +240,6 @@ class GUIFrameMain : public wxDocChildFrame
 		virtual void OnScroll( wxScrollEvent& event ) = 0;
 		virtual void OnScrollChange( wxScrollEvent& event ) = 0;
 		virtual void OnPreset( wxCommandEvent& event ) = 0;
-		virtual void On3DSelect( wxMouseEvent& event ) = 0;
 		virtual void OnToggleAnkleLock( wxCommandEvent& event ) = 0;
 		virtual void OnChoiceDisplay( wxCommandEvent& event ) = 0;
 		

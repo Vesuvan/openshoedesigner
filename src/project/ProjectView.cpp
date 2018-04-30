@@ -27,6 +27,8 @@
 #include "ProjectView.h"
 
 #include <cstdio>
+
+#include "../gui/FrameMain.h"
 #include "../main.h"
 
 IMPLEMENT_DYNAMIC_CLASS(ProjectView, wxView)
@@ -34,13 +36,10 @@ IMPLEMENT_DYNAMIC_CLASS(ProjectView, wxView)
 ProjectView::ProjectView()
 		: wxView()
 {
-	m_frame = NULL;
-	foot = NULL;
-
 	showLeft = true;
-	showRight = false;
+	showRight = true;
 	showBones = true;
-	showSkin = false;
+	showSkin = true;
 	showLeg = false;
 	showLast = false;
 	showInsole = false;
@@ -57,11 +56,13 @@ ProjectView::ProjectView()
 
 ProjectView::~ProjectView()
 {
-	printf("Destructing view\n");
+	printf("ProjectView: Destructor called...\n");
 }
 
 bool ProjectView::OnCreate(wxDocument* doc, long flags)
 {
+	printf("ProjectView::OnCreate(...) called...\n");
+
 	if(!wxView::OnCreate(doc, flags)) return false;
 	wxFrame* frame = wxGetApp().CreateChildFrame(this, mainframe);
 	wxASSERT(frame == GetFrame());
@@ -70,51 +71,59 @@ bool ProjectView::OnCreate(wxDocument* doc, long flags)
 	temp.LoadFile(_T("blender/images/Skel_right.jpg"), wxBITMAP_TYPE_JPEG);
 	background.push_back(temp);
 
-	Project* project = wxStaticCast(this->GetDocument(), Project);
-	foot = &(project->footL);
+//	Project* project = wxStaticCast(this->GetDocument(), Project);
+//	foot = &(project->footL);
 
 	frame->Show();
 	return true;
 }
 
-void ProjectView::Paint(void) const
+void ProjectView::Paint(bool usePicking) const
 {
 	const bool shiftapart = (showLeft && showRight);
 
 	Project* project = wxStaticCast(this->GetDocument(), Project);
+
+	glColor3f(0.8, 0.5, 0.0);
+//	project->vol.PaintSurface();
 
 	if(showLeft){
 		glPushMatrix();
 
 		if(shiftapart) glTranslatef(0, project->footL.ballwidth, 0);
 
-		glLoadName(0);
+		glLoadName(0); // Left
 		glPushName(1);
 		if(showBones) project->footL.PaintBones();
 		glPopName();
 		glPushName(2);
-		if(showSkin) project->footL.PaintSkin();
+		if(showSkin && !usePicking) project->footL.PaintSkin();
 		glPopName();
-
+		glPushName(3);
+		if(showLast) project->lastL.Paint();
+		glPopName();
+		glPushName(4);
+		if(showInsole) project->bow.Paint();
+		glPopName();
 		glPopMatrix();
 	}
 	if(showRight){
 		glPushMatrix();
 		if(shiftapart) glTranslatef(0, -project->footR.ballwidth, 0);
 
-		glLoadName(1);
+		glLoadName(1); // Right
 		glPushName(1);
 		if(showBones) project->footR.PaintBones();
 		glPopName();
 		glPushName(2);
-		if(showSkin) project->footR.PaintSkin();
+		if(showSkin && !usePicking) project->footR.PaintSkin();
 		glPopName();
-
+		glPushName(3);
+		if(showLast) project->lastR.Paint();
+		glPopName();
 		glPopMatrix();
 	}
 
-	glLoadName(10);
-	if(showLast) PaintLast();
 	glLoadName(11);
 	if(showInsole) PaintInsole();
 	glLoadName(12);
@@ -124,10 +133,12 @@ void ProjectView::Paint(void) const
 	glLoadName(14);
 	if(showCutaway) PaintCutaway();
 
-	glLoadName(16);
-	if(showFloor) PaintFloor();
-	glLoadName(17);
-	if(showBackground) PaintBackground(false);
+	if(!usePicking){
+		glLoadName(16);
+		if(showFloor) PaintFloor();
+		glLoadName(17);
+		if(showBackground) PaintBackground(false);
+	}
 }
 
 void ProjectView::PaintLast(void) const
@@ -141,8 +152,6 @@ void ProjectView::PaintLast(void) const
 void ProjectView::PaintInsole(void) const
 {
 	Project* project = wxStaticCast(this->GetDocument(), Project);
-
-	project->bow.Paint();
 
 //	glColor3f(0.0, 0.75, 0.0);
 //	glBegin(GL_LINES);
@@ -204,26 +213,29 @@ void ProjectView::PaintBackground(bool showBehind) const
 
 void ProjectView::OnDraw(wxDC* dc)
 {
-	printf("ProjectView::OnDraw called...\n");
+	printf("ProjectView::OnDraw(...) called...\n");
 
 }
 
 void ProjectView::OnUpdate(wxView* sender, wxObject* hint)
 {
+	FrameMain* temp = wxStaticCast(GetFrame(), FrameMain);
+	temp->TransferDataToWindow();
+	temp->Refresh();
 	wxView::OnUpdate(sender, hint);
-	printf("ProjectView::OnUpdate called...\n");
 }
 
 bool ProjectView::OnClose(bool deleteWindow)
 {
+	printf("ProjectView::OnClose(%s) called...\n",
+			deleteWindow? "true" : "false");
 	wxDocument* doc = GetDocument();
 	wxDocManager* manager = doc->GetDocumentManager();
 	wxList tempDocs = manager->GetDocuments();
 	wxList tempViews = doc->GetViews();
 
-	printf("In view: %u docs, %u views\n", tempDocs.GetCount(),
+	printf("ProjectView: %u docs, %u views\n", tempDocs.GetCount(),
 			tempViews.GetCount());
-	printf("Closing View\n");
 
 	if(!wxView::OnClose(deleteWindow)) return false;
 	Activate(false);
@@ -231,13 +243,13 @@ bool ProjectView::OnClose(bool deleteWindow)
 	wxWindow* frame = this->GetFrame();
 	if(tempDocs.GetCount() <= 1 && tempViews.GetCount() <= 1 && frame != NULL){
 		wxWindow* parent = frame->GetParent();
-		printf("Closing Application from Frame\n");
+		printf("ProjectView: Posting wxID_EXIT to parent\n");
 		wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, wxID_EXIT);
 		wxPostEvent(parent, event);
 	}
 
 	if(deleteWindow){
-		printf("Request destruction of Frame\n");
+		printf("ProjectView: Request destruction of associated Frame\n");
 		frame->Destroy();
 		SetFrame(NULL);
 	}

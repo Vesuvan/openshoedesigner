@@ -31,6 +31,7 @@
 #include "AffineTransformMatrix.h"
 #include "Geometry.h"
 #include "Vector3.h"
+#include <GL/gl.h>
 
 /*!\class Volume
  * \brief Marching Cube Volume
@@ -107,6 +108,10 @@ public:
 public:
 	Vector3 color; ///< Color of the volume
 	Geometry geometry; ///< Generated geometry
+
+private:
+	mutable GLuint m_gllist;
+	mutable bool update;
 
 };
 

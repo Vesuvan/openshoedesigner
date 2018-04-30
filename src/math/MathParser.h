@@ -28,6 +28,7 @@
 #define MATHPARSER_H_
 
 #include <wx/string.h>
+#include <stdint.h>
 
 /*!\class MathParser
  * \brief Simple single-line math parser

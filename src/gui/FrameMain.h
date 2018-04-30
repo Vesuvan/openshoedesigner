@@ -42,12 +42,12 @@
 
 #include "../project/Project.h"
 
-#include "LastGenerationThread.h"
-
 #include <wx/intl.h>
 #include <wx/config.h>
 
 #include "DialogSetupUnits.h"
+#include "MidiPort.h"
+
 class FrameMain:public GUIFrameMain {
 public:
 	FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
@@ -57,15 +57,12 @@ public:
 	bool TransferDataToWindow();
 	bool TransferDataFromWindow();
 
+	void On3DSelect(wxCommandEvent& event);
 	void RefreshCanvas(wxCommandEvent& event);
 	void RefreshView(wxCommandEvent& event);
-	void UpdateProject(void);
-	void LastCalculationDone(wxCommandEvent& event);
 
 	void OnClose(wxCloseEvent& event);
-	void OnUndo(wxCommandEvent& event);
-	void OnRedo(wxCommandEvent& event);
-
+	void OnIdle(wxIdleEvent& event);
 	void OnSetSymmetry(wxCommandEvent& event);
 	void OnSetupBackgroundImages(wxCommandEvent& event);
 	void OnCopyMeasurements(wxCommandEvent& event);
@@ -84,7 +81,6 @@ public:
 	void OnSaveCutaway(wxCommandEvent& event);
 	void OnPackZip(wxCommandEvent& event);
 	void OnToggleStereo3D(wxCommandEvent& event);
-	void On3DSelect(wxMouseEvent& event);
 	void OnViewChange(wxCommandEvent& event);
 	void OnSetupStereo3D(wxCommandEvent& event);
 	void OnSetupUnits(wxCommandEvent& event);
@@ -101,20 +97,16 @@ public:
 	void OnChoiceDisplay(wxCommandEvent& event);
 
 	wxConfig *config;
-	wxLocale *locale;
-
-//	wxCommandProcessor *commandProcessor;
+//	wxLocale *locale;
 
 	DisplaySettings settings;
 
 	DialogSetupStereo3D* dialogSetupStereo3D;
 	DialogSetupUnits* dialogSetupUnits;
 
-	LastGenerationThread* thread;
-
-private:
-	bool updateVolume;
-
+//	MidiPort midi;
+//	wxTimer timer;
+//	void OnTimer(wxTimerEvent& event);
 };
 
 #endif /* FRAMEMAIN_H_ */

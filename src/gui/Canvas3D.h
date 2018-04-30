@@ -34,18 +34,26 @@
  */
 
 #include "../project/ProjectView.h"
-
 #include "../3D/OpenGLCanvas.h"
+#include "../Config.h"
 
 class Canvas3D:public OpenGLCanvas {
 public:
 	Canvas3D(wxWindow* parent);
 	virtual ~Canvas3D();
 	void SetProjectView(const ProjectView* projectview);
+//
+//	void ConnectMouseEvents(void);
+//	void DisconnectMouseEvents(void);
 	void Render();
+	void RenderPick();
+//	void OnMouseEvent(wxMouseEvent& event);
 
 private:
 	const ProjectView* projectview;
+
+	Vector3 a,b;
+
 };
 
 #endif /* CANVAS3D_H_ */

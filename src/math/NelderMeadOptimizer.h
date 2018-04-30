@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Name               : NelderMeadOptimizer.h
 // Purpose            : 
-// Thread Safe        : Yes
+// Thread Safe        : No
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
@@ -56,10 +56,10 @@
  optim.Start();
  while(optim.IsRunning()){
 
- double x = optim.param[0];
- double f = x * x;
+   double x = optim.param[0];
+   double f = x * x;
 
- optim.SetError(f);
+   optim.SetError(f);
  }
 
  printf("Optimum: x = %g\n", optim.param[0]);

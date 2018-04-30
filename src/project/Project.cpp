@@ -40,21 +40,66 @@
 #include <wx/wfstream.h>
 #include <GL/gl.h>
 #include <float.h>
+#include "../gui/IDs.h"
+
+static const int maxState = 10;
+
+const Foot* Project::GetActiveFoot(void) const
+{
+	switch(active){
+	case Left:
+		return &footL;
+	case Right:
+		return &footR;
+	case Both:
+		throw(std::logic_error("Both sides cannot be active at the same time."));
+	}
+	return NULL;
+}
 
 IMPLEMENT_DYNAMIC_CLASS(Project, wxDocument)
 
 Project::Project()
 		: wxDocument()
 {
+
+//	vol.SetSize(4, 4, 4, 0.1);
+//	vol.SetOrigin(Vector3(-0.15, -0.15, -0.15));
+
+//	vol.SetSize(2, 2, 2, 0.1);
+//	vol.SetOrigin(Vector3(-0.05, -0.05, -0.05));
+
+//	for(size_t n = 0; n < vol.Numel(); n++)
+//		vol[n] = 0.0;
+//	vol.CalcSurface();
+
+	thread0 = NULL;
+	thread1 = NULL;
+	this->Connect(ID_THREADDONE_0, ID_THREADDONE_1,
+	wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(Project::OnCalculationDone));
+
 	generator = Experimental;
 	symmetry = Full;
-	activeFoot = &footL;
 	active = Left;
 	Reset();
 }
 
 Project::~Project()
 {
+	wxCriticalSectionLocker locker(CS);
+	if(thread0 != NULL){
+		thread0->Wait();
+		delete thread0;
+	}
+	if(thread1 != NULL){
+		thread1->Wait();
+		delete thread1;
+	}
+	this->Disconnect(ID_THREADDONE_0, ID_THREADDONE_1,
+	wxEVT_COMMAND_MENU_SELECTED,
+			wxCommandEventHandler(Project::OnCalculationDone));
+
 }
 
 void Project::Reset(void)
@@ -66,94 +111,138 @@ void Project::Reset(void)
 	footR.mirrored = true;
 	legLengthDifference = 0.0;
 
-	FlagForUpdate();
-	Update();
+	stateLeft = 0;
+	stateRight = 0;
 }
 
-bool Project::UpdateFootPosition(void)
+void Project::OnRefreshViews(wxCommandEvent& event)
 {
-	const double L = (footL.length + footR.length) / 2.0;
-	const double W = (footL.ballwidth + footR.ballwidth) / 2.0;
-	const double H = (footL.heelwidth + footR.heelwidth) / 2.0;
-	const double A = (footL.anklewidth + footR.anklewidth) / 2.0;
-
-	if(!shoe.Evaluate(L, W, H, A)) return false;
-
-	const double heelHeightL = shoe.heelHeight + fmax(0, legLengthDifference);
-	const double heelHeightR = shoe.heelHeight + fmax(0, -legLengthDifference);
-
-	footL.UpdateModel();
-	footL.SetPosition(heelHeightL, shoe.ballHeight, shoe.toeAngle, shoe.mixing);
-
-	footR.UpdateModel();
-	footR.SetPosition(heelHeightR, shoe.ballHeight, shoe.toeAngle, shoe.mixing);
-
-	return true;
+	UpdateAllViews();
 }
 
-void Project::FlagForUpdate(void)
+void Project::OnCalculationDone(wxCommandEvent& event)
 {
-	if(updateState < 1) updateState = 1;
-}
-
-bool Project::Update(void)
-{
-	if(updateState == 0) return false;
-
-	switch(updateState){
-	case 1:
-		if(symmetry == Full || symmetry == OnlyModel){
-			if(active == Left) footR.CopyModel(footL);
-			if(active == Right) footL.CopyModel(footR);
-		}
-		if(symmetry == Full){
-			if(active == Left) footR.CopyModelParameter(footL);
-			if(active == Right) footL.CopyModelParameter(footR);
-		}
-		UpdateFootPosition();
-		if(active == Left) updateState = 2;
-		if(active == Right) updateState = 3;
-		break;
-	case 2:
-		footL.CalculateSkin();
-		if(active == Left) updateState = 3;
-		if(active == Right) updateState = 0;
-		break;
-	case 3:
-		footR.CalculateSkin();
-		if(active == Left) updateState = 0;
-		if(active == Right) updateState = 2;
-		break;
+	CS.Enter();
+	if(event.GetId() == ID_THREADDONE_0 && thread0 != NULL){
+		thread0->Wait();
+		delete thread0;
+		thread0 = NULL;
 	}
+	if(event.GetId() == ID_THREADDONE_1 && thread1 != NULL){
+		thread1->Wait();
+		delete thread1;
+		thread1 = NULL;
+	}
+	CS.Leave();
+	UpdateAllViews();
+}
 
-	if(updateState == 0){
+void Project::Update(PartToUpdate part, Side side)
+{
+	if(side == Left || side == Both){
+		stateLeft = 0;
+	}
+	if(side == Right || side == Both){
+		stateRight = 0;
+	}
+}
 
-		heightfield = footL.skin.SurfaceField();
-		OrientedMatrix temp = heightfield.XRay(Volume::MinValue);
+void Project::Recalculate(void)
+{
+	const bool multiThreading = true;
 
-		bow.Clear();
-		for(unsigned int i = 0; i < temp.Numel(); i++){
-			if(temp[i] < DBL_MAX){
-				bow.InsertPoint(i * temp.dx + temp.origin.x, 0,
-						temp[i] + temp.origin.z);
-			}
+	if(multiThreading){
+		wxCriticalSectionLocker locker(CS);
+		if(ThreadNeedsCalculations(0) && thread0 == NULL){
+			thread0 = new WorkerThread(this, 0);
+			thread0->Create();
+			thread0->Run();
 		}
+		if(ThreadNeedsCalculations(1) && thread1 == NULL){
+			thread1 = new WorkerThread(this, 1);
+			thread1->Create();
+			thread1->Run();
+		}
+	}else{
+		while(ThreadNeedsCalculations(0) || ThreadNeedsCalculations(1)){
+			ThreadCalculate(0);
+			ThreadCalculate(1);
+		}
+	}
+}
 
-//	sole.origin.z -= 0.1;
+bool Project::ThreadNeedsCalculations(size_t threadNr) const
+{
+	switch(threadNr){
+	case 0:
+		return (stateLeft < maxState);
+	case 1:
+		return (stateRight < maxState);
+	}
+	return false;
+}
 
-		xray = footL.skin.XRay(Volume::MeanValue);
+void Project::ThreadCalculate(size_t threadNr)
+{
+	if(threadNr == 0){
+		if(stateLeft < maxState) stateLeft++;
+		switch(stateLeft){
+		case 1:
+			{
+				footL.UpdateModel();
+				footL.UpdatePosition(&shoe, fmax(0, legLengthDifference));
+			}
+			break;
+		case 2:
+			{
+				footL.CalculateSkin();
+			}
+			break;
+		case 3:
+			{
+				heightfield = footL.skin.SurfaceField();
+				OrientedMatrix temp = heightfield.XRay(Volume::MinValue);
 
-//	bow = foot.GetCenterline();
+				bow.Clear();
+				for(unsigned int i = 0; i < temp.Numel(); i++){
+					if(temp[i] < DBL_MAX){
+						bow.InsertPoint(i * temp.dx + temp.origin.x, 0,
+								temp[i] + temp.origin.z);
+					}
+				}
+
+				//	sole.origin.z -= 0.1;
+
+				xray = footL.skin.XRay(Volume::MeanValue);
+				bow = footL.GetCenterline();
 //	bow.elements[0] = lastvol.GetSurface(bow.elements[1],
 //			(bow.elements[0] - bow.elements[1]) * 2);
 //	size_t M = bow.elements.GetCount();
 //	bow.elements[M - 1] = lastvol.GetSurface(bow.elements[M - 2],
 //			(bow.elements[M - 1] - bow.elements[M - 2]) * 2);
 //
-//	bow.Resample(50);
+				bow.Resample(50);
 //	bow.Filter(20);
+			}
+			break;
+		}
 	}
-	return (updateState == 0)? false : true;
+	if(threadNr == 1){
+		if(stateRight < maxState) stateRight++;
+		switch(stateRight){
+		case 1:
+			{
+				footR.UpdateModel();
+				footR.UpdatePosition(&shoe, fmax(0, -legLengthDifference));
+			}
+			break;
+		case 2:
+			{
+				footR.CalculateSkin();
+			}
+			break;
+		}
+	}
 }
 
 bool Project::LoadModel(wxString fileName)
@@ -171,7 +260,7 @@ bool Project::LoadModel(wxString fileName)
 		if(symmetry == Full) footR.CopyModel(footL);
 	}
 	if(flag){
-		UpdateFootPosition();
+		Update();
 		return true;
 	}
 	return false;

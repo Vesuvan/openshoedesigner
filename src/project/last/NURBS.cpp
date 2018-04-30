@@ -26,7 +26,10 @@
 
 #include "NURBS.h"
 
+//#define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
+//#include <GL/glext.h>
+
 #include <cassert>
 #include <cmath>
 
@@ -231,7 +234,7 @@ Vector3 NURBS::Normal(double u, double v) const
 	const Vector3 p0 = Position(u, v);
 	const Vector3 p1 = Position(u + eps, v);
 	const Vector3 p2 = Position(u, v + eps);
-	Vector3 n = (p2 - p0) * (p1 - p0);
+	Vector3 n = (p1 - p0) * (p2 - p0);
 	n.Normalize();
 	return n;
 }
@@ -315,7 +318,7 @@ void NURBS::Paint(void) const
 			const Vector3 p1 = Position(u + du, v);
 			const Vector3 p2 = Position(u + du, v + dv);
 			const Vector3 p3 = Position(u, v + dv);
-			Vector3 n = (p3 - p0) * (p1 - p0);
+			Vector3 n = (p1 - p0) * (p3 - p0);
 			n.Normalize();
 			glNormal3d(n.x, n.y, n.z);
 			glBegin(GL_QUADS);
@@ -336,4 +339,5 @@ void NURBS::Paint(void) const
 
 void NURBS::Paint(int blockU, int blockV) const
 {
+//	glBlendEquation(1);
 }

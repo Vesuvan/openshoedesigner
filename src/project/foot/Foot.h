@@ -80,10 +80,20 @@
 #include "../../3D/Volume.h"
 #include "Skeleton.h"
 
+class Shoe;
+
 class Foot:public Skeleton {
 public:
-		enum sizetype {
+	enum sizetype {
 		EU, US, CN, UK, JP, AU, mm, cm, in, ft
+	};
+
+	enum sizeparameter {
+		Length, //!< Length of foot
+		BallWidth, //!< Width of the ball
+		HeelWidth, //!< Width of the heel
+		AnkleWidth, //!< Width of the ankle
+		Mixing  //!< Anglemixing
 	};
 
 	Foot();
@@ -96,10 +106,9 @@ public:
 	bool SaveModel(wxTextOutputStream* stream);
 	void CopyModel(const Foot &other);
 	void SetModelParameter(double L, double W, double H, double A);
-	void CopyModelParameter(const Foot &other);
 	void UpdateModel(void);
 
-	void SetPosition(double heelheight,double ballheight, double toeAngle, double mixing = 0.5);
+	void UpdatePosition(const Shoe* shoe, double offset = 0.0);
 	double GetSize(sizetype type) const;
 
 	void CalculateSkin(void);
@@ -115,16 +124,19 @@ private:
 	void InitBones(void);
 	double GetHeelHeight(void) const;
 	double GetBallHeight(void) const;
-	void UpdatePosition(void);
-
 
 public:
-	bool defined; ///< Flag that this foot is defined. If it is not, use the other one.
-
+	// Parameter:
 	double length;
 	double ballwidth;
 	double heelwidth;
 	double anklewidth;
+	double mixing;
+
+	// Calculated:
+	double heelHeight;
+	double ballHeight;
+	double toeAngle;
 
 private:
 	static const unsigned int NBones;

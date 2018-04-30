@@ -74,6 +74,7 @@ openshoedesigner::openshoedesigner()
 
 openshoedesigner::~openshoedesigner()
 {
+	printf("wxApp: Destructor called\n");
 	delete config; // config is written back on deletion of object
 }
 
@@ -132,7 +133,7 @@ int openshoedesigner::OnExit()
 	wxDocManager* const docManager = wxDocManager::GetDocumentManager();
 	docManager->FileHistorySave(*config);
 	delete docManager;
-	printf("Exiting Application\n");
+	printf("wxApp: Exiting Application\n");
 	return wxApp::OnExit();
 }
 

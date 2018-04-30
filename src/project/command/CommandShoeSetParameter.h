@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : CommandFootModelSetValue.h
-// Purpose            : 
-// Thread Safe        : Yes
+// Name               : CommandShoeSetParameter.h
+// Purpose            :
+// Thread Safe        : No
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 19.02.2018
+// Created            : 01.05.2018
 // Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,28 +24,29 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef SRC_PROJECT_FOOT_COMMANDFOOTMODELSETVALUE_H_
-#define SRC_PROJECT_FOOT_COMMANDFOOTMODELSETVALUE_H_
+#ifndef __COMMANDSHOESETPARAMETER_H__
+#define __COMMANDSHOESETPARAMETER_H__
 
 #include <wx/cmdproc.h>
 #include <wx/string.h>
 
 #include "../Project.h"
 
-class CommandFootModelSetValue:public wxCommand {
+class CommandShoeSetParameter:public wxCommand {
 public:
-	CommandFootModelSetValue(const wxString& name, Project* project,
-			size_t boneNr, Bone::stringIdentifier field, wxString newFormula);
+	CommandShoeSetParameter(const wxString& name, Project* project, int fieldNr,
+			wxString newExpression);
 
 	bool Do(void);
 	bool Undo(void);
 
 protected:
 	Project* project;
-	size_t boneNr;
-	Bone::stringIdentifier field;
-	wxString newFormula;
-	wxString oldFormula;
+	int fieldNr;
+	wxString newExpression;
+	wxString oldExpression;
+
 };
 
-#endif /* SRC_PROJECT_FOOT_COMMANDFOOTMODELSETVALUE_H_ */
+#endif /* __COMMANDSHOESETPARAMETER_H__ */
+

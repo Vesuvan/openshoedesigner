@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Skeleton.h
+// Name               : WorkerThread.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 18.02.2018
-// Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 05.10.2015
+// Copyright          : (C) 2015 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,44 +24,30 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef SRC_PROJECT_FOOT_SKELETON_H_
-#define SRC_PROJECT_FOOT_SKELETON_H_
+#ifndef __WORKERTHREAD_H__
+#define __WORKERTHREAD_H__
 
-/*!\class Skeleton
- * \brief Collection of bones.
+#include <stddef.h>
+#include <wx/thread.h>
+
+class Project;
+
+/*!\class LastGenerationThread
+ * \brief Thread for the loadheavy calculation of the volume
  *
- * Bones are enumerated for easier handling. A std::map<std::string, Bone> would be cleaner, but
- * in the end more difficult to use.
+ * This thread inscribes the volume with the bones of the foot.
  */
 
-#include "Bone.h"
-#include "../../math/MathParser.h"
-#include <wx/string.h>
-#include <GL/gl.h>
-#include <vector>
-
-class Skeleton {
+class WorkerThread:public wxThread {
 public:
-	Skeleton();
-	virtual ~Skeleton();
+	WorkerThread(Project* project, size_t threadNr);
+	virtual ~WorkerThread();
 
-	Bone* AddBone(wxString name);
+	wxThread::ExitCode Entry();
 
-	bool Connect(wxString name1, wxString name2);
-
-	void Setup(void);
-	void Render(void) const;
-
-	size_t GetBoneCount(void) const;
-
-	void UpdateBonesFromFormula(MathParser* parser);
-
-	bool mirrored;
-
-	std::vector <Bone> bones;
-private:
-	mutable GLuint m_gllist;
-	mutable bool update;
+public:
+	Project * project;
+	size_t threadNr;
 };
 
-#endif /* SRC_PROJECT_FOOT_SKELETON_H_ */
+#endif /* __WORKERTHREAD_H__ */

@@ -31,10 +31,13 @@
 Skeleton::Skeleton()
 {
 	mirrored = false;
+	m_gllist = 0;
+	update = true;
 }
 
 Skeleton::~Skeleton()
 {
+	if(m_gllist != 0) glDeleteLists(m_gllist, 1);
 }
 
 Bone* Skeleton::AddBone(wxString name)
@@ -77,14 +80,26 @@ void Skeleton::Setup(void)
 			bones[n].Setup(NULL);
 		}
 	}
+	update = true;
 }
 
 void Skeleton::Render(void) const
 {
-	for(size_t n = 0; n < bones.size(); n++){
-		::glPushName(n);
-		bones[n].Render();
-		::glPopName();
+	if(m_gllist == 0){
+		m_gllist = glGenLists(1);
+		update = true;
+	}
+	if(update){
+		glNewList(m_gllist, GL_COMPILE_AND_EXECUTE);
+		for(size_t n = 0; n < bones.size(); n++){
+			::glPushName(n);
+			bones[n].Render();
+			::glPopName();
+		}
+		glEndList();
+		update = false;
+	}else{
+		glCallList(m_gllist);
 	}
 }
 
@@ -113,4 +128,5 @@ void Skeleton::UpdateBonesFromFormula(MathParser *parser)
 			bones[n].normal.y = -bones[n].normal.y;
 		}
 	}
+	update = true;
 }

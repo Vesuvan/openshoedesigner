@@ -57,9 +57,9 @@ public:
 	 * @param origin Vector3 of origin
 	 */
 	void SetOrigin(Vector3 origin);
-	void SetCount(unsigned int nx, unsigned int ny, unsigned int nz,
-			float resolution);
-	void SetSize(float x, float y, float z, float resolution = 1.0);
+	void SetSize(unsigned int nx, unsigned int ny, unsigned int nz,
+			float resolution = 1.0);
+	void SetExtent(float x, float y, float z, float resolution = 1.0);
 
 	/*! \brief Return the Value at a point
 	 *

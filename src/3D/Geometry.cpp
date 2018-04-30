@@ -123,6 +123,18 @@ void Geometry::Paint(GeometryColorStyle style) const
 
 	}
 	::glEnd();
+
+//	for(i = 0; i < triangles.Count(); i++){
+//		::glBegin(GL_LINE_LOOP);
+//		::glVertex3d(triangles[i].p[0].x, triangles[i].p[0].y,
+//				triangles[i].p[0].z);
+//		::glVertex3d(triangles[i].p[1].x, triangles[i].p[1].y,
+//				triangles[i].p[1].z);
+//		::glVertex3d(triangles[i].p[2].x, triangles[i].p[2].y,
+//				triangles[i].p[2].z);
+//		::glEnd();
+//	}
+
 	::glPopMatrix();
 //#if defined (__WIN32__)
 //	::glDisable(GL_NORMALIZE);
@@ -278,13 +290,13 @@ void Geometry::ToXml(wxXmlNode* parentNode)
 	temp = parentNode->GetChildren();
 	while(temp != NULL && nodeObject == NULL){
 		if(temp->GetName() == _T("geometry")
-				&& temp->GetPropVal(_T("name"), _T("")) == name) nodeObject =
+				&& temp->GetAttribute(_T("name"), _T("")) == name) nodeObject =
 				temp;
 		temp = temp->GetNext();
 	}
 	if(nodeObject == NULL){
 		nodeObject = new wxXmlNode(wxXML_ELEMENT_NODE, _T("geometry"));
-		nodeObject->AddProperty(_T("name"), name);
+		nodeObject->AddAttribute(_T("name"), name);
 		parentNode->InsertChild(nodeObject, NULL);
 	}
 
@@ -322,7 +334,7 @@ void Geometry::ToXml(wxXmlNode* parentNode)
 bool Geometry::FromXml(wxXmlNode* parentNode)
 {
 	if(parentNode->GetName() != _T("geometry")) return false;
-	name = parentNode->GetPropVal(_T("name"), _T(""));
+	name = parentNode->GetAttribute(_T("name"), _T(""));
 	wxXmlNode *temp = parentNode->GetChildren();
 
 	triangles.Empty();

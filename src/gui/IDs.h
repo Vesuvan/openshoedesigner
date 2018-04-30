@@ -41,10 +41,12 @@
  *
  */
 
-#define ID_REFRESH3DVIEW			(wxID_HIGHEST+1)
-#define ID_REFRESHVIEW				(wxID_HIGHEST+2)
+#define ID_REFRESH3DVIEW		(wxID_HIGHEST+1)
+#define ID_REFRESH				(wxID_HIGHEST+2)
+#define ID_3DSELECT				(wxID_HIGHEST+3)
 
 //!>\def ID_THREADLASTDONE Worker thread to main thread: Processing of volume ready.
-#define ID_THREADLASTDONE			(wxID_HIGHEST+5)
+#define ID_THREADDONE_0			(wxID_HIGHEST+5)
+#define ID_THREADDONE_1			(wxID_HIGHEST+6)
 
 #endif /* IDS_H_ */
