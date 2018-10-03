@@ -36,12 +36,12 @@
 //#include <GL/gl.h>
 #endif
 
-static int wx_gl_attribs[] =
-	{WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 24, 0};
+static int wx_gl_attribs[] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE,
+		24, 0};
 
 OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
-		const wxSize& size, long style, const wxString& name) :
-		wxGLCanvas(parent, id, wx_gl_attribs, pos, size,
+		const wxSize& size, long style, const wxString& name)
+		: wxGLCanvas(parent, id, wx_gl_attribs, pos, size,
 				style | wxFULL_REPAINT_ON_RESIZE, name)
 {
 
@@ -95,7 +95,7 @@ OpenGLCanvas::~OpenGLCanvas()
 {
 #ifdef _USE_6DOFCONTROLLER
 	this->Disconnect(wxEVT_TIMER, wxTimerEventHandler(OpenGLCanvas::OnTimer),
-	NULL, this);
+			NULL, this);
 #endif
 	this->Disconnect(wxEVT_RIGHT_DCLICK,
 			wxMouseEventHandler(OpenGLCanvas::OnMouseEvent), NULL, this);
@@ -185,8 +185,8 @@ void OpenGLCanvas::OnTimer(wxTimerEvent& event)
 	control->Pump();
 	if(control->IsIdle()) return;
 
-	float resRot = 2000;
-	float resMov = 5 * unitAtOrigin;
+	const float resRot = 2000;
+	const float resMov = 5 * unitAtOrigin;
 
 	rotmat = AffineTransformMatrix::RotateInterwoven(
 			(float) control->GetAxis(3) / resRot,
@@ -262,20 +262,20 @@ void OpenGLCanvas::OnMouseEvent(wxMouseEvent& event)
 	if(event.Dragging() && event.MiddleIsDown()){
 		float movement = 1.0;
 		if(unitAtOrigin > 1.0) movement = unitAtOrigin;
-		float dx = (float) (event.m_x - x) / movement;
-		float dy = (float) (event.m_y - y) / movement;
+		const float dx = (float) (event.m_x - x) / movement;
+		const float dy = (float) (event.m_y - y) / movement;
 		rotmat.TranslateGlobal(dx, -dy, 0);
 		x = event.m_x;
 		y = event.m_y;
 
 		this->Refresh();
-	}
-
-	int x = event.GetWheelRotation();
-	if(x != 0){
-		scale = exp(log(scale) - ((float) x) / 1000.0);
-//		rotmat.TranslateGlobal(0, 0, (float) -x / 1000.0);
-		this->Refresh();
+	}else{
+		const int x = event.GetWheelRotation();
+		if(x != 0){
+			scale *= exp(-((float) x) / 1000.0);
+			// rotmat.TranslateGlobal(0, 0, (float) -x / 1000.0);
+			this->Refresh();
+		}
 	}
 
 	if(event.Moving() || event.Dragging()) event.Skip();
