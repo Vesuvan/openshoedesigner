@@ -106,5 +106,4 @@ void DialogQuickInitFoot::ParseText(wxString text)
 	if(m_radioBtnSmall->GetValue()) width = -1.0;
 	if(m_radioBtnWide->GetValue()) width = 1.0;
 	width = (length / 3.0) * (1 + width / 5.0);
-
 }

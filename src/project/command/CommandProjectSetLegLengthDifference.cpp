@@ -38,16 +38,19 @@ CommandProjectSetLegLengthDifference::CommandProjectSetLegLengthDifference(
 bool CommandProjectSetLegLengthDifference::Do(void)
 {
 	if(project == NULL) return false;
-	oldValue = project->legLengthDifference;
-	project->legLengthDifference = value;
-	project->Update(Project::UpdateFoot, Project::Both);
-	return true;
+	return false;
+//	oldValue = project->legLengthDifference;
+//	project->legLengthDifference = value;
+//	project->Update(Project::UpdateFoot, Project::Both);
+//	return true;
 }
 
 bool CommandProjectSetLegLengthDifference::Undo(void)
 {
 	if(project == NULL) return false;
-	project->legLengthDifference = oldValue;
-	project->Update(Project::UpdateFoot, Project::Both);
-	return true;
+	return false;
+
+//	project->legLengthDifference = oldValue;
+//	project->Update(Project::UpdateFoot, Project::Both);
+//	return true;
 }

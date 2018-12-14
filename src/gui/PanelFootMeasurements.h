@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : CommandShoePreset.h
-// Purpose            :
-// Thread Safe        : No
+// Name               : PanelFootMeasurements.h
+// Purpose            : 
+// Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 01.05.2018
+// Created            : 18.11.2018
 // Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,27 +24,40 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef __COMMANDSHOEPRESET_H__
-#define __COMMANDSHOEPRESET_H__
+#ifndef SRC_GUI_PANELFOOTMEASUREMENTS_H_
+#define SRC_GUI_PANELFOOTMEASUREMENTS_H_
 
-#include <wx/cmdproc.h>
-#include <wx/string.h>
-#include "../Project.h"
+/*!\class PanelFootMeasurements
+ * \brief ...
+ *
+ * ...
+ */
 
-class CommandShoePreset:public wxCommand {
+#include <wx/docview.h>
+
+#include "DisplaySettings.h"
+#include "guipanels.h"
+
+class PanelFootMeasurements:public GUIPanelFootMeasurements {
 public:
-	CommandShoePreset(const wxString& name, Project* project, int preset);
+	PanelFootMeasurements(wxWindow* parent, wxWindowID id = wxID_ANY,
+			const wxPoint& pos = wxDefaultPosition,
+			const wxSize& size = wxSize(-1, -1), long style = wxTAB_TRAVERSAL);
+	virtual ~PanelFootMeasurements();
 
-	bool Do(void);
-	bool Undo(void);
+	void SetDocView(wxDocument* doc, wxView* view);
+	void SetDisplaySettings(DisplaySettings* settings);
 
-protected:
-	Project* project;
-	int preset;
+	bool TransferDataToWindow(void);
 
-	wxString oldHeelHeight;
-	wxString oldBallHeight;
-	wxString oldToeAngle;
+	void OnQuickSetup(wxCommandEvent& event);
+	void OnKillFocus(wxFocusEvent& event);
+	void OnSetFocus(wxFocusEvent& event);
+	void OnTextEnter(wxCommandEvent& event);
+
+	wxDocument *doc;
+	wxView *view;
+	DisplaySettings *settings;
 };
 
-#endif /* __COMMANDSHOEPRESET_H__ */
+#endif /* SRC_GUI_PANELFOOTMEASUREMENTS_H_ */

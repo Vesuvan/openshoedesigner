@@ -30,7 +30,7 @@
 /*!\class Last
  * \brief Last with NURBS hull
  *
- *
+ * NURBS Hull derived from either the foot model or a prototype last model.
  */
 
 #include "NURBS.h"
@@ -43,7 +43,6 @@ public:
 	void Paint(void) const;
 
 	NURBS nurbs;
-
 };
 
 #endif /* LAST_H_ */

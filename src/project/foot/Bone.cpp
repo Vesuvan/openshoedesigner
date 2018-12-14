@@ -24,7 +24,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "Bone.h"
+#include "../foot/Bone.h"
+
 #include <GL/gl.h>
 
 #include <math.h>
@@ -41,10 +42,27 @@ Bone::Bone(const wxString &name)
 	s2 = 0.01;
 	rotx = 0.0;
 	roty = 0.0;
+	rotxBackup = 0.0;
+	rotyBackup = 0.0;
 }
 
 Bone::~Bone()
 {
+}
+
+double Bone::GetXMax(void) const
+{
+	return fmax(p1.x + r1 + s1, p2.x + r1 + s1);
+}
+
+double Bone::GetXMin(void) const
+{
+	return fmin(p1.x - r1 - s1, p2.x - r1 - s1);
+}
+
+double Bone::GetZMin(void) const
+{
+	return fmin(p1.z - r1 - s1, p2.z - r1 - s1);
 }
 
 void Bone::Vertex(const Vector3 v) const
@@ -302,3 +320,16 @@ void Bone::Setup(Bone *parent)
 	p2 = matrix.Transform(normal * length);
 }
 
+void Bone::ResetRotation(void)
+{
+	rotxBackup = rotx;
+	rotyBackup = roty;
+	rotx = 0.0;
+	roty = 0.0;
+}
+
+void Bone::RestoreRotation(void)
+{
+	rotx = rotxBackup;
+	roty = rotyBackup;
+}

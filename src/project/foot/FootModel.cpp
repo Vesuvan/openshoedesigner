@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Foot.cpp
-// Purpose            : Footbones and skin parameters
+// Name               : FootModel.cpp
+// Purpose            : Bone-based model of a foot
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
@@ -24,7 +24,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "Foot.h"
+#include "../foot/FootModel.h"
 
 #include <GL/gl.h>
 #include <cassert>
@@ -32,8 +32,8 @@
 #include "../Shoe.h"
 #include "../../math/NelderMeadOptimizer.h"
 
-const unsigned int Foot::NBones = 29;
-Foot::Foot()
+const unsigned int FootModel::NBones = 29;
+FootModel::FootModel()
 {
 	bones.reserve(NBones); //TODO Move away from using pointers.
 
@@ -109,25 +109,18 @@ Foot::Foot()
 	Skeleton::Connect(_T("PhalanxII3"), _T("PhalanxIII3"));
 	Skeleton::Connect(_T("PhalanxII4"), _T("PhalanxIII4"));
 
-	length = 28.67e-2;
-	ballwidth = 9.56e-2;
-	heelwidth = ballwidth - 2e-2;
-	anklewidth = heelwidth - 1e-2;
-	mixing = 0.1;
-
-	heelHeight = 0.02;
-	ballHeight = 0.0;
-	toeAngle = 0.0;
+	L = 28.67e-2;
+	W = 9.56e-2;
 
 	InitBones();
-	UpdateModel();
+	CalculateBones();
 }
 
-Foot::~Foot()
+FootModel::~FootModel()
 {
 }
 
-void Foot::PaintBones(void) const
+void FootModel::PaintBones(void) const
 {
 	glPushMatrix();
 	glMultMatrixd(origin.a);
@@ -135,7 +128,7 @@ void Foot::PaintBones(void) const
 	glPopMatrix();
 }
 
-void Foot::PaintSkin(void) const
+void FootModel::PaintSkin(void) const
 {
 	glPushMatrix();
 	glMultMatrixd(origin.a);
@@ -143,7 +136,7 @@ void Foot::PaintSkin(void) const
 	glPopMatrix();
 }
 
-void Foot::InitBones(void)
+void FootModel::InitBones(void)
 {
 	Tibia->anchorD = 0.0143493;
 	Tibia->anchorN.Set(0.00240981, 0.00711795, 0);
@@ -408,7 +401,7 @@ void Foot::InitBones(void)
 	PhalanxIII4->s2 = 0.01;
 }
 
-bool Foot::LoadModel(wxTextInputStream* stream)
+bool FootModel::LoadModel(wxTextInputStream* stream)
 {
 	if(!Tibia->Set(stream->ReadLine())) return false;
 	if(!Fibula->Set(stream->ReadLine())) return false;
@@ -440,12 +433,12 @@ bool Foot::LoadModel(wxTextInputStream* stream)
 	if(!PhalanxIII3->Set(stream->ReadLine())) return false;
 	if(!PhalanxIII4->Set(stream->ReadLine())) return false;
 
-	UpdateModel();
+	CalculateBones();
 
 	return true;
 }
 
-bool Foot::SaveModel(wxTextOutputStream* stream)
+bool FootModel::SaveModel(wxTextOutputStream* stream)
 {
 	stream->WriteString(Tibia->Get());
 	stream->WriteString(Fibula->Get());
@@ -479,7 +472,7 @@ bool Foot::SaveModel(wxTextOutputStream* stream)
 	return true;
 }
 
-void Foot::CopyModel(const Foot& other)
+void FootModel::CopyModel(const FootModel& other)
 {
 	for(size_t n = 0; n < bones.size(); n++){
 		bones[n].name = other.bones[n].name;
@@ -501,73 +494,47 @@ void Foot::CopyModel(const Foot& other)
 	}
 }
 
-void Foot::SetModelParameter(double L, double W, double H, double A)
+void FootModel::UpdateForm(const FootMeasurements &measurements)
 {
-	this->length = L;
-	this->ballwidth = W;
-	this->heelwidth = H;
-	this->anklewidth = A;
+	ResetRotation();
+	optiForm.reevalBest = true;
+	optiForm.keepSimplex = true;
+	optiForm.simplexSpread = 0.01;
+	optiForm.evalLimit = 30;
+	optiForm.errorLimit = 0.0005;
+	optiForm.param.resize(1, 0.0);
+	optiForm.param[0] = L;
+	optiForm.Start();
+	while(optiForm.IsRunning()){
+		L = optiForm.param[0];
+		CalculateBones();
+		optiForm.SetError(
+				fabs(
+						(PhalanxIII4->GetXMax() - Calcaneus->GetXMin())
+								- measurements.footLength.value));
+	}
+	RestoreRotation();
 }
 
-void Foot::UpdateModel(void)
+void FootModel::UpdatePosition(const Shoe &shoe, double offset, double mixing)
 {
-	MathParser parser;
-	parser.SetVariable(_T("L"), length);
-	parser.SetVariable(_T("W"), ballwidth);
-	parser.SetVariable(_T("H"), heelwidth);
-	parser.SetVariable(_T("A"), anklewidth);
 
-	UpdateBonesFromFormula(&parser);
-	Skeleton::Setup();
-}
-
-double Foot::GetHeelHeight(void) const
-{
-	return Calcaneus->p2.z - Calcaneus->r2 - Calcaneus->s2;
-}
-
-double Foot::GetBallHeight(void) const
-{
-	return PhalanxI5->p1.z - PhalanxI5->r1 - PhalanxI5->s1;
-}
-
-void Foot::UpdatePosition(const Shoe* shoe, double offset)
-{
-	MathParser parser(false);
-	parser.AddAllowedUnit(_T("mm"), 1e-3);
-	parser.AddAllowedUnit(_T("cm"), 1e-2);
-	parser.AddAllowedUnit(_T("m"), 1);
-	parser.AddAllowedUnit(_T("in"), 2.54e-2);
-	parser.AddAllowedUnit(_T("ft"), 0.3048);
-	parser.AddAllowedUnit(_T("rad"), 1);
-	parser.AddAllowedUnit(_T("deg"), 0.017453);
-	parser.AddAllowedUnit(_T("gon"), 0.015708);
-
-	parser.SetVariable(_T("L"), length);
-	parser.SetVariable(_T("W"), ballwidth);
-	parser.SetVariable(_T("H"), heelwidth);
-	parser.SetVariable(_T("A"), anklewidth);
-
-	parser.SetString(shoe->exprHeelHeight);
-	if(parser.Evaluate()) heelHeight = parser.GetNumber();
-	parser.SetString(shoe->exprBallHeight);
-	if(parser.Evaluate()) ballHeight = parser.GetNumber();
-	parser.SetString(shoe->exprToeAngle);
-	if(parser.Evaluate()) toeAngle = parser.GetNumber();
-
+	double heelHeight = shoe.heelHeight.value;
+	double ballHeight = shoe.ballHeight.value;
+	double toeAngle = shoe.toeSpring.value;
 	heelHeight += offset; // Compensation for legs of different length
 
-	NelderMeadOptimizer opti;
-	opti.param.push_back(0);
-	opti.simplexSpread = 1.0;
-	opti.evalLimit = 30;
-	opti.errorLimit = 0.001;
-	opti.reevalBest = true;
+	optiPos.reevalBest = true;
+	optiPos.keepSimplex = true;
+	optiPos.simplexSpread = 0.1;
+	optiPos.evalLimit = 30;
+	optiPos.errorLimit = 0.0005;
+	optiPos.param.resize(1, 0.0);
+	optiPos.param[0] = fmin(fmax(toeAngle - PhalanxI1->roty, -0.5), 1.2);
+	optiPos.Start();
 
-	opti.param[0] = fmin(fmax(toeAngle - PhalanxI1->roty, -0.5), 1.2);
-	opti.Start();
-	while(opti.IsRunning()){
-		const double ang = opti.param[0];
+	while(optiPos.IsRunning()){
+		const double ang = optiPos.param[0];
 
 		Talus->roty = ang * (1 - mixing);
 		Talus->rotx = 0;
@@ -587,38 +554,37 @@ void Foot::UpdatePosition(const Shoe* shoe, double offset)
 
 		Skeleton::Setup();
 
-		if(ang > 1.2) opti.SetError(ang * 1000);
-		if(ang < -0.5) opti.SetError(-ang * 1000);
+		if(ang > 1.2) optiPos.SetError(ang * 1000);
+		if(ang < -0.5) optiPos.SetError(-ang * 1000);
 		if(ang <= 1.2 && ang >= -0.5){
-			const double h = GetHeelHeight() - GetBallHeight();
-			opti.SetError(fabs(h - heelHeight + ballHeight));
+			const double h = Calcaneus->GetZMin() - PhalanxI5->GetZMin();
+			optiPos.SetError(fabs(h - heelHeight + ballHeight));
 		}
 	}
 	origin = AffineTransformMatrix::Identity();
-	origin.TranslateLocal(0, 0, -GetHeelHeight() + heelHeight);
+	origin.TranslateLocal(0, 0, -Calcaneus->GetZMin() + heelHeight);
 }
 
-double Foot::GetSize(sizetype type) const
+void FootModel::CalculateBones(void)
 {
-	switch(type){
-	case EU:
-		return (length + 1.5e-2) * 150;
-	case US:
-		return (length) / 2.54e-2 * 3 - 21.5;
-	case UK:
-		return (length + 1.5e-2) / 8.46e-3 - 25;
-	case JP:
-		return round((length * 1000) / 5) * 5;
-	case CN:
-		return round((length * 100) / 0.5) * 0.5;
-	case AU:
-		return (length + 1.5e-2) / 8.46e-3 - 25;
-	default:
-		return 0;
-	}
+	MathParser parser(false);
+	parser.AddAllowedUnit(_T("mm"), 1e-3);
+	parser.AddAllowedUnit(_T("cm"), 1e-2);
+	parser.AddAllowedUnit(_T("m"), 1);
+	parser.AddAllowedUnit(_T("in"), 2.54e-2);
+	parser.AddAllowedUnit(_T("ft"), 0.3048);
+	parser.AddAllowedUnit(_T("rad"), 1);
+	parser.AddAllowedUnit(_T("deg"), 0.017453);
+	parser.AddAllowedUnit(_T("gon"), 0.015708);
+
+	parser.SetVariable(_T("L"), L);
+	parser.SetVariable(_T("W"), W);
+
+	Skeleton::UpdateBonesFromFormula(&parser);
+	Skeleton::Setup();
 }
 
-void Foot::CalculateSkin(void)
+void FootModel::CalculateSkin(void)
 {
 	// Calculate the Footmodel
 	skin.SetExtent(0.40, 0.3, 0.4, 0.0075);
@@ -642,7 +608,8 @@ void Foot::CalculateSkin(void)
 //	volume.Rotate(Volume::Z, -1);
 	skin.CalcSurface();
 }
-Polygon3 Foot::GetCenterline(void) const
+
+Polygon3 FootModel::GetCenterline(void) const
 {
 	Polygon3 temp;
 

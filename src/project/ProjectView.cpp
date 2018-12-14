@@ -36,6 +36,8 @@ IMPLEMENT_DYNAMIC_CLASS(ProjectView, wxView)
 ProjectView::ProjectView()
 		: wxView()
 {
+	active = Left;
+
 	showLeft = true;
 	showRight = true;
 	showBones = true;
@@ -90,7 +92,8 @@ void ProjectView::Paint(bool usePicking) const
 	if(showLeft){
 		glPushMatrix();
 
-		if(shiftapart) glTranslatef(0, project->footL.ballwidth, 0);
+		if(shiftapart) glTranslatef(0, project->measL.ballGirth.value / M_PI,
+				0);
 
 		glLoadName(0); // Left
 		glPushName(1);
@@ -109,7 +112,8 @@ void ProjectView::Paint(bool usePicking) const
 	}
 	if(showRight){
 		glPushMatrix();
-		if(shiftapart) glTranslatef(0, -project->footR.ballwidth, 0);
+		if(shiftapart) glTranslatef(0, -project->measR.ballGirth.value / M_PI,
+				0);
 
 		glLoadName(1); // Right
 		glPushName(1);
@@ -211,6 +215,18 @@ void ProjectView::PaintBackground(bool showBehind) const
 	}
 }
 
+const FootMeasurements* ProjectView::GetActiveFootMeasurements(void) const
+{
+	const Project* project = wxStaticCast(this->GetDocument(), Project);
+	switch(active){
+	case Left:
+		return &(project->measL);
+	case Right:
+		return &(project->measR);
+	}
+	return NULL;
+}
+
 void ProjectView::OnDraw(wxDC* dc)
 {
 	printf("ProjectView::OnDraw(...) called...\n");
@@ -234,7 +250,7 @@ bool ProjectView::OnClose(bool deleteWindow)
 	wxList tempDocs = manager->GetDocuments();
 	wxList tempViews = doc->GetViews();
 
-	printf("ProjectView: %u docs, %u views\n", tempDocs.GetCount(),
+	printf("ProjectView: %lu docs, %lu views\n", tempDocs.GetCount(),
 			tempViews.GetCount());
 
 	if(!wxView::OnClose(deleteWindow)) return false;

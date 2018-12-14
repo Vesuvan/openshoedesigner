@@ -30,13 +30,13 @@
  * \brief Simple bone approximated by a capsule.
  *
  * Simple bone model with two radii for both ends.
- * Definition of a link may be confusing but is selected
+ * Definition of a link may be confusing but is choosen
  * this way to make every bone scaleable while keeping
  * the skeleton intact.
  *
  * Rotations are done with 50-50 split rotations.
  *
- * Parent bone provides an anchor, a bone normal and a length.
+ * The parent bone provides an anchor, a bone normal and a length.
  *
  * First calculate the normal intersection from link and parent bond.
  *
@@ -108,6 +108,9 @@ public:
 	double rotx; //!< Rotation along the x axis
 	double roty; //!< Rotation along the y axis
 
+	double rotxBackup; //!< Rotation along the x axis
+	double rotyBackup; //!< Rotation along the y axis
+
 	// Second calculate p1. It is the link-point + anchor*(rLocalParent+r1)
 	Vector3 p1; //!< First point of bone.
 	Vector3 link;
@@ -120,7 +123,15 @@ public:
 	bool Set(wxString text);
 	wxString Get(void) const;
 
+	double GetXMax(void) const;
+	double GetXMin(void) const;
+	double GetZMin(void) const;
+
+
 	void Setup(Bone *parent);
+
+	void ResetRotation(void);
+	void RestoreRotation(void);
 
 	void Render(void) const;
 

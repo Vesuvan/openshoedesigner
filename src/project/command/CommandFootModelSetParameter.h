@@ -31,6 +31,7 @@
 #include <wx/string.h>
 
 #include "../Project.h"
+#include "../ProjectView.h"
 
 class CommandFootModelSetParameter:public wxCommand {
 public:
@@ -42,7 +43,7 @@ public:
 
 protected:
 	Project* project;
-	Project::Side activeSide;
+	ProjectView::Side activeSide;
 	size_t boneNr;
 	Bone::stringIdentifier field;
 	wxString newFormula;

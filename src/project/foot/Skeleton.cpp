@@ -24,7 +24,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "Skeleton.h"
+#include "../foot/Skeleton.h"
 
 #include <GL/gl.h>
 
@@ -129,4 +129,16 @@ void Skeleton::UpdateBonesFromFormula(MathParser *parser)
 		}
 	}
 	update = true;
+}
+
+void Skeleton::ResetRotation(void)
+{
+	for(size_t n = 0; n < bones.size(); n++)
+		bones[n].ResetRotation();
+}
+
+void Skeleton::RestoreRotation(void)
+{
+	for(size_t n = 0; n < bones.size(); n++)
+		bones[n].RestoreRotation();
 }

@@ -36,12 +36,12 @@
 //#include <GL/gl.h>
 #endif
 
-static int wx_gl_attribs[] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE,
-		24, 0};
+static int wx_gl_attribs[] =
+	{WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 24, 0};
 
 OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
-		const wxSize& size, long style, const wxString& name)
-		: wxGLCanvas(parent, id, wx_gl_attribs, pos, size,
+		const wxSize& size, long style, const wxString& name) :
+		wxGLCanvas(parent, id, wx_gl_attribs, pos, size,
 				style | wxFULL_REPAINT_ON_RESIZE, name)
 {
 
@@ -95,7 +95,7 @@ OpenGLCanvas::~OpenGLCanvas()
 {
 #ifdef _USE_6DOFCONTROLLER
 	this->Disconnect(wxEVT_TIMER, wxTimerEventHandler(OpenGLCanvas::OnTimer),
-			NULL, this);
+	NULL, this);
 #endif
 	this->Disconnect(wxEVT_RIGHT_DCLICK,
 			wxMouseEventHandler(OpenGLCanvas::OnMouseEvent), NULL, this);

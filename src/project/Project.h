@@ -52,18 +52,28 @@
  *
  */
 
-#include "foot/Foot.h"
-#include "Shoe.h"
-#include "last/Last.h"
-
-#include "pattern/Pattern.h"
-
-#include "../3D/Volume.h"
-#include "../3D/Polygon3.h"
-#include "last/PolyHull.h"
-#include "WorkerThread.h"
-
+#include <stddef.h>
 #include <wx/docview.h>
+#include <wx/event.h>
+#include <wx/object.h>
+#include <wx/platform.h>
+#include <wx/setup.h>
+#include <wx/string.h>
+#include <wx/thread.h>
+#include <iostream>
+
+#include "../3D/OrientedMatrix.h"
+#include "../3D/Polygon3.h"
+//#include "../3D/Volume.h"
+#include "foot/FootMeasurements.h"
+#include "foot/FootModel.h"
+#include "last/Last.h"
+#include "last/PolyHull.h"
+#include "pattern/Pattern.h"
+#include "Shoe.h"
+//#include "WorkerThread.h"
+
+class WorkerThread;
 
 #if wxUSE_STD_IOSTREAM
 typedef wxSTD istream DocumentIstream;
@@ -78,10 +88,6 @@ public:
 	enum Symmetry {
 		No, OnlyModel, Full
 	};
-
-	enum Side {
-		Left, Right, Both
-	};
 	enum PartToUpdate {
 		UpdateFoot, UpdateLast, UpdateSole, UpdatePattern, UpdateFlattening
 	};
@@ -92,6 +98,15 @@ public:
 		Cemented, //!< for cemented soles (simple, glued-together shoes)
 		Molded, //!< for industrial shoes, where the sole is injection-molded to the upper
 		Dutch //!< Generator for dutch wooden clogs: Generates last, insole and clog
+	};
+
+
+	enum sizeparameter {
+		Length, //!< Length of foot
+		BallWidth, //!< Width of the ball
+		HeelWidth, //!< Width of the heel
+		AnkleWidth, //!< Width of the ankle
+		Mixing  //!< Anglemixing
 	};
 
 	Project();
@@ -106,22 +121,21 @@ public:
 	bool SaveModel(wxString fileName);
 	bool SaveSkin(wxString fileName);
 
-	void Update(PartToUpdate part = UpdateFoot, Side side = Both);
+	void Update(void);
+
 	void Recalculate(void);
 	bool ThreadNeedsCalculations(size_t threadNr) const;
 	void ThreadCalculate(size_t threadNr);
 	void OnCalculationDone(wxCommandEvent& event);
 	void OnRefreshViews(wxCommandEvent& event);
 
-	const Foot * GetActiveFoot(void) const;
-
 public:
-	Side active;
-
-	double legLengthDifference;
 	Symmetry symmetry;
-	Foot footL;
-	Foot footR;
+
+	FootMeasurements measL;
+	FootMeasurements measR;
+	FootModel footL;
+	FootModel footR;
 	Last lastL;
 	Last lastR;
 
@@ -135,9 +149,8 @@ public:
 	OrientedMatrix xray;
 	OrientedMatrix heightfield;
 	Polygon3 bow;
+
 private:
-	int stateLeft;
-	int stateRight;
 	WorkerThread* thread0;
 	WorkerThread* thread1;
 	wxCriticalSection CS;

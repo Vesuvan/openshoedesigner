@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : CommandShoePreset.h
+// Name               : CommandFootMeasurementSet.h
 // Purpose            :
 // Thread Safe        : No
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 01.05.2018
+// Created            : 30.04.2018
 // Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,27 +24,32 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef __COMMANDSHOEPRESET_H__
-#define __COMMANDSHOEPRESET_H__
+#ifndef __COMMANDFOOTMEASUREMENTSET_H__
+#define __COMMANDFOOTMEASUREMENTSET_H__
 
 #include <wx/cmdproc.h>
 #include <wx/string.h>
-#include "../Project.h"
 
-class CommandShoePreset:public wxCommand {
+#include "../Project.h"
+#include "../ProjectView.h"
+
+class CommandFootMeasurementSet:public wxCommand {
 public:
-	CommandShoePreset(const wxString& name, Project* project, int preset);
+	CommandFootMeasurementSet(const wxString& name, Project* project,
+			ProjectView::Side active, int parameter, wxString value);
 
 	bool Do(void);
 	bool Undo(void);
 
 protected:
-	Project* project;
-	int preset;
 
-	wxString oldHeelHeight;
-	wxString oldBallHeight;
-	wxString oldToeAngle;
+	wxString Replace(ProjectView::Side active,int parameter, wxString newValue);
+
+	Project* project;
+	ProjectView::Side active;
+	int parameter;
+	wxString value;
+	wxString oldValue;
 };
 
-#endif /* __COMMANDSHOEPRESET_H__ */
+#endif /* __COMMANDFOOTMEASUREMENTSET_H__ */

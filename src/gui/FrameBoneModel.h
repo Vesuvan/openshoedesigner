@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : CommandShoePreset.h
-// Purpose            :
-// Thread Safe        : No
+// Name               : FrameBoneModel.h
+// Purpose            : 
+// Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 01.05.2018
+// Created            : 18.11.2018
 // Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,27 +24,29 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef __COMMANDSHOEPRESET_H__
-#define __COMMANDSHOEPRESET_H__
+#ifndef SRC_GUI_FRAMEBONEMODEL_H_
+#define SRC_GUI_FRAMEBONEMODEL_H_
 
-#include <wx/cmdproc.h>
-#include <wx/string.h>
-#include "../Project.h"
+/*!\class FrameBoneModel
+ * \brief ...
+ *
+ * ...
+ */
 
-class CommandShoePreset:public wxCommand {
+#include "gui.h"
+
+class FrameBoneModel:public GUIFrameBoneModel {
 public:
-	CommandShoePreset(const wxString& name, Project* project, int preset);
+	FrameBoneModel(wxWindow* parent, wxWindowID id = wxID_ANY,
+			const wxString& title = _("Bone Model Setup"), const wxPoint& pos =
+					wxDefaultPosition, const wxSize& size = wxSize(672, 458),
+			long style = wxDEFAULT_FRAME_STYLE | wxTAB_TRAVERSAL);
+	virtual ~FrameBoneModel();
 
-	bool Do(void);
-	bool Undo(void);
 
-protected:
-	Project* project;
-	int preset;
+	bool TransferDataToWindow();
+	bool TransferDataFromWindow();
 
-	wxString oldHeelHeight;
-	wxString oldBallHeight;
-	wxString oldToeAngle;
 };
 
-#endif /* __COMMANDSHOEPRESET_H__ */
+#endif /* SRC_GUI_FRAMEBONEMODEL_H_ */

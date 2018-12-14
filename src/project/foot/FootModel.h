@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Foot.h
-// Purpose            : Footbones and skin parameters
+// Name               : FootModel.h
+// Purpose            : Bone-based model of a foot
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
@@ -24,15 +24,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef FOOT_H_
-#define FOOT_H_
+#ifndef FOOTMODEL_H_
+#define FOOTMODEL_H_
 
-/*!\class Foot
- * \brief Footbones and skin parameters
+/*!\class FootModel
+ * \brief Bone-based model of a foot
  *
  * Stores the footbones and skin parameters.
  *
- * Upon calling Setup with a FootParameters object, the parameters of bones and skin are recalculated.
+ * Upon calling Setup with a FootMeasurements object, the size and position of
+ * the bones and the skin are calculated.
  *
  *\dot
  * digraph classes {
@@ -78,42 +79,33 @@
 #include "../../3D/Polygon3.h"
 #include "../../3D/BoundingBox.h"
 #include "../../3D/Volume.h"
-#include "Skeleton.h"
+#include "../../math/NelderMeadOptimizer.h"
+#include "../foot/FootMeasurements.h"
+#include "../foot/Skeleton.h"
 
 class Shoe;
 
-class Foot:public Skeleton {
+class FootModel:public Skeleton {
 public:
-	enum sizetype {
-		EU, US, CN, UK, JP, AU, mm, cm, in, ft
-	};
 
-	enum sizeparameter {
-		Length, //!< Length of foot
-		BallWidth, //!< Width of the ball
-		HeelWidth, //!< Width of the heel
-		AnkleWidth, //!< Width of the ankle
-		Mixing  //!< Anglemixing
-	};
-
-	Foot();
-	virtual ~Foot();
+	FootModel();
+	virtual ~FootModel();
 
 	void PaintBones(void) const;
 	void PaintSkin(void) const;
 
 	bool LoadModel(wxTextInputStream* stream);
 	bool SaveModel(wxTextOutputStream* stream);
-	void CopyModel(const Foot &other);
-	void SetModelParameter(double L, double W, double H, double A);
-	void UpdateModel(void);
+	void CopyModel(const FootModel &other);
 
-	void UpdatePosition(const Shoe* shoe, double offset = 0.0);
-	double GetSize(sizetype type) const;
+	void UpdateForm(const FootMeasurements &measurements);
+	void UpdatePosition(const Shoe &shoe, double offset = 0.0, double mixing =
+			0.05);
 
+	void CalculateBones(void);
 	void CalculateSkin(void);
 
-	Polygon3 GetCenterline(void) const;
+	Polygon3 GetCenterline(void) const; //!< (Re-)move?
 
 	AffineTransformMatrix origin; //!< Origin for drawing. The origin of the model is the ankle.
 
@@ -122,21 +114,13 @@ public:
 
 private:
 	void InitBones(void);
-	double GetHeelHeight(void) const;
-	double GetBallHeight(void) const;
 
-public:
-	// Parameter:
-	double length;
-	double ballwidth;
-	double heelwidth;
-	double anklewidth;
-	double mixing;
+	// Model parameter, set by optimizer
+	double L;
+	double W;
 
-	// Calculated:
-	double heelHeight;
-	double ballHeight;
-	double toeAngle;
+	NelderMeadOptimizer optiForm;
+	NelderMeadOptimizer optiPos;
 
 private:
 	static const unsigned int NBones;
@@ -172,4 +156,4 @@ private:
 	Bone* PhalanxIII4;
 };
 
-#endif /* FOOT_H_ */
+#endif /* FOOTMODEL_H_ */

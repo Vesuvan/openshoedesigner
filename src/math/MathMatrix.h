@@ -46,9 +46,9 @@ public:
 	MathMatrix();
 	virtual ~MathMatrix();
 
-	double Min(void) const; ///< Minimum value of all elemts of the matrix
+	double Min(void) const; ///< Minimum value of all elements in the matrix
 	double Max(void) const; ///< Maximum value of all elements in the matrix
-	double MaxAbs(void) const; ///< Maximum absolue value of all elements in the matrix
+	double MaxAbs(void) const; ///< Maximum absolute value of all elements in the matrix
 
 	void AlignAtZero(void); ///< Shift the offset of the values in the matrix to align the smallest element at zero
 	void Normalize(double max = 1.0); ///< Rescale the matrix to the value of max as the maximum value

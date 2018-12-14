@@ -31,6 +31,7 @@
 
 #include "../3D/FileSTL.h"
 #include "../math/MathParser.h"
+#include "IniFile.h"
 
 #if wxUSE_STD_IOSTREAM
 #include <wx/ioswrap.h>
@@ -44,24 +45,17 @@
 
 static const int maxState = 10;
 
-const Foot* Project::GetActiveFoot(void) const
-{
-	switch(active){
-	case Left:
-		return &footL;
-	case Right:
-		return &footR;
-	case Both:
-		throw(std::logic_error("Both sides cannot be active at the same time."));
-	}
-	return NULL;
-}
+
 
 IMPLEMENT_DYNAMIC_CLASS(Project, wxDocument)
 
 Project::Project()
 		: wxDocument()
 {
+
+
+
+	IniFile presets("data/ShoePresets.ini");
 
 //	vol.SetSize(4, 4, 4, 0.1);
 //	vol.SetOrigin(Vector3(-0.15, -0.15, -0.15));
@@ -81,21 +75,20 @@ Project::Project()
 
 	generator = Experimental;
 	symmetry = Full;
-	active = Left;
 	Reset();
 }
 
 Project::~Project()
 {
 	wxCriticalSectionLocker locker(CS);
-	if(thread0 != NULL){
-		thread0->Wait();
-		delete thread0;
-	}
-	if(thread1 != NULL){
-		thread1->Wait();
-		delete thread1;
-	}
+//	if(thread0 != NULL){
+//		thread0->Wait();
+//		delete thread0;
+//	}
+//	if(thread1 != NULL){
+//		thread1->Wait();
+//		delete thread1;
+//	}
 	this->Disconnect(ID_THREADDONE_0, ID_THREADDONE_1,
 	wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(Project::OnCalculationDone));
@@ -109,10 +102,10 @@ void Project::Reset(void)
 	footL.LoadModel(&text);
 	footR.CopyModel(footL);
 	footR.mirrored = true;
-	legLengthDifference = 0.0;
-
-	stateLeft = 0;
-	stateRight = 0;
+//	legLengthDifference = 0.0;
+//
+//	stateLeft = 0;
+//	stateRight = 0;
 }
 
 void Project::OnRefreshViews(wxCommandEvent& event)
@@ -123,126 +116,126 @@ void Project::OnRefreshViews(wxCommandEvent& event)
 void Project::OnCalculationDone(wxCommandEvent& event)
 {
 	CS.Enter();
-	if(event.GetId() == ID_THREADDONE_0 && thread0 != NULL){
-		thread0->Wait();
-		delete thread0;
-		thread0 = NULL;
-	}
-	if(event.GetId() == ID_THREADDONE_1 && thread1 != NULL){
-		thread1->Wait();
-		delete thread1;
-		thread1 = NULL;
-	}
+//	if(event.GetId() == ID_THREADDONE_0 && thread0 != NULL){
+//		thread0->Wait();
+//		delete thread0;
+//		thread0 = NULL;
+//	}
+//	if(event.GetId() == ID_THREADDONE_1 && thread1 != NULL){
+//		thread1->Wait();
+//		delete thread1;
+//		thread1 = NULL;
+//	}
 	CS.Leave();
 	UpdateAllViews();
 }
 
-void Project::Update(PartToUpdate part, Side side)
+void Project::Update(void)
 {
-	if(side == Left || side == Both){
-		stateLeft = 0;
-	}
-	if(side == Right || side == Both){
-		stateRight = 0;
-	}
+//	if(side == Left || side == Both){
+//		stateLeft = 0;
+//	}
+//	if(side == Right || side == Both){
+//		stateRight = 0;
+//	}
 }
 
 void Project::Recalculate(void)
 {
 	const bool multiThreading = true;
 
-	if(multiThreading){
-		wxCriticalSectionLocker locker(CS);
-		if(ThreadNeedsCalculations(0) && thread0 == NULL){
-			thread0 = new WorkerThread(this, 0);
-			thread0->Create();
-			thread0->Run();
-		}
-		if(ThreadNeedsCalculations(1) && thread1 == NULL){
-			thread1 = new WorkerThread(this, 1);
-			thread1->Create();
-			thread1->Run();
-		}
-	}else{
-		while(ThreadNeedsCalculations(0) || ThreadNeedsCalculations(1)){
-			ThreadCalculate(0);
-			ThreadCalculate(1);
-		}
-	}
+//	if(multiThreading){
+//		wxCriticalSectionLocker locker(CS);
+//		if(ThreadNeedsCalculations(0) && thread0 == NULL){
+//			thread0 = new WorkerThread(this, 0);
+//			thread0->Create();
+//			thread0->Run();
+//		}
+//		if(ThreadNeedsCalculations(1) && thread1 == NULL){
+//			thread1 = new WorkerThread(this, 1);
+//			thread1->Create();
+//			thread1->Run();
+//		}
+//	}else{
+//		while(ThreadNeedsCalculations(0) || ThreadNeedsCalculations(1)){
+//			ThreadCalculate(0);
+//			ThreadCalculate(1);
+//		}
+//	}
 }
 
 bool Project::ThreadNeedsCalculations(size_t threadNr) const
 {
-	switch(threadNr){
-	case 0:
-		return (stateLeft < maxState);
-	case 1:
-		return (stateRight < maxState);
-	}
+//	switch(threadNr){
+//	case 0:
+//		return (stateLeft < maxState);
+//	case 1:
+//		return (stateRight < maxState);
+//	}
 	return false;
 }
 
 void Project::ThreadCalculate(size_t threadNr)
 {
-	if(threadNr == 0){
-		if(stateLeft < maxState) stateLeft++;
-		switch(stateLeft){
-		case 1:
-			{
-				footL.UpdateModel();
-				footL.UpdatePosition(&shoe, fmax(0, legLengthDifference));
-			}
-			break;
-		case 2:
-			{
-				footL.CalculateSkin();
-			}
-			break;
-		case 3:
-			{
-				heightfield = footL.skin.SurfaceField();
-				OrientedMatrix temp = heightfield.XRay(Volume::MinValue);
-
-				bow.Clear();
-				for(unsigned int i = 0; i < temp.Numel(); i++){
-					if(temp[i] < DBL_MAX){
-						bow.InsertPoint(i * temp.dx + temp.origin.x, 0,
-								temp[i] + temp.origin.z);
-					}
-				}
-
-				//	sole.origin.z -= 0.1;
-
-				xray = footL.skin.XRay(Volume::MeanValue);
-				bow = footL.GetCenterline();
-//	bow.elements[0] = lastvol.GetSurface(bow.elements[1],
-//			(bow.elements[0] - bow.elements[1]) * 2);
-//	size_t M = bow.elements.GetCount();
-//	bow.elements[M - 1] = lastvol.GetSurface(bow.elements[M - 2],
-//			(bow.elements[M - 1] - bow.elements[M - 2]) * 2);
+//	if(threadNr == 0){
+//		if(stateLeft < maxState) stateLeft++;
+//		switch(stateLeft){
+//		case 1:
+//			{
+//				footL.UpdateModel();
+//				footL.UpdatePosition(&shoe, fmax(0, legLengthDifference));
+//			}
+//			break;
+//		case 2:
+//			{
+//				footL.CalculateSkin();
+//			}
+//			break;
+//		case 3:
+//			{
+//				heightfield = footL.skin.SurfaceField();
+//				OrientedMatrix temp = heightfield.XRay(Volume::MinValue);
 //
-				bow.Resample(50);
-//	bow.Filter(20);
-			}
-			break;
-		}
-	}
-	if(threadNr == 1){
-		if(stateRight < maxState) stateRight++;
-		switch(stateRight){
-		case 1:
-			{
-				footR.UpdateModel();
-				footR.UpdatePosition(&shoe, fmax(0, -legLengthDifference));
-			}
-			break;
-		case 2:
-			{
-				footR.CalculateSkin();
-			}
-			break;
-		}
-	}
+//				bow.Clear();
+//				for(unsigned int i = 0; i < temp.Numel(); i++){
+//					if(temp[i] < DBL_MAX){
+//						bow.InsertPoint(i * temp.dx + temp.origin.x, 0,
+//								temp[i] + temp.origin.z);
+//					}
+//				}
+//
+//				//	sole.origin.z -= 0.1;
+//
+//				xray = footL.skin.XRay(Volume::MeanValue);
+//				bow = footL.GetCenterline();
+////	bow.elements[0] = lastvol.GetSurface(bow.elements[1],
+////			(bow.elements[0] - bow.elements[1]) * 2);
+////	size_t M = bow.elements.GetCount();
+////	bow.elements[M - 1] = lastvol.GetSurface(bow.elements[M - 2],
+////			(bow.elements[M - 1] - bow.elements[M - 2]) * 2);
+////
+//				bow.Resample(50);
+////	bow.Filter(20);
+//			}
+//			break;
+//		}
+//	}
+//	if(threadNr == 1){
+//		if(stateRight < maxState) stateRight++;
+//		switch(stateRight){
+//		case 1:
+//			{
+//				footR.UpdateModel();
+//				footR.UpdatePosition(&shoe, fmax(0, -legLengthDifference));
+//			}
+//			break;
+//		case 2:
+//			{
+//				footR.CalculateSkin();
+//			}
+//			break;
+//		}
+//	}
 }
 
 bool Project::LoadModel(wxString fileName)
@@ -250,19 +243,19 @@ bool Project::LoadModel(wxString fileName)
 	wxFileInputStream input(fileName);
 	wxTextInputStream text(input);
 
-	bool flag = false;
-	if(active == Left){
-		flag = footL.LoadModel(&text);
-		if(symmetry == Full) footR.CopyModel(footL);
-	}
-	if(active == Right){
-		flag = footR.LoadModel(&text);
-		if(symmetry == Full) footR.CopyModel(footL);
-	}
-	if(flag){
-		Update();
-		return true;
-	}
+//	bool flag = false;
+//	if(active == Left){
+//		flag = footL.LoadModel(&text);
+//		if(symmetry == Full) footR.CopyModel(footL);
+//	}
+//	if(active == Right){
+//		flag = footR.LoadModel(&text);
+//		if(symmetry == Full) footR.CopyModel(footL);
+//	}
+//	if(flag){
+//		Update();
+//		return true;
+//	}
 	return false;
 }
 
@@ -320,8 +313,8 @@ bool Project::SaveSkin(wxString fileName)
 {
 	wxFFileOutputStream outStream(fileName);
 	FileSTL temp;
-	if(active == Left) temp.WriteStream(outStream, footL.skin.geometry);
-	if(active == Right) temp.WriteStream(outStream, footR.skin.geometry);
+//	if(active == Left) temp.WriteStream(outStream, footL.skin.geometry);
+//	if(active == Right) temp.WriteStream(outStream, footR.skin.geometry);
 	return true;
 }
 

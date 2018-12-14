@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : CommandFootSetSize.h
-// Purpose            :
-// Thread Safe        : No
+// Name               : PanelLegMeasurements.h
+// Purpose            : 
+// Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 30.04.2018
+// Created            : 18.11.2018
 // Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,28 +24,38 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef __COMMANDFOOTSETSIZE_H__
-#define __COMMANDFOOTSETSIZE_H__
+#ifndef SRC_GUI_PANELLEGMEASUREMENTS_H_
+#define SRC_GUI_PANELLEGMEASUREMENTS_H_
 
-#include <wx/cmdproc.h>
-#include <wx/string.h>
+/*!\class PanelLegMeasurements
+ * \brief ...
+ *
+ * ...
+ */
 
-#include "../Project.h"
+#include <wx/docview.h>
 
-class CommandFootSetSize:public wxCommand {
+#include "DisplaySettings.h"
+#include "guipanels.h"
+
+class PanelLegMeasurements: public GUIPanelLegMeasurements {
 public:
-	CommandFootSetSize(const wxString& name, Project* project, Foot::sizeparameter param, double value);
+	PanelLegMeasurements(wxWindow* parent, wxWindowID id = wxID_ANY,
+			const wxPoint& pos = wxDefaultPosition,
+			const wxSize& size = wxSize(-1, -1), long style = wxTAB_TRAVERSAL);
+	virtual ~PanelLegMeasurements();
 
-	bool Do(void);
-	bool Undo(void);
+	void SetDocView(wxDocument* doc, wxView* view);
+	void SetDisplaySettings(DisplaySettings* settings);
 
-protected:
-	Project* project;
-	Project::Side active;
-	Foot::sizeparameter param;
-	double value;
-	double oldValueL;
-	double oldValueR;
+	bool TransferDataToWindow(void);
+	void OnKillFocus(wxFocusEvent& event);
+	void OnSetFocus(wxFocusEvent& event);
+	void OnTextEnter(wxCommandEvent& event);
+
+	wxDocument *doc;
+	wxView *view;
+	DisplaySettings *settings;
 };
 
-#endif /* __COMMANDFOOTSETSIZE_H__ */
+#endif /* SRC_GUI_PANELLEGMEASUREMENTS_H_ */

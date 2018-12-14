@@ -36,12 +36,12 @@
 
 #define _LASTGENERATOR_USEMULTITHREADING
 
-
 //	#define _DEBUGMODE
 
 // Components used in this project:
 #define _USE_3DPICKING
 //#define _USE_6DOFCONTROLLER
 #define _USE_UNIT
+//#define _USE_MIDI
 
 #endif /* CONFIG_H_ */

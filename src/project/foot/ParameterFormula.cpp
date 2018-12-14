@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : CommandShoePreset.h
-// Purpose            :
-// Thread Safe        : No
+// Name               : ParameterFormula.cpp
+// Purpose            : Store a parameter with a formula
+// Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 01.05.2018
+// Created            : 29.11.2018
 // Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,27 +24,26 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef __COMMANDSHOEPRESET_H__
-#define __COMMANDSHOEPRESET_H__
+#include "ParameterFormula.h"
 
-#include <wx/cmdproc.h>
-#include <wx/string.h>
-#include "../Project.h"
+ParameterFormula::ParameterFormula(const wxString name, const wxString formula,
+		const wxString unit)
+		: name(name), formula(formula), unit(unit)
+{
+	value = 0.0;
+	errorFlag = false;
+}
 
-class CommandShoePreset:public wxCommand {
-public:
-	CommandShoePreset(const wxString& name, Project* project, int preset);
+ParameterFormula::~ParameterFormula()
+{
+}
 
-	bool Do(void);
-	bool Undo(void);
+double ParameterFormula::Update(MathParser& parser)
+{
 
-protected:
-	Project* project;
-	int preset;
-
-	wxString oldHeelHeight;
-	wxString oldBallHeight;
-	wxString oldToeAngle;
-};
-
-#endif /* __COMMANDSHOEPRESET_H__ */
+	value = parser.GetNumber(formula);
+	errorStr = parser.GetError();
+	errorFlag = !errorStr.IsEmpty();
+	if(!errorFlag) parser.SetVariable(name, value);
+	return value;
+}

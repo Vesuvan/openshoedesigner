@@ -33,14 +33,20 @@
  * use the same project data and only display a different aspect.
  */
 
-#include "Project.h"
+#include <stddef.h>
+#include <wx/docview.h>
+#include <wx/object.h>
+#include <vector>
+
 #include "../3D/BackgroundImage.h"
 
-#include <wx/docview.h>
-#include <vector>
+class FootMeasurements;
 
 class ProjectView:public wxView {
 public:
+	enum Side {
+		Left, Right
+	};
 	enum FrameType {
 		mainframe, patternframe, walkcycleframe
 	};
@@ -51,6 +57,8 @@ public:
 	void PaintBackground(bool showBehind = true) const;
 
 	std::vector <BackgroundImage> background;
+
+	Side active;
 
 	bool showLeft;
 	bool showRight;
@@ -68,6 +76,8 @@ public:
 
 	bool showFootScan;
 	bool showLastScan;
+
+	const FootMeasurements* GetActiveFootMeasurements(void) const;
 
 	bool OnCreate(wxDocument* doc, long flags);
 	void OnDraw(wxDC *dc);

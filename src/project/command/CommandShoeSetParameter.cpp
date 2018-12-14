@@ -40,21 +40,21 @@ bool CommandShoeSetParameter::Do(void)
 	if(project == NULL) return false;
 	switch(fieldNr){
 	case 0:
-		oldExpression = project->shoe.exprHeelHeight;
-		project->shoe.exprHeelHeight = newExpression;
+		oldExpression = project->shoe.heelHeight.formula;
+		project->shoe.heelHeight.formula = newExpression;
 		break;
 	case 1:
-		oldExpression = project->shoe.exprBallHeight;
-		project->shoe.exprBallHeight = newExpression;
+		oldExpression = project->shoe.ballHeight.formula;
+		project->shoe.ballHeight.formula = newExpression;
 		break;
 	case 2:
-		oldExpression = project->shoe.exprToeAngle;
-		project->shoe.exprToeAngle = newExpression;
+		oldExpression = project->shoe.toeSpring.formula;
+		project->shoe.toeSpring.formula = newExpression;
 		break;
 	default:
 		return false;
 	}
-	project->Update(Project::UpdateFoot, Project::Both);
+//	project->Update(Project::UpdateFoot, Project::Both);
 	return true;
 }
 
@@ -63,18 +63,18 @@ bool CommandShoeSetParameter::Undo(void)
 	if(project == NULL) return false;
 	switch(fieldNr){
 	case 0:
-		project->shoe.exprHeelHeight = oldExpression;
+		project->shoe.heelHeight.formula = oldExpression;
 		break;
 	case 1:
-		project->shoe.exprBallHeight = oldExpression;
+		project->shoe.ballHeight.formula = oldExpression;
 		break;
 	case 2:
-		project->shoe.exprToeAngle = oldExpression;
+		project->shoe.toeSpring.formula = oldExpression;
 		break;
 	default:
 		return false;
 	}
-	project->Update(Project::UpdateFoot, Project::Both);
+//	project->Update(Project::UpdateFoot, Project::Both);
 	return true;
 }
 

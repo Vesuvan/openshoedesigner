@@ -63,13 +63,14 @@ public:
 
 	void OnClose(wxCloseEvent& event);
 	void OnIdle(wxIdleEvent& event);
+	void OnSetByShoeSize(wxCommandEvent& event);
 	void OnSetSymmetry(wxCommandEvent& event);
-	void OnSetupBackgroundImages(wxCommandEvent& event);
 	void OnCopyMeasurements(wxCommandEvent& event);
-	void OnLoadFootModel(wxCommandEvent& event);
-	void OnSaveFootModel(wxCommandEvent& event);
+	void OnChangeModel(wxCommandEvent& event);
 	void OnLoadFootSTL(wxCommandEvent& event);
-	void OnSetupFoot(wxCommandEvent& event);
+	void OnEditBoneModel(wxCommandEvent& event);
+	void OnLoadBoneModel(wxCommandEvent& event);
+	void OnSaveBoneModel(wxCommandEvent& event);
 	void OnSetupShoe(wxCommandEvent& event);
 	void OnConstructionSelection(wxCommandEvent& event);
 	void OnEditWalkCycle(wxCommandEvent& event);
@@ -82,17 +83,18 @@ public:
 	void OnPackZip(wxCommandEvent& event);
 	void OnToggleStereo3D(wxCommandEvent& event);
 	void OnViewChange(wxCommandEvent& event);
+	void OnSetupBackgroundImages(wxCommandEvent& event);
 	void OnSetupStereo3D(wxCommandEvent& event);
 	void OnSetupUnits(wxCommandEvent& event);
 	void OnSelectLanguage(wxCommandEvent& event);
 	void OnDebugParser(wxCommandEvent& event);
 	void OnPageChange( wxNotebookEvent& event);
-	void OnSetByShoeSize(wxCommandEvent& event);
-	void OnText(wxCommandEvent& event);
-	void OnCellChange(wxGridEvent& event);
-	void OnScroll(wxScrollEvent& event);
-	void OnScrollChange(wxScrollEvent& event);
-	void OnPreset(wxCommandEvent& event);
+	void OnToggleButton(wxCommandEvent& event);
+	void OnFileChangedScanFile(wxFileDirPickerEvent& event);
+	void OnFileChangedLastFile(wxFileDirPickerEvent& event);
+	void OnChoice(wxCommandEvent& event);
+	void OnTextEnter(wxCommandEvent& event);
+	void OnCheckBox(wxCommandEvent& event);
 	void OnToggleAnkleLock(wxCommandEvent& event);
 	void OnChoiceDisplay(wxCommandEvent& event);
 

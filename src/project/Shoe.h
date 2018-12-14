@@ -41,16 +41,21 @@
  */
 
 #include <wx/string.h>
+#include "foot/ParameterFormula.h"
 
 class Shoe {
 public:
 	Shoe();
 	virtual ~Shoe();
 
+	void Update(void);
+	void Update(MathParser &parser);
+
 public:
-	wxString exprHeelHeight;
-	wxString exprBallHeight;
-	wxString exprToeAngle;
+	ParameterFormula heelHeight;
+	ParameterFormula ballHeight;
+	ParameterFormula heelPitch;
+	ParameterFormula toeSpring;
 };
 
 #endif /* SHOE_H_ */

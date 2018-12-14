@@ -35,10 +35,10 @@ CommandFootModelSetParameter::CommandFootModelSetParameter(const wxString& name,
 		: wxCommand(true, name)
 {
 	this->project = project;
-	this->activeSide = project->active;
-	if(project->symmetry == Project::Full
-			|| project->symmetry == Project::OnlyModel) this->activeSide =
-			Project::Both;
+//	this->activeSide = project->active;
+//	if(project->symmetry == Project::Full
+//			|| project->symmetry == Project::OnlyModel) this->activeSide =
+//			Project::Both;
 	this->boneNr = boneNr;
 	this->field = field;
 	this->newFormula = newFormula;
@@ -47,142 +47,142 @@ CommandFootModelSetParameter::CommandFootModelSetParameter(const wxString& name,
 bool CommandFootModelSetParameter::Do(void)
 {
 	if(project == NULL) return false;
-
-	if(activeSide == Project::Left || activeSide == Project::Both){
-		if(boneNr >= project->footL.bones.size()) return false;
-		switch(field){
-
-		// BoneLength
-		case Bone::stringIdentifier::stringLength:
-			oldFormulaL = project->footL.bones[boneNr].lengthv;
-			project->footL.bones[boneNr].lengthv = newFormula;
-			break;
-		case Bone::stringIdentifier::stringR1:
-			oldFormulaL = project->footL.bones[boneNr].r1v;
-			project->footL.bones[boneNr].r1v = newFormula;
-			break;
-		case Bone::stringIdentifier::stringR2:
-			oldFormulaL = project->footL.bones[boneNr].r2v;
-			project->footL.bones[boneNr].r2v = newFormula;
-			break;
-		case Bone::stringIdentifier::stringS1:
-			oldFormulaL = project->footL.bones[boneNr].s1v;
-			project->footL.bones[boneNr].s1v = newFormula;
-			break;
-		case Bone::stringIdentifier::stringS2:
-			oldFormulaL = project->footL.bones[boneNr].s2v;
-			project->footL.bones[boneNr].s2v = newFormula;
-			break;
-//	case 3:{
-//		// Leg
+return false;
+//	if(activeSide == Project::Left || activeSide == Project::Both){
+//		if(boneNr >= project->footL.bones.size()) return false;
+//		switch(field){
 //
-//		break;}
-		default:
-			return false;
-		}
-	}
-	if(activeSide == Project::Right || activeSide == Project::Both){
-		if(boneNr >= project->footR.bones.size()) return false;
-		switch(field){
-
-		// BoneLength
-		case Bone::stringIdentifier::stringLength:
-			oldFormulaR = project->footR.bones[boneNr].lengthv;
-			project->footR.bones[boneNr].lengthv = newFormula;
-			break;
-		case Bone::stringIdentifier::stringR1:
-			oldFormulaR = project->footR.bones[boneNr].r1v;
-			project->footR.bones[boneNr].r1v = newFormula;
-			break;
-		case Bone::stringIdentifier::stringR2:
-			oldFormulaR = project->footR.bones[boneNr].r2v;
-			project->footR.bones[boneNr].r2v = newFormula;
-			break;
-		case Bone::stringIdentifier::stringS1:
-			oldFormulaR = project->footR.bones[boneNr].s1v;
-			project->footR.bones[boneNr].s1v = newFormula;
-			break;
-		case Bone::stringIdentifier::stringS2:
-			oldFormulaR = project->footR.bones[boneNr].s2v;
-			project->footR.bones[boneNr].s2v = newFormula;
-			break;
-			//	case 3:{
-			//		// Leg
-			//
-			//		break;}
-		default:
-			return false;
-		}
-	}
-
-	project->Update(Project::UpdateFoot, activeSide);
+//		// BoneLength
+//		case Bone::stringIdentifier::stringLength:
+//			oldFormulaL = project->footL.bones[boneNr].lengthv;
+//			project->footL.bones[boneNr].lengthv = newFormula;
+//			break;
+//		case Bone::stringIdentifier::stringR1:
+//			oldFormulaL = project->footL.bones[boneNr].r1v;
+//			project->footL.bones[boneNr].r1v = newFormula;
+//			break;
+//		case Bone::stringIdentifier::stringR2:
+//			oldFormulaL = project->footL.bones[boneNr].r2v;
+//			project->footL.bones[boneNr].r2v = newFormula;
+//			break;
+//		case Bone::stringIdentifier::stringS1:
+//			oldFormulaL = project->footL.bones[boneNr].s1v;
+//			project->footL.bones[boneNr].s1v = newFormula;
+//			break;
+//		case Bone::stringIdentifier::stringS2:
+//			oldFormulaL = project->footL.bones[boneNr].s2v;
+//			project->footL.bones[boneNr].s2v = newFormula;
+//			break;
+////	case 3:{
+////		// Leg
+////
+////		break;}
+//		default:
+//			return false;
+//		}
+//	}
+//	if(activeSide == Project::Right || activeSide == Project::Both){
+//		if(boneNr >= project->footR.bones.size()) return false;
+//		switch(field){
+//
+//		// BoneLength
+//		case Bone::stringIdentifier::stringLength:
+//			oldFormulaR = project->footR.bones[boneNr].lengthv;
+//			project->footR.bones[boneNr].lengthv = newFormula;
+//			break;
+//		case Bone::stringIdentifier::stringR1:
+//			oldFormulaR = project->footR.bones[boneNr].r1v;
+//			project->footR.bones[boneNr].r1v = newFormula;
+//			break;
+//		case Bone::stringIdentifier::stringR2:
+//			oldFormulaR = project->footR.bones[boneNr].r2v;
+//			project->footR.bones[boneNr].r2v = newFormula;
+//			break;
+//		case Bone::stringIdentifier::stringS1:
+//			oldFormulaR = project->footR.bones[boneNr].s1v;
+//			project->footR.bones[boneNr].s1v = newFormula;
+//			break;
+//		case Bone::stringIdentifier::stringS2:
+//			oldFormulaR = project->footR.bones[boneNr].s2v;
+//			project->footR.bones[boneNr].s2v = newFormula;
+//			break;
+//			//	case 3:{
+//			//		// Leg
+//			//
+//			//		break;}
+//		default:
+//			return false;
+//		}
+//	}
+//
+//	project->Update(Project::UpdateFoot, activeSide);
 	return true;
 }
 
 bool CommandFootModelSetParameter::Undo(void)
 {
 	if(project == NULL) return false;
-
-	if(activeSide == Project::Left || activeSide == Project::Both){
-
-		if(boneNr >= project->footL.bones.size()) return false;
-		switch(field){
-		case Bone::stringIdentifier::stringLength:
-			project->footL.bones[boneNr].lengthv = oldFormulaL;
-			break;
-		case Bone::stringIdentifier::stringR1:
-			project->footL.bones[boneNr].r1v = oldFormulaL;
-			break;
-		case Bone::stringIdentifier::stringR2:
-			project->footL.bones[boneNr].r2v = oldFormulaL;
-			break;
-		case Bone::stringIdentifier::stringS1:
-			project->footL.bones[boneNr].s1v = oldFormulaL;
-			break;
-		case Bone::stringIdentifier::stringS2:
-			project->footL.bones[boneNr].s2v = oldFormulaL;
-			break;
-
-//	case 3:{
-//		// Leg
+return false;
+//	if(activeSide == Project::Left || activeSide == Project::Both){
 //
-//		break;}
-
-		default:
-			return false;
-		}
-	}
-
-	if(activeSide == Project::Right || activeSide == Project::Both){
-
-		if(boneNr >= project->footR.bones.size()) return false;
-		switch(field){
-		case Bone::stringIdentifier::stringLength:
-			project->footR.bones[boneNr].lengthv = oldFormulaR;
-			break;
-		case Bone::stringIdentifier::stringR1:
-			project->footR.bones[boneNr].r1v = oldFormulaR;
-			break;
-		case Bone::stringIdentifier::stringR2:
-			project->footR.bones[boneNr].r2v = oldFormulaR;
-			break;
-		case Bone::stringIdentifier::stringS1:
-			project->footR.bones[boneNr].s1v = oldFormulaR;
-			break;
-		case Bone::stringIdentifier::stringS2:
-			project->footR.bones[boneNr].s2v = oldFormulaR;
-			break;
-
-//	case 3:{
-//		// Leg
+//		if(boneNr >= project->footL.bones.size()) return false;
+//		switch(field){
+//		case Bone::stringIdentifier::stringLength:
+//			project->footL.bones[boneNr].lengthv = oldFormulaL;
+//			break;
+//		case Bone::stringIdentifier::stringR1:
+//			project->footL.bones[boneNr].r1v = oldFormulaL;
+//			break;
+//		case Bone::stringIdentifier::stringR2:
+//			project->footL.bones[boneNr].r2v = oldFormulaL;
+//			break;
+//		case Bone::stringIdentifier::stringS1:
+//			project->footL.bones[boneNr].s1v = oldFormulaL;
+//			break;
+//		case Bone::stringIdentifier::stringS2:
+//			project->footL.bones[boneNr].s2v = oldFormulaL;
+//			break;
 //
-//		break;}
-
-		default:
-			return false;
-		}
-	}
-
-	project->Update(Project::UpdateFoot, activeSide);
-	return true;
+////	case 3:{
+////		// Leg
+////
+////		break;}
+//
+//		default:
+//			return false;
+//		}
+//	}
+//
+//	if(activeSide == Project::Right || activeSide == Project::Both){
+//
+//		if(boneNr >= project->footR.bones.size()) return false;
+//		switch(field){
+//		case Bone::stringIdentifier::stringLength:
+//			project->footR.bones[boneNr].lengthv = oldFormulaR;
+//			break;
+//		case Bone::stringIdentifier::stringR1:
+//			project->footR.bones[boneNr].r1v = oldFormulaR;
+//			break;
+//		case Bone::stringIdentifier::stringR2:
+//			project->footR.bones[boneNr].r2v = oldFormulaR;
+//			break;
+//		case Bone::stringIdentifier::stringS1:
+//			project->footR.bones[boneNr].s1v = oldFormulaR;
+//			break;
+//		case Bone::stringIdentifier::stringS2:
+//			project->footR.bones[boneNr].s2v = oldFormulaR;
+//			break;
+//
+////	case 3:{
+////		// Leg
+////
+////		break;}
+//
+//		default:
+//			return false;
+//		}
+//	}
+//
+//	project->Update(Project::UpdateFoot, activeSide);
+//	return true;
 }

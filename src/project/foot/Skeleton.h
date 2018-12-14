@@ -34,11 +34,12 @@
  * in the end more difficult to use.
  */
 
-#include "Bone.h"
 #include "../../math/MathParser.h"
 #include <wx/string.h>
 #include <GL/gl.h>
 #include <vector>
+
+#include "../foot/Bone.h"
 
 class Skeleton {
 public:
@@ -55,6 +56,9 @@ public:
 	size_t GetBoneCount(void) const;
 
 	void UpdateBonesFromFormula(MathParser* parser);
+
+	void ResetRotation(void);
+	void RestoreRotation(void);
 
 	bool mirrored;
 

@@ -29,14 +29,39 @@
 #include "../math/MathParser.h"
 
 Shoe::Shoe()
+		: heelHeight(_T("heelHeight")), ballHeight(_T("ballHeight")), heelPitch(
+				_T("heelPitch")), toeSpring(_T("toeSpring"))
 {
-	exprHeelHeight = _T("2 cm");
-	exprBallHeight = _T("0 deg");
-	exprToeAngle = _T("0 deg");
-
-
+	heelHeight.formula = _T("3 cm");
+	ballHeight.formula = _T("1 cm");
+	heelPitch.formula = _T("5 deg");
+	toeSpring.formula = _T("10 deg");
+	Update();
 }
 
 Shoe::~Shoe()
 {
+}
+
+void Shoe::Update(void)
+{
+	MathParser parser;
+	parser.ignorecase = true;
+	parser.AddAllowedUnit(_T("mm"), 1e-3);
+	parser.AddAllowedUnit(_T("cm"), 1e-2);
+	parser.AddAllowedUnit(_T("m"), 1);
+	parser.AddAllowedUnit(_T("in"), 2.54e-2);
+	parser.AddAllowedUnit(_T("ft"), 0.3048);
+	parser.AddAllowedUnit(_T("rad"), 1);
+	parser.AddAllowedUnit(_T("deg"), 0.017453);
+	parser.AddAllowedUnit(_T("gon"), 0.015708);
+	Update(parser);
+}
+
+void Shoe::Update(MathParser& parser)
+{
+	heelHeight.Update(parser);
+	ballHeight.Update(parser);
+	heelPitch.Update(parser);
+	toeSpring.Update(parser);
 }
