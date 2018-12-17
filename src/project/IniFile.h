@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : ParameterFormula.cpp
-// Purpose            : Store a parameter with a formula
+// Name               : IniFile.h
+// Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 29.11.2018
+// Created            : 16.11.2018
 // Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,40 +24,30 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "ParameterFormula.h"
+#ifndef SRC_PROJECT_INIFILE_H_
+#define SRC_PROJECT_INIFILE_H_
 
-#include <cfloat>
-#include <cmath>
+/*!\class IniFile
+ * \brief ...
+ *
+ * ...
+ */
 
-ParameterFormula::ParameterFormula(const wxString name, const wxString formula)
-		: name(name), formula(formula)
-{
-	value = 0.0;
-	errorFlag = false;
-	modified = false;
-}
+#include <string>
+#include <vector>
+#include <map>
 
-ParameterFormula::~ParameterFormula()
-{
-}
+class IniFile {
+public:
+	IniFile();
+	IniFile(std::string filename);
+	virtual ~IniFile();
+	bool ReadFile(std::string filename);
 
-bool ParameterFormula::IsModified(void) const
-{
-	return modified;
-}
 
-double ParameterFormula::Update(MathParser& parser)
-{
-	const double oldValue = value;
-	value = parser.GetNumber(formula);
-	errorStr = parser.GetError();
-	errorFlag = !errorStr.IsEmpty();
-	if(errorFlag){
-		value = oldValue;
-		modified = false;
-	}else{
-		modified = (fabs(value - oldValue) > FLT_EPSILON);
-	}
-	parser.SetVariable(name, value);
-	return value;
-}
+private:
+	std::vector<std::string>sectionname;
+	std::vector<std::map<std::string,std::string>> section;
+};
+
+#endif /* SRC_PROJECT_INIFILE_H_ */

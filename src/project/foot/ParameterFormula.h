@@ -36,14 +36,13 @@
 
 class ParameterFormula {
 public:
-	ParameterFormula(const wxString name, const wxString formula = _T(""),
-			const wxString unit = _T(""));
+	ParameterFormula(const wxString name, const wxString formula = _T(""));
 	virtual ~ParameterFormula();
 
 	const wxString name;
 	wxString formula;
-	wxString unit;
 	double value; //!< Calculated value
+	bool modified; //!< True if the value has changed by more than FLT_EPSILON in the last call to Update.
 	bool errorFlag; //!< \b True if an error occured during evaluation of the formula.
 	wxString errorStr; //!< Errorstring if an error occured otherwise empty.
 
@@ -56,6 +55,7 @@ public:
 	 * \return Calculated value
 	 */
 	double Update(MathParser &parser);
+	bool IsModified(void) const;
 };
 
 #endif /* SRC_PROJECT_FOOT_PARAMETERFORMULA_H_ */

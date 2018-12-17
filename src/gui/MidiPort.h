@@ -34,7 +34,7 @@
  * Latency compensation is not used.
  */
 
-#if !(defined(linux) ||  defined(__linux))
+#if !(defined(linux) || defined(__linux))
 #undef _USE_MIDI
 #endif
 

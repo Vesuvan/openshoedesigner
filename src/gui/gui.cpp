@@ -23,9 +23,9 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_menubar->Append( m_menuEdit, _("&Edit") ); 
 	
 	m_menuFoot = new wxMenu();
-	wxMenuItem* m_menuItemInitalizeFootModel;
-	m_menuItemInitalizeFootModel = new wxMenuItem( m_menuFoot, ID_INITIALIZEFOOTMODEL, wxString( _("Quick &Initialization") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menuFoot->Append( m_menuItemInitalizeFootModel );
+	wxMenuItem* m_menuItemQuickSetup;
+	m_menuItemQuickSetup = new wxMenuItem( m_menuFoot, ID_QUICKSETUPMEASUREMENTS, wxString( _("Quick &Setup") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuFoot->Append( m_menuItemQuickSetup );
 	
 	m_menuFoot->AppendSeparator();
 	
@@ -823,7 +823,7 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	// Connect Events
 	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameMain::OnClose ) );
 	this->Connect( wxEVT_IDLE, wxIdleEventHandler( GUIFrameMain::OnIdle ) );
-	this->Connect( m_menuItemInitalizeFootModel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetByShoeSize ) );
+	this->Connect( m_menuItemQuickSetup->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnQuickSetupMeasurements ) );
 	this->Connect( m_menuItemFullSymmetry->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
 	this->Connect( m_menuItemSymmetricModel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
 	this->Connect( m_menuItemIndividualModel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
@@ -897,7 +897,7 @@ GUIFrameMain::~GUIFrameMain()
 	// Disconnect Events
 	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameMain::OnClose ) );
 	this->Disconnect( wxEVT_IDLE, wxIdleEventHandler( GUIFrameMain::OnIdle ) );
-	this->Disconnect( ID_INITIALIZEFOOTMODEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetByShoeSize ) );
+	this->Disconnect( ID_QUICKSETUPMEASUREMENTS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnQuickSetupMeasurements ) );
 	this->Disconnect( ID_FULLSYMMETRY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
 	this->Disconnect( ID_SYMMETRICMODEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
 	this->Disconnect( ID_INDIVIDUALMODEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );

@@ -99,6 +99,7 @@ class GUIPanelFootMeasurements : public wxPanel
 		virtual void OnSetFocus( wxFocusEvent& event ) { event.Skip(); }
 		virtual void OnTextEnter( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnQuickSetup( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnLeftDown( wxMouseEvent& event ) { event.Skip(); }
 		
 	
 	public:

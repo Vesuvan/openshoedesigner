@@ -63,7 +63,7 @@ public:
 
 	void OnClose(wxCloseEvent& event);
 	void OnIdle(wxIdleEvent& event);
-	void OnSetByShoeSize(wxCommandEvent& event);
+	void OnQuickSetupMeasurements(wxCommandEvent& event);
 	void OnSetSymmetry(wxCommandEvent& event);
 	void OnCopyMeasurements(wxCommandEvent& event);
 	void OnChangeModel(wxCommandEvent& event);

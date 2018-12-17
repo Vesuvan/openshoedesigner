@@ -87,10 +87,15 @@ class Project:public wxDocument {
 public:
 	enum Symmetry {
 		No, OnlyModel, Full
-	};
-	enum PartToUpdate {
-		UpdateFoot, UpdateLast, UpdateSole, UpdatePattern, UpdateFlattening
-	};
+	} symmetry;
+	enum MeasurementSource{
+		fromMeasurements, fromFootScan
+	} measurementsource;
+	enum ModelType {
+		boneBased, lastBased
+	} modeltype;
+
+
 
 	enum Generator {
 		Experimental, //!< Default generator for development of algorithms
@@ -98,7 +103,7 @@ public:
 		Cemented, //!< for cemented soles (simple, glued-together shoes)
 		Molded, //!< for industrial shoes, where the sole is injection-molded to the upper
 		Dutch //!< Generator for dutch wooden clogs: Generates last, insole and clog
-	};
+	} generator;
 
 
 	enum sizeparameter {
@@ -130,7 +135,6 @@ public:
 	void OnRefreshViews(wxCommandEvent& event);
 
 public:
-	Symmetry symmetry;
 
 	FootMeasurements measL;
 	FootMeasurements measR;
@@ -142,7 +146,6 @@ public:
 	Shoe shoe;
 
 	Pattern pattern;
-	Generator generator;
 
 	PolyHull test;
 //	Volume vol;

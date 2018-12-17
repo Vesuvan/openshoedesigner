@@ -54,7 +54,7 @@
 
 ///////////////////////////////////////////////////////////////////////////
 
-#define ID_INITIALIZEFOOTMODEL 1000
+#define ID_QUICKSETUPMEASUREMENTS 1000
 #define ID_FULLSYMMETRY 1001
 #define ID_SYMMETRICMODEL 1002
 #define ID_INDIVIDUALMODEL 1003
@@ -221,7 +221,7 @@ class GUIFrameMain : public wxDocChildFrame
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnClose( wxCloseEvent& event ) = 0;
 		virtual void OnIdle( wxIdleEvent& event ) = 0;
-		virtual void OnSetByShoeSize( wxCommandEvent& event ) = 0;
+		virtual void OnQuickSetupMeasurements( wxCommandEvent& event ) = 0;
 		virtual void OnSetSymmetry( wxCommandEvent& event ) = 0;
 		virtual void OnCopyMeasurements( wxCommandEvent& event ) = 0;
 		virtual void OnChangeModel( wxCommandEvent& event ) = 0;

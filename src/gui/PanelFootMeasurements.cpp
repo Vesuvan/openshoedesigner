@@ -71,61 +71,16 @@ bool PanelFootMeasurements::TransferDataToWindow(void)
 	ProjectView* projectview = wxStaticCast(view, ProjectView);
 	const FootMeasurements *foot = projectview->GetActiveFootMeasurements();
 
-	if(m_textCtrlFootLength->HasFocus())
-		m_textCtrlFootLength->SetValue(foot->footLength.formula);
-	else
-		m_textCtrlFootLength->SetValue(
-				settings->Distance.TextFromSIWithUnit(foot->footLength.value,
-						1));
-
-	if(m_textCtrlBallGirth->HasFocus())
-		m_textCtrlBallGirth->SetValue(foot->ballGirth.formula);
-	else
-		m_textCtrlBallGirth->SetValue(
-				settings->Distance.TextFromSIWithUnit(foot->ballGirth.value,
-						1));
-
-	if(m_textCtrlWaistGirth->HasFocus())
-		m_textCtrlWaistGirth->SetValue(foot->waistGirth.formula);
-	else
-		m_textCtrlWaistGirth->SetValue(
-				settings->Distance.TextFromSIWithUnit(foot->waistGirth.value,
-						1));
-
-	if(m_textCtrlInstepGirth->HasFocus())
-		m_textCtrlInstepGirth->SetValue(foot->instepGirth.formula);
-	else
-		m_textCtrlInstepGirth->SetValue(
-				settings->Distance.TextFromSIWithUnit(foot->instepGirth.value,
-						1));
-
-	if(m_textCtrlLongHeelGirth->HasFocus())
-		m_textCtrlLongHeelGirth->SetValue(foot->longHeelGirth.formula);
-	else
-		m_textCtrlLongHeelGirth->SetValue(
-				settings->Distance.TextFromSIWithUnit(foot->longHeelGirth.value,
-						1));
-
-	if(m_textCtrlShortHeelGirth->HasFocus())
-		m_textCtrlShortHeelGirth->SetValue(foot->shortHeelGirth.formula);
-	else
-		m_textCtrlShortHeelGirth->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->shortHeelGirth.value, 1));
-
-	if(m_textCtrlAngleMixing->HasFocus())
-		m_textCtrlAngleMixing->SetValue(foot->angleMixing.formula);
-	else
-		m_textCtrlAngleMixing->SetValue(
-				wxString::Format(_T("%g %%"), foot->angleMixing.value*100));
-
-	if(m_textCtrlLegLengthDifference->HasFocus())
-		m_textCtrlLegLengthDifference->SetValue(
-				foot->legLengthDifference.formula);
-	else
-		m_textCtrlLegLengthDifference->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->legLengthDifference.value, 1));
+	TransferParameterToTextCtrl(foot->footLength, m_textCtrlFootLength);
+	TransferParameterToTextCtrl(foot->ballGirth, m_textCtrlBallGirth);
+	TransferParameterToTextCtrl(foot->waistGirth, m_textCtrlWaistGirth);
+	TransferParameterToTextCtrl(foot->instepGirth, m_textCtrlInstepGirth);
+	TransferParameterToTextCtrl(foot->longHeelGirth, m_textCtrlLongHeelGirth);
+	TransferParameterToTextCtrl(foot->shortHeelGirth, m_textCtrlShortHeelGirth);
+	TransferParameterToTextCtrl(foot->angleMixing, m_textCtrlAngleMixing,
+			false);
+	TransferParameterToTextCtrl(foot->legLengthDifference,
+			m_textCtrlLegLengthDifference);
 
 	m_textCtrlShoeSizeEU->SetValue(
 			wxString::Format(_T("%g"),
@@ -149,6 +104,28 @@ bool PanelFootMeasurements::TransferDataToWindow(void)
 	return true;
 }
 
+void PanelFootMeasurements::TransferParameterToTextCtrl(
+		const ParameterFormula parameter, wxTextCtrl* ctrl, bool isDistance)
+{
+	if(ctrl->HasFocus()){
+		ctrl->SetValue(parameter.formula);
+	}else{
+		if(parameter.errorFlag){
+			ctrl->SetBackgroundColour(*wxRED);
+			ctrl->SetValue(parameter.errorStr);
+		} else{
+			ctrl->SetBackgroundColour(wxNullColour);
+			if(isDistance){
+				ctrl->SetValue(
+						settings->Distance.TextFromSIWithUnit(parameter.value,
+								1));
+			} else{
+				ctrl->SetValue(wxString::Format(_T("%g %%"), parameter.value*100));
+			}
+		}
+	}
+}
+
 void PanelFootMeasurements::OnSetFocus(wxFocusEvent& event)
 {
 	TransferDataToWindow();
@@ -162,31 +139,7 @@ void PanelFootMeasurements::OnQuickSetup(wxCommandEvent& event)
 {
 	DialogQuickInitFoot dialog(this);
 	if(dialog.ShowModal() == wxID_OK){
-//		Project* project = wxStaticCast(GetDocument(), Project);
-//		const FootModel *foot = project->GetActiveFoot();
-//		if (fabs(foot->length - dialog.length) > FLT_EPSILON)
-//			project->GetCommandProcessor()->Submit(
-//					new CommandFootSetSize(
-//							wxString::Format(_("Set footlength to %g"),
-//									dialog.length), project, FootModel::Length,
-//							dialog.length));
-//		if (fabs(foot->ballwidth - dialog.width) > FLT_EPSILON)
-//			project->GetCommandProcessor()->Submit(
-//					new CommandFootSetSize(
-//							wxString::Format(_("Set ballwidth to %g"),
-//									dialog.width), project,
-//							FootModel::BallWidth, dialog.width));
 
-//		if(fabs(foot->anklewidth - dialog.width) > FLT_EPSILON) project->GetCommandProcessor()->Submit(
-//				new CommandFootSetSize(
-//						wxString::Format(_("Set anklewidth to %g"),
-//								dialog.width), project, FootModel::AnkleWidth,
-//						dialog.width));
-//		if(fabs(foot->heelwidth - dialog.width) > FLT_EPSILON) project->GetCommandProcessor()->Submit(
-//				new CommandFootSetSize(
-//						wxString::Format(_("Set heelwidth to %g"),
-//								dialog.width), project, FootModel::HeelWidth,
-//						dialog.width));
 	}
 }
 
@@ -194,92 +147,57 @@ void PanelFootMeasurements::OnTextEnter(wxCommandEvent& event)
 {
 	Project* project = wxStaticCast(doc, Project);
 	ProjectView* projectview = wxStaticCast(view, ProjectView);
-	const FootMeasurements *foot = projectview->GetActiveFootMeasurements();
-
 	const wxString newFormula = event.GetString();
-
-	wxString parameter;
-	switch(event.GetId()){
-	case ID_MEASUREMENT_FOOTLENGTH:
-		parameter = _T("FootLength");
-		break;
-	case ID_MEASUREMENT_BALLGIRTH:
-		parameter = _T("BallGirth");
-		break;
-	case ID_MEASUREMENT_WAISTGIRTH:
-		parameter = _T("WaistGirth");
-		break;
-	case ID_MEASUREMENT_INSTEPGIRTH:
-		parameter = _T("InstepGirth");
-		break;
-	case ID_MEASUREMENT_LONGHEELGIRTH:
-		parameter = _T("LongHeelGirth");
-		break;
-	case ID_MEASUREMENT_SHORTHEELGIRTH:
-		parameter = _T("ShortHeelGirth");
-		break;
-	case ID_MEASUREMENT_ANGLEMIXING:
-		parameter = _T("AngleMixing");
-		break;
-	case ID_MEASUREMENT_LEGLENGTHDIFFERENCE:
-		parameter = _T("LegLengthDifference");
-		break;
-	}
-
 	project->GetCommandProcessor()->Submit(
 			new CommandFootMeasurementSet(
-					wxString::Format(_("Set %s to %s"), parameter, newFormula),
-					project, projectview->active, event.GetId(), newFormula));
-//
-//		break;
-//	case ID_TEXTFOOTWIDTH:
-//		project->GetCommandProcessor()->Submit(
-//				new CommandFootSetSize(
-//						wxString::Format(_("Set ballwidth to %g"), temp),
-//						project, FootModel::BallWidth, temp));
-//		break;
-//	case ID_TEXTHEELWIDTH:
-//		project->GetCommandProcessor()->Submit(
-//				new CommandFootSetSize(
-//						wxString::Format(_("Set heelwidth to %g"), temp),
-//						project, FootModel::HeelWidth, temp));
-//		break;
-//	case ID_TEXTANKLEWIDTH:
-//		project->GetCommandProcessor()->Submit(
-//				new CommandFootSetSize(
-//						wxString::Format(_("Set anklewidth to %g"), temp),
-//						project, FootModel::AnkleWidth, temp));
-//		break;
-//	case ID_TEXTLEGLENGTH:
-//		project->GetCommandProcessor()->Submit(
-//				new CommandProjectSetLegLengthDifference(
-//						wxString::Format(_("Set leglengthdifference to %g"),
-//								temp), project, temp));
-//		break;
-//	case ID_TEXTHEELHEIGHT:
-//		project->GetCommandProcessor()->Submit(
-//				new CommandShoeSetParameter(
-//				_("Set heelheight to ") + event.GetString(), project, 0,
-//						event.GetString()));
-//		break;
-//	case ID_TEXTBALLHEIGHT:
-//		project->GetCommandProcessor()->Submit(
-//				new CommandShoeSetParameter(
-//				_("Set ballheight to ") + event.GetString(), project, 1,
-//						event.GetString()));
-
-//	case ID_TEXTTOEPITCH:
-//		project->GetCommandProcessor()->Submit(
-//				new CommandShoeSetParameter(
-//				_("Set toe pitch to ") + event.GetString(), project, 2,
-//						event.GetString()));
-//		break;
-//	case ID_TEXTMIXINGANGLE:
-//		project->GetCommandProcessor()->Submit(
-//				new CommandFootSetSize(
-//						wxString::Format(_("Set mixing to %g"), temp), project,
-//						FootModel::Mixing, temp));
-//		break;
-
+					wxString::Format(_("Set %s to %s"),
+							GetNameByID(event.GetId()), newFormula), project,
+					projectview->active, event.GetId(), newFormula));
+	Navigate();
 }
 
+wxString PanelFootMeasurements::GetNameByID(int id)
+{
+	switch(id){
+	case ID_MEASUREMENT_FOOTLENGTH:
+		return _T("FootLength");
+	case ID_MEASUREMENT_BALLGIRTH:
+		return _T("BallGirth");
+	case ID_MEASUREMENT_WAISTGIRTH:
+		return _T("WaistGirth");
+	case ID_MEASUREMENT_INSTEPGIRTH:
+		return _T("InstepGirth");
+	case ID_MEASUREMENT_LONGHEELGIRTH:
+		return _T("LongHeelGirth");
+	case ID_MEASUREMENT_SHORTHEELGIRTH:
+		return _T("ShortHeelGirth");
+	case ID_MEASUREMENT_ANGLEMIXING:
+		return _T("AngleMixing");
+	case ID_MEASUREMENT_LEGLENGTHDIFFERENCE:
+		return _T("LegLengthDifference");
+	}
+	return _T("");
+}
+
+wxTextCtrl* PanelFootMeasurements::GetTextCtrlByID(int id)
+{
+	switch(id){
+	case ID_MEASUREMENT_FOOTLENGTH:
+		return m_textCtrlFootLength;
+	case ID_MEASUREMENT_BALLGIRTH:
+		return m_textCtrlBallGirth;
+	case ID_MEASUREMENT_WAISTGIRTH:
+		return m_textCtrlWaistGirth;
+	case ID_MEASUREMENT_INSTEPGIRTH:
+		return m_textCtrlInstepGirth;
+	case ID_MEASUREMENT_LONGHEELGIRTH:
+		return m_textCtrlLongHeelGirth;
+	case ID_MEASUREMENT_SHORTHEELGIRTH:
+		return m_textCtrlShortHeelGirth;
+	case ID_MEASUREMENT_ANGLEMIXING:
+		return m_textCtrlAngleMixing;
+	case ID_MEASUREMENT_LEGLENGTHDIFFERENCE:
+		return m_textCtrlLegLengthDifference;
+	}
+	return NULL;
+}

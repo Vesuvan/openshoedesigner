@@ -498,7 +498,7 @@ void FootModel::UpdateForm(const FootMeasurements &measurements)
 {
 	ResetRotation();
 	optiForm.reevalBest = true;
-	optiForm.keepSimplex = true;
+	optiForm.keepSimplex = false;
 	optiForm.simplexSpread = 0.01;
 	optiForm.evalLimit = 30;
 	optiForm.errorLimit = 0.0005;

@@ -452,7 +452,7 @@ void FrameMain::OnPageChange(wxNotebookEvent& event)
 {
 }
 
-void FrameMain::OnSetByShoeSize(wxCommandEvent& event)
+void FrameMain::OnQuickSetupMeasurements(wxCommandEvent& event)
 {
 	DialogQuickInitFoot dialog(this);
 	if(dialog.ShowModal() == wxID_OK){

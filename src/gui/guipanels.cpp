@@ -222,6 +222,7 @@ GUIPanelFootMeasurements::GUIPanelFootMeasurements( wxWindow* parent, wxWindowID
 	m_textCtrlLegLengthDifference->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIPanelFootMeasurements::OnSetFocus ), NULL, this );
 	m_textCtrlLegLengthDifference->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIPanelFootMeasurements::OnTextEnter ), NULL, this );
 	m_buttonQuickSetup->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIPanelFootMeasurements::OnQuickSetup ), NULL, this );
+	m_bitmap->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( GUIPanelFootMeasurements::OnLeftDown ), NULL, this );
 }
 
 GUIPanelFootMeasurements::~GUIPanelFootMeasurements()
@@ -252,6 +253,7 @@ GUIPanelFootMeasurements::~GUIPanelFootMeasurements()
 	m_textCtrlLegLengthDifference->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIPanelFootMeasurements::OnSetFocus ), NULL, this );
 	m_textCtrlLegLengthDifference->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIPanelFootMeasurements::OnTextEnter ), NULL, this );
 	m_buttonQuickSetup->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIPanelFootMeasurements::OnQuickSetup ), NULL, this );
+	m_bitmap->Disconnect( wxEVT_LEFT_DOWN, wxMouseEventHandler( GUIPanelFootMeasurements::OnLeftDown ), NULL, this );
 	
 }
 

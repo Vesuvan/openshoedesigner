@@ -35,6 +35,7 @@
 
 #include <wx/docview.h>
 
+#include "../project/foot/ParameterFormula.h"
 #include "DisplaySettings.h"
 #include "guipanels.h"
 
@@ -49,6 +50,12 @@ public:
 	void SetDisplaySettings(DisplaySettings* settings);
 
 	bool TransferDataToWindow(void);
+
+	void TransferParameterToTextCtrl(ParameterFormula const parameter,
+			wxTextCtrl *ctrl, bool isDistance = true);
+
+	wxString GetNameByID(int id);
+	wxTextCtrl* GetTextCtrlByID(int id);
 
 	void OnQuickSetup(wxCommandEvent& event);
 	void OnKillFocus(wxFocusEvent& event);

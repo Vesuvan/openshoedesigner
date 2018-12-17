@@ -45,15 +45,11 @@
 
 static const int maxState = 10;
 
-
-
 IMPLEMENT_DYNAMIC_CLASS(Project, wxDocument)
 
 Project::Project()
 		: wxDocument()
 {
-
-
 
 	IniFile presets("data/ShoePresets.ini");
 
@@ -69,12 +65,16 @@ Project::Project()
 
 	thread0 = NULL;
 	thread1 = NULL;
+
 	this->Connect(ID_THREADDONE_0, ID_THREADDONE_1,
 	wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(Project::OnCalculationDone));
 
 	generator = Experimental;
 	symmetry = Full;
+	measurementsource = fromMeasurements;
+	modeltype = boneBased;
+
 	Reset();
 }
 
@@ -132,12 +132,43 @@ void Project::OnCalculationDone(wxCommandEvent& event)
 
 void Project::Update(void)
 {
+	if(symmetry != No){
+		MathParser parser;
+		parser.ignorecase = true;
+		parser.AddAllowedUnit(_T("mm"), 1e-3);
+		parser.AddAllowedUnit(_T("cm"), 1e-2);
+		parser.AddAllowedUnit(_T("m"), 1);
+		parser.AddAllowedUnit(_T("in"), 2.54e-2);
+		parser.AddAllowedUnit(_T("ft"), 0.3048);
+		parser.AddAllowedUnit(_T("rad"), 1);
+		parser.AddAllowedUnit(_T("deg"), 0.017453);
+		parser.AddAllowedUnit(_T("gon"), 0.015708);
+		measL.Update(parser);
+		footL.UpdateForm(measL);
+	}
+
+	if(symmetry != No){
+		MathParser parser;
+		parser.ignorecase = true;
+		parser.AddAllowedUnit(_T("mm"), 1e-3);
+		parser.AddAllowedUnit(_T("cm"), 1e-2);
+		parser.AddAllowedUnit(_T("m"), 1);
+		parser.AddAllowedUnit(_T("in"), 2.54e-2);
+		parser.AddAllowedUnit(_T("ft"), 0.3048);
+		parser.AddAllowedUnit(_T("rad"), 1);
+		parser.AddAllowedUnit(_T("deg"), 0.017453);
+		parser.AddAllowedUnit(_T("gon"), 0.015708);
+		measR.Update(parser);
+		footR.UpdateForm(measR);
+	}
+
 //	if(side == Left || side == Both){
 //		stateLeft = 0;
 //	}
 //	if(side == Right || side == Both){
 //		stateRight = 0;
 //	}
+	UpdateAllViews();
 }
 
 void Project::Recalculate(void)
