@@ -47,14 +47,11 @@
  * - Generator for injection molded shoes
  * - Dutch clog generator
  *
- * This process is started by calling UpdateFootPosition() followed by UpdateAndGenerate().
- * \todo Check if combineable into one command.
- *
  */
 
 #include <stddef.h>
 #include <wx/docview.h>
-#include <wx/event.h>
+
 #include <wx/object.h>
 #include <wx/platform.h>
 #include <wx/setup.h>
@@ -65,13 +62,13 @@
 #include "../3D/OrientedMatrix.h"
 #include "../3D/Polygon3.h"
 //#include "../3D/Volume.h"
+#include "last/PolyHull.h"
+
 #include "foot/FootMeasurements.h"
 #include "foot/FootModel.h"
 #include "last/Last.h"
-#include "last/PolyHull.h"
-#include "pattern/Pattern.h"
 #include "Shoe.h"
-//#include "WorkerThread.h"
+#include "pattern/Pattern.h"
 
 class WorkerThread;
 
@@ -83,20 +80,18 @@ typedef wxInputStream DocumentIstream;
 typedef wxOutputStream DocumentOstream;
 #endif // wxUSE_STD_IOSTREAM/!wxUSE_STD_IOSTREAM
 
-class Project:public wxDocument {
+class Project: public wxDocument {
+	friend class WorkerThread;
 public:
 	enum Symmetry {
 		No, OnlyModel, Full
 	} symmetry;
-	enum MeasurementSource{
+	enum MeasurementSource {
 		fromMeasurements, fromFootScan
 	} measurementsource;
 	enum ModelType {
 		boneBased, lastBased
 	} modeltype;
-
-
-
 	enum Generator {
 		Experimental, //!< Default generator for development of algorithms
 		Welted, //!< Welt sewn shoes: Generates last, insole, sole, upper pattern and cutout
@@ -105,17 +100,17 @@ public:
 		Dutch //!< Generator for dutch wooden clogs: Generates last, insole and clog
 	} generator;
 
-
-	enum sizeparameter {
-		Length, //!< Length of foot
-		BallWidth, //!< Width of the ball
-		HeelWidth, //!< Width of the heel
-		AnkleWidth, //!< Width of the ankle
-		Mixing  //!< Anglemixing
-	};
+//	enum sizeparameter {
+//		Length, //!< Length of foot
+//		BallWidth, //!< Width of the ball
+//		HeelWidth, //!< Width of the heel
+//		AnkleWidth, //!< Width of the ankle
+//		Mixing  //!< Anglemixing
+//	};
 
 	Project();
 	virtual ~Project();
+	void StopAllThreads(void); //!< Call from OnClose; the event loop has to be running.
 
 	void Reset(void);
 
@@ -127,12 +122,9 @@ public:
 	bool SaveSkin(wxString fileName);
 
 	void Update(void);
-
-	void Recalculate(void);
-	bool ThreadNeedsCalculations(size_t threadNr) const;
-	void ThreadCalculate(size_t threadNr);
-	void OnCalculationDone(wxCommandEvent& event);
-	void OnRefreshViews(wxCommandEvent& event);
+protected:
+	bool UpdateLeft(void);
+	bool UpdateRight(void);
 
 public:
 
@@ -154,9 +146,17 @@ public:
 	Polygon3 bow;
 
 private:
+	void ThreadCalculate(size_t threadNr);
+
+	void OnCalculationDone(wxThreadEvent& event);
+	void OnRefreshViews(wxThreadEvent& event);
+
 	WorkerThread* thread0;
 	WorkerThread* thread1;
+
 	wxCriticalSection CS;
+	wxCriticalSection CSLeft;
+	wxCriticalSection CSRight;
 
 DECLARE_DYNAMIC_CLASS(Project)
 	;

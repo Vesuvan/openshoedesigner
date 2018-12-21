@@ -40,6 +40,7 @@
 #include <math.h>
 #include <cfloat>
 
+#include "../project/command/CommandFootMeasurementSet.h"
 //#include "../project/command/CommandFootMeasurementSet.h"
 #include "../project/command/CommandFootModelSetParameter.h"
 #include "../project/command/CommandProjectSetLegLengthDifference.h"
@@ -47,9 +48,11 @@
 #include "../project/command/CommandShoeSetParameter.h"
 
 FrameMain::FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
-		wxDocParentFrame* parent)
-		: GUIFrameMain(doc, view, parent)
-{
+		wxDocParentFrame* parent) :
+		GUIFrameMain(doc, view, parent) {
+
+	presets.ReadFile("data/ShoePresets.ini");
+
 	m_menuFile->Append(wxID_NEW);
 	m_menuFile->Append(wxID_OPEN);
 	m_menuFile->Append(wxID_REVERT_TO_SAVED);
@@ -105,10 +108,12 @@ FrameMain::FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
 //			this);
 //	timer.Start(100);
 //	midi.Open(3);
+
+	Project* project = wxStaticCast(doc, Project);
+	project->Update();
 }
 
-FrameMain::~FrameMain()
-{
+FrameMain::~FrameMain() {
 	printf("FrameMain: Destructor called\n");
 
 //	this->Disconnect(wxEVT_TIMER, wxTimerEventHandler(FrameMain::OnTimer), NULL,
@@ -123,8 +128,7 @@ FrameMain::~FrameMain()
 	settings.WriteConfigTo(config);
 }
 
-bool FrameMain::TransferDataToWindow()
-{
+bool FrameMain::TransferDataToWindow() {
 	const ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
 	Project* project = wxStaticCast(GetDocument(), Project);
 	const FootMeasurements * foot = projectview->GetActiveFootMeasurements();
@@ -164,15 +168,15 @@ bool FrameMain::TransferDataToWindow()
 //	m_textCtrlResultMixing->SetValue(
 //			settings.Percent.TextFromSIWithUnit(foot->mixing, 1));
 
-	if(dialogSetupStereo3D->IsShown()) dialogSetupStereo3D->TransferDataToWindow();
+	if (dialogSetupStereo3D->IsShown())
+		dialogSetupStereo3D->TransferDataToWindow();
 
 	m_panelFootMeasurements->TransferDataToWindow();
 	m_panelLegMeasurements->TransferDataToWindow();
 	return true;
 }
 
-bool FrameMain::TransferDataFromWindow()
-{
+bool FrameMain::TransferDataFromWindow() {
 	ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
 	Project* project = wxStaticCast(GetDocument(), Project);
 
@@ -194,15 +198,13 @@ bool FrameMain::TransferDataFromWindow()
 	return true;
 }
 
-void FrameMain::RefreshCanvas(wxCommandEvent& event)
-{
+void FrameMain::RefreshCanvas(wxCommandEvent& event) {
 	settings.WriteToCanvas(m_canvas3D);
 	m_canvas3D->Refresh();
 	Refresh();
 }
 
-void FrameMain::RefreshView(wxCommandEvent& event)
-{
+void FrameMain::RefreshView(wxCommandEvent& event) {
 	TransferDataToWindow();
 	this->Refresh(); // FIXME: Recursive refresh does not work with GTK1. Call Refresh on every child-dialog by hand.
 }
@@ -231,20 +233,21 @@ void FrameMain::RefreshView(wxCommandEvent& event)
 //	this->Refresh();
 //}
 
-void FrameMain::OnClose(wxCloseEvent& event)
-{
+void FrameMain::OnClose(wxCloseEvent& event) {
 	wxDocument* doc = this->GetDocument();
 	wxList tempDocs = doc->GetDocumentManager()->GetDocuments();
 	wxList tempViews = doc->GetViews();
+	Project* project = wxStaticCast(doc, Project);
+	project->StopAllThreads();
 
 	printf("FrameMain: %lu docs, %lu views\n", tempDocs.GetCount(),
 			tempViews.GetCount());
 
-	if(tempDocs.GetCount() > 1){
+	if (tempDocs.GetCount() > 1) {
 		event.Skip(); // Only close this window, by passing the event to the default handler.
 		return;
 	}
-	if(tempViews.GetCount() > 1){
+	if (tempViews.GetCount() > 1) {
 		event.Skip(); // Only close this window, by passing the event to the default handler.
 		return;
 	}
@@ -253,8 +256,7 @@ void FrameMain::OnClose(wxCloseEvent& event)
 	main->Close(); // Exit app by closing main window, this will close this window as well.
 }
 
-void FrameMain::On3DSelect(wxCommandEvent& event)
-{
+void FrameMain::On3DSelect(wxCommandEvent& event) {
 //	int x = event.GetX();
 //	int y = event.GetY();
 //	OpenGLPick result;
@@ -295,81 +297,73 @@ void FrameMain::On3DSelect(wxCommandEvent& event)
 //	}
 }
 
-void FrameMain::OnConstructionSelection(wxCommandEvent& event)
-{
+void FrameMain::OnConstructionSelection(wxCommandEvent& event) {
 	event.Skip();
 }
 
-void FrameMain::OnLoadBoneModel(wxCommandEvent& event)
-{
+void FrameMain::OnLoadBoneModel(wxCommandEvent& event) {
 	wxFileDialog dialog(this, _("Open Foot Model..."), _T(""), _T(""),
 			_("Foot Model (*.fmd; *.txt)|*.fmd;*.txt|All Files|*.*"),
 			wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 
-	if(wxDir::Exists(settings.lastFootDirectory)){
+	if (wxDir::Exists(settings.lastFootDirectory)) {
 		dialog.SetDirectory(settings.lastFootDirectory);
 	}
 
-	if(dialog.ShowModal() == wxID_OK){
+	if (dialog.ShowModal() == wxID_OK) {
 		wxFileName fileName(dialog.GetPath());
 		Project* project = wxStaticCast(GetDocument(), Project);
 
-		if(project->LoadModel(fileName.GetFullPath())){
+		if (project->LoadModel(fileName.GetFullPath())) {
 			settings.lastFootDirectory = fileName.GetPath();
 			TransferDataToWindow();
 		}
 	}
 }
 
-void FrameMain::OnSaveBoneModel(wxCommandEvent& event)
-{
+void FrameMain::OnSaveBoneModel(wxCommandEvent& event) {
 
 	wxFileDialog dialog(this, _("Save Foot Model As..."), _T(""), _T(""),
 			_("Foot Model (*.fmd; *.txt)|*.fmd;*.txt|All Files|*.*"),
 			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
-	if(wxDir::Exists(settings.lastFootDirectory)){
+	if (wxDir::Exists(settings.lastFootDirectory)) {
 		dialog.SetDirectory(settings.lastFootDirectory);
 	}
 
 //	if(project.fileName.IsOk()) dialog.SetFilename(
 //			project.fileName.GetFullPath());
 
-	if(dialog.ShowModal() == wxID_OK){
+	if (dialog.ShowModal() == wxID_OK) {
 		wxFileName fileName(dialog.GetPath());
 		Project* project = wxStaticCast(GetDocument(), Project);
-		if(project->SaveModel(fileName.GetFullPath())){
+		if (project->SaveModel(fileName.GetFullPath())) {
 			settings.lastFootDirectory = fileName.GetPath();
 			TransferDataToWindow();
 		}
 	}
 }
 
-void FrameMain::OnLoadPattern(wxCommandEvent& event)
-{
+void FrameMain::OnLoadPattern(wxCommandEvent& event) {
 }
 
-void FrameMain::OnSavePattern(wxCommandEvent& event)
-{
+void FrameMain::OnSavePattern(wxCommandEvent& event) {
 }
 
-void FrameMain::OnSetupShoe(wxCommandEvent& event)
-{
+void FrameMain::OnSetupShoe(wxCommandEvent& event) {
 
 }
 
-void FrameMain::OnEditWalkCycle(wxCommandEvent& event)
-{
+void FrameMain::OnEditWalkCycle(wxCommandEvent& event) {
 
 }
 
-void FrameMain::OnSaveLast(wxCommandEvent& event)
-{
+void FrameMain::OnSaveLast(wxCommandEvent& event) {
 	wxFileDialog dialog(this, _("Save last..."), _T(""), _T(""),
 			_("STL file (*.stl)|*.stl|All files|*.*"),
 			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
-	if(dialog.ShowModal() == wxID_OK){
+	if (dialog.ShowModal() == wxID_OK) {
 		wxFileName fileName;
 		fileName = dialog.GetPath();
 		Project* project = wxStaticCast(GetDocument(), Project);
@@ -377,39 +371,33 @@ void FrameMain::OnSaveLast(wxCommandEvent& event)
 	}
 }
 
-void FrameMain::OnSaveInsole(wxCommandEvent& event)
-{
+void FrameMain::OnSaveInsole(wxCommandEvent& event) {
 }
 
-void FrameMain::OnSaveSole(wxCommandEvent& event)
-{
+void FrameMain::OnSaveSole(wxCommandEvent& event) {
 }
 
-void FrameMain::OnSaveCutaway(wxCommandEvent& event)
-{
+void FrameMain::OnSaveCutaway(wxCommandEvent& event) {
 }
 
-void FrameMain::OnPackZip(wxCommandEvent& event)
-{
+void FrameMain::OnPackZip(wxCommandEvent& event) {
 }
 
-void FrameMain::OnToggleStereo3D(wxCommandEvent& event)
-{
-	if(m_canvas3D->stereoMode == stereoOff){
+void FrameMain::OnToggleStereo3D(wxCommandEvent& event) {
+	if (m_canvas3D->stereoMode == stereoOff) {
 		m_canvas3D->stereoMode = stereoAnaglyph;
-	}else{
+	} else {
 		m_canvas3D->stereoMode = stereoOff;
 	}
 	m_menuView->Check(ID_STEREO3D, m_canvas3D->stereoMode != stereoOff);
 	Refresh();
 }
 
-void FrameMain::OnViewChange(wxCommandEvent& event)
-{
+void FrameMain::OnViewChange(wxCommandEvent& event) {
 	ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
 	TransferDataFromWindow();
 
-	switch(event.GetId()){
+	switch (event.GetId()) {
 	case ID_SHOWLEFT:
 		projectview->showLeft = event.IsChecked();
 		break;
@@ -421,44 +409,51 @@ void FrameMain::OnViewChange(wxCommandEvent& event)
 	Refresh();
 }
 
-void FrameMain::OnSetupStereo3D(wxCommandEvent& event)
-{
+void FrameMain::OnSetupStereo3D(wxCommandEvent& event) {
 	dialogSetupStereo3D->Show();
 	dialogSetupStereo3D->Raise();
 }
 
-void FrameMain::OnSetupUnits(wxCommandEvent& event)
-{
+void FrameMain::OnSetupUnits(wxCommandEvent& event) {
 	dialogSetupUnits->Show();
 	dialogSetupUnits->Raise();
 }
 
-void FrameMain::OnSelectLanguage(wxCommandEvent& event)
-{
+void FrameMain::OnSelectLanguage(wxCommandEvent& event) {
 	long lng =
 			wxGetSingleChoiceIndex(
 					_T(
 							"Please choose language:\nChanges will take place after restart!"),
 					_T("Language"), WXSIZEOF(langNames), langNames);
-	if(lng >= 0) config->Write(_T("Language"), langNames[lng]);
+	if (lng >= 0)
+		config->Write(_T("Language"), langNames[lng]);
 }
 
-void FrameMain::OnDebugParser(wxCommandEvent& event)
-{
+void FrameMain::OnDebugParser(wxCommandEvent& event) {
 	(new FrameDebugParser(this))->Show();
 }
 
-void FrameMain::OnPageChange(wxNotebookEvent& event)
-{
+void FrameMain::OnPageChange(wxNotebookEvent& event) {
 }
 
-void FrameMain::OnQuickSetupMeasurements(wxCommandEvent& event)
-{
+void FrameMain::OnQuickSetupMeasurements(wxCommandEvent& event) {
 	DialogQuickInitFoot dialog(this);
-	if(dialog.ShowModal() == wxID_OK){
+	if (dialog.ShowModal() == wxID_OK) {
 		Project* project = wxStaticCast(GetDocument(), Project);
 		ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
-		const FootMeasurements *foot = projectview->GetActiveFootMeasurements();
+
+		wxString lengthStr = settings.Distance.TextFromSIWithUnit(
+				dialog.length);
+
+		project->GetCommandProcessor()->Submit(
+				new CommandFootMeasurementSet(
+				_("Set footlength to ") + lengthStr, project,
+						projectview->active, ID_MEASUREMENT_FOOTLENGTH,
+						lengthStr));
+
+//		ballGirth.formula = _T("footLength*0.93");
+
+//		const FootMeasurements *foot = projectview->GetActiveFootMeasurements();
 
 //		if(fabs(foot->footLength - dialog.length) > FLT_EPSILON) project->GetCommandProcessor()->Submit(
 //				new CommandFootSetSize(
@@ -494,17 +489,14 @@ void FrameMain::OnQuickSetupMeasurements(wxCommandEvent& event)
 //	TransferDataToWindow();
 //}
 
-void FrameMain::OnToggleAnkleLock(wxCommandEvent& event)
-{
+void FrameMain::OnToggleAnkleLock(wxCommandEvent& event) {
 }
 
-void FrameMain::OnLoadFootSTL(wxCommandEvent& event)
-{
+void FrameMain::OnLoadFootSTL(wxCommandEvent& event) {
 }
 
-void FrameMain::OnSetSymmetry(wxCommandEvent& event)
-{
-	switch(event.GetId()){
+void FrameMain::OnSetSymmetry(wxCommandEvent& event) {
+	switch (event.GetId()) {
 	case ID_FULLSYMMETRY:
 		break;
 	case ID_SYMMETRICMODEL:
@@ -517,52 +509,40 @@ void FrameMain::OnSetSymmetry(wxCommandEvent& event)
 	event.Skip();
 }
 
-void FrameMain::OnCopyMeasurements(wxCommandEvent& event)
-{
+void FrameMain::OnCopyMeasurements(wxCommandEvent& event) {
 }
 
-void FrameMain::OnSetupBackgroundImages(wxCommandEvent& event)
-{
+void FrameMain::OnSetupBackgroundImages(wxCommandEvent& event) {
 }
 
-void FrameMain::OnIdle(wxIdleEvent& event)
-{
-	Project* project = wxStaticCast(GetDocument(), Project);
-	project->Recalculate();
+void FrameMain::OnIdle(wxIdleEvent& event) {
+//	Project* project = wxStaticCast(GetDocument(), Project);
+//	project->Update();
 }
 
-void FrameMain::OnChoiceDisplay(wxCommandEvent& event)
-{
+void FrameMain::OnChoiceDisplay(wxCommandEvent& event) {
 }
 
-void FrameMain::OnFileChangedLastFile(wxFileDirPickerEvent& event)
-{
+void FrameMain::OnFileChangedLastFile(wxFileDirPickerEvent& event) {
 }
 
-void FrameMain::OnFileChangedScanFile(wxFileDirPickerEvent& event)
-{
+void FrameMain::OnFileChangedScanFile(wxFileDirPickerEvent& event) {
 }
 
-void FrameMain::OnChoice(wxCommandEvent& event)
-{
+void FrameMain::OnChoice(wxCommandEvent& event) {
 }
 
-void FrameMain::OnTextEnter(wxCommandEvent& event)
-{
+void FrameMain::OnTextEnter(wxCommandEvent& event) {
 }
 
-void FrameMain::OnCheckBox(wxCommandEvent& event)
-{
+void FrameMain::OnCheckBox(wxCommandEvent& event) {
 }
 
-void FrameMain::OnChangeModel(wxCommandEvent& event)
-{
+void FrameMain::OnChangeModel(wxCommandEvent& event) {
 }
 
-void FrameMain::OnEditBoneModel(wxCommandEvent& event)
-{
+void FrameMain::OnEditBoneModel(wxCommandEvent& event) {
 }
 
-void FrameMain::OnToggleButton(wxCommandEvent& event)
-{
+void FrameMain::OnToggleButton(wxCommandEvent& event) {
 }

@@ -26,28 +26,30 @@
 
 #ifndef __WORKERTHREAD_H__
 #define __WORKERTHREAD_H__
-
-#include <stddef.h>
-#include <wx/thread.h>
-
-class Project;
-
 /*!\class LastGenerationThread
  * \brief Thread for the loadheavy calculation of the volume
  *
  * This thread inscribes the volume with the bones of the foot.
  */
 
-class WorkerThread:public wxThread {
+#include <stddef.h>
+#include <wx/thread.h>
+#include <wx/event.h>
+
+wxDECLARE_EVENT(wxEVT_COMMAND_THREAD_COMPLETED, wxThreadEvent);
+wxDECLARE_EVENT(wxEVT_COMMAND_THREAD_UPDATE, wxThreadEvent);
+
+class Project;
+class WorkerThread: public wxThread {
 public:
 	WorkerThread(Project* project, size_t threadNr);
 	virtual ~WorkerThread();
 
 	wxThread::ExitCode Entry();
 
-public:
-	Project * project;
-	size_t threadNr;
+private:
+	Project* project;
+	const size_t threadNr;
 };
 
 #endif /* __WORKERTHREAD_H__ */

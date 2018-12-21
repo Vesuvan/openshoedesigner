@@ -26,35 +26,44 @@
 
 #include "WorkerThread.h"
 #include "Project.h"
-#include "../gui/IDs.h"
 
-WorkerThread::WorkerThread(Project * project, size_t threadNr)
-		: wxThread(wxTHREAD_JOINABLE)
-{
+wxDEFINE_EVENT(wxEVT_COMMAND_THREAD_COMPLETED, wxThreadEvent);
+wxDEFINE_EVENT(wxEVT_COMMAND_THREAD_UPDATE, wxThreadEvent);
+
+WorkerThread::WorkerThread(Project * project, size_t threadNr) :
+		wxThread(wxTHREAD_DETACHED), threadNr(threadNr) {
 	this->project = project;
-	this->threadNr = threadNr;
 }
 
-WorkerThread::~WorkerThread()
-{
+WorkerThread::~WorkerThread() {
+	if (project != NULL) {
+		wxCriticalSectionLocker enter(project->CS);
+		switch (threadNr) {
+		case 0:
+			project->thread0 = NULL;
+			break;
+		case 1:
+			project->thread1 = NULL;
+			break;
+		}
+	}
 }
 
-wxThread::ExitCode WorkerThread::Entry()
-{
-	if(threadNr > 1) return (wxThread::ExitCode) 1;
-	if(TestDestroy()) return (wxThread::ExitCode) 2;
-	while(project->ThreadNeedsCalculations(threadNr) && !TestDestroy()){
-		project->ThreadCalculate(threadNr);
-		wxQueueEvent(project,
-				new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_REFRESH));
+wxThread::ExitCode WorkerThread::Entry() {
+	if (threadNr >= 2)
+		return (wxThread::ExitCode) 1;
+
+	if (TestDestroy())
+		return (wxThread::ExitCode) 2;
+	bool flag = true;
+	while (flag && !TestDestroy()) {
+		if (threadNr == 0)
+			flag = project->UpdateLeft();
+		if (threadNr == 1)
+			flag = project->UpdateRight();
+		wxQueueEvent(project, new wxThreadEvent(wxEVT_COMMAND_THREAD_UPDATE));
 	}
-	if(threadNr == 0){
-		wxQueueEvent(project, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED,
-		ID_THREADDONE_0));
-	}
-	if(threadNr == 1){
-		wxQueueEvent(project, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED,
-		ID_THREADDONE_1));
-	}
+	wxQueueEvent(project, new wxThreadEvent(wxEVT_COMMAND_THREAD_COMPLETED));
+	printf("Thread%u exit.\n", threadNr);
 	return (wxThread::ExitCode) 0;
 }

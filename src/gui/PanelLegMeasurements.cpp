@@ -28,226 +28,175 @@
 
 #include "../project/command/CommandFootMeasurementSet.h"
 PanelLegMeasurements::PanelLegMeasurements(wxWindow* parent, wxWindowID id,
-		const wxPoint& pos, const wxSize& size, long style)
-		: GUIPanelLegMeasurements(parent, id, pos, size, style)
-{
+		const wxPoint& pos, const wxSize& size, long style) :
+		GUIPanelLegMeasurements(parent, id, pos, size, style) {
 	settings = NULL;
 	doc = NULL;
 	view = NULL;
 }
 
-PanelLegMeasurements::~PanelLegMeasurements()
-{
+PanelLegMeasurements::~PanelLegMeasurements() {
 }
 
-void PanelLegMeasurements::SetDocView(wxDocument* doc, wxView* view)
-{
+void PanelLegMeasurements::SetDocView(wxDocument* doc, wxView* view) {
 	this->doc = doc;
 	this->view = view;
 }
 
-void PanelLegMeasurements::SetDisplaySettings(DisplaySettings* settings)
-{
+void PanelLegMeasurements::SetDisplaySettings(DisplaySettings* settings) {
 	this->settings = settings;
 }
 
-bool PanelLegMeasurements::TransferDataToWindow(void)
-{
+bool PanelLegMeasurements::TransferDataToWindow(void) {
 
 	ProjectView* projectview = wxStaticCast(view, ProjectView);
 	const FootMeasurements *foot = projectview->GetActiveFootMeasurements();
 
-	if(m_textCtrlBelowCrutchGirth->HasFocus())
-		m_textCtrlBelowCrutchGirth->SetValue(foot->belowCrutchGirth.formula);
-	else
-		m_textCtrlBelowCrutchGirth->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->belowCrutchGirth.value, 1));
-
-	if(m_textCtrlBelowCrutchLevel->HasFocus())
-		m_textCtrlBelowCrutchLevel->SetValue(foot->belowCrutchLevel.formula);
-	else
-		m_textCtrlBelowCrutchLevel->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->belowCrutchLevel.value, 1));
-
-	if(m_textCtrlMiddleOfCalfGirth->HasFocus())
-		m_textCtrlMiddleOfCalfGirth->SetValue(foot->middleOfCalfGirth.formula);
-	else
-		m_textCtrlMiddleOfCalfGirth->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->middleOfCalfGirth.value, 1));
-
-	if(m_textCtrlMiddleOfCalfLevel->HasFocus())
-		m_textCtrlMiddleOfCalfLevel->SetValue(foot->middleOfCalfLevel.formula);
-	else
-		m_textCtrlMiddleOfCalfLevel->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->middleOfCalfLevel.value, 1));
-
-	if(m_textCtrlAboveKneeGirth->HasFocus())
-		m_textCtrlAboveKneeGirth->SetValue(foot->aboveKneeGirth.formula);
-	else
-		m_textCtrlAboveKneeGirth->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->aboveKneeGirth.value, 1));
-
-	if(m_textCtrlAboveKneeLevel->HasFocus())
-		m_textCtrlAboveKneeLevel->SetValue(foot->aboveKneeLevel.formula);
-	else
-		m_textCtrlAboveKneeLevel->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->aboveKneeLevel.value, 1));
-
-	if(m_textCtrlOverKneeCapGirth->HasFocus())
-		m_textCtrlOverKneeCapGirth->SetValue(foot->overKneeCapGirth.formula);
-	else
-		m_textCtrlOverKneeCapGirth->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->overKneeCapGirth.value, 1));
-
-	if(m_textCtrlOverKneeCapLevel->HasFocus())
-		m_textCtrlOverKneeCapLevel->SetValue(foot->overKneeCapLevel.formula);
-	else
-		m_textCtrlOverKneeCapLevel->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->overKneeCapLevel.value, 1));
-
-	if(m_textCtrlBelowKneeGirth->HasFocus())
-		m_textCtrlBelowKneeGirth->SetValue(foot->belowKneeGirth.formula);
-	else
-		m_textCtrlBelowKneeGirth->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->belowKneeGirth.value, 1));
-
-	if(m_textCtrlBelowKneeLevel->HasFocus())
-		m_textCtrlBelowKneeLevel->SetValue(foot->belowKneeLevel.formula);
-	else
-		m_textCtrlBelowKneeLevel->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->belowKneeLevel.value, 1));
-
-	if(m_textCtrlMiddleOfShankGirth->HasFocus())
-		m_textCtrlMiddleOfShankGirth->SetValue(
-				foot->middleOfShankGirth.formula);
-	else
-		m_textCtrlMiddleOfShankGirth->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->middleOfShankGirth.value, 1));
-
-	if(m_textCtrlMiddleOfShankLevel->HasFocus())
-		m_textCtrlMiddleOfShankLevel->SetValue(
-				foot->middleOfShankLevel.formula);
-	else
-		m_textCtrlMiddleOfShankLevel->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->middleOfShankLevel.value, 1));
-
-	if(m_textCtrlAboveAnkleGirth->HasFocus())
-		m_textCtrlAboveAnkleGirth->SetValue(foot->aboveAnkleGirth.formula);
-	else
-		m_textCtrlAboveAnkleGirth->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->aboveAnkleGirth.value, 1));
-
-	if(m_textCtrlAboveAnkleLevel->HasFocus())
-		m_textCtrlAboveAnkleLevel->SetValue(foot->aboveAnkleLevel.formula);
-	else
-		m_textCtrlAboveAnkleLevel->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->aboveAnkleLevel.value, 1));
-
-	if(m_textCtrlOverAnkleBoneGirth->HasFocus())
-		m_textCtrlOverAnkleBoneGirth->SetValue(
-				foot->overAnkleBoneGirth.formula);
-	else
-		m_textCtrlOverAnkleBoneGirth->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->overAnkleBoneGirth.value, 1));
-
-	if(m_textCtrlOverAnkleBoneLevel->HasFocus())
-		m_textCtrlOverAnkleBoneLevel->SetValue(
-				foot->overAnkleBoneLevel.formula);
-	else
-		m_textCtrlOverAnkleBoneLevel->SetValue(
-				settings->Distance.TextFromSIWithUnit(
-						foot->overAnkleBoneLevel.value, 1));
+	TransferParameterToTextCtrl(foot->belowCrutchGirth,
+			m_textCtrlBelowCrutchGirth);
+	TransferParameterToTextCtrl(foot->belowCrutchLevel,
+			m_textCtrlBelowCrutchLevel);
+	TransferParameterToTextCtrl(foot->middleOfCalfGirth,
+			m_textCtrlMiddleOfCalfGirth);
+	TransferParameterToTextCtrl(foot->middleOfCalfLevel,
+			m_textCtrlMiddleOfCalfLevel);
+	TransferParameterToTextCtrl(foot->aboveKneeGirth, m_textCtrlAboveKneeGirth);
+	TransferParameterToTextCtrl(foot->aboveKneeLevel, m_textCtrlAboveKneeLevel);
+	TransferParameterToTextCtrl(foot->overKneeCapGirth,
+			m_textCtrlOverKneeCapGirth);
+	TransferParameterToTextCtrl(foot->overKneeCapLevel,
+			m_textCtrlOverKneeCapLevel);
+	TransferParameterToTextCtrl(foot->belowKneeGirth, m_textCtrlBelowKneeGirth);
+	TransferParameterToTextCtrl(foot->belowKneeLevel, m_textCtrlBelowKneeLevel);
+	TransferParameterToTextCtrl(foot->middleOfShankGirth,
+			m_textCtrlMiddleOfShankGirth);
+	TransferParameterToTextCtrl(foot->middleOfShankLevel,
+			m_textCtrlMiddleOfShankLevel);
+	TransferParameterToTextCtrl(foot->aboveAnkleGirth,
+			m_textCtrlAboveAnkleGirth);
+	TransferParameterToTextCtrl(foot->aboveAnkleLevel,
+			m_textCtrlAboveAnkleLevel);
+	TransferParameterToTextCtrl(foot->overAnkleBoneGirth,
+			m_textCtrlOverAnkleBoneGirth);
+	TransferParameterToTextCtrl(foot->overAnkleBoneLevel,
+			m_textCtrlOverAnkleBoneLevel);
 
 	return true;
 }
 
-void PanelLegMeasurements::OnKillFocus(wxFocusEvent& event)
-{
+void PanelLegMeasurements::OnKillFocus(wxFocusEvent& event) {
 	TransferDataToWindow();
 }
 
-void PanelLegMeasurements::OnSetFocus(wxFocusEvent& event)
-{
+void PanelLegMeasurements::OnSetFocus(wxFocusEvent& event) {
 	TransferDataToWindow();
 }
 
-void PanelLegMeasurements::OnTextEnter(wxCommandEvent& event)
-{
+void PanelLegMeasurements::OnTextEnter(wxCommandEvent& event) {
 	Project* project = wxStaticCast(doc, Project);
 	ProjectView* projectview = wxStaticCast(view, ProjectView);
-	const FootMeasurements *foot = projectview->GetActiveFootMeasurements();
-
 	const wxString newFormula = event.GetString();
-
-	wxString parameter;
-	switch(event.GetId()){
-	case ID_MEASUREMENT_BELOWCRUTCHGIRTH:
-		parameter = _T("BelowCrutchGirth");
-		break;
-	case ID_MEASUREMENT_BELOWCRUTCHLEVEL:
-		parameter = _T("BelowCrutchLevel");
-		break;
-	case ID_MEASUREMENT_MIDDLEOFCALFGIRTH:
-		parameter = _T("MiddleOfCalfGirth");
-		break;
-	case ID_MEASUREMENT_MIDDLEOFCALFLEVEL:
-		parameter = _T("MiddleOfCalfLevel");
-		break;
-	case ID_MEASUREMENT_ABOVEKNEEGIRTH:
-		parameter = _T("AboveKneeGirth");
-		break;
-	case ID_MEASUREMENT_ABOVEKNEELEVEL:
-		parameter = _T("AboveKneeLevel");
-		break;
-	case ID_MEASUREMENT_OVERKNEECAPGIRTH:
-		parameter = _T("OverKneeCapGirth");
-		break;
-	case ID_MEASUREMENT_OVERKNEECAPLEVEL:
-		parameter = _T("OverKneeCapLevel");
-		break;
-	case ID_MEASUREMENT_BELOWKNEEGIRTH:
-		parameter = _T("BelowKneeGirth");
-		break;
-	case ID_MEASUREMENT_BELOWKNEELEVEL:
-		parameter = _T("BelowKneeLevel");
-		break;
-	case ID_MEASUREMENT_MIDDLEOFSHANKGIRTH:
-		parameter = _T("MiddleOfSkankGirth");
-		break;
-	case ID_MEASUREMENT_MIDDLEOFSHANKLEVEL:
-		parameter = _T("MiddleOfSkankLevel");
-		break;
-	case ID_MEASUREMENT_ABOVEANKLEGIRTH:
-		parameter = _T("AboveAnkleGirth");
-		break;
-	case ID_MEASUREMENT_ABOVEANKLELEVEL:
-		parameter = _T("AboveAnkleLevel");
-		break;
-	case ID_MEASUREMENT_OVERANKLEBONEGIRTH:
-		parameter = _T("OverAnkelConeGirth");
-		break;
-	case ID_MEASUREMENT_OVERANKLEBONELEVEL:
-		parameter = _T("OverAnkleBoneLevel");
-		break;
-	}
-
 	project->GetCommandProcessor()->Submit(
 			new CommandFootMeasurementSet(
-					wxString::Format(_("Set %s to %s"), parameter, newFormula),
-					project, projectview->active, event.GetId(), newFormula));
+					wxString::Format(_("Set %s to %s"),
+							GetNameByID(event.GetId()), newFormula), project,
+					projectview->active, event.GetId(), newFormula));
+	Navigate();
+}
+
+void PanelLegMeasurements::TransferParameterToTextCtrl(
+		const ParameterFormula parameter, wxTextCtrl* ctrl, bool isDistance) {
+	if (ctrl->HasFocus()) {
+		ctrl->SetValue(parameter.formula);
+	} else {
+		if (parameter.errorFlag) {
+			ctrl->SetBackgroundColour(*wxRED);
+			ctrl->SetValue(parameter.errorStr);
+		} else {
+			ctrl->SetBackgroundColour(wxNullColour);
+			if(isDistance) {
+				ctrl->SetValue(
+						settings->Distance.TextFromSIWithUnit(parameter.value,
+								1));
+			} else {
+				ctrl->SetValue(wxString::Format(_T("%g %%"), parameter.value*100));
+			}
+		}
+	}
+}
+
+wxString PanelLegMeasurements::GetNameByID(int id) {
+	switch (id) {
+	case ID_MEASUREMENT_BELOWCRUTCHGIRTH:
+		return _T("BelowCrutchGirth");
+	case ID_MEASUREMENT_BELOWCRUTCHLEVEL:
+		return _T("BelowCrutchLevel");
+	case ID_MEASUREMENT_MIDDLEOFCALFGIRTH:
+		return _T("MiddleOfCalfGirth");
+	case ID_MEASUREMENT_MIDDLEOFCALFLEVEL:
+		return _T("MiddleOfCalfLevel");
+	case ID_MEASUREMENT_ABOVEKNEEGIRTH:
+		return _T("AboveKneeGirth");
+	case ID_MEASUREMENT_ABOVEKNEELEVEL:
+		return _T("AboveKneeLevel");
+	case ID_MEASUREMENT_OVERKNEECAPGIRTH:
+		return _T("OverKneeCapGirth");
+	case ID_MEASUREMENT_OVERKNEECAPLEVEL:
+		return _T("OverKneeCapLevel");
+	case ID_MEASUREMENT_BELOWKNEEGIRTH:
+		return _T("BelowKneeGirth");
+	case ID_MEASUREMENT_BELOWKNEELEVEL:
+		return _T("BelowKneeLevel");
+	case ID_MEASUREMENT_MIDDLEOFSHANKGIRTH:
+		return _T("MiddleOfShankGirth");
+	case ID_MEASUREMENT_MIDDLEOFSHANKLEVEL:
+		return _T("MiddleOfShankLevel");
+	case ID_MEASUREMENT_ABOVEANKLEGIRTH:
+		return _T("AboveAnkleGirth");
+	case ID_MEASUREMENT_ABOVEANKLELEVEL:
+		return _T("AboveAnkleLevel");
+	case ID_MEASUREMENT_OVERANKLEBONEGIRTH:
+		return _T("OverAnkleBoneGirth");
+	case ID_MEASUREMENT_OVERANKLEBONELEVEL:
+		return _T("OverAnkleBoneLevel");
+	}
+	return _T("");
+}
+
+wxTextCtrl* PanelLegMeasurements::GetTextCtrlByID(int id) {
+	switch (id) {
+	case ID_MEASUREMENT_BELOWCRUTCHGIRTH:
+		return m_textCtrlBelowCrutchGirth;
+	case ID_MEASUREMENT_BELOWCRUTCHLEVEL:
+		return m_textCtrlBelowCrutchLevel;
+	case ID_MEASUREMENT_MIDDLEOFCALFGIRTH:
+		return m_textCtrlMiddleOfCalfGirth;
+	case ID_MEASUREMENT_MIDDLEOFCALFLEVEL:
+		return m_textCtrlMiddleOfCalfLevel;
+	case ID_MEASUREMENT_ABOVEKNEEGIRTH:
+		return m_textCtrlAboveKneeGirth;
+	case ID_MEASUREMENT_ABOVEKNEELEVEL:
+		return m_textCtrlAboveKneeLevel;
+	case ID_MEASUREMENT_OVERKNEECAPGIRTH:
+		return m_textCtrlOverKneeCapGirth;
+	case ID_MEASUREMENT_OVERKNEECAPLEVEL:
+		return m_textCtrlOverKneeCapLevel;
+	case ID_MEASUREMENT_BELOWKNEEGIRTH:
+		return m_textCtrlBelowKneeGirth;
+	case ID_MEASUREMENT_BELOWKNEELEVEL:
+		return m_textCtrlBelowKneeLevel;
+	case ID_MEASUREMENT_MIDDLEOFSHANKGIRTH:
+		return m_textCtrlMiddleOfShankGirth;
+	case ID_MEASUREMENT_MIDDLEOFSHANKLEVEL:
+		return m_textCtrlMiddleOfShankLevel;
+	case ID_MEASUREMENT_ABOVEANKLEGIRTH:
+		return m_textCtrlAboveAnkleGirth;
+	case ID_MEASUREMENT_ABOVEANKLELEVEL:
+		return m_textCtrlAboveAnkleLevel;
+	case ID_MEASUREMENT_OVERANKLEBONEGIRTH:
+		return m_textCtrlOverAnkleBoneGirth;
+	case ID_MEASUREMENT_OVERANKLEBONELEVEL:
+		return m_textCtrlOverAnkleBoneLevel;
+	}
+	return NULL;
 }

@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Aug 20 2017)
+// C++ code generated with wxFormBuilder (version Dec 20 2018)
 // http://www.wxformbuilder.org/
 //
-// PLEASE DO "NOT" EDIT THIS FILE!
+// PLEASE DO *NOT* EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
 #ifndef __GUI_H__
@@ -11,9 +11,6 @@
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
 #include <wx/intl.h>
-#include <wx/docview.h>
-#include <wx/config.h>
-
 #include <wx/string.h>
 #include <wx/menu.h>
 #include <wx/bitmap.h>

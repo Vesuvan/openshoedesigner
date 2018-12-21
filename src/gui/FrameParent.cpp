@@ -55,7 +55,7 @@ FrameParent::FrameParent(wxDocManager *manager, wxFrame *parent, wxWindowID id,
 
 	SetMenuBar(menubar);
 
-	m_helpController = new wxHelpController;
+	m_helpController = new wxHelpController();
 
 	//TODO Logging is disable here, because the SESSION_MANAGER variable is not defined since Ubuntu 16.04.
 	// The initialisation of the help controller will always lead to the message:

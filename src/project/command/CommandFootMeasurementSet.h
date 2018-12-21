@@ -30,6 +30,7 @@
 #include <wx/cmdproc.h>
 #include <wx/string.h>
 
+#include "../foot/ParameterFormula.h"
 #include "../Project.h"
 #include "../ProjectView.h"
 
@@ -44,6 +45,7 @@ public:
 protected:
 
 	wxString Replace(ProjectView::Side active,int parameter, wxString newValue);
+	ParameterFormula* GetParameterByID(FootMeasurements *meas, int id);
 
 	Project* project;
 	ProjectView::Side active;

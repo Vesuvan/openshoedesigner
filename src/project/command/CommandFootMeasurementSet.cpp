@@ -29,22 +29,23 @@
 
 CommandFootMeasurementSet::CommandFootMeasurementSet(const wxString& name,
 		Project* project, ProjectView::Side active, int parameter,
-		wxString value)
-		: wxCommand(true, name), project(project), active(active), parameter(
-				parameter), value(value)
-{
+		wxString value) :
+		wxCommand(true, name), project(project), active(active), parameter(
+				parameter), value(value) {
 }
 
-bool CommandFootMeasurementSet::Do(void)
-{
-	if(project == NULL) return false;
+bool CommandFootMeasurementSet::Do(void) {
+	if (project == NULL)
+		return false;
 	FootMeasurements *meas;
-	if(active == ProjectView::Left) meas = &(project->measL);
-	if(active == ProjectView::Right) meas = &(project->measR);
+	if (active == ProjectView::Left)
+		meas = &(project->measL);
+	if (active == ProjectView::Right)
+		meas = &(project->measR);
 
 	oldValue = Replace(active, parameter, value);
 	const bool hasChanged = !value.IsSameAs(oldValue);
-	if(hasChanged){
+	if (hasChanged) {
 		meas->Modify(true);
 		project->Update();
 	}
@@ -103,18 +104,20 @@ bool CommandFootMeasurementSet::Do(void)
 //	return true;
 }
 
-bool CommandFootMeasurementSet::Undo(void)
-{
-	if(project == NULL) return false;
+bool CommandFootMeasurementSet::Undo(void) {
+	if (project == NULL)
+		return false;
 
 	FootMeasurements *meas;
-	if(active == ProjectView::Left) meas = &(project->measL);
-	if(active == ProjectView::Right) meas = &(project->measR);
+	if (active == ProjectView::Left)
+		meas = &(project->measL);
+	if (active == ProjectView::Right)
+		meas = &(project->measR);
 	wxString currentValue;
 
 	currentValue = Replace(active, parameter, oldValue);
 	const bool hasChanged = !currentValue.IsSameAs(oldValue);
-	if(hasChanged){
+	if (hasChanged) {
 		meas->Modify(true);
 		project->Update();
 	}
@@ -164,51 +167,75 @@ bool CommandFootMeasurementSet::Undo(void)
 }
 
 wxString CommandFootMeasurementSet::Replace(ProjectView::Side active,
-		int parameter, wxString newValue)
-{
+		int parameter, wxString newValue) {
 	wxString lastValue;
 	FootMeasurements *meas;
-	if(active == ProjectView::Left) meas = &(project->measL);
-	if(active == ProjectView::Right) meas = &(project->measR);
+	if (active == ProjectView::Left)
+		meas = &(project->measL);
+	if (active == ProjectView::Right)
+		meas = &(project->measR);
+	ParameterFormula *param = GetParameterByID(meas, parameter);
+	lastValue = param->formula;
+	param->formula = newValue;
+	return lastValue;
+}
 
-	switch(parameter){
+ParameterFormula* CommandFootMeasurementSet::GetParameterByID(
+		FootMeasurements *meas, int id) {
+	switch (id) {
 	case ID_MEASUREMENT_FOOTLENGTH:
-		lastValue = meas->footLength.formula;
-		meas->footLength.formula = newValue;
-		break;
+		return &(meas->footLength);
 	case ID_MEASUREMENT_BALLGIRTH:
-		lastValue = meas->ballGirth.formula;
-		meas->ballGirth.formula = newValue;
-		break;
+		return &(meas->ballGirth);
 	case ID_MEASUREMENT_WAISTGIRTH:
-		lastValue = meas->waistGirth.formula;
-		meas->waistGirth.formula = newValue;
-		break;
+		return &(meas->waistGirth);
 	case ID_MEASUREMENT_INSTEPGIRTH:
-		lastValue = meas->instepGirth.formula;
-		meas->instepGirth.formula = newValue;
-		break;
+		return &(meas->instepGirth);
 	case ID_MEASUREMENT_LONGHEELGIRTH:
-		lastValue = meas->longHeelGirth.formula;
-		meas->longHeelGirth.formula = newValue;
-		break;
+		return &(meas->longHeelGirth);
 	case ID_MEASUREMENT_SHORTHEELGIRTH:
-		lastValue = meas->shortHeelGirth.formula;
-		meas->shortHeelGirth.formula = newValue;
-		break;
+		return &(meas->shortHeelGirth);
 	case ID_MEASUREMENT_ANGLEMIXING:
-		lastValue = meas->angleMixing.formula;
-		meas->angleMixing.formula = newValue;
-		break;
+		return &(meas->angleMixing);
 	case ID_MEASUREMENT_LEGLENGTHDIFFERENCE:
-		lastValue = meas->legLengthDifference.formula;
-		meas->legLengthDifference.formula = newValue;
-		break;
+		return &(meas->legLengthDifference);
+	case ID_MEASUREMENT_BELOWCRUTCHGIRTH:
+		return &(meas->belowCrutchGirth);
+	case ID_MEASUREMENT_BELOWCRUTCHLEVEL:
+		return &(meas->belowCrutchLevel);
+	case ID_MEASUREMENT_MIDDLEOFCALFGIRTH:
+		return &(meas->middleOfCalfGirth);
+	case ID_MEASUREMENT_MIDDLEOFCALFLEVEL:
+		return &(meas->middleOfCalfLevel);
+	case ID_MEASUREMENT_ABOVEKNEEGIRTH:
+		return &(meas->aboveKneeGirth);
+	case ID_MEASUREMENT_ABOVEKNEELEVEL:
+		return &(meas->aboveKneeLevel);
+	case ID_MEASUREMENT_OVERKNEECAPGIRTH:
+		return &(meas->overKneeCapGirth);
+	case ID_MEASUREMENT_OVERKNEECAPLEVEL:
+		return &(meas->overKneeCapLevel);
+	case ID_MEASUREMENT_BELOWKNEEGIRTH:
+		return &(meas->belowKneeGirth);
+	case ID_MEASUREMENT_BELOWKNEELEVEL:
+		return &(meas->belowKneeLevel);
+	case ID_MEASUREMENT_MIDDLEOFSHANKGIRTH:
+		return &(meas->middleOfShankGirth);
+	case ID_MEASUREMENT_MIDDLEOFSHANKLEVEL:
+		return &(meas->middleOfShankLevel);
+	case ID_MEASUREMENT_ABOVEANKLEGIRTH:
+		return &(meas->aboveAnkleGirth);
+	case ID_MEASUREMENT_ABOVEANKLELEVEL:
+		return &(meas->aboveAnkleLevel);
+	case ID_MEASUREMENT_OVERANKLEBONEGIRTH:
+		return &(meas->overAnkleBoneGirth);
+	case ID_MEASUREMENT_OVERANKLEBONELEVEL:
+		return &(meas->overAnkleBoneLevel);
 	default:
 		throw(std::invalid_argument(
 				std::string(__FILE__)
 						+ " : Replace() : Passed invalid/unhandled ID ("
 						+ std::to_string(parameter) + ")."));
 	}
-	return lastValue;
+	return NULL;
 }

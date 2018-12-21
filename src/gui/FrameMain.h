@@ -45,6 +45,7 @@
 #include <wx/intl.h>
 #include <wx/config.h>
 
+#include "../project/IniFile.h"
 #include "DialogSetupUnits.h"
 #include "MidiPort.h"
 
@@ -100,6 +101,8 @@ public:
 
 	wxConfig *config;
 //	wxLocale *locale;
+
+	IniFile presets;
 
 	DisplaySettings settings;
 

@@ -48,6 +48,8 @@ public:
 	Shoe();
 	virtual ~Shoe();
 
+	bool IsModified(void) const; //!< Returns \b true if the measurements have been modified since last update.
+	void Modify(bool modify = true);
 	void Update(void);
 	void Update(MathParser &parser);
 
@@ -56,6 +58,9 @@ public:
 	ParameterFormula ballHeight;
 	ParameterFormula heelPitch;
 	ParameterFormula toeSpring;
+
+private:
+	bool modified;
 };
 
 #endif /* SHOE_H_ */

@@ -137,10 +137,9 @@ void PanelFootMeasurements::OnKillFocus(wxFocusEvent& event)
 
 void PanelFootMeasurements::OnQuickSetup(wxCommandEvent& event)
 {
-	DialogQuickInitFoot dialog(this);
-	if(dialog.ShowModal() == wxID_OK){
-
-	}
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED,
+			ID_QUICKSETUPMEASUREMENTS);
+	ProcessEvent(selectEvent);
 }
 
 void PanelFootMeasurements::OnTextEnter(wxCommandEvent& event)

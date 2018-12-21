@@ -28,23 +28,28 @@
 
 #include "../math/MathParser.h"
 
-Shoe::Shoe()
-		: heelHeight(_T("heelHeight")), ballHeight(_T("ballHeight")), heelPitch(
-				_T("heelPitch")), toeSpring(_T("toeSpring"))
-{
+Shoe::Shoe() :
+		heelHeight(_T("heelHeight")), ballHeight(_T("ballHeight")), heelPitch(
+				_T("heelPitch")), toeSpring(_T("toeSpring")) {
 	heelHeight.formula = _T("3 cm");
 	ballHeight.formula = _T("1 cm");
 	heelPitch.formula = _T("5 deg");
 	toeSpring.formula = _T("10 deg");
+	modified = true;
 	Update();
 }
 
-Shoe::~Shoe()
-{
+Shoe::~Shoe() {
 }
 
-void Shoe::Update(void)
-{
+bool Shoe::IsModified(void) const {
+	return modified;
+}
+
+void Shoe::Modify(bool modify) {
+	this->modified = modify;
+}
+void Shoe::Update(void) {
 	MathParser parser;
 	parser.ignorecase = true;
 	parser.AddAllowedUnit(_T("mm"), 1e-3);
@@ -58,10 +63,12 @@ void Shoe::Update(void)
 	Update(parser);
 }
 
-void Shoe::Update(MathParser& parser)
-{
+void Shoe::Update(MathParser& parser) {
 	heelHeight.Update(parser);
 	ballHeight.Update(parser);
 	heelPitch.Update(parser);
 	toeSpring.Update(parser);
+	modified |= heelHeight.IsModified() | ballHeight.IsModified()
+			| heelPitch.IsModified() | toeSpring.IsModified();
 }
+

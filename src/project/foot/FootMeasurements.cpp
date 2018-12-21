@@ -47,7 +47,7 @@ FootMeasurements::FootMeasurements()
 				_T("overAnkleBoneGirth")), overAnkleBoneLevel(
 				_T("overAnkleBoneLevel"))
 {
-	modified = false;
+	modified = true;
 
 	SetDefaults();
 	Update();
@@ -127,7 +127,7 @@ void FootMeasurements::Update(MathParser &parser)
 	overAnkleBoneGirth.Update(parser);
 	overAnkleBoneLevel.Update(parser);
 
-	modified = legLengthDifference.IsModified() | footLength.IsModified()
+	modified |= legLengthDifference.IsModified() | footLength.IsModified()
 			| ballGirth.IsModified() | waistGirth.IsModified()
 			| instepGirth.IsModified() | longHeelGirth.IsModified()
 			| shortHeelGirth.IsModified() | angleMixing.IsModified()

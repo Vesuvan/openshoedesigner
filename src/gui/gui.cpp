@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Aug 20 2017)
+// C++ code generated with wxFormBuilder (version Dec 20 2018)
 // http://www.wxformbuilder.org/
 //
-// PLEASE DO "NOT" EDIT THIS FILE!
+// PLEASE DO *NOT* EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
 #include "../StdInclude.h"
@@ -408,7 +408,7 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_panelPageFoot->SetSizer( bSizerFoot );
 	m_panelPageFoot->Layout();
 	bSizerFoot->Fit( m_panelPageFoot );
-	m_notebook->AddPage( m_panelPageFoot, _("Foot"), true );
+	m_notebook->AddPage( m_panelPageFoot, _("Foot"), false );
 	m_panelPageLeg = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerLeg;
 	bSizerLeg = new wxBoxSizer( wxVERTICAL );
@@ -516,44 +516,53 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	wxStaticBoxSizer* sbSizerLastForm;
 	sbSizerLastForm = new wxStaticBoxSizer( new wxStaticBox( m_panelPageShoe, wxID_ANY, _("Lastform") ), wxVERTICAL );
 	
+	wxFlexGridSizer* fgSizer6;
+	fgSizer6 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer6->AddGrowableCol( 1 );
+	fgSizer6->SetFlexibleDirection( wxBOTH );
+	fgSizer6->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
 	m_staticTextTipSymmetry = new wxStaticText( sbSizerLastForm->GetStaticBox(), wxID_ANY, _("Tip symetry:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextTipSymmetry->Wrap( -1 );
-	sbSizerLastForm->Add( m_staticTextTipSymmetry, 0, wxALL, 5 );
+	fgSizer6->Add( m_staticTextTipSymmetry, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
 	m_sliderSymmetry = new wxSlider( sbSizerLastForm->GetStaticBox(), ID_TIPSYMMETRY, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
-	sbSizerLastForm->Add( m_sliderSymmetry, 0, wxALL|wxEXPAND, 5 );
+	fgSizer6->Add( m_sliderSymmetry, 0, wxALL|wxEXPAND, 5 );
 	
 	m_staticTextTipPointedness = new wxStaticText( sbSizerLastForm->GetStaticBox(), wxID_ANY, _("Tip pointedness:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextTipPointedness->Wrap( -1 );
-	sbSizerLastForm->Add( m_staticTextTipPointedness, 0, wxALL, 5 );
+	fgSizer6->Add( m_staticTextTipPointedness, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
 	m_sliderTipPointedness = new wxSlider( sbSizerLastForm->GetStaticBox(), ID_TIPPOINTEDNESS, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
-	sbSizerLastForm->Add( m_sliderTipPointedness, 0, wxALL|wxEXPAND, 5 );
+	fgSizer6->Add( m_sliderTipPointedness, 0, wxALL|wxEXPAND, 5 );
 	
 	m_staticTextTipSharpness = new wxStaticText( sbSizerLastForm->GetStaticBox(), wxID_ANY, _("Tip sharpness:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextTipSharpness->Wrap( -1 );
-	sbSizerLastForm->Add( m_staticTextTipSharpness, 0, wxALL, 5 );
+	fgSizer6->Add( m_staticTextTipSharpness, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
 	m_sliderTipSharpness = new wxSlider( sbSizerLastForm->GetStaticBox(), ID_TIPSHARPNESS, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
-	sbSizerLastForm->Add( m_sliderTipSharpness, 0, wxALL|wxEXPAND, 5 );
+	fgSizer6->Add( m_sliderTipSharpness, 0, wxALL|wxEXPAND, 5 );
 	
-	m_staticTextExtraLength = new wxStaticText( sbSizerLastForm->GetStaticBox(), wxID_ANY, _("Garanteed extra length:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextExtraLength = new wxStaticText( sbSizerLastForm->GetStaticBox(), wxID_ANY, _("Extra length:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextExtraLength->Wrap( -1 );
-	sbSizerLastForm->Add( m_staticTextExtraLength, 0, wxALL, 5 );
+	fgSizer6->Add( m_staticTextExtraLength, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
 	m_textCtrlExtraLength = new wxTextCtrl( sbSizerLastForm->GetStaticBox(), ID_EXTRALENGTH, _("2 cm"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_textCtrlExtraLength->SetToolTip( _("Difference between foot-length and last-length. To make a shoe walkable, this should be at least 2 cm  (Standard value used in the shoe industry).") );
 	
-	sbSizerLastForm->Add( m_textCtrlExtraLength, 0, wxALL, 5 );
+	fgSizer6->Add( m_textCtrlExtraLength, 0, wxALL|wxEXPAND, 5 );
 	
 	m_staticTextFootCompression = new wxStaticText( sbSizerLastForm->GetStaticBox(), wxID_ANY, _("Foot compression:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextFootCompression->Wrap( -1 );
-	sbSizerLastForm->Add( m_staticTextFootCompression, 0, wxALL, 5 );
+	fgSizer6->Add( m_staticTextFootCompression, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
 	m_textCtrlFootCompression = new wxTextCtrl( sbSizerLastForm->GetStaticBox(), wxID_ANY, _("5 %"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_textCtrlFootCompression->SetToolTip( _("Pressure from the sides of the shoe onto the foot. Higher values give a tighter fit of the shoe. This is needed for example with high heels to prevent the foot from slipping around in the shoe. Set to 0 % for diabetic footwear.") );
 	
-	sbSizerLastForm->Add( m_textCtrlFootCompression, 0, wxALL, 5 );
+	fgSizer6->Add( m_textCtrlFootCompression, 0, wxALL|wxEXPAND, 5 );
+	
+	
+	sbSizerLastForm->Add( fgSizer6, 1, wxEXPAND, 5 );
 	
 	
 	bSizerShoe->Add( sbSizerLastForm, 0, wxEXPAND, 5 );
@@ -562,7 +571,7 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_panelPageShoe->SetSizer( bSizerShoe );
 	m_panelPageShoe->Layout();
 	bSizerShoe->Fit( m_panelPageShoe );
-	m_notebook->AddPage( m_panelPageShoe, _("Shoe"), false );
+	m_notebook->AddPage( m_panelPageShoe, _("Shoe"), true );
 	m_panelPageSole = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer28;
 	bSizer28 = new wxBoxSizer( wxVERTICAL );
