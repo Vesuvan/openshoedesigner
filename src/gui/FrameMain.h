@@ -63,7 +63,6 @@ public:
 	void RefreshView(wxCommandEvent& event);
 
 	void OnClose(wxCloseEvent& event);
-	void OnIdle(wxIdleEvent& event);
 	void OnQuickSetupMeasurements(wxCommandEvent& event);
 	void OnSetSymmetry(wxCommandEvent& event);
 	void OnCopyMeasurements(wxCommandEvent& event);
@@ -100,7 +99,6 @@ public:
 	void OnChoiceDisplay(wxCommandEvent& event);
 
 	wxConfig *config;
-//	wxLocale *locale;
 
 	IniFile presets;
 

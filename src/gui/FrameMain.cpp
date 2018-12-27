@@ -51,7 +51,7 @@ FrameMain::FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
 		wxDocParentFrame* parent) :
 		GUIFrameMain(doc, view, parent) {
 
-	presets.ReadFile("data/ShoePresets.ini");
+	presets.ReadFile(_T("data/ShoePresets.ini"));
 
 	m_menuFile->Append(wxID_NEW);
 	m_menuFile->Append(wxID_OPEN);
@@ -132,6 +132,19 @@ bool FrameMain::TransferDataToWindow() {
 	const ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
 	Project* project = wxStaticCast(GetDocument(), Project);
 	const FootMeasurements * foot = projectview->GetActiveFootMeasurements();
+
+	{
+		wxArrayString newStrings;
+		newStrings.Add(_("Custom"));
+		for (size_t n = 0; n < presets.section.size(); ++n)
+			newStrings.Add(presets.section[n].param[0].value);
+
+		wxArrayString temp = m_choiceShoeType->GetStrings();
+		if (newStrings != temp) {
+			m_choiceShoeType->Set(newStrings);
+			m_choiceShoeType->SetSelection(0);
+		}
+	}
 
 	m_menuView->Check(ID_STEREO3D, m_canvas3D->stereoMode != stereoOff);
 	m_menuView->Check(ID_SHOWLEFT, projectview->showLeft);
@@ -513,11 +526,6 @@ void FrameMain::OnCopyMeasurements(wxCommandEvent& event) {
 }
 
 void FrameMain::OnSetupBackgroundImages(wxCommandEvent& event) {
-}
-
-void FrameMain::OnIdle(wxIdleEvent& event) {
-//	Project* project = wxStaticCast(GetDocument(), Project);
-//	project->Update();
 }
 
 void FrameMain::OnChoiceDisplay(wxCommandEvent& event) {

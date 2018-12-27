@@ -9,7 +9,7 @@
 
 #include "guipanels.h"
 
-#include "../icons/FootMeasurements.xpm"
+#include "../icons/FootMeasurements_small.xpm"
 #include "../icons/LegMeasurements.xpm"
 
 ///////////////////////////////////////////////////////////////////////////
@@ -188,8 +188,8 @@ GUIPanelFootMeasurements::GUIPanelFootMeasurements( wxWindow* parent, wxWindowID
 	
 	bSizerMain->Add( bSizerHorizontal, 1, wxEXPAND, 5 );
 	
-	m_bitmap = new wxStaticBitmap( this, wxID_ANY, wxBitmap( FootMeasurements_xpm ), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizerMain->Add( m_bitmap, 0, wxALL|wxEXPAND, 5 );
+	m_bitmap = new wxStaticBitmap( this, wxID_ANY, wxBitmap( FootMeasurements_small_xpm ), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerMain->Add( m_bitmap, 0, wxEXPAND, 5 );
 	
 	
 	this->SetSizer( bSizerMain );

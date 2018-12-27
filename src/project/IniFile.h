@@ -26,28 +26,42 @@
 
 #ifndef SRC_PROJECT_INIFILE_H_
 #define SRC_PROJECT_INIFILE_H_
-
 /*!\class IniFile
  * \brief ...
  *
  * ...
  */
 
-#include <string>
+#include <wx/string.h>
 #include <vector>
-#include <map>
 
 class IniFile {
 public:
-	IniFile();
-	IniFile(std::string filename);
+	class Section {
+	public:
+		class Parameter {
+		public:
+			Parameter(wxString name, wxString value);
+			wxString name;
+			wxString value;
+		};
+	public:
+		Section(wxString name);
+		wxString name;
+		std::vector<Parameter> param;
+	};
+
+public:
+	IniFile(bool casesensitive = true);
+	IniFile(wxString filename, bool casesensitive = true);
 	virtual ~IniFile();
-	bool ReadFile(std::string filename);
+	bool ReadFile(wxString filename);
 
-
+	std::vector<Section> section;
 private:
-	std::vector<std::string>sectionname;
-	std::vector<std::map<std::string,std::string>> section;
+	const bool casesensitive;
+
+	wxString CleanString(wxString text);
 };
 
 #endif /* SRC_PROJECT_INIFILE_H_ */

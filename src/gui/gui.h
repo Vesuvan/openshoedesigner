@@ -217,7 +217,6 @@ class GUIFrameMain : public wxDocChildFrame
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnClose( wxCloseEvent& event ) = 0;
-		virtual void OnIdle( wxIdleEvent& event ) = 0;
 		virtual void OnQuickSetupMeasurements( wxCommandEvent& event ) = 0;
 		virtual void OnSetSymmetry( wxCommandEvent& event ) = 0;
 		virtual void OnCopyMeasurements( wxCommandEvent& event ) = 0;

@@ -333,6 +333,7 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	bSizerEditLeftRight = new wxBoxSizer( wxHORIZONTAL );
 	
 	m_toggleBtnEditLeft = new wxToggleButton( m_panelPageFoot, ID_EDITLEFT, _("Left"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_toggleBtnEditLeft->SetValue( true ); 
 	bSizerEditLeftRight->Add( m_toggleBtnEditLeft, 1, wxALL, 5 );
 	
 	m_toggleBtnEditRight = new wxToggleButton( m_panelPageFoot, ID_EDITRIGHT, _("Right"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -408,7 +409,7 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_panelPageFoot->SetSizer( bSizerFoot );
 	m_panelPageFoot->Layout();
 	bSizerFoot->Fit( m_panelPageFoot );
-	m_notebook->AddPage( m_panelPageFoot, _("Foot"), false );
+	m_notebook->AddPage( m_panelPageFoot, _("Foot"), true );
 	m_panelPageLeg = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerLeg;
 	bSizerLeg = new wxBoxSizer( wxVERTICAL );
@@ -417,9 +418,11 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	bSizerLeftRight1 = new wxBoxSizer( wxHORIZONTAL );
 	
 	m_toggleBtnEditLeft1 = new wxToggleButton( m_panelPageLeg, ID_EDITLEFT, _("Left"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_toggleBtnEditLeft1->SetValue( true ); 
 	bSizerLeftRight1->Add( m_toggleBtnEditLeft1, 1, wxALL, 5 );
 	
 	m_toggleBtnEditRight1 = new wxToggleButton( m_panelPageLeg, ID_EDITRIGHT, _("Right"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_toggleBtnEditRight1->SetValue( true ); 
 	bSizerLeftRight1->Add( m_toggleBtnEditRight1, 1, wxALL, 5 );
 	
 	
@@ -571,7 +574,7 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_panelPageShoe->SetSizer( bSizerShoe );
 	m_panelPageShoe->Layout();
 	bSizerShoe->Fit( m_panelPageShoe );
-	m_notebook->AddPage( m_panelPageShoe, _("Shoe"), true );
+	m_notebook->AddPage( m_panelPageShoe, _("Shoe"), false );
 	m_panelPageSole = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer28;
 	bSizer28 = new wxBoxSizer( wxVERTICAL );
@@ -831,7 +834,6 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	
 	// Connect Events
 	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameMain::OnClose ) );
-	this->Connect( wxEVT_IDLE, wxIdleEventHandler( GUIFrameMain::OnIdle ) );
 	this->Connect( m_menuItemQuickSetup->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnQuickSetupMeasurements ) );
 	this->Connect( m_menuItemFullSymmetry->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
 	this->Connect( m_menuItemSymmetricModel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
@@ -905,7 +907,6 @@ GUIFrameMain::~GUIFrameMain()
 {
 	// Disconnect Events
 	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameMain::OnClose ) );
-	this->Disconnect( wxEVT_IDLE, wxIdleEventHandler( GUIFrameMain::OnIdle ) );
 	this->Disconnect( ID_QUICKSETUPMEASUREMENTS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnQuickSetupMeasurements ) );
 	this->Disconnect( ID_FULLSYMMETRY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
 	this->Disconnect( ID_SYMMETRICMODEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );

@@ -67,6 +67,7 @@ FrameParent::FrameParent(wxDocManager *manager, wxFrame *parent, wxWindowID id,
 
 FrameParent::~FrameParent()
 {
+	printf("FrameParent: Destructor called\n");
 	delete m_helpController;
 }
 
