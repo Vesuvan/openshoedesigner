@@ -83,31 +83,59 @@ typedef wxOutputStream DocumentOstream;
 class Project: public wxDocument {
 	friend class WorkerThread;
 public:
-	enum Symmetry {
-		No, OnlyModel, Full
-	} symmetry;
+
+	// +++ Measurements +++
+	bool measurementsSymmetric;
+
 	enum MeasurementSource {
 		fromMeasurements, fromFootScan
 	} measurementsource;
+	FootMeasurements measL;
+	FootMeasurements measR;
+
+	//TODO: Add here some structures for a scan of the foot.
+
 	enum ModelType {
 		boneBased, lastBased
 	} modeltype;
+	FootModel footL;
+	FootModel footR;
+
+	//TODO: Add here some structures for a last based model
+
+	// +++ Shoe +++
+	Shoe shoe;
+
+	// Last to generate
+	Last lastL;
+	Last lastR;
+
+
+	// Pattern for the upper of the shoe
+	Pattern pattern;
+
+
+	// +++ Generator +++
 	enum Generator {
 		Experimental, //!< Default generator for development of algorithms
 		Welted, //!< Welt sewn shoes: Generates last, insole, sole, upper pattern and cutout
 		Cemented, //!< for cemented soles (simple, glued-together shoes)
 		Molded, //!< for industrial shoes, where the sole is injection-molded to the upper
-		Dutch //!< Generator for dutch wooden clogs: Generates last, insole and clog
+		Dutch, //!< Generator for dutch wooden clogs: Generates last, insole and clog
+		Geta   //!< Japanese Geta generator
 	} generator;
 
-//	enum sizeparameter {
-//		Length, //!< Length of foot
-//		BallWidth, //!< Width of the ball
-//		HeelWidth, //!< Width of the heel
-//		AnkleWidth, //!< Width of the ankle
-//		Mixing  //!< Anglemixing
-//	};
+	// Generated products / debugging structures
 
+	PolyHull test;
+	//	Volume vol;
+	OrientedMatrix xray;
+	OrientedMatrix heightfield;
+	Polygon3 bow;
+
+
+
+public:
 	Project();
 	virtual ~Project();
 	void StopAllThreads(void); //!< Call from OnClose; the event loop has to be running.
@@ -122,35 +150,16 @@ public:
 	bool SaveSkin(wxString fileName);
 
 	void Update(void);
+
 protected:
 	bool UpdateLeft(void);
 	bool UpdateRight(void);
 
-public:
-
-	FootMeasurements measL;
-	FootMeasurements measR;
-	FootModel footL;
-	FootModel footR;
-	Last lastL;
-	Last lastR;
-
-	Shoe shoe;
-
-	Pattern pattern;
-
-	PolyHull test;
-//	Volume vol;
-	OrientedMatrix xray;
-	OrientedMatrix heightfield;
-	Polygon3 bow;
-
 private:
-	void ThreadCalculate(size_t threadNr);
-
 	void OnCalculationDone(wxThreadEvent& event);
 	void OnRefreshViews(wxThreadEvent& event);
 
+private:
 	WorkerThread* thread0;
 	WorkerThread* thread1;
 
@@ -158,8 +167,7 @@ private:
 	wxCriticalSection CSLeft;
 	wxCriticalSection CSRight;
 
-DECLARE_DYNAMIC_CLASS(Project)
-	;
+DECLARE_DYNAMIC_CLASS(Project);
 };
 
 #endif /* PROJECT_H_ */

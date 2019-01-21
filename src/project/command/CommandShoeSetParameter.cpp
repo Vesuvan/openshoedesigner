@@ -25,56 +25,78 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "CommandShoeSetParameter.h"
+#include "../../gui/gui.h"
 
 CommandShoeSetParameter::CommandShoeSetParameter(const wxString& name,
-		Project* project, int fieldNr, wxString newExpression)
-		: wxCommand(true, name)
+		Project* project, int parameter, wxString value)
+		: wxCommand(true, name), project(project), parameter(parameter), value(
+				value)
 {
-	this->project = project;
-	this->fieldNr = fieldNr;
-	this->newExpression = newExpression;
 }
 
 bool CommandShoeSetParameter::Do(void)
 {
 	if(project == NULL) return false;
-	switch(fieldNr){
-	case 0:
-		oldExpression = project->shoe.heelHeight.formula;
-		project->shoe.heelHeight.formula = newExpression;
-		break;
-	case 1:
-		oldExpression = project->shoe.ballHeight.formula;
-		project->shoe.ballHeight.formula = newExpression;
-		break;
-	case 2:
-		oldExpression = project->shoe.toeSpring.formula;
-		project->shoe.toeSpring.formula = newExpression;
-		break;
-	default:
-		return false;
+	Shoe *shoe = &(project->shoe);
+
+	oldValue = Replace(parameter, value);
+	const bool hasChanged = !value.IsSameAs(oldValue);
+	if(hasChanged){
+		shoe->Modify(true);
+		project->Update();
 	}
-//	project->Update(Project::UpdateFoot, Project::Both);
-	return true;
+
+	return hasChanged;
 }
 
 bool CommandShoeSetParameter::Undo(void)
 {
 	if(project == NULL) return false;
-	switch(fieldNr){
-	case 0:
-		project->shoe.heelHeight.formula = oldExpression;
-		break;
-	case 1:
-		project->shoe.ballHeight.formula = oldExpression;
-		break;
-	case 2:
-		project->shoe.toeSpring.formula = oldExpression;
-		break;
-	default:
-		return false;
+	Shoe *shoe = &(project->shoe);
+
+	wxString currentValue;
+	currentValue = Replace(parameter, oldValue);
+	const bool hasChanged = !currentValue.IsSameAs(oldValue);
+	if(hasChanged){
+		shoe->Modify(true);
+		project->Update();
 	}
-//	project->Update(Project::UpdateFoot, Project::Both);
+
 	return true;
 }
 
+wxString CommandShoeSetParameter::Replace(int parameter, wxString newValue)
+{
+	wxString lastValue;
+	Shoe *shoe = &(project->shoe);
+	ParameterFormula *param = GetParameterByID(shoe, parameter);
+	lastValue = param->formula;
+	param->formula = newValue;
+	return lastValue;
+}
+
+ParameterFormula* CommandShoeSetParameter::GetParameterByID(Shoe *shoe, int id)
+{
+	switch(id){
+	case ID_HEELHEIGHT:
+		return &(shoe->heelHeight);
+	case ID_BALLHEIGHT:
+		return &(shoe->ballHeight);
+	case ID_HEELPITCH:
+		return &(shoe->heelPitch);
+	case ID_TOESPRING:
+		return &(shoe->toeSpring);
+	case ID_UPPERLEVEL:
+		return &(shoe->upperLevel);
+	case ID_EXTRALENGTH:
+		return &(shoe->extraLength);
+	case ID_FOOTCOMPRESSION:
+		return &(shoe->footCompression);
+	default:
+		throw(std::invalid_argument(
+				std::string(__FILE__)
+						+ " : Replace() : Passed invalid/unhandled ID ("
+						+ std::to_string(parameter) + ")."));
+	}
+	return NULL;
+}

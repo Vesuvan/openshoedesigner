@@ -31,7 +31,6 @@
 
 #include "../3D/FileSTL.h"
 #include "../math/MathParser.h"
-#include "IniFile.h"
 #include "WorkerThread.h"
 #if wxUSE_STD_IOSTREAM
 #include <wx/ioswrap.h>
@@ -45,8 +44,9 @@
 
 IMPLEMENT_DYNAMIC_CLASS(Project, wxDocument)
 
-Project::Project() :
-		wxDocument() {
+Project::Project()
+		: wxDocument()
+{
 
 //	vol.SetSize(4, 4, 4, 0.1);
 //	vol.SetOrigin(Vector3(-0.15, -0.15, -0.15));
@@ -58,47 +58,71 @@ Project::Project() :
 //		vol[n] = 0.0;
 //	vol.CalcSurface();
 
-	generator = Experimental;
-	symmetry = Full;
+	measurementsSymmetric = true;
 	measurementsource = fromMeasurements;
 	modeltype = boneBased;
 
+	generator = Experimental;
+
 	thread0 = NULL;
 	thread1 = NULL;
-
 	Reset();
 
 	Bind(wxEVT_COMMAND_THREAD_COMPLETED, &Project::OnCalculationDone, this);
 	Bind(wxEVT_COMMAND_THREAD_UPDATE, &Project::OnRefreshViews, this);
 }
 
-Project::~Project() {
-	wxCriticalSectionLocker locker(CS);
-//	if(thread0 != NULL){
-//		thread0->Wait();
-//		delete thread0;
-//	}
-//	if(thread1 != NULL){
-//		thread1->Wait();
-//		delete thread1;
-//	}
+Project::~Project()
+{
 	Unbind(wxEVT_COMMAND_THREAD_UPDATE, &Project::OnRefreshViews, this);
 	Unbind(wxEVT_COMMAND_THREAD_COMPLETED, &Project::OnCalculationDone, this);
+	{
+		wxCriticalSectionLocker locker(CSLeft);
+		if(thread0 != NULL) thread0->Delete();
+	}
+	{
+		wxCriticalSectionLocker locker(CSRight);
+		if(thread1 != NULL) thread1->Delete();
+	}
 }
 
-void Project::Update(void) {
-
-	switch (symmetry) {
-	case No:
-
-		break;
-	case OnlyModel:
-		break;
-	case Full:
-		break;
-	}
-
+void Project::StopAllThreads(void)
+{
 	{
+		wxCriticalSectionLocker enter(CS);
+		if(thread0){
+			if(thread0->Delete() != wxTHREAD_NO_ERROR)
+			wxLogError
+			("Can't delete thread0!");
+		}
+		if(thread1){
+			if(thread1->Delete() != wxTHREAD_NO_ERROR)
+			wxLogError
+			("Can't delete thread1!");
+		}
+	}
+	while(true){
+		{
+			wxCriticalSectionLocker enter(CS);
+			if(thread0 == NULL && thread1 == NULL) break;
+		}
+		wxThread::This()->Sleep(1);
+	}
+}
+
+void Project::Reset(void)
+{
+	wxFileInputStream input(_T("data/FootModelDefault.txt"));
+	wxTextInputStream text(input);
+	footL.LoadModel(&text);
+	footR.CopyModel(footL);
+	footR.mirrored = true;
+}
+
+void Project::Update(void)
+{
+	{
+		// Update the left foot/shoe
 		MathParser parser;
 		parser.ignorecase = true;
 		parser.AddAllowedUnit(_T("mm"), 1e-3);
@@ -111,15 +135,15 @@ void Project::Update(void) {
 		parser.AddAllowedUnit(_T("gon"), 0.015708);
 		measL.Update(parser);
 		shoe.Update(parser);
-		if (shoe.IsModified()) {
+		if(shoe.IsModified()){
 			measL.Modify(true);
 			measR.Modify(true);
 			shoe.Modify(false);
 		}
-		if (measL.IsModified()) {
-			if (thread0 == NULL) {
+		if(measL.IsModified()){
+			if(thread0 == NULL){
 				thread0 = new WorkerThread(this, 0);
-				if (thread0->Run() != wxTHREAD_NO_ERROR) {
+				if(thread0->Run() != wxTHREAD_NO_ERROR){
 					wxLogError
 					("Can't create the thread0!");
 					delete thread0;
@@ -129,6 +153,7 @@ void Project::Update(void) {
 		}
 	}
 	{
+		// Update right foot/shoe
 		MathParser parser;
 		parser.ignorecase = true;
 		parser.AddAllowedUnit(_T("mm"), 1e-3);
@@ -140,10 +165,10 @@ void Project::Update(void) {
 		parser.AddAllowedUnit(_T("deg"), 0.017453);
 		parser.AddAllowedUnit(_T("gon"), 0.015708);
 		measR.Update(parser);
-		if (measR.IsModified()) {
-			if (thread1 == NULL) {
+		if(measR.IsModified()){
+			if(thread1 == NULL){
 				thread1 = new WorkerThread(this, 1);
-				if (thread1->Run() != wxTHREAD_NO_ERROR) {
+				if(thread1->Run() != wxTHREAD_NO_ERROR){
 					wxLogError
 					("Can't create the thread1!");
 					delete thread1;
@@ -155,154 +180,97 @@ void Project::Update(void) {
 	UpdateAllViews();
 }
 
-bool Project::UpdateLeft(void) {
+bool Project::UpdateLeft(void)
+{
 	wxCriticalSectionLocker locker(CSLeft);
-	if (measL.IsModified()) {
+	if(measL.IsModified()){
 		measL.Modify(false);
 		footL.UpdateForm(measL);
+		return true;
+	}
+	if(footL.IsModifiedForm()){
+		footL.ModifyForm(false);
 		footL.UpdatePosition(shoe, measL.legLengthDifference.value,
 				measL.angleMixing.value);
-		printf("Update L - true\n");
 		return true;
 	}
-	printf("Update L - false\n");
+	if(footL.IsModifiedPosition()){
+		footL.ModifyPosition(false);
+		footL.CalculateSkin();
+		return true;
+	}
+
+	if(footL.IsModifiedSkin()){
+		footL.ModifySkin(false);
+		heightfield = footL.skin.SurfaceField();
+		OrientedMatrix temp = heightfield.XRay(Volume::MinValue);
+		bow.Clear();
+		for(unsigned int i = 0; i < temp.Numel(); i++){
+			if(temp[i] < DBL_MAX){
+				bow.InsertPoint(i * temp.dx + temp.origin.x, 0,
+						temp[i] + temp.origin.z);
+			}
+		}
+		xray = footL.skin.XRay(Volume::MeanValue);
+		bow = footL.GetCenterline();
+		//	bow.elements[0] = lastvol.GetSurface(bow.elements[1],
+		//			(bow.elements[0] - bow.elements[1]) * 2);
+		//	size_t M = bow.elements.GetCount();
+		//	bow.elements[M - 1] = lastvol.GetSurface(bow.elements[M - 2],
+		//			(bow.elements[M - 1] - bow.elements[M - 2]) * 2);
+		//
+		bow.Resample(50);
+		bow.Filter(20);
+
+		return true;
+	}
+	//
+	//
+	//				//	sole.origin.z -= 0.1;
+	//
+
+	printf("Update L - done\n");
 	return false;
 }
 
-bool Project::UpdateRight(void) {
+bool Project::UpdateRight(void)
+{
 	wxCriticalSectionLocker locker(CSRight);
-	if (measR.IsModified()) {
+	if(measR.IsModified()){
 		measR.Modify(false);
 		footR.UpdateForm(measR);
-		footR.UpdatePosition(shoe, measR.legLengthDifference.value,
-				measR.angleMixing.value);
-		printf("Update R - true\n");
 		return true;
 	}
-	printf("Update R - false\n");
+	if(footR.IsModifiedForm()){
+		footR.ModifyForm(false);
+		footR.UpdatePosition(shoe, measR.legLengthDifference.value,
+				measR.angleMixing.value);
+		return true;
+	}
+	if(footR.IsModifiedPosition()){
+		footR.ModifyPosition(false);
+		footR.CalculateSkin();
+		return true;
+	}
+	printf("Update R - done\n");
 	return false;
 }
 
-void Project::StopAllThreads(void) {
-	{
-		wxCriticalSectionLocker enter(CS);
-		if (thread0) {
-			if (thread0->Delete() != wxTHREAD_NO_ERROR)
-				wxLogError
-				("Can't delete thread0!");
-		}
-		if (thread1) {
-			if (thread1->Delete() != wxTHREAD_NO_ERROR)
-				wxLogError
-				("Can't delete thread1!");
-		}
-	}
-	while (true) {
-		{
-			wxCriticalSectionLocker enter(CS);
-			if (thread0 == NULL && thread1 == NULL)
-				break;
-		}
-		wxThread::This()->Sleep(1);
-	}
-}
-
-void Project::Reset(void) {
-	wxFileInputStream input(_T("data/FootModelDefault.txt"));
-	wxTextInputStream text(input);
-	footL.LoadModel(&text);
-	footR.CopyModel(footL);
-	footR.mirrored = true;
-//	legLengthDifference = 0.0;
-//
-//	stateLeft = 0;
-//	stateRight = 0;
-}
-
-void Project::OnRefreshViews(wxThreadEvent& event) {
+void Project::OnRefreshViews(wxThreadEvent& event)
+{
 	UpdateAllViews();
 }
 
-void Project::OnCalculationDone(wxThreadEvent& event) {
+void Project::OnCalculationDone(wxThreadEvent& event)
+{
 	CS.Enter();
-//	if(event.GetId() == ID_THREADDONE_0 && thread0 != NULL){
-//		thread0->Wait();
-//		delete thread0;
-//		thread0 = NULL;
-//	}
-//	if(event.GetId() == ID_THREADDONE_1 && thread1 != NULL){
-//		thread1->Wait();
-//		delete thread1;
-//		thread1 = NULL;
-//	}
+
 	CS.Leave();
-	UpdateAllViews();
+	UpdateAllViews(); // This has been done by OnRefreshViews.
 }
 
-
-void Project::ThreadCalculate(size_t threadNr) {
-//	if(threadNr == 0){
-//		if(stateLeft < maxState) stateLeft++;
-//		switch(stateLeft){
-//		case 1:
-//			{
-//				footL.UpdateModel();
-//				footL.UpdatePosition(&shoe, fmax(0, legLengthDifference));
-//			}
-//			break;
-//		case 2:
-//			{
-//				footL.CalculateSkin();
-//			}
-//			break;
-//		case 3:
-//			{
-//				heightfield = footL.skin.SurfaceField();
-//				OrientedMatrix temp = heightfield.XRay(Volume::MinValue);
-//
-//				bow.Clear();
-//				for(unsigned int i = 0; i < temp.Numel(); i++){
-//					if(temp[i] < DBL_MAX){
-//						bow.InsertPoint(i * temp.dx + temp.origin.x, 0,
-//								temp[i] + temp.origin.z);
-//					}
-//				}
-//
-//				//	sole.origin.z -= 0.1;
-//
-//				xray = footL.skin.XRay(Volume::MeanValue);
-//				bow = footL.GetCenterline();
-////	bow.elements[0] = lastvol.GetSurface(bow.elements[1],
-////			(bow.elements[0] - bow.elements[1]) * 2);
-////	size_t M = bow.elements.GetCount();
-////	bow.elements[M - 1] = lastvol.GetSurface(bow.elements[M - 2],
-////			(bow.elements[M - 1] - bow.elements[M - 2]) * 2);
-////
-//				bow.Resample(50);
-////	bow.Filter(20);
-//			}
-//			break;
-//		}
-//	}
-//	if(threadNr == 1){
-//		if(stateRight < maxState) stateRight++;
-//		switch(stateRight){
-//		case 1:
-//			{
-//				footR.UpdateModel();
-//				footR.UpdatePosition(&shoe, fmax(0, -legLengthDifference));
-//			}
-//			break;
-//		case 2:
-//			{
-//				footR.CalculateSkin();
-//			}
-//			break;
-//		}
-//	}
-}
-
-bool Project::LoadModel(wxString fileName) {
+bool Project::LoadModel(wxString fileName)
+{
 	wxFileInputStream input(fileName);
 	wxTextInputStream text(input);
 
@@ -315,20 +283,18 @@ bool Project::LoadModel(wxString fileName) {
 //		flag = footR.LoadModel(&text);
 //		if(symmetry == Full) footR.CopyModel(footL);
 //	}
-//	if(flag){
-//		Update();
-//		return true;
-//	}
 	return false;
 }
 
-bool Project::SaveModel(wxString fileName) {
+bool Project::SaveModel(wxString fileName)
+{
 	wxFileOutputStream output(fileName);
 	wxTextOutputStream text(output);
 	return footL.SaveModel(&text);
 }
 
-DocumentOstream& Project::SaveObject(DocumentOstream& ostream) {
+DocumentOstream& Project::SaveObject(DocumentOstream& ostream)
+{
 	wxDocument::SaveObject(ostream);
 #if wxUSE_STD_IOSTREAM
 	DocumentOstream& stream = ostream;
@@ -336,12 +302,13 @@ DocumentOstream& Project::SaveObject(DocumentOstream& ostream) {
 	wxTextOutputStream stream(ostream);
 #endif
 
-	// TODO: Add Project data
+// TODO: Add Project data
 
 	return ostream;
 }
 
-DocumentIstream& Project::LoadObject(DocumentIstream& istream) {
+DocumentIstream& Project::LoadObject(DocumentIstream& istream)
+{
 	wxDocument::LoadObject(istream);
 #if wxUSE_STD_IOSTREAM
 	DocumentIstream& stream = istream;
@@ -352,7 +319,7 @@ DocumentIstream& Project::LoadObject(DocumentIstream& istream) {
 	wxInt32 count = 0;
 	stream >> count;
 
-	if (false) {
+	if(false){
 		wxLogWarning
 		("File could not be read.");
 #if wxUSE_STD_IOSTREAM
@@ -363,12 +330,13 @@ DocumentIstream& Project::LoadObject(DocumentIstream& istream) {
 		return istream;
 	}
 
-	// TODO: Add Project data
+// TODO: Add Project data
 
 	return istream;
 }
 
-bool Project::SaveSkin(wxString fileName) {
+bool Project::SaveSkin(wxString fileName)
+{
 	wxFFileOutputStream outStream(fileName);
 	FileSTL temp;
 //	if(active == Left) temp.WriteStream(outStream, footL.skin.geometry);

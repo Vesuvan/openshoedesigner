@@ -97,6 +97,6 @@ void DialogSetupUnits::OnCloseX(wxCloseEvent& event)
 void DialogSetupUnits::OnChangeUnit(wxCommandEvent& event)
 {
 	TransferDataFromWindow();
-	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_REFRESH);
+	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED, ID_REFRESHALL);
 	ProcessEvent(selectEvent);
 }

@@ -59,6 +59,10 @@ public:
 	ParameterFormula heelPitch;
 	ParameterFormula toeSpring;
 
+	ParameterFormula upperLevel;
+	ParameterFormula extraLength;
+	ParameterFormula footCompression;
+
 private:
 	bool modified;
 };

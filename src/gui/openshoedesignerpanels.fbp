@@ -2713,7 +2713,7 @@
                 </object>
                 <object class="sizeritem" expanded="0">
                     <property name="border">5</property>
-                    <property name="flag">wxEXPAND</property>
+                    <property name="flag">wxEXPAND|wxALIGN_CENTER_HORIZONTAL</property>
                     <property name="proportion">0</property>
                     <object class="wxStaticBitmap" expanded="0">
                         <property name="BottomDockable">1</property>
@@ -2788,7 +2788,7 @@
                         <event name="OnRightDown"></event>
                         <event name="OnRightUp"></event>
                         <event name="OnSetFocus"></event>
-                        <event name="OnSize"></event>
+                        <event name="OnSize">OnSize</event>
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>

@@ -111,7 +111,8 @@ bool openshoedesigner::OnInit()
 	docManager->FileHistoryLoad(*config);
 
 	wxFrame* parent;
-	parent = new FrameParent(docManager, NULL, wxID_ANY, GetAppDisplayName());
+	parent = new FrameParent(docManager, config, NULL, wxID_ANY,
+			GetAppDisplayName());
 
 	SetTopWindow(parent);
 	parent->Show(false);

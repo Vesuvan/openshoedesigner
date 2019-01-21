@@ -46,10 +46,13 @@
 #include "../project/command/CommandProjectSetLegLengthDifference.h"
 #include "../project/command/CommandShoePreset.h"
 #include "../project/command/CommandShoeSetParameter.h"
+#include "FrameParent.h"
 
 FrameMain::FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
-		wxDocParentFrame* parent) :
-		GUIFrameMain(doc, view, parent) {
+		wxDocParentFrame* parent)
+		: GUIFrameMain(doc, view, parent)
+{
+	this->config = config;
 
 	presets.ReadFile(_T("data/ShoePresets.ini"));
 
@@ -74,6 +77,13 @@ FrameMain::FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
 	m_menuEdit->Append(wxID_UNDO);
 	m_menuEdit->Append(wxID_REDO);
 
+	m_menuPreferences->Append(ID_SETUPLANGUAGE, _T("Change Language"));
+	m_menuPreferences->Append(ID_SETUPCONTROLLER, _("Setup 6DOF &Controller"));
+	m_menuPreferences->Append(ID_SETUPSTEREO3D, _("Setup &Stereo 3D"));
+	m_menuPreferences->Append(ID_SETUPMIDI, _("Setup &MIDI"));
+	m_menuPreferences->Append(ID_SETUPUNITS,
+	_("Setup &Units") + wxT("\tCtrl+U"));
+
 	m_menuHelp->AppendSeparator();
 	m_menuHelp->Append(wxID_HELP, _("&Help") + wxT("\tF1"));
 	m_menuHelp->Append(wxID_ABOUT);
@@ -81,18 +91,15 @@ FrameMain::FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
 	doc->GetCommandProcessor()->SetEditMenu(m_menuEdit);
 	doc->GetCommandProcessor()->Initialize();
 
-	this->config = config;
-	settings.GetConfigFrom(config);
+	FrameParent* parentframe = wxStaticCast(parent, FrameParent);
+	DisplaySettings* settings = &(parentframe->settings);
 
 	m_canvas3D->SetProjectView(wxStaticCast(view, ProjectView));
 	m_panelFootMeasurements->SetDocView(doc, view);
-	m_panelFootMeasurements->SetDisplaySettings(&settings);
+	m_panelFootMeasurements->SetDisplaySettings(settings);
 	m_panelLegMeasurements->SetDocView(doc, view);
-	m_panelLegMeasurements->SetDisplaySettings(&settings);
-	settings.WriteToCanvas(m_canvas3D);
-
-	dialogSetupStereo3D = new DialogSetupStereo3D(this, &settings);
-	dialogSetupUnits = new DialogSetupUnits(this, &settings);
+	m_panelLegMeasurements->SetDisplaySettings(settings);
+	settings->WriteToCanvas(m_canvas3D);
 
 	TransferDataToWindow();
 
@@ -100,7 +107,7 @@ FrameMain::FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
 			wxCommandEventHandler(FrameMain::On3DSelect));
 	this->Connect(ID_REFRESH3DVIEW, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::RefreshCanvas));
-	this->Connect(ID_REFRESH, wxEVT_COMMAND_MENU_SELECTED,
+	this->Connect(ID_REFRESHVIEW, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::RefreshView));
 
 //	timer.SetOwner(this);
@@ -113,22 +120,23 @@ FrameMain::FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
 	project->Update();
 }
 
-FrameMain::~FrameMain() {
+FrameMain::~FrameMain()
+{
 	printf("FrameMain: Destructor called\n");
 
 //	this->Disconnect(wxEVT_TIMER, wxTimerEventHandler(FrameMain::OnTimer), NULL,
 //			this);
 
-	this->Disconnect(ID_REFRESH, wxEVT_COMMAND_MENU_SELECTED,
+	this->Disconnect(ID_REFRESHVIEW, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::RefreshView));
 	this->Disconnect(ID_REFRESH3DVIEW, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::RefreshCanvas));
 	this->Disconnect(ID_3DSELECT, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::On3DSelect));
-	settings.WriteConfigTo(config);
 }
 
-bool FrameMain::TransferDataToWindow() {
+bool FrameMain::TransferDataToWindow()
+{
 	const ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
 	Project* project = wxStaticCast(GetDocument(), Project);
 	const FootMeasurements * foot = projectview->GetActiveFootMeasurements();
@@ -136,11 +144,11 @@ bool FrameMain::TransferDataToWindow() {
 	{
 		wxArrayString newStrings;
 		newStrings.Add(_("Custom"));
-		for (size_t n = 0; n < presets.section.size(); ++n)
+		for(size_t n = 0; n < presets.section.size(); ++n)
 			newStrings.Add(presets.section[n].param[0].value);
 
 		wxArrayString temp = m_choiceShoeType->GetStrings();
-		if (newStrings != temp) {
+		if(newStrings != temp){
 			m_choiceShoeType->Set(newStrings);
 			m_choiceShoeType->SetSelection(0);
 		}
@@ -163,10 +171,15 @@ bool FrameMain::TransferDataToWindow() {
 	m_menuView->Check(ID_SHOWBACKGROUND, projectview->showBackground);
 
 	Shoe * shoe = &(project->shoe);
-	m_textCtrlHeelHeight->SetValue(shoe->heelHeight.formula);
-	m_textCtrlBallHeight->SetValue(shoe->ballHeight.formula);
-	m_textCtrlHeelPitch->SetValue(shoe->heelPitch.formula);
-	m_textCtrlToeSpring->SetValue(shoe->toeSpring.formula);
+
+	TransferParameterToTextCtrl(shoe->heelHeight, m_textCtrlHeelHeight);
+	TransferParameterToTextCtrl(shoe->ballHeight, m_textCtrlBallHeight);
+	TransferParameterToTextCtrl(shoe->heelPitch, m_textCtrlHeelPitch,false);
+	TransferParameterToTextCtrl(shoe->toeSpring, m_textCtrlToeSpring,false);
+	TransferParameterToTextCtrl(shoe->upperLevel, m_textCtrlUpperLevel,false);
+	TransferParameterToTextCtrl(shoe->extraLength, m_textCtrlExtraLength);
+	TransferParameterToTextCtrl(shoe->footCompression,
+			m_textCtrlFootCompression,false);
 
 //	m_textCtrlToeAngle->SetValue(shoe->exprToeAngle);
 //
@@ -181,15 +194,13 @@ bool FrameMain::TransferDataToWindow() {
 //	m_textCtrlResultMixing->SetValue(
 //			settings.Percent.TextFromSIWithUnit(foot->mixing, 1));
 
-	if (dialogSetupStereo3D->IsShown())
-		dialogSetupStereo3D->TransferDataToWindow();
-
 	m_panelFootMeasurements->TransferDataToWindow();
 	m_panelLegMeasurements->TransferDataToWindow();
 	return true;
 }
 
-bool FrameMain::TransferDataFromWindow() {
+bool FrameMain::TransferDataFromWindow()
+{
 	ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
 	Project* project = wxStaticCast(GetDocument(), Project);
 
@@ -211,13 +222,14 @@ bool FrameMain::TransferDataFromWindow() {
 	return true;
 }
 
-void FrameMain::RefreshCanvas(wxCommandEvent& event) {
-	settings.WriteToCanvas(m_canvas3D);
+void FrameMain::RefreshCanvas(wxCommandEvent& event)
+{
 	m_canvas3D->Refresh();
 	Refresh();
 }
 
-void FrameMain::RefreshView(wxCommandEvent& event) {
+void FrameMain::RefreshView(wxCommandEvent& event)
+{
 	TransferDataToWindow();
 	this->Refresh(); // FIXME: Recursive refresh does not work with GTK1. Call Refresh on every child-dialog by hand.
 }
@@ -246,7 +258,8 @@ void FrameMain::RefreshView(wxCommandEvent& event) {
 //	this->Refresh();
 //}
 
-void FrameMain::OnClose(wxCloseEvent& event) {
+void FrameMain::OnClose(wxCloseEvent& event)
+{
 	wxDocument* doc = this->GetDocument();
 	wxList tempDocs = doc->GetDocumentManager()->GetDocuments();
 	wxList tempViews = doc->GetViews();
@@ -256,11 +269,11 @@ void FrameMain::OnClose(wxCloseEvent& event) {
 	printf("FrameMain: %lu docs, %lu views\n", tempDocs.GetCount(),
 			tempViews.GetCount());
 
-	if (tempDocs.GetCount() > 1) {
+	if(tempDocs.GetCount() > 1){
 		event.Skip(); // Only close this window, by passing the event to the default handler.
 		return;
 	}
-	if (tempViews.GetCount() > 1) {
+	if(tempViews.GetCount() > 1){
 		event.Skip(); // Only close this window, by passing the event to the default handler.
 		return;
 	}
@@ -269,7 +282,8 @@ void FrameMain::OnClose(wxCloseEvent& event) {
 	main->Close(); // Exit app by closing main window, this will close this window as well.
 }
 
-void FrameMain::On3DSelect(wxCommandEvent& event) {
+void FrameMain::On3DSelect(wxCommandEvent& event)
+{
 //	int x = event.GetX();
 //	int y = event.GetY();
 //	OpenGLPick result;
@@ -310,73 +324,86 @@ void FrameMain::On3DSelect(wxCommandEvent& event) {
 //	}
 }
 
-void FrameMain::OnConstructionSelection(wxCommandEvent& event) {
+void FrameMain::OnConstructionSelection(wxCommandEvent& event)
+{
 	event.Skip();
 }
 
-void FrameMain::OnLoadBoneModel(wxCommandEvent& event) {
+void FrameMain::OnLoadBoneModel(wxCommandEvent& event)
+{
+	FrameParent* parent = wxStaticCast(GetParent(), FrameParent);
+	DisplaySettings* settings = &(parent->settings);
+
 	wxFileDialog dialog(this, _("Open Foot Model..."), _T(""), _T(""),
 			_("Foot Model (*.fmd; *.txt)|*.fmd;*.txt|All Files|*.*"),
 			wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 
-	if (wxDir::Exists(settings.lastFootDirectory)) {
-		dialog.SetDirectory(settings.lastFootDirectory);
+	if(wxDir::Exists(settings->lastFootDirectory)){
+		dialog.SetDirectory(settings->lastFootDirectory);
 	}
 
-	if (dialog.ShowModal() == wxID_OK) {
+	if(dialog.ShowModal() == wxID_OK){
 		wxFileName fileName(dialog.GetPath());
 		Project* project = wxStaticCast(GetDocument(), Project);
 
-		if (project->LoadModel(fileName.GetFullPath())) {
-			settings.lastFootDirectory = fileName.GetPath();
+		if(project->LoadModel(fileName.GetFullPath())){
+			settings->lastFootDirectory = fileName.GetPath();
 			TransferDataToWindow();
 		}
 	}
 }
 
-void FrameMain::OnSaveBoneModel(wxCommandEvent& event) {
+void FrameMain::OnSaveBoneModel(wxCommandEvent& event)
+{
+	FrameParent* parent = wxStaticCast(GetParent(), FrameParent);
+	DisplaySettings* settings = &(parent->settings);
 
 	wxFileDialog dialog(this, _("Save Foot Model As..."), _T(""), _T(""),
 			_("Foot Model (*.fmd; *.txt)|*.fmd;*.txt|All Files|*.*"),
 			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
-	if (wxDir::Exists(settings.lastFootDirectory)) {
-		dialog.SetDirectory(settings.lastFootDirectory);
+	if(wxDir::Exists(settings->lastFootDirectory)){
+		dialog.SetDirectory(settings->lastFootDirectory);
 	}
 
 //	if(project.fileName.IsOk()) dialog.SetFilename(
 //			project.fileName.GetFullPath());
 
-	if (dialog.ShowModal() == wxID_OK) {
+	if(dialog.ShowModal() == wxID_OK){
 		wxFileName fileName(dialog.GetPath());
 		Project* project = wxStaticCast(GetDocument(), Project);
-		if (project->SaveModel(fileName.GetFullPath())) {
-			settings.lastFootDirectory = fileName.GetPath();
+		if(project->SaveModel(fileName.GetFullPath())){
+			settings->lastFootDirectory = fileName.GetPath();
 			TransferDataToWindow();
 		}
 	}
 }
 
-void FrameMain::OnLoadPattern(wxCommandEvent& event) {
+void FrameMain::OnLoadPattern(wxCommandEvent& event)
+{
 }
 
-void FrameMain::OnSavePattern(wxCommandEvent& event) {
+void FrameMain::OnSavePattern(wxCommandEvent& event)
+{
 }
 
-void FrameMain::OnSetupShoe(wxCommandEvent& event) {
+void FrameMain::OnSetupShoe(wxCommandEvent& event)
+{
 
 }
 
-void FrameMain::OnEditWalkCycle(wxCommandEvent& event) {
+void FrameMain::OnEditWalkCycle(wxCommandEvent& event)
+{
 
 }
 
-void FrameMain::OnSaveLast(wxCommandEvent& event) {
+void FrameMain::OnSaveLast(wxCommandEvent& event)
+{
 	wxFileDialog dialog(this, _("Save last..."), _T(""), _T(""),
 			_("STL file (*.stl)|*.stl|All files|*.*"),
 			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
-	if (dialog.ShowModal() == wxID_OK) {
+	if(dialog.ShowModal() == wxID_OK){
 		wxFileName fileName;
 		fileName = dialog.GetPath();
 		Project* project = wxStaticCast(GetDocument(), Project);
@@ -384,33 +411,39 @@ void FrameMain::OnSaveLast(wxCommandEvent& event) {
 	}
 }
 
-void FrameMain::OnSaveInsole(wxCommandEvent& event) {
+void FrameMain::OnSaveInsole(wxCommandEvent& event)
+{
 }
 
-void FrameMain::OnSaveSole(wxCommandEvent& event) {
+void FrameMain::OnSaveSole(wxCommandEvent& event)
+{
 }
 
-void FrameMain::OnSaveCutaway(wxCommandEvent& event) {
+void FrameMain::OnSaveCutaway(wxCommandEvent& event)
+{
 }
 
-void FrameMain::OnPackZip(wxCommandEvent& event) {
+void FrameMain::OnPackZip(wxCommandEvent& event)
+{
 }
 
-void FrameMain::OnToggleStereo3D(wxCommandEvent& event) {
-	if (m_canvas3D->stereoMode == stereoOff) {
+void FrameMain::OnToggleStereo3D(wxCommandEvent& event)
+{
+	if(m_canvas3D->stereoMode == stereoOff){
 		m_canvas3D->stereoMode = stereoAnaglyph;
-	} else {
+	}else{
 		m_canvas3D->stereoMode = stereoOff;
 	}
 	m_menuView->Check(ID_STEREO3D, m_canvas3D->stereoMode != stereoOff);
 	Refresh();
 }
 
-void FrameMain::OnViewChange(wxCommandEvent& event) {
+void FrameMain::OnViewChange(wxCommandEvent& event)
+{
 	ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
 	TransferDataFromWindow();
 
-	switch (event.GetId()) {
+	switch(event.GetId()){
 	case ID_SHOWLEFT:
 		projectview->showLeft = event.IsChecked();
 		break;
@@ -422,40 +455,25 @@ void FrameMain::OnViewChange(wxCommandEvent& event) {
 	Refresh();
 }
 
-void FrameMain::OnSetupStereo3D(wxCommandEvent& event) {
-	dialogSetupStereo3D->Show();
-	dialogSetupStereo3D->Raise();
-}
-
-void FrameMain::OnSetupUnits(wxCommandEvent& event) {
-	dialogSetupUnits->Show();
-	dialogSetupUnits->Raise();
-}
-
-void FrameMain::OnSelectLanguage(wxCommandEvent& event) {
-	long lng =
-			wxGetSingleChoiceIndex(
-					_T(
-							"Please choose language:\nChanges will take place after restart!"),
-					_T("Language"), WXSIZEOF(langNames), langNames);
-	if (lng >= 0)
-		config->Write(_T("Language"), langNames[lng]);
-}
-
-void FrameMain::OnDebugParser(wxCommandEvent& event) {
+void FrameMain::OnDebugParser(wxCommandEvent& event)
+{
 	(new FrameDebugParser(this))->Show();
 }
 
-void FrameMain::OnPageChange(wxNotebookEvent& event) {
+void FrameMain::OnPageChange(wxNotebookEvent& event)
+{
 }
 
-void FrameMain::OnQuickSetupMeasurements(wxCommandEvent& event) {
+void FrameMain::OnQuickSetupMeasurements(wxCommandEvent& event)
+{
 	DialogQuickInitFoot dialog(this);
-	if (dialog.ShowModal() == wxID_OK) {
+	if(dialog.ShowModal() == wxID_OK){
 		Project* project = wxStaticCast(GetDocument(), Project);
 		ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
+		FrameParent* parent = wxStaticCast(GetParent(), FrameParent);
+		DisplaySettings* settings = &(parent->settings);
 
-		wxString lengthStr = settings.Distance.TextFromSIWithUnit(
+		wxString lengthStr = settings->Distance.TextFromSIWithUnit(
 				dialog.length);
 
 		project->GetCommandProcessor()->Submit(
@@ -492,24 +510,17 @@ void FrameMain::OnQuickSetupMeasurements(wxCommandEvent& event) {
 	}
 }
 
-//void FrameMain::OnPreset(wxCommandEvent& event)
-//{
-//	Project* project = wxStaticCast(GetDocument(), Project);
-//	project->GetCommandProcessor()->Submit(
-//			new CommandShoePreset(
-//					wxString::Format(_("Set preset to %i"), event.GetId()),
-//					project, event.GetId()));
-//	TransferDataToWindow();
-//}
-
-void FrameMain::OnToggleAnkleLock(wxCommandEvent& event) {
+void FrameMain::OnToggleAnkleLock(wxCommandEvent& event)
+{
 }
 
-void FrameMain::OnLoadFootSTL(wxCommandEvent& event) {
+void FrameMain::OnLoadFootSTL(wxCommandEvent& event)
+{
 }
 
-void FrameMain::OnSetSymmetry(wxCommandEvent& event) {
-	switch (event.GetId()) {
+void FrameMain::OnSetSymmetry(wxCommandEvent& event)
+{
+	switch(event.GetId()){
 	case ID_FULLSYMMETRY:
 		break;
 	case ID_SYMMETRICMODEL:
@@ -522,35 +533,175 @@ void FrameMain::OnSetSymmetry(wxCommandEvent& event) {
 	event.Skip();
 }
 
-void FrameMain::OnCopyMeasurements(wxCommandEvent& event) {
+void FrameMain::OnCopyMeasurements(wxCommandEvent& event)
+{
 }
 
-void FrameMain::OnSetupBackgroundImages(wxCommandEvent& event) {
+void FrameMain::OnSetupBackgroundImages(wxCommandEvent& event)
+{
 }
 
-void FrameMain::OnChoiceDisplay(wxCommandEvent& event) {
+void FrameMain::OnChoiceDisplay(wxCommandEvent& event)
+{
 }
 
-void FrameMain::OnFileChangedLastFile(wxFileDirPickerEvent& event) {
+void FrameMain::OnFileChangedLastFile(wxFileDirPickerEvent& event)
+{
 }
 
-void FrameMain::OnFileChangedScanFile(wxFileDirPickerEvent& event) {
+void FrameMain::OnFileChangedScanFile(wxFileDirPickerEvent& event)
+{
 }
 
-void FrameMain::OnChoice(wxCommandEvent& event) {
+void FrameMain::OnChoice(wxCommandEvent& event)
+{
+	printf("Preset selected %u\n", event.GetId());
+	switch(event.GetId()){
+	case ID_PRESETSHOEHEIGHT:
+		break;
+	case ID_PRESETSHOETYPE:
+		break;
+	default:
+		event.Skip();
+	}
+
+	//void FrameMain::OnPreset(wxCommandEvent& event)
+	//{
+	//	Project* project = wxStaticCast(GetDocument(), Project);
+	//	project->GetCommandProcessor()->Submit(
+	//			new CommandShoePreset(
+	//					wxString::Format(_("Set preset to %i"), event.GetId()),
+	//					project, event.GetId()));
+	//	TransferDataToWindow();
+	//}
+
 }
 
-void FrameMain::OnTextEnter(wxCommandEvent& event) {
+void FrameMain::OnTextEnter(wxCommandEvent& event)
+{
+	Project* project = wxStaticCast(GetDocument(), Project);
+	ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
+	const wxString newFormula = event.GetString();
+
+	project->GetCommandProcessor()->Submit(
+			new CommandShoeSetParameter(
+					wxString::Format(_("Set %s to %s"),
+							GetNameByID(event.GetId()), newFormula), project,
+					event.GetId(), newFormula));
+
+	Navigate();
 }
 
-void FrameMain::OnCheckBox(wxCommandEvent& event) {
+void FrameMain::OnKillFocus(wxFocusEvent& event)
+{
+	switch(event.GetId()){
+	case ID_HEELHEIGHT:
+	case ID_BALLHEIGHT:
+	case ID_HEELPITCH:
+	case ID_TOESPRING:
+	case ID_UPPERLEVEL:
+	case ID_EXTRALENGTH:
+	case ID_FOOTCOMPRESSION:
+		TransferDataToWindow();
+	}
 }
 
-void FrameMain::OnChangeModel(wxCommandEvent& event) {
+void FrameMain::OnSetFocus(wxFocusEvent& event)
+{
+	switch(event.GetId()){
+	case ID_HEELHEIGHT:
+	case ID_BALLHEIGHT:
+	case ID_HEELPITCH:
+	case ID_TOESPRING:
+	case ID_UPPERLEVEL:
+	case ID_EXTRALENGTH:
+	case ID_FOOTCOMPRESSION:
+		TransferDataToWindow();
+	}
 }
 
-void FrameMain::OnEditBoneModel(wxCommandEvent& event) {
+wxString FrameMain::GetNameByID(int id)
+{
+	switch(id){
+	case ID_HEELHEIGHT:
+		return _T("HeelHeight");
+	case ID_BALLHEIGHT:
+		return _T("BallHeight");
+	case ID_HEELPITCH:
+		return _T("HeelPitch");
+	case ID_TOESPRING:
+		return _T("ToeSpring");
+	case ID_UPPERLEVEL:
+		return _T("UpperLevel");
+	case ID_EXTRALENGTH:
+		return _T("ExtraLenght");
+	case ID_FOOTCOMPRESSION:
+		return _T("FootCompression");
+	}
+	return _T("");
 }
 
-void FrameMain::OnToggleButton(wxCommandEvent& event) {
+wxTextCtrl* FrameMain::GetTextCtrlByID(int id)
+{
+	switch(id){
+	case ID_HEELHEIGHT:
+		return m_textCtrlHeelHeight;
+	case ID_BALLHEIGHT:
+		return m_textCtrlBallHeight;
+	case ID_HEELPITCH:
+		return m_textCtrlHeelPitch;
+	case ID_TOESPRING:
+		return m_textCtrlToeSpring;
+	case ID_UPPERLEVEL:
+		return m_textCtrlUpperLevel;
+	case ID_EXTRALENGTH:
+		return m_textCtrlExtraLength;
+	case ID_FOOTCOMPRESSION:
+		return m_textCtrlFootCompression;
+	}
+	return NULL;
 }
+
+void FrameMain::TransferParameterToTextCtrl(const ParameterFormula parameter,
+		wxTextCtrl* ctrl, bool isDistance)
+{
+	FrameParent* parent = wxStaticCast(GetParent(), FrameParent);
+	DisplaySettings* settings = &(parent->settings);
+
+	if(ctrl->HasFocus()){
+		ctrl->SetValue(parameter.formula);
+	}else{
+		if(parameter.errorFlag){
+			ctrl->SetBackgroundColour(*wxRED);
+			ctrl->SetValue(parameter.errorStr);
+		} else{
+			ctrl->SetBackgroundColour(wxNullColour);
+			if(isDistance){
+				ctrl->SetValue(
+						settings->Distance.TextFromSIWithUnit(parameter.value,
+								1));
+			} else{
+				ctrl->SetValue(wxString::Format(_T("%g %%"), parameter.value*100));
+			}
+		}
+	}
+}
+
+void FrameMain::OnCheckBox(wxCommandEvent& event)
+{
+	printf("CheckBox %u pressed.\n", event.GetId());
+}
+
+void FrameMain::OnChangeModel(wxCommandEvent& event)
+{
+}
+
+void FrameMain::OnEditBoneModel(wxCommandEvent& event)
+{
+}
+
+void FrameMain::OnToggleButton(wxCommandEvent& event)
+{
+	printf("ToggleButton %u pressed.\n", event.GetId());
+}
+

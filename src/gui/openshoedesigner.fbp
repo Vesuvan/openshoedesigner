@@ -26,7 +26,7 @@
         <property name="ui_table">UI</property>
         <property name="use_enum">0</property>
         <property name="use_microsoft_bom">0</property>
-        <object class="Frame" expanded="0">
+        <object class="Frame" expanded="1">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -88,7 +88,7 @@
             <event name="OnSetFocus"></event>
             <event name="OnSize"></event>
             <event name="OnUpdateUI"></event>
-            <object class="wxMenuBar" expanded="0">
+            <object class="wxMenuBar" expanded="1">
                 <property name="bg"></property>
                 <property name="context_help"></property>
                 <property name="context_menu">1</property>
@@ -953,55 +953,10 @@
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>
-                <object class="wxMenu" expanded="0">
-                    <property name="label">S&amp;ettings</property>
-                    <property name="name">m_menuSettings</property>
+                <object class="wxMenu" expanded="1">
+                    <property name="label">P&amp;references</property>
+                    <property name="name">m_menuPreferences</property>
                     <property name="permission">protected</property>
-                    <object class="wxMenuItem" expanded="0">
-                        <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
-                        <property name="help"></property>
-                        <property name="id">ID_SETUPSTEREO3D</property>
-                        <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">Setup &amp;Stereo3D</property>
-                        <property name="name">m_menuItemSetupStereo3D</property>
-                        <property name="permission">none</property>
-                        <property name="shortcut"></property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnSetupStereo3D</event>
-                        <event name="OnUpdateUI"></event>
-                    </object>
-                    <object class="wxMenuItem" expanded="0">
-                        <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
-                        <property name="help"></property>
-                        <property name="id">ID_SETUPUNITS</property>
-                        <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">Setup &amp;Units</property>
-                        <property name="name">m_menuItemSetupUnits</property>
-                        <property name="permission">none</property>
-                        <property name="shortcut">CTRL+U</property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnSetupUnits</event>
-                        <event name="OnUpdateUI"></event>
-                    </object>
-                    <object class="wxMenuItem" expanded="0">
-                        <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
-                        <property name="help"></property>
-                        <property name="id">wxID_ANY</property>
-                        <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">Select &amp;Language</property>
-                        <property name="name">m_menuItemSelectLanguage</property>
-                        <property name="permission">none</property>
-                        <property name="shortcut"></property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnSelectLanguage</event>
-                        <event name="OnUpdateUI"></event>
-                    </object>
                 </object>
                 <object class="wxMenu" expanded="0">
                     <property name="label">&amp;Help</property>
@@ -1024,16 +979,16 @@
                     </object>
                 </object>
             </object>
-            <object class="wxBoxSizer" expanded="0">
+            <object class="wxBoxSizer" expanded="1">
                 <property name="minimum_size"></property>
                 <property name="name">bSizer</property>
                 <property name="orient">wxVERTICAL</property>
                 <property name="permission">none</property>
-                <object class="sizeritem" expanded="0">
+                <object class="sizeritem" expanded="1">
                     <property name="border">5</property>
                     <property name="flag">wxEXPAND|wxALIGN_CENTER_HORIZONTAL</property>
                     <property name="proportion">1</property>
-                    <object class="wxSplitterWindow" expanded="0">
+                    <object class="wxSplitterWindow" expanded="1">
                         <property name="BottomDockable">1</property>
                         <property name="LeftDockable">1</property>
                         <property name="RightDockable">1</property>
@@ -1282,7 +1237,7 @@
                                             <object class="notebookpage" expanded="0">
                                                 <property name="bitmap"></property>
                                                 <property name="label">Foot</property>
-                                                <property name="select">1</property>
+                                                <property name="select">0</property>
                                                 <object class="wxPanel" expanded="0">
                                                     <property name="BottomDockable">1</property>
                                                     <property name="LeftDockable">1</property>
@@ -2932,7 +2887,7 @@
                                             <object class="notebookpage" expanded="0">
                                                 <property name="bitmap"></property>
                                                 <property name="label">Shoe</property>
-                                                <property name="select">0</property>
+                                                <property name="select">1</property>
                                                 <object class="wxPanel" expanded="0">
                                                     <property name="BottomDockable">1</property>
                                                     <property name="LeftDockable">1</property>
@@ -3245,7 +3200,7 @@
                                                                         <property name="font"></property>
                                                                         <property name="gripper">0</property>
                                                                         <property name="hidden">0</property>
-                                                                        <property name="id">ID_TEXTHEELHEIGHT</property>
+                                                                        <property name="id">ID_HEELHEIGHT</property>
                                                                         <property name="max_size"></property>
                                                                         <property name="maximize_button">0</property>
                                                                         <property name="maximum_size"></property>
@@ -3281,7 +3236,7 @@
                                                                         <event name="OnEraseBackground"></event>
                                                                         <event name="OnKeyDown"></event>
                                                                         <event name="OnKeyUp"></event>
-                                                                        <event name="OnKillFocus"></event>
+                                                                        <event name="OnKillFocus">OnKillFocus</event>
                                                                         <event name="OnLeaveWindow"></event>
                                                                         <event name="OnLeftDClick"></event>
                                                                         <event name="OnLeftDown"></event>
@@ -3296,7 +3251,7 @@
                                                                         <event name="OnRightDClick"></event>
                                                                         <event name="OnRightDown"></event>
                                                                         <event name="OnRightUp"></event>
-                                                                        <event name="OnSetFocus"></event>
+                                                                        <event name="OnSetFocus">OnSetFocus</event>
                                                                         <event name="OnSize"></event>
                                                                         <event name="OnText"></event>
                                                                         <event name="OnTextEnter">OnTextEnter</event>
@@ -3419,7 +3374,7 @@
                                                                         <property name="font"></property>
                                                                         <property name="gripper">0</property>
                                                                         <property name="hidden">0</property>
-                                                                        <property name="id">ID_TEXTBALLHEIGHT</property>
+                                                                        <property name="id">ID_BALLHEIGHT</property>
                                                                         <property name="max_size"></property>
                                                                         <property name="maximize_button">0</property>
                                                                         <property name="maximum_size"></property>
@@ -3455,7 +3410,7 @@
                                                                         <event name="OnEraseBackground"></event>
                                                                         <event name="OnKeyDown"></event>
                                                                         <event name="OnKeyUp"></event>
-                                                                        <event name="OnKillFocus"></event>
+                                                                        <event name="OnKillFocus">OnKillFocus</event>
                                                                         <event name="OnLeaveWindow"></event>
                                                                         <event name="OnLeftDClick"></event>
                                                                         <event name="OnLeftDown"></event>
@@ -3470,7 +3425,7 @@
                                                                         <event name="OnRightDClick"></event>
                                                                         <event name="OnRightDown"></event>
                                                                         <event name="OnRightUp"></event>
-                                                                        <event name="OnSetFocus"></event>
+                                                                        <event name="OnSetFocus">OnSetFocus</event>
                                                                         <event name="OnSize"></event>
                                                                         <event name="OnText"></event>
                                                                         <event name="OnTextEnter">OnTextEnter</event>
@@ -3593,7 +3548,7 @@
                                                                         <property name="font"></property>
                                                                         <property name="gripper">0</property>
                                                                         <property name="hidden">0</property>
-                                                                        <property name="id">ID_TEXTHEELPITCH</property>
+                                                                        <property name="id">ID_HEELPITCH</property>
                                                                         <property name="max_size"></property>
                                                                         <property name="maximize_button">0</property>
                                                                         <property name="maximum_size"></property>
@@ -3629,7 +3584,7 @@
                                                                         <event name="OnEraseBackground"></event>
                                                                         <event name="OnKeyDown"></event>
                                                                         <event name="OnKeyUp"></event>
-                                                                        <event name="OnKillFocus"></event>
+                                                                        <event name="OnKillFocus">OnKillFocus</event>
                                                                         <event name="OnLeaveWindow"></event>
                                                                         <event name="OnLeftDClick"></event>
                                                                         <event name="OnLeftDown"></event>
@@ -3644,7 +3599,7 @@
                                                                         <event name="OnRightDClick"></event>
                                                                         <event name="OnRightDown"></event>
                                                                         <event name="OnRightUp"></event>
-                                                                        <event name="OnSetFocus"></event>
+                                                                        <event name="OnSetFocus">OnSetFocus</event>
                                                                         <event name="OnSize"></event>
                                                                         <event name="OnText"></event>
                                                                         <event name="OnTextEnter">OnTextEnter</event>
@@ -3767,7 +3722,7 @@
                                                                         <property name="font"></property>
                                                                         <property name="gripper">0</property>
                                                                         <property name="hidden">0</property>
-                                                                        <property name="id">ID_TEXTTOESPRING</property>
+                                                                        <property name="id">ID_TOESPRING</property>
                                                                         <property name="max_size"></property>
                                                                         <property name="maximize_button">0</property>
                                                                         <property name="maximum_size"></property>
@@ -3803,7 +3758,7 @@
                                                                         <event name="OnEraseBackground"></event>
                                                                         <event name="OnKeyDown"></event>
                                                                         <event name="OnKeyUp"></event>
-                                                                        <event name="OnKillFocus"></event>
+                                                                        <event name="OnKillFocus">OnKillFocus</event>
                                                                         <event name="OnLeaveWindow"></event>
                                                                         <event name="OnLeftDClick"></event>
                                                                         <event name="OnLeftDown"></event>
@@ -3818,7 +3773,7 @@
                                                                         <event name="OnRightDClick"></event>
                                                                         <event name="OnRightDown"></event>
                                                                         <event name="OnRightUp"></event>
-                                                                        <event name="OnSetFocus"></event>
+                                                                        <event name="OnSetFocus">OnSetFocus</event>
                                                                         <event name="OnSize"></event>
                                                                         <event name="OnText"></event>
                                                                         <event name="OnTextEnter">OnTextEnter</event>
@@ -4062,7 +4017,7 @@
                                                                         <property name="font"></property>
                                                                         <property name="gripper">0</property>
                                                                         <property name="hidden">0</property>
-                                                                        <property name="id">ID_TEXTUPPERLEVEL</property>
+                                                                        <property name="id">ID_UPPERLEVEL</property>
                                                                         <property name="max_size"></property>
                                                                         <property name="maximize_button">0</property>
                                                                         <property name="maximum_size"></property>
@@ -4098,7 +4053,7 @@
                                                                         <event name="OnEraseBackground"></event>
                                                                         <event name="OnKeyDown"></event>
                                                                         <event name="OnKeyUp"></event>
-                                                                        <event name="OnKillFocus"></event>
+                                                                        <event name="OnKillFocus">OnKillFocus</event>
                                                                         <event name="OnLeaveWindow"></event>
                                                                         <event name="OnLeftDClick"></event>
                                                                         <event name="OnLeftDown"></event>
@@ -4113,7 +4068,7 @@
                                                                         <event name="OnRightDClick"></event>
                                                                         <event name="OnRightDown"></event>
                                                                         <event name="OnRightUp"></event>
-                                                                        <event name="OnSetFocus"></event>
+                                                                        <event name="OnSetFocus">OnSetFocus</event>
                                                                         <event name="OnSize"></event>
                                                                         <event name="OnText"></event>
                                                                         <event name="OnTextEnter">OnTextEnter</event>
@@ -4876,7 +4831,7 @@
                                                                                 <event name="OnEraseBackground"></event>
                                                                                 <event name="OnKeyDown"></event>
                                                                                 <event name="OnKeyUp"></event>
-                                                                                <event name="OnKillFocus"></event>
+                                                                                <event name="OnKillFocus">OnKillFocus</event>
                                                                                 <event name="OnLeaveWindow"></event>
                                                                                 <event name="OnLeftDClick"></event>
                                                                                 <event name="OnLeftDown"></event>
@@ -4891,7 +4846,7 @@
                                                                                 <event name="OnRightDClick"></event>
                                                                                 <event name="OnRightDown"></event>
                                                                                 <event name="OnRightUp"></event>
-                                                                                <event name="OnSetFocus"></event>
+                                                                                <event name="OnSetFocus">OnSetFocus</event>
                                                                                 <event name="OnSize"></event>
                                                                                 <event name="OnText"></event>
                                                                                 <event name="OnTextEnter">OnTextEnter</event>
@@ -5014,7 +4969,7 @@
                                                                                 <property name="font"></property>
                                                                                 <property name="gripper">0</property>
                                                                                 <property name="hidden">0</property>
-                                                                                <property name="id">wxID_ANY</property>
+                                                                                <property name="id">ID_FOOTCOMPRESSION</property>
                                                                                 <property name="max_size"></property>
                                                                                 <property name="maximize_button">0</property>
                                                                                 <property name="maximum_size"></property>
@@ -5050,7 +5005,7 @@
                                                                                 <event name="OnEraseBackground"></event>
                                                                                 <event name="OnKeyDown"></event>
                                                                                 <event name="OnKeyUp"></event>
-                                                                                <event name="OnKillFocus"></event>
+                                                                                <event name="OnKillFocus">OnKillFocus</event>
                                                                                 <event name="OnLeaveWindow"></event>
                                                                                 <event name="OnLeftDClick"></event>
                                                                                 <event name="OnLeftDown"></event>
@@ -5065,7 +5020,7 @@
                                                                                 <event name="OnRightDClick"></event>
                                                                                 <event name="OnRightDown"></event>
                                                                                 <event name="OnRightUp"></event>
-                                                                                <event name="OnSetFocus"></event>
+                                                                                <event name="OnSetFocus">OnSetFocus</event>
                                                                                 <event name="OnSize"></event>
                                                                                 <event name="OnText"></event>
                                                                                 <event name="OnTextEnter">OnTextEnter</event>
@@ -7681,8 +7636,8 @@
                                 </object>
                             </object>
                         </object>
-                        <object class="splitteritem" expanded="0">
-                            <object class="wxPanel" expanded="0">
+                        <object class="splitteritem" expanded="1">
+                            <object class="wxPanel" expanded="1">
                                 <property name="BottomDockable">1</property>
                                 <property name="LeftDockable">1</property>
                                 <property name="RightDockable">1</property>
@@ -7756,7 +7711,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxBoxSizer" expanded="0">
+                                <object class="wxBoxSizer" expanded="1">
                                     <property name="minimum_size"></property>
                                     <property name="name">bSizerCanvas</property>
                                     <property name="orient">wxVERTICAL</property>

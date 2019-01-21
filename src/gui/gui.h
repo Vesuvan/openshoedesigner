@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Dec 20 2018)
+// C++ code generated with wxFormBuilder (version Aug 20 2017)
 // http://www.wxformbuilder.org/
 //
-// PLEASE DO *NOT* EDIT THIS FILE!
+// PLEASE DO "NOT" EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
 #ifndef __GUI_H__
@@ -11,6 +11,9 @@
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
 #include <wx/intl.h>
+#include <wx/docview.h>
+#include <wx/config.h>
+
 #include <wx/string.h>
 #include <wx/menu.h>
 #include <wx/bitmap.h>
@@ -87,25 +90,24 @@
 #define ID_SHOWFLOOR 1033
 #define ID_SHOWCOORDINATESYSTEM 1034
 #define ID_SHOWBACKGROUND 1035
-#define ID_SETUPSTEREO3D 1036
-#define ID_SETUPUNITS 1037
-#define ID_EDITLEFT 1038
-#define ID_EDITRIGHT 1039
-#define ID_PRESETSHOETYPE 1040
-#define ID_TEXTHEELHEIGHT 1041
-#define ID_TEXTBALLHEIGHT 1042
-#define ID_TEXTHEELPITCH 1043
-#define ID_TEXTTOESPRING 1044
-#define ID_PRESETSHOEHEIGHT 1045
-#define ID_TEXTUPPERLEVEL 1046
-#define ID_TIPSYMMETRY 1047
-#define ID_TIPPOINTEDNESS 1048
-#define ID_TIPSHARPNESS 1049
-#define ID_EXTRALENGTH 1050
-#define ID_CHECKSEPARATEDHEEL 1051
-#define ID_GRIDLENGTH 1052
-#define ID_GRIDDIAMETER 1053
-#define ID_GRIDSKIN 1054
+#define ID_EDITLEFT 1036
+#define ID_EDITRIGHT 1037
+#define ID_PRESETSHOETYPE 1038
+#define ID_HEELHEIGHT 1039
+#define ID_BALLHEIGHT 1040
+#define ID_HEELPITCH 1041
+#define ID_TOESPRING 1042
+#define ID_PRESETSHOEHEIGHT 1043
+#define ID_UPPERLEVEL 1044
+#define ID_TIPSYMMETRY 1045
+#define ID_TIPPOINTEDNESS 1046
+#define ID_TIPSHARPNESS 1047
+#define ID_EXTRALENGTH 1048
+#define ID_FOOTCOMPRESSION 1049
+#define ID_CHECKSEPARATEDHEEL 1050
+#define ID_GRIDLENGTH 1051
+#define ID_GRIDDIAMETER 1052
+#define ID_GRIDSKIN 1053
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class GUIFrameMain
@@ -130,7 +132,7 @@ class GUIFrameMain : public wxDocChildFrame
 		wxMenu* m_menuFabric;
 		wxMenu* m_menuGeometry;
 		wxMenu* m_menuView;
-		wxMenu* m_menuSettings;
+		wxMenu* m_menuPreferences;
 		wxMenu* m_menuHelp;
 		wxSplitterWindow* m_splitter;
 		wxPanel* m_panelConfig;
@@ -238,15 +240,14 @@ class GUIFrameMain : public wxDocChildFrame
 		virtual void OnToggleStereo3D( wxCommandEvent& event ) = 0;
 		virtual void OnViewChange( wxCommandEvent& event ) = 0;
 		virtual void OnSetupBackgroundImages( wxCommandEvent& event ) = 0;
-		virtual void OnSetupStereo3D( wxCommandEvent& event ) = 0;
-		virtual void OnSetupUnits( wxCommandEvent& event ) = 0;
-		virtual void OnSelectLanguage( wxCommandEvent& event ) = 0;
 		virtual void OnDebugParser( wxCommandEvent& event ) = 0;
 		virtual void OnPageChange( wxNotebookEvent& event ) = 0;
 		virtual void OnToggleButton( wxCommandEvent& event ) = 0;
 		virtual void OnFileChangedScanFile( wxFileDirPickerEvent& event ) = 0;
 		virtual void OnFileChangedLastFile( wxFileDirPickerEvent& event ) = 0;
 		virtual void OnChoice( wxCommandEvent& event ) = 0;
+		virtual void OnKillFocus( wxFocusEvent& event ) = 0;
+		virtual void OnSetFocus( wxFocusEvent& event ) = 0;
 		virtual void OnTextEnter( wxCommandEvent& event ) = 0;
 		virtual void OnCheckBox( wxCommandEvent& event ) = 0;
 		virtual void OnToggleAnkleLock( wxCommandEvent& event ) = 0;

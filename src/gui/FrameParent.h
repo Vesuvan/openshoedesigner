@@ -33,23 +33,71 @@
  * Parent frame for the SDI application.
  */
 
-#include "../StdInclude.h"
-#include "../Config.h"
+#include <wx/config.h>
 #include <wx/docview.h>
+#include <wx/event.h>
 #include <wx/help.h>
+#include <wx/string.h>
+#include <wx/timer.h>
+
+#ifdef _USE_6DOFCONTROLLER
+#include "../controller/Control3D.h"
+#include "../controller/DialogSetup6DOFController.h"
+#endif
+#ifdef _USE_MIDI
+#include "../controller/MidiPort.h"
+#include "DialogSetupMidi.h"
+#endif
+#include "DisplaySettings.h"
+#include "DialogSetupStereo3D.h"
+#include "DialogSetupUnits.h"
 
 class FrameParent:public wxDocParentFrame {
 public:
-	FrameParent(wxDocManager *manager, wxFrame *parent, wxWindowID id,
-			const wxString& title);
+	FrameParent(wxDocManager *manager, wxConfig* config, wxFrame *parent,
+			wxWindowID id, const wxString& title);
 	virtual ~FrameParent();
 
 public:
+	void OnChangeLanguage(wxCommandEvent& event);
+	void OnSetupStereo3D(wxCommandEvent& event);
+
+#ifdef _USE_6DOFCONTROLLER
+	void OnSetupController(wxCommandEvent& event);
+#endif
+#ifdef __USEMIDI
+	void OnSetupMidi(wxCommandEvent& event);
+#endif
+	void OnSetupUnits(wxCommandEvent& event);
+
+	void OnRefreshAll(wxCommandEvent& event);
+	void OnRefreshAll3D(wxCommandEvent& event);
+	void OnRefreshView(wxCommandEvent& event);
+	void OnRefreshView3D(wxCommandEvent& event);
+
+	void OnTimer(wxTimerEvent& event);
+
 	void OnAbout(wxCommandEvent& WXUNUSED(event));
 	void OnHelp(wxCommandEvent& WXUNUSED(event));
 
-private:
+public:
+	wxConfig* config;
+
 	wxHelpController* m_helpController;
+	DialogSetupStereo3D* dialogSetupStereo3D;
+	DisplaySettings settings;
+
+#ifdef _USE_6DOFCONTROLLER
+	Control3D control;
+#endif
+#ifdef _USE_MIDI
+	DialogSetupMidi* dialogSetupMidi;
+	MidiPort midi;
+#endif
+
+	wxTimer timer; ///> Animation timer
+	float t;
+	float dt;
 
 wxDECLARE_EVENT_TABLE();
 };

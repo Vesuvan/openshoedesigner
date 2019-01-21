@@ -91,6 +91,13 @@ public:
 	FootModel();
 	virtual ~FootModel();
 
+	bool IsModifiedForm(void) const;
+	bool IsModifiedPosition(void) const;
+	bool IsModifiedSkin(void) const;
+	void ModifyForm(bool modified = true);
+	void ModifyPosition(bool modified = true);
+	void ModifySkin(bool modified = true);
+
 	void PaintBones(void) const;
 	void PaintSkin(void) const;
 
@@ -114,6 +121,10 @@ public:
 
 private:
 	void InitBones(void);
+
+	bool modifiedForm;
+	bool modifiedPosition;
+	bool modifiedSkin;
 
 	// Model parameter, set by optimizer
 	double L;

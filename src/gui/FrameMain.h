@@ -48,12 +48,17 @@
 #include "../project/IniFile.h"
 #include "DialogSetupUnits.h"
 #include "MidiPort.h"
+class ProjectView;
 
 class FrameMain:public GUIFrameMain {
+	friend class ProjectView;
 public:
 	FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
 			wxDocParentFrame* parent);
 	virtual ~FrameMain();
+
+	wxConfig *config;
+	IniFile presets;
 
 	bool TransferDataToWindow();
 	bool TransferDataFromWindow();
@@ -61,6 +66,11 @@ public:
 	void On3DSelect(wxCommandEvent& event);
 	void RefreshCanvas(wxCommandEvent& event);
 	void RefreshView(wxCommandEvent& event);
+
+	wxString GetNameByID(int id);
+	wxTextCtrl* GetTextCtrlByID(int id);
+	void TransferParameterToTextCtrl(ParameterFormula const parameter,
+			wxTextCtrl *ctrl, bool isDistance = true);
 
 	void OnClose(wxCloseEvent& event);
 	void OnQuickSetupMeasurements(wxCommandEvent& event);
@@ -84,9 +94,6 @@ public:
 	void OnToggleStereo3D(wxCommandEvent& event);
 	void OnViewChange(wxCommandEvent& event);
 	void OnSetupBackgroundImages(wxCommandEvent& event);
-	void OnSetupStereo3D(wxCommandEvent& event);
-	void OnSetupUnits(wxCommandEvent& event);
-	void OnSelectLanguage(wxCommandEvent& event);
 	void OnDebugParser(wxCommandEvent& event);
 	void OnPageChange( wxNotebookEvent& event);
 	void OnToggleButton(wxCommandEvent& event);
@@ -94,22 +101,12 @@ public:
 	void OnFileChangedLastFile(wxFileDirPickerEvent& event);
 	void OnChoice(wxCommandEvent& event);
 	void OnTextEnter(wxCommandEvent& event);
+	void OnKillFocus(wxFocusEvent& event);
+	void OnSetFocus(wxFocusEvent& event);
 	void OnCheckBox(wxCommandEvent& event);
 	void OnToggleAnkleLock(wxCommandEvent& event);
 	void OnChoiceDisplay(wxCommandEvent& event);
 
-	wxConfig *config;
-
-	IniFile presets;
-
-	DisplaySettings settings;
-
-	DialogSetupStereo3D* dialogSetupStereo3D;
-	DialogSetupUnits* dialogSetupUnits;
-
-//	MidiPort midi;
-//	wxTimer timer;
-//	void OnTimer(wxTimerEvent& event);
 };
 
 #endif /* FRAMEMAIN_H_ */

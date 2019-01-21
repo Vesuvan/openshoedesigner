@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Dec 20 2018)
+// C++ code generated with wxFormBuilder (version Aug 20 2017)
 // http://www.wxformbuilder.org/
 //
-// PLEASE DO *NOT* EDIT THIS FILE!
+// PLEASE DO "NOT" EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
 #include "../StdInclude.h"
@@ -289,20 +289,8 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	
 	m_menubar->Append( m_menuView, _("&View") ); 
 	
-	m_menuSettings = new wxMenu();
-	wxMenuItem* m_menuItemSetupStereo3D;
-	m_menuItemSetupStereo3D = new wxMenuItem( m_menuSettings, ID_SETUPSTEREO3D, wxString( _("Setup &Stereo3D") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menuSettings->Append( m_menuItemSetupStereo3D );
-	
-	wxMenuItem* m_menuItemSetupUnits;
-	m_menuItemSetupUnits = new wxMenuItem( m_menuSettings, ID_SETUPUNITS, wxString( _("Setup &Units") ) + wxT('\t') + wxT("CTRL+U"), wxEmptyString, wxITEM_NORMAL );
-	m_menuSettings->Append( m_menuItemSetupUnits );
-	
-	wxMenuItem* m_menuItemSelectLanguage;
-	m_menuItemSelectLanguage = new wxMenuItem( m_menuSettings, wxID_ANY, wxString( _("Select &Language") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menuSettings->Append( m_menuItemSelectLanguage );
-	
-	m_menubar->Append( m_menuSettings, _("S&ettings") ); 
+	m_menuPreferences = new wxMenu();
+	m_menubar->Append( m_menuPreferences, _("P&references") ); 
 	
 	m_menuHelp = new wxMenu();
 	wxMenuItem* m_menuItemdebugParser;
@@ -409,7 +397,7 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_panelPageFoot->SetSizer( bSizerFoot );
 	m_panelPageFoot->Layout();
 	bSizerFoot->Fit( m_panelPageFoot );
-	m_notebook->AddPage( m_panelPageFoot, _("Foot"), true );
+	m_notebook->AddPage( m_panelPageFoot, _("Foot"), false );
 	m_panelPageLeg = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerLeg;
 	bSizerLeg = new wxBoxSizer( wxVERTICAL );
@@ -462,28 +450,28 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_staticTextHeelHeight->Wrap( -1 );
 	fgSizerShoeBaseMeasurements->Add( m_staticTextHeelHeight, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
-	m_textCtrlHeelHeight = new wxTextCtrl( m_panelPageShoe, ID_TEXTHEELHEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlHeelHeight = new wxTextCtrl( m_panelPageShoe, ID_HEELHEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
 	fgSizerShoeBaseMeasurements->Add( m_textCtrlHeelHeight, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
 	
 	m_staticTextBallHeight = new wxStaticText( m_panelPageShoe, wxID_ANY, _("Ball Height:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextBallHeight->Wrap( -1 );
 	fgSizerShoeBaseMeasurements->Add( m_staticTextBallHeight, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
-	m_textCtrlBallHeight = new wxTextCtrl( m_panelPageShoe, ID_TEXTBALLHEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlBallHeight = new wxTextCtrl( m_panelPageShoe, ID_BALLHEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
 	fgSizerShoeBaseMeasurements->Add( m_textCtrlBallHeight, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
 	
 	m_staticTextHeelPitch = new wxStaticText( m_panelPageShoe, wxID_ANY, _("Heel Pitch:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextHeelPitch->Wrap( -1 );
 	fgSizerShoeBaseMeasurements->Add( m_staticTextHeelPitch, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5 );
 	
-	m_textCtrlHeelPitch = new wxTextCtrl( m_panelPageShoe, ID_TEXTHEELPITCH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlHeelPitch = new wxTextCtrl( m_panelPageShoe, ID_HEELPITCH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
 	fgSizerShoeBaseMeasurements->Add( m_textCtrlHeelPitch, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
 	
 	m_staticTextToeSpring = new wxStaticText( m_panelPageShoe, wxID_ANY, _("Toe Spring:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextToeSpring->Wrap( -1 );
 	fgSizerShoeBaseMeasurements->Add( m_staticTextToeSpring, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
-	m_textCtrlToeSpring = new wxTextCtrl( m_panelPageShoe, ID_TEXTTOESPRING, _("10 deg"), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlToeSpring = new wxTextCtrl( m_panelPageShoe, ID_TOESPRING, _("10 deg"), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
 	fgSizerShoeBaseMeasurements->Add( m_textCtrlToeSpring, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
 	
 	
@@ -510,7 +498,7 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_staticTextUpperLevel->Wrap( -1 );
 	fgSizerUpperLevel->Add( m_staticTextUpperLevel, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
-	m_textCtrlUpperLevel = new wxTextCtrl( m_panelPageShoe, ID_TEXTUPPERLEVEL, _("0.8"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_textCtrlUpperLevel = new wxTextCtrl( m_panelPageShoe, ID_UPPERLEVEL, _("0.8"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizerUpperLevel->Add( m_textCtrlUpperLevel, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 5 );
 	
 	
@@ -559,7 +547,7 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_staticTextFootCompression->Wrap( -1 );
 	fgSizer6->Add( m_staticTextFootCompression, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
-	m_textCtrlFootCompression = new wxTextCtrl( sbSizerLastForm->GetStaticBox(), wxID_ANY, _("5 %"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_textCtrlFootCompression = new wxTextCtrl( sbSizerLastForm->GetStaticBox(), ID_FOOTCOMPRESSION, _("5 %"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_textCtrlFootCompression->SetToolTip( _("Pressure from the sides of the shoe onto the foot. Higher values give a tighter fit of the shoe. This is needed for example with high heels to prevent the foot from slipping around in the shoe. Set to 0 % for diabetic footwear.") );
 	
 	fgSizer6->Add( m_textCtrlFootCompression, 0, wxALL|wxEXPAND, 5 );
@@ -574,7 +562,7 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_panelPageShoe->SetSizer( bSizerShoe );
 	m_panelPageShoe->Layout();
 	bSizerShoe->Fit( m_panelPageShoe );
-	m_notebook->AddPage( m_panelPageShoe, _("Shoe"), false );
+	m_notebook->AddPage( m_panelPageShoe, _("Shoe"), true );
 	m_panelPageSole = new wxPanel( m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer28;
 	bSizer28 = new wxBoxSizer( wxVERTICAL );
@@ -877,9 +865,6 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	this->Connect( m_menuItemShowCoordinateSystem->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
 	this->Connect( m_menuItemShowBackground->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
 	this->Connect( m_menuItemSetupBackground->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupBackgroundImages ) );
-	this->Connect( m_menuItemSetupStereo3D->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupStereo3D ) );
-	this->Connect( m_menuItemSetupUnits->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupUnits ) );
-	this->Connect( m_menuItemSelectLanguage->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSelectLanguage ) );
 	this->Connect( m_menuItemdebugParser->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnDebugParser ) );
 	m_notebook->Connect( wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler( GUIFrameMain::OnPageChange ), NULL, this );
 	m_toggleBtnEditLeft->Connect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
@@ -890,13 +875,27 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_toggleBtnEditLeft1->Connect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
 	m_toggleBtnEditRight1->Connect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
 	m_choiceShoeType->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChoice ), NULL, this );
+	m_textCtrlHeelHeight->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlHeelHeight->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlHeelHeight->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlBallHeight->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlBallHeight->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlBallHeight->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlHeelPitch->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlHeelPitch->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlHeelPitch->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlToeSpring->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlToeSpring->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlToeSpring->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_choiceShoeHeight->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChoice ), NULL, this );
+	m_textCtrlUpperLevel->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlUpperLevel->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlUpperLevel->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlExtraLength->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlExtraLength->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlExtraLength->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlFootCompression->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlFootCompression->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlFootCompression->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_checkBoxSeparatedHeel->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameMain::OnCheckBox ), NULL, this );
 	m_checkBoxLockAnkle->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleAnkleLock ), NULL, this );
@@ -950,9 +949,6 @@ GUIFrameMain::~GUIFrameMain()
 	this->Disconnect( ID_SHOWCOORDINATESYSTEM, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
 	this->Disconnect( ID_SHOWBACKGROUND, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupBackgroundImages ) );
-	this->Disconnect( ID_SETUPSTEREO3D, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupStereo3D ) );
-	this->Disconnect( ID_SETUPUNITS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupUnits ) );
-	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSelectLanguage ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnDebugParser ) );
 	m_notebook->Disconnect( wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler( GUIFrameMain::OnPageChange ), NULL, this );
 	m_toggleBtnEditLeft->Disconnect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
@@ -963,13 +959,27 @@ GUIFrameMain::~GUIFrameMain()
 	m_toggleBtnEditLeft1->Disconnect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
 	m_toggleBtnEditRight1->Disconnect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
 	m_choiceShoeType->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChoice ), NULL, this );
+	m_textCtrlHeelHeight->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlHeelHeight->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlHeelHeight->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlBallHeight->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlBallHeight->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlBallHeight->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlHeelPitch->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlHeelPitch->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlHeelPitch->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlToeSpring->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlToeSpring->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlToeSpring->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_choiceShoeHeight->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChoice ), NULL, this );
+	m_textCtrlUpperLevel->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlUpperLevel->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlUpperLevel->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlExtraLength->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlExtraLength->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlExtraLength->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlFootCompression->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlFootCompression->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlFootCompression->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_checkBoxSeparatedHeel->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameMain::OnCheckBox ), NULL, this );
 	m_checkBoxLockAnkle->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleAnkleLock ), NULL, this );

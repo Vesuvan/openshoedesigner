@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Dec 20 2018)
+// C++ code generated with wxFormBuilder (version Aug 20 2017)
 // http://www.wxformbuilder.org/
 //
-// PLEASE DO *NOT* EDIT THIS FILE!
+// PLEASE DO "NOT" EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
 #ifndef __GUIPANELS_H__
@@ -100,6 +100,7 @@ class GUIPanelFootMeasurements : public wxPanel
 		virtual void OnTextEnter( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnQuickSetup( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnLeftDown( wxMouseEvent& event ) { event.Skip(); }
+		virtual void OnSize( wxSizeEvent& event ) { event.Skip(); }
 		
 	
 	public:

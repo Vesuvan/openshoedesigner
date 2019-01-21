@@ -26,48 +26,108 @@
 
 #include "FrameParent.h"
 
-#include "gui.h"
+#include "../StdInclude.h"
+#include <wx/generic/choicdgg.h>
 #include <cstdio>
+#include "../languages.h"
+#include "../project/ProjectView.h"
+#include "IDs.h"
+
 wxBEGIN_EVENT_TABLE(FrameParent, wxDocParentFrame)
+
+EVT_MENU(ID_SETUPLANGUAGE , FrameParent::OnChangeLanguage)
+EVT_MENU(ID_SETUPUNITS , FrameParent::OnSetupUnits)
+EVT_MENU(ID_SETUPSTEREO3D , FrameParent::OnSetupStereo3D)
+#ifdef _USE_6DOFCONTROLLER
+EVT_MENU(ID_SETUPCONTROLLER , FrameParent::OnSetupController)
+#endif
+#ifdef _USE_MIDI
+EVT_MENU(ID_SETUPMIDI , FrameParent::OnSetupMidi)
+#endif
 EVT_MENU(wxID_ABOUT, FrameParent::OnAbout)
 EVT_MENU(wxID_HELP, FrameParent::OnHelp)
+
+EVT_MENU(ID_REFRESHALL, FrameParent::OnRefreshAll)
+EVT_MENU(ID_REFRESHALL3DVIEW, FrameParent::OnRefreshAll3D)
+EVT_MENU(ID_REFRESHVIEW, FrameParent::OnRefreshView)
+EVT_MENU(ID_REFRESH3DVIEW, FrameParent::OnRefreshView3D)
 wxEND_EVENT_TABLE()
 
-FrameParent::FrameParent(wxDocManager *manager, wxFrame *parent, wxWindowID id,
-		const wxString& title)
-		: wxDocParentFrame(manager, parent, id, title)
+FrameParent::FrameParent(wxDocManager *manager, wxConfig* config,
+		wxFrame *parent, wxWindowID id, const wxString& title) :
+		wxDocParentFrame(manager, parent, id, title)
 {
-	wxMenu *menuFile = new wxMenu;
-	menuFile->Append(wxID_NEW);
-	menuFile->Append(wxID_OPEN);
-	menuFile->AppendSeparator();
-	menuFile->Append(wxID_PRINT_SETUP, "Print &Setup...");
-	menuFile->AppendSeparator();
-	menuFile->Append(wxID_EXIT);
+	this->config = config;
+	settings.GetConfigFrom(config);
+#ifdef _USE_6DOFCONTROLLER
+	control.GetConfigFrom(config);
+#endif
+	wxMenu *m_menuFile = new wxMenu;
+	m_menuFile->Append(wxID_NEW);
+	m_menuFile->Append(wxID_OPEN);
+	m_menuFile->AppendSeparator();
+	m_menuFile->Append(wxID_PRINT_SETUP, "Print &Setup...");
+	m_menuFile->AppendSeparator();
+	m_menuFile->Append(wxID_EXIT);
 
-	wxMenu *menuHelp = new wxMenu;
-	menuHelp->Append(wxID_HELP, _("&Help") + wxT("\tF1"));
-	menuHelp->Append(wxID_ABOUT);
+	wxMenu *m_menuPreferences = new wxMenu;
+	m_menuPreferences->Append(ID_SETUPLANGUAGE, _T("Change Language"));
+#ifdef _USE_6DOFCONTROLLER
+	m_menuPreferences->Append(ID_SETUPCONTROLLER, _("Setup 6DOF &Controller"));
+#endif
+	m_menuPreferences->Append(ID_SETUPSTEREO3D, _("Setup &Stereo 3D"));
+#ifdef _USE_MIDI
+	m_menuPreferences->Append(ID_SETUPMIDI, _("Setup &MIDI"));
+#endif
+	m_menuPreferences->Append(ID_SETUPUNITS, _("Setup &Units") + wxT("\tCtrl+U"));
+
+	wxMenu *m_menuHelp = new wxMenu;
+	m_menuHelp->Append(wxID_HELP, _("&Help") + wxT("\tF1"));
+	m_menuHelp->Append(wxID_ABOUT);
 
 	wxMenuBar *menubar = new wxMenuBar;
-	menubar->Append(menuFile, wxGetStockLabel(wxID_FILE));
-	menubar->Append(menuHelp, wxGetStockLabel(wxID_HELP));
+	menubar->Append(m_menuFile, wxGetStockLabel(wxID_FILE));
+	menubar->Append(m_menuPreferences, wxGetStockLabel(wxID_PREFERENCES));
+	menubar->Append(m_menuHelp, wxGetStockLabel(wxID_HELP));
 
 	SetMenuBar(menubar);
 
 	m_helpController = new wxHelpController();
 
+	dialogSetupStereo3D = new DialogSetupStereo3D(this, &settings);
+#ifdef _USE_MIDI
+	dialogSetupMidi = new DialogSetupMidi(this, &midi);
+#endif
 	//TODO Logging is disable here, because the SESSION_MANAGER variable is not defined since Ubuntu 16.04.
 	// The initialisation of the help controller will always lead to the message:
 	// 	Debug: Failed to connect to session manager: SESSION_MANAGER environment variable not defined
 	wxLog::EnableLogging(false);
-	m_helpController->Initialize(_T("doc/help/OpenShoeDesigner.hhp"));
+	m_helpController->Initialize(_T("doc/help/help.hhp"));
 	wxLog::EnableLogging(true);
+
+	timer.SetOwner(this);
+
+	t = 0.0;
+	dt = 50e-3; // s
+	timer.Start(round(dt * 1000.0)); // ms
+
+	this->Connect(wxEVT_TIMER, wxTimerEventHandler(FrameParent::OnTimer), NULL,
+			this);
 }
 
 FrameParent::~FrameParent()
 {
 	printf("FrameParent: Destructor called\n");
+
+#ifdef _USE_6DOFCONTROLLER
+	// Save the configuration of the 6DOF controller
+	control.WriteConfigTo(config);
+#endif
+	settings.WriteConfigTo(config);
+
+	this->Disconnect(wxEVT_TIMER, wxTimerEventHandler(FrameParent::OnTimer),
+	NULL, this);
+
 	delete m_helpController;
 }
 
@@ -80,4 +140,94 @@ void FrameParent::OnAbout(wxCommandEvent&)
 void FrameParent::OnHelp(wxCommandEvent&)
 {
 	m_helpController->DisplayContents();
+}
+
+void FrameParent::OnTimer(wxTimerEvent& event)
+{
+	t += dt;
+
+//	wxString temp;
+//	temp = wxString::Format(_T("Free RAM: %lu MB"),
+//			GetFreeSystemMemory() / 1024 / 1024);
+//
+//	m_statusBar->SetStatusText(temp, 1);
+
+//	if(project.processToolpath){
+//		if(project.GenerateToolpaths()) TransferDataToWindow();
+//	}
+}
+
+void FrameParent::OnChangeLanguage(wxCommandEvent& event)
+{
+	long lng =
+			wxGetSingleChoiceIndex(
+					_T(
+							"Please choose language:\nChanges will take place after restart!"),
+					_T("Language"), WXSIZEOF(langNames), langNames);
+	if(lng >= 0) config->Write(_T("Language"), langNames[lng]);
+}
+#ifdef _USE_6DOFCONTROLLER
+void FrameParent::OnSetupController(wxCommandEvent& event)
+{
+	DialogSetup6DOFController temp(this);
+	temp.InsertController(control);
+	temp.ShowModal();
+}
+#endif
+void FrameParent::OnSetupStereo3D(wxCommandEvent& event)
+{
+	dialogSetupStereo3D->Show(true);
+	dialogSetupStereo3D->Raise();
+}
+#ifdef _USE_MIDI
+void FrameParent::OnSetupMidi(wxCommandEvent& event)
+{
+	dialogSetupMidi->Show(true);
+	dialogSetupMidi->Raise();
+}
+#endif
+void FrameParent::OnSetupUnits(wxCommandEvent& event)
+{
+	DialogSetupUnits * temp = new DialogSetupUnits(this, &settings);
+	temp->Show();
+	temp->Raise();
+}
+
+void FrameParent::OnRefreshAll(wxCommandEvent& event)
+{
+	wxDocManager * mgr = GetDocumentManager();
+	wxDocVector docs = mgr->GetDocumentsVector();
+	for(size_t i = 0; i < docs.size(); ++i)
+		docs[i]->UpdateAllViews();
+}
+
+void FrameParent::OnRefreshAll3D(wxCommandEvent& event)
+{
+	wxDocManager * mgr = GetDocumentManager();
+	wxDocVector docs = mgr->GetDocumentsVector();
+	for(size_t i = 0; i < docs.size(); ++i){
+		wxViewVector views = docs[i]->GetViewsVector();
+		for(size_t j = 0; j < views.size(); ++j){
+			ProjectView* projectview = wxStaticCast(views[j], ProjectView);
+			projectview->OnUpdate3D();
+		}
+	}
+}
+
+void FrameParent::OnRefreshView(wxCommandEvent& event)
+{
+	wxDocManager * mgr = GetDocumentManager();
+	wxDocument * doc = mgr->GetCurrentDocument();
+	if(doc != NULL) doc->UpdateAllViews();
+}
+
+void FrameParent::OnRefreshView3D(wxCommandEvent& event)
+{
+	wxDocManager * mgr = GetDocumentManager();
+	wxDocument * doc = mgr->GetCurrentDocument();
+	wxViewVector views = doc->GetViewsVector();
+	for(size_t i = 0; i < views.size(); ++i){
+		ProjectView* projectview = wxStaticCast(views[i], ProjectView);
+		projectview->OnUpdate3D();
+	}
 }

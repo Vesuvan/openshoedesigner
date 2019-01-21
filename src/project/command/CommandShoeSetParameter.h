@@ -30,22 +30,25 @@
 #include <wx/cmdproc.h>
 #include <wx/string.h>
 
+#include "../foot/ParameterFormula.h"
 #include "../Project.h"
 
 class CommandShoeSetParameter:public wxCommand {
 public:
-	CommandShoeSetParameter(const wxString& name, Project* project, int fieldNr,
-			wxString newExpression);
+	CommandShoeSetParameter(const wxString& name, Project* project,
+			int parameter, wxString value);
 
 	bool Do(void);
 	bool Undo(void);
 
 protected:
-	Project* project;
-	int fieldNr;
-	wxString newExpression;
-	wxString oldExpression;
+	wxString Replace(int parameter, wxString newValue);
+	ParameterFormula* GetParameterByID(Shoe *shoe, int id);
 
+	Project* project;
+	int parameter;
+	wxString value;
+	wxString oldValue;
 };
 
 #endif /* __COMMANDSHOESETPARAMETER_H__ */

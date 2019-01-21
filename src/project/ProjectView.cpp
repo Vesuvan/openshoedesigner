@@ -29,6 +29,7 @@
 #include <cstdio>
 
 #include "../gui/FrameMain.h"
+#include "../gui/FrameParent.h"
 #include "../main.h"
 
 IMPLEMENT_DYNAMIC_CLASS(ProjectView, wxView)
@@ -240,6 +241,15 @@ void ProjectView::OnUpdate(wxView* sender, wxObject* hint)
 	temp->Refresh();
 	wxView::OnUpdate(sender, hint);
 }
+
+void ProjectView::OnUpdate3D(void)
+{
+	FrameMain* frame = wxStaticCast(GetFrame(), FrameMain);
+	FrameParent* parentframe = wxStaticCast(frame->GetParent(), FrameParent);
+	parentframe->settings.WriteToCanvas(frame->m_canvas3D);
+	frame->m_canvas3D->Refresh();
+}
+
 
 bool ProjectView::OnClose(bool deleteWindow)
 {

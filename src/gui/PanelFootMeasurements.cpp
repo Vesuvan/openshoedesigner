@@ -43,9 +43,13 @@
 #include "../project/Project.h"
 #include "DialogQuickInitFoot.h"
 
+#include "../icons/FootMeasurements.xpm"
+#include "../icons/FootMeasurements_small.xpm"
+
 PanelFootMeasurements::PanelFootMeasurements(wxWindow* parent, wxWindowID id,
 		const wxPoint& pos, const wxSize& size, long style)
-		: GUIPanelFootMeasurements(parent, id, pos, size, style)
+		: GUIPanelFootMeasurements(parent, id, pos, size, style), bm0(
+				FootMeasurements_small_xpm), bm1(FootMeasurements_xpm)
 {
 	settings = NULL;
 	doc = NULL;
@@ -138,7 +142,7 @@ void PanelFootMeasurements::OnKillFocus(wxFocusEvent& event)
 void PanelFootMeasurements::OnQuickSetup(wxCommandEvent& event)
 {
 	wxCommandEvent selectEvent(wxEVT_COMMAND_MENU_SELECTED,
-			ID_QUICKSETUPMEASUREMENTS);
+	ID_QUICKSETUPMEASUREMENTS);
 	ProcessEvent(selectEvent);
 }
 
@@ -199,4 +203,15 @@ wxTextCtrl* PanelFootMeasurements::GetTextCtrlByID(int id)
 		return m_textCtrlLegLengthDifference;
 	}
 	return NULL;
+}
+
+void PanelFootMeasurements::OnSize(wxSizeEvent& event)
+{
+	wxSize s = this->GetSize();
+	if(s.GetWidth() > 460)
+		m_bitmap->SetBitmap(bm1);
+	else
+		m_bitmap->SetBitmap(bm0);
+//	this->Layout();
+	event.Skip();
 }

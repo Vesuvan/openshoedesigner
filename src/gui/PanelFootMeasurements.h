@@ -61,10 +61,15 @@ public:
 	void OnKillFocus(wxFocusEvent& event);
 	void OnSetFocus(wxFocusEvent& event);
 	void OnTextEnter(wxCommandEvent& event);
+	void OnSize(wxSizeEvent& event);
 
 	wxDocument *doc;
 	wxView *view;
 	DisplaySettings *settings;
+
+protected:
+	const wxBitmap bm0;
+	const wxBitmap bm1;
 };
 
 #endif /* SRC_GUI_PANELFOOTMEASUREMENTS_H_ */

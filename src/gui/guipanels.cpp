@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Dec 20 2018)
+// C++ code generated with wxFormBuilder (version Aug 20 2017)
 // http://www.wxformbuilder.org/
 //
-// PLEASE DO *NOT* EDIT THIS FILE!
+// PLEASE DO "NOT" EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
 #include "../StdInclude.h"
@@ -189,7 +189,7 @@ GUIPanelFootMeasurements::GUIPanelFootMeasurements( wxWindow* parent, wxWindowID
 	bSizerMain->Add( bSizerHorizontal, 1, wxEXPAND, 5 );
 	
 	m_bitmap = new wxStaticBitmap( this, wxID_ANY, wxBitmap( FootMeasurements_small_xpm ), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizerMain->Add( m_bitmap, 0, wxEXPAND, 5 );
+	bSizerMain->Add( m_bitmap, 0, wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
 	
 	
 	this->SetSizer( bSizerMain );
@@ -223,6 +223,7 @@ GUIPanelFootMeasurements::GUIPanelFootMeasurements( wxWindow* parent, wxWindowID
 	m_textCtrlLegLengthDifference->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIPanelFootMeasurements::OnTextEnter ), NULL, this );
 	m_buttonQuickSetup->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIPanelFootMeasurements::OnQuickSetup ), NULL, this );
 	m_bitmap->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( GUIPanelFootMeasurements::OnLeftDown ), NULL, this );
+	m_bitmap->Connect( wxEVT_SIZE, wxSizeEventHandler( GUIPanelFootMeasurements::OnSize ), NULL, this );
 }
 
 GUIPanelFootMeasurements::~GUIPanelFootMeasurements()
@@ -254,6 +255,7 @@ GUIPanelFootMeasurements::~GUIPanelFootMeasurements()
 	m_textCtrlLegLengthDifference->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIPanelFootMeasurements::OnTextEnter ), NULL, this );
 	m_buttonQuickSetup->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIPanelFootMeasurements::OnQuickSetup ), NULL, this );
 	m_bitmap->Disconnect( wxEVT_LEFT_DOWN, wxMouseEventHandler( GUIPanelFootMeasurements::OnLeftDown ), NULL, this );
+	m_bitmap->Disconnect( wxEVT_SIZE, wxSizeEventHandler( GUIPanelFootMeasurements::OnSize ), NULL, this );
 	
 }
 

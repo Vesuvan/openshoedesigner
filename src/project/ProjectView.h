@@ -82,6 +82,7 @@ public:
 	bool OnCreate(wxDocument* doc, long flags);
 	void OnDraw(wxDC *dc);
 	void OnUpdate(wxView *sender, wxObject *hint = NULL);
+	void OnUpdate3D(void);
 	bool OnClose(bool deleteWindow = true);
 
 private:

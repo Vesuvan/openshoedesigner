@@ -112,6 +112,10 @@ FootModel::FootModel()
 	L = 28.67e-2;
 	W = 9.56e-2;
 
+	modifiedForm = true;
+	modifiedPosition = true;
+	modifiedSkin = true;
+
 	InitBones();
 	CalculateBones();
 }
@@ -514,6 +518,7 @@ void FootModel::UpdateForm(const FootMeasurements &measurements)
 								- measurements.footLength.value));
 	}
 	RestoreRotation();
+	ModifyForm(true);
 }
 
 void FootModel::UpdatePosition(const Shoe &shoe, double offset, double mixing)
@@ -563,6 +568,7 @@ void FootModel::UpdatePosition(const Shoe &shoe, double offset, double mixing)
 	}
 	origin = AffineTransformMatrix::Identity();
 	origin.TranslateLocal(0, 0, -Calcaneus->GetZMin() + heelHeight);
+	ModifyPosition(true);
 }
 
 void FootModel::CalculateBones(void)
@@ -607,6 +613,7 @@ void FootModel::CalculateSkin(void)
 //	volume.Rotate(Volume::Z, -1);
 //	volume.Rotate(Volume::Z, -1);
 	skin.CalcSurface();
+	ModifySkin(true);
 }
 
 Polygon3 FootModel::GetCenterline(void) const
@@ -638,3 +645,32 @@ Polygon3 FootModel::GetCenterline(void) const
 	return temp;
 }
 
+bool FootModel::IsModifiedForm(void) const
+{
+	return modifiedForm;
+}
+
+bool FootModel::IsModifiedPosition(void) const
+{
+	return modifiedPosition;
+}
+
+bool FootModel::IsModifiedSkin(void) const
+{
+	return modifiedSkin;
+}
+
+void FootModel::ModifyForm(bool modified)
+{
+	modifiedForm = modified;
+}
+
+void FootModel::ModifyPosition(bool modified)
+{
+	modifiedPosition = modified;
+}
+
+void FootModel::ModifySkin(bool modified)
+{
+	modifiedSkin = modified;
+}
