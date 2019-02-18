@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : DialogSetupUnits.h
-// Purpose            :
+// Name               : CollectionFilepaths.cpp
+// Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 03.07.2011
-// Copyright          : (C) 2011 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 18.02.2019
+// Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,39 +24,37 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef DIALOGSETUPUNITS_H_
-#define DIALOGSETUPUNITS_H_
+#include "CollectionFilepaths.h"
 
-/*!\class DialogSetupUnits
- * \brief ...
- *
- * ...
- */
+CollectionFilepaths::CollectionFilepaths()
+{
+}
 
-#include "../StdInclude.h"
-#include "gui.h"
+CollectionFilepaths::~CollectionFilepaths()
+{
+}
 
-class CollectionUnits;
-class DialogSetupUnits:public GUIFrameSetupUnits {
-	// Constructor/ Destructor
+bool CollectionFilepaths::Load(wxConfig* config)
+{
+	wxASSERT(config!=NULL);
+	if(config == NULL) return false;
 
-public:
-	DialogSetupUnits(wxWindow* parent, CollectionUnits * units);
-	virtual ~DialogSetupUnits();
-	// Member variables
-private:
+	wxString cwd = wxFileName::GetCwd();
+	config->Read(_T("LastFootDirectory"), &lastFootDirectory, cwd);
+	config->Read(_T("LastShoeDirectory"), &lastShoeDirectory, cwd);
+	config->Read(_T("LastOutputDirectory"), &lastOutputDirectory, cwd);
 
-	CollectionUnits * units;
+	return true;
+}
 
-	// Methods
-private:
-	bool TransferDataToWindow(void);
-	bool TransferDataFromWindow(void);
+bool CollectionFilepaths::Save(wxConfig* config)
+{
+	wxASSERT(config!=NULL);
+	if(config == NULL) return false;
 
-private:
-	void OnClose(wxCommandEvent& event);
-	void OnCloseX(wxCloseEvent& event);
-	void OnChangeUnit(wxCommandEvent& event);
-};
+	config->Write(_T("LastFootDirectory"), lastFootDirectory);
+	config->Write(_T("LastShoeDirectory"), lastShoeDirectory);
+	config->Write(_T("LastOutputDirectory"), lastOutputDirectory);
 
-#endif /* DIALOGSETUPUNITS_H_ */
+	return true;
+}

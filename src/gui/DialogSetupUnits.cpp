@@ -25,13 +25,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "DialogSetupUnits.h"
+#include "CollectionUnits.h"
 #include "IDs.h"
 #include "../StdInclude.h"
 
-DialogSetupUnits::DialogSetupUnits(wxWindow* parent, DisplaySettings * settings)
+DialogSetupUnits::DialogSetupUnits(wxWindow* parent, CollectionUnits * units)
 		: GUIFrameSetupUnits(parent)
 {
-	this->settings = settings;
+	this->units = units;
 
 	TransferDataToWindow();
 }
@@ -50,21 +51,21 @@ bool DialogSetupUnits::TransferDataToWindow(void)
 	int i;
 
 	m_choiceUnitLength->Clear();
-	m_choiceUnitLength->Append(settings->unitsOfLength);
-	i = m_choiceUnitLength->FindString(settings->Distance.GetOtherName());
+	m_choiceUnitLength->Append(units->unitsOfLength);
+	i = m_choiceUnitLength->FindString(units->Distance.GetOtherName());
 	if(i == wxNOT_FOUND) i = 6;
 	m_choiceUnitLength->SetSelection(i);
 
 	m_choiceUnitSmallDistance->Clear();
-	m_choiceUnitSmallDistance->Append(settings->unitsOfLength);
+	m_choiceUnitSmallDistance->Append(units->unitsOfLength);
 	i = m_choiceUnitSmallDistance->FindString(
-			settings->SmallDistance.GetOtherName());
+			units->SmallDistance.GetOtherName());
 	if(i == wxNOT_FOUND) i = 6;
 	m_choiceUnitSmallDistance->SetSelection(i);
 
 	m_choiceUnitAngle->Clear();
-	m_choiceUnitAngle->Append(settings->unitsOfAngle);
-	i = m_choiceUnitAngle->FindString(settings->Angle.GetOtherName());
+	m_choiceUnitAngle->Append(units->unitsOfAngle);
+	i = m_choiceUnitAngle->FindString(units->Angle.GetOtherName());
 	if(i == wxNOT_FOUND) i = 0;
 	m_choiceUnitAngle->SetSelection(i);
 
@@ -75,16 +76,16 @@ bool DialogSetupUnits::TransferDataFromWindow(void)
 	int i;
 
 	i = m_choiceUnitLength->GetSelection();
-	settings->Distance.Setup(_T("m"), settings->unitsOfLength[i],
-			settings->factorofLength[i]);
+	units->Distance.Setup(_T("m"), units->unitsOfLength[i],
+			units->factorofLength[i]);
 
 	i = m_choiceUnitSmallDistance->GetSelection();
-	settings->SmallDistance.Setup(_T("m"), settings->unitsOfLength[i],
-			settings->factorofLength[i]);
+	units->SmallDistance.Setup(_T("m"), units->unitsOfLength[i],
+			units->factorofLength[i]);
 
 	i = m_choiceUnitAngle->GetSelection();
-	settings->Angle.Setup(_T("rad"), settings->unitsOfAngle[i],
-			settings->factorofAngle[i]);
+	units->Angle.Setup(_T("rad"), units->unitsOfAngle[i],
+			units->factorofAngle[i]);
 
 	return true;
 }

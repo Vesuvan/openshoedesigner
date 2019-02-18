@@ -48,8 +48,9 @@
 #include "../controller/MidiPort.h"
 #include "DialogSetupMidi.h"
 #endif
-#include "DisplaySettings.h"
+#include "SettingsStereo3D.h"
 #include "DialogSetupStereo3D.h"
+#include "CollectionUnits.h"
 #include "DialogSetupUnits.h"
 
 class FrameParent:public wxDocParentFrame {
@@ -85,7 +86,8 @@ public:
 
 	wxHelpController* m_helpController;
 	DialogSetupStereo3D* dialogSetupStereo3D;
-	DisplaySettings settings;
+	SettingsStereo3D settingsStereo3D;
+	CollectionUnits units;
 
 #ifdef _USE_6DOFCONTROLLER
 	Control3D control;

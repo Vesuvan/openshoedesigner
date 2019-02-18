@@ -54,13 +54,14 @@ EVT_MENU(ID_REFRESH3DVIEW, FrameParent::OnRefreshView3D)
 wxEND_EVENT_TABLE()
 
 FrameParent::FrameParent(wxDocManager *manager, wxConfig* config,
-		wxFrame *parent, wxWindowID id, const wxString& title) :
-		wxDocParentFrame(manager, parent, id, title)
+		wxFrame *parent, wxWindowID id, const wxString& title)
+		: wxDocParentFrame(manager, parent, id, title)
 {
 	this->config = config;
-	settings.GetConfigFrom(config);
+	settingsStereo3D.Load(config);
+	units.Load(config);
 #ifdef _USE_6DOFCONTROLLER
-	control.GetConfigFrom(config);
+	control.Load(config);
 #endif
 	wxMenu *m_menuFile = new wxMenu;
 	m_menuFile->Append(wxID_NEW);
@@ -79,7 +80,8 @@ FrameParent::FrameParent(wxDocManager *manager, wxConfig* config,
 #ifdef _USE_MIDI
 	m_menuPreferences->Append(ID_SETUPMIDI, _("Setup &MIDI"));
 #endif
-	m_menuPreferences->Append(ID_SETUPUNITS, _("Setup &Units") + wxT("\tCtrl+U"));
+	m_menuPreferences->Append(ID_SETUPUNITS,
+	_("Setup &Units") + wxT("\tCtrl+U"));
 
 	wxMenu *m_menuHelp = new wxMenu;
 	m_menuHelp->Append(wxID_HELP, _("&Help") + wxT("\tF1"));
@@ -94,7 +96,8 @@ FrameParent::FrameParent(wxDocManager *manager, wxConfig* config,
 
 	m_helpController = new wxHelpController();
 
-	dialogSetupStereo3D = new DialogSetupStereo3D(this, &settings);
+	dialogSetupStereo3D = new DialogSetupStereo3D(this, &settingsStereo3D,
+			&units);
 #ifdef _USE_MIDI
 	dialogSetupMidi = new DialogSetupMidi(this, &midi);
 #endif
@@ -123,7 +126,8 @@ FrameParent::~FrameParent()
 	// Save the configuration of the 6DOF controller
 	control.WriteConfigTo(config);
 #endif
-	settings.WriteConfigTo(config);
+	settingsStereo3D.Save(config);
+	units.Save(config);
 
 	this->Disconnect(wxEVT_TIMER, wxTimerEventHandler(FrameParent::OnTimer),
 	NULL, this);
@@ -188,7 +192,7 @@ void FrameParent::OnSetupMidi(wxCommandEvent& event)
 #endif
 void FrameParent::OnSetupUnits(wxCommandEvent& event)
 {
-	DialogSetupUnits * temp = new DialogSetupUnits(this, &settings);
+	DialogSetupUnits * temp = new DialogSetupUnits(this, &units);
 	temp->Show();
 	temp->Raise();
 }

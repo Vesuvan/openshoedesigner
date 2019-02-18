@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : DialogSetupUnits.h
-// Purpose            :
+// Name               : CollectionFilepaths.h
+// Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 03.07.2011
-// Copyright          : (C) 2011 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 18.02.2019
+// Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,39 +24,29 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef DIALOGSETUPUNITS_H_
-#define DIALOGSETUPUNITS_H_
+#ifndef SRC_GUI_COLLECTIONFILEPATHS_H_
+#define SRC_GUI_COLLECTIONFILEPATHS_H_
 
-/*!\class DialogSetupUnits
+/*!\class CollectionFilepaths
  * \brief ...
  *
  * ...
  */
 
-#include "../StdInclude.h"
-#include "gui.h"
+#include <wx/string.h>
+#include <wx/config.h>
 
-class CollectionUnits;
-class DialogSetupUnits:public GUIFrameSetupUnits {
-	// Constructor/ Destructor
-
+class CollectionFilepaths {
 public:
-	DialogSetupUnits(wxWindow* parent, CollectionUnits * units);
-	virtual ~DialogSetupUnits();
-	// Member variables
-private:
+	CollectionFilepaths();
+	virtual ~CollectionFilepaths();
 
-	CollectionUnits * units;
+	wxString lastFootDirectory;
+	wxString lastShoeDirectory;
+	wxString lastOutputDirectory;
 
-	// Methods
-private:
-	bool TransferDataToWindow(void);
-	bool TransferDataFromWindow(void);
-
-private:
-	void OnClose(wxCommandEvent& event);
-	void OnCloseX(wxCloseEvent& event);
-	void OnChangeUnit(wxCommandEvent& event);
+	bool Load(wxConfig * config);
+	bool Save(wxConfig * config);
 };
 
-#endif /* DIALOGSETUPUNITS_H_ */
+#endif /* SRC_GUI_COLLECTIONFILEPATHS_H_ */

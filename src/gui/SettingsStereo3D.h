@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : DialogSetupUnits.h
-// Purpose            :
+// Name               : SettingsStereo3D.h
+// Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 03.07.2011
-// Copyright          : (C) 2011 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 18.02.2019
+// Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,39 +24,38 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef DIALOGSETUPUNITS_H_
-#define DIALOGSETUPUNITS_H_
+#ifndef SRC_GUI_SETTINGSSTEREO3D_H_
+#define SRC_GUI_SETTINGSSTEREO3D_H_
 
-/*!\class DialogSetupUnits
+/*!\class SettingsStereo3D
  * \brief ...
  *
  * ...
  */
 
-#include "../StdInclude.h"
-#include "gui.h"
+#include <wx/config.h>
+#include "../3D/OpenGLCanvas.h"
 
-class CollectionUnits;
-class DialogSetupUnits:public GUIFrameSetupUnits {
-	// Constructor/ Destructor
-
+class SettingsStereo3D {
 public:
-	DialogSetupUnits(wxWindow* parent, CollectionUnits * units);
-	virtual ~DialogSetupUnits();
-	// Member variables
-private:
+	SettingsStereo3D();
+	virtual ~SettingsStereo3D();
 
-	CollectionUnits * units;
+	float eyeDistance;
+	float focalDistance;
+	unsigned char backgroundGrayLevel;
+	unsigned char rightEyeR;
+	unsigned char rightEyeG;
+	unsigned char rightEyeB;
+	unsigned char leftEyeR;
+	unsigned char leftEyeG;
+	unsigned char leftEyeB;
 
-	// Methods
-private:
-	bool TransferDataToWindow(void);
-	bool TransferDataFromWindow(void);
+	bool Load(wxConfig * config);
+	bool Save(wxConfig * config);
 
-private:
-	void OnClose(wxCommandEvent& event);
-	void OnCloseX(wxCloseEvent& event);
-	void OnChangeUnit(wxCommandEvent& event);
+	void WriteToCanvas(OpenGLCanvas * canvas);
+
 };
 
-#endif /* DIALOGSETUPUNITS_H_ */
+#endif /* SRC_GUI_SETTINGSSTEREO3D_H_ */

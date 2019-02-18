@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : DialogSetupUnits.h
-// Purpose            :
+// Name               : CollectionUnits.h
+// Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 03.07.2011
-// Copyright          : (C) 2011 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 18.02.2019
+// Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,39 +24,55 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef DIALOGSETUPUNITS_H_
-#define DIALOGSETUPUNITS_H_
+#ifndef SRC_GUI_COLLECTIONUNITS_H_
+#define SRC_GUI_COLLECTIONUNITS_H_
 
-/*!\class DialogSetupUnits
+/*!\class CollectionUnits
  * \brief ...
  *
  * ...
  */
 
-#include "../StdInclude.h"
-#include "gui.h"
+#include <wx/config.h>
+#include "../math/Unit.h"
+#include "DialogSetupUnits.h"
 
-class CollectionUnits;
-class DialogSetupUnits:public GUIFrameSetupUnits {
-	// Constructor/ Destructor
-
-public:
-	DialogSetupUnits(wxWindow* parent, CollectionUnits * units);
-	virtual ~DialogSetupUnits();
-	// Member variables
-private:
-
-	CollectionUnits * units;
-
-	// Methods
-private:
-	bool TransferDataToWindow(void);
-	bool TransferDataFromWindow(void);
-
-private:
-	void OnClose(wxCommandEvent& event);
-	void OnCloseX(wxCloseEvent& event);
-	void OnChangeUnit(wxCommandEvent& event);
+enum typeUnit {
+	unitNone,
+	unitTime,
+	unitDistance,
+	unitSmallDistance,
+	unitTolerance,
+	unitAngle,
+	unitPercent
 };
 
-#endif /* DIALOGSETUPUNITS_H_ */
+class CollectionUnits {
+public:
+	friend class DialogSetupUnits;
+	CollectionUnits();
+	virtual ~CollectionUnits();
+
+	Unit Time;
+	Unit Distance;
+	Unit SmallDistance;
+	Unit Tolerance;
+	Unit Angle;
+	Unit Percent;
+
+	bool Load(wxConfig * config);
+	bool Save(wxConfig * config);
+
+protected:
+	// TODO: Put the unit lists into the Unit class, or at least the factors.
+	wxArrayString unitsOfLength;
+	wxArrayString unitsOfTime;
+	wxArrayString unitsOfAngle;
+
+	double * factorofLength;
+	double * factorofTime;
+	double * factorofAngle;
+
+};
+
+#endif /* SRC_GUI_COLLECTIONUNITS_H_ */
