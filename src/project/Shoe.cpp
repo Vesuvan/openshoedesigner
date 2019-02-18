@@ -80,6 +80,10 @@ void Shoe::Update(MathParser& parser)
 	ballHeight.Update(parser);
 	heelPitch.Update(parser);
 	toeSpring.Update(parser);
+	upperLevel.Update(parser);
+	extraLength.Update(parser);
+	footCompression.Update(parser);
+
 	modified |= heelHeight.IsModified() | ballHeight.IsModified()
 			| heelPitch.IsModified() | toeSpring.IsModified()
 			| upperLevel.IsModified() | extraLength.IsModified()

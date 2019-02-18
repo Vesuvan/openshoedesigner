@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : PanelLegMeasurements.h
+// Name               : FrameSetupBackgroundImages.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 18.11.2018
-// Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 18.02.2019
+// Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,46 +24,34 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef SRC_GUI_PANELLEGMEASUREMENTS_H_
-#define SRC_GUI_PANELLEGMEASUREMENTS_H_
+#ifndef SRC_GUI_FRAMESETUPBACKGROUNDIMAGES_H_
+#define SRC_GUI_FRAMESETUPBACKGROUNDIMAGES_H_
 
-/*!\class PanelLegMeasurements
+/*!\class FrameSetupBackgroundImages
  * \brief ...
  *
  * ...
  */
 
-#include <wx/docview.h>
+#include "gui.h"
 
-#include "../project/foot/ParameterFormula.h"
-#include "DisplaySettings.h"
-#include "guipanels.h"
-
-class PanelLegMeasurements: public GUIPanelLegMeasurements {
+class FrameSetupBackgroundImages:public GUIFrameSetupBackgroundImages {
 public:
-	PanelLegMeasurements(wxWindow* parent, wxWindowID id = wxID_ANY,
+	FrameSetupBackgroundImages(wxWindow* parent, wxWindowID id = wxID_ANY,
+			const wxString& title = _("Setup background images"),
 			const wxPoint& pos = wxDefaultPosition,
-			const wxSize& size = wxSize(-1, -1), long style = wxTAB_TRAVERSAL);
-	virtual ~PanelLegMeasurements();
+			const wxSize& size = wxSize(582, 561),
+			long style = wxDEFAULT_FRAME_STYLE | wxRESIZE_BORDER | wxSTAY_ON_TOP
+					| wxTAB_TRAVERSAL);
+	virtual ~FrameSetupBackgroundImages();
 
-	void SetDocView(wxDocument* doc, wxView* view);
-	void SetDisplaySettings(DisplaySettings* settings);
-
-	bool TransferDataToWindow(void);
-
-	void TransferParameterToTextCtrl(ParameterFormula const parameter,
-			wxTextCtrl *ctrl, bool isDistance = true);
-
-	wxString GetNameByID(int id);
-	wxTextCtrl* GetTextCtrlByID(int id);
-
-	void OnKillFocus(wxFocusEvent& event);
-	void OnSetFocus(wxFocusEvent& event);
+	void OnAddUpdate(wxCommandEvent& event);
+	void OnRemove(wxCommandEvent& event);
 	void OnTextEnter(wxCommandEvent& event);
+	void OnSpin(wxSpinEvent& event);
+	void OnRightDown(wxMouseEvent& event);
+	void OnScroll(wxScrollEvent& event);
 
-	wxDocument *doc;
-	wxView *view;
-	DisplaySettings *settings;
 };
 
-#endif /* SRC_GUI_PANELLEGMEASUREMENTS_H_ */
+#endif /* SRC_GUI_FRAMESETUPBACKGROUNDIMAGES_H_ */

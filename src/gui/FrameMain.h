@@ -38,16 +38,18 @@
 #include "gui.h"
 
 #include "DialogSetupStereo3D.h"
-#include "DisplaySettings.h"
-
 #include "../project/Project.h"
 
 #include <wx/intl.h>
 #include <wx/config.h>
 
 #include "../project/IniFile.h"
-#include "DialogSetupUnits.h"
 #include "MidiPort.h"
+
+#include "SettingsStereo3D.h"
+#include "CollectionUnits.h"
+#include "CollectionFilepaths.h"
+
 class ProjectView;
 
 class FrameMain:public GUIFrameMain {
@@ -58,7 +60,15 @@ public:
 	virtual ~FrameMain();
 
 	wxConfig *config;
-	IniFile presets;
+	CollectionFilepaths filepaths;
+
+	IniFile presets; //TODO: Check, if this can be moved elsewhere
+
+protected:
+	const wxBitmap bm0;
+	const wxBitmap bm1;
+
+public:
 
 	bool TransferDataToWindow();
 	bool TransferDataFromWindow();
@@ -70,7 +80,7 @@ public:
 	wxString GetNameByID(int id);
 	wxTextCtrl* GetTextCtrlByID(int id);
 	void TransferParameterToTextCtrl(ParameterFormula const parameter,
-			wxTextCtrl *ctrl, bool isDistance = true);
+			wxTextCtrl *ctrl, typeUnit type);
 
 	void OnClose(wxCloseEvent& event);
 	void OnQuickSetupMeasurements(wxCommandEvent& event);
@@ -81,9 +91,7 @@ public:
 	void OnEditBoneModel(wxCommandEvent& event);
 	void OnLoadBoneModel(wxCommandEvent& event);
 	void OnSaveBoneModel(wxCommandEvent& event);
-	void OnSetupShoe(wxCommandEvent& event);
 	void OnConstructionSelection(wxCommandEvent& event);
-	void OnEditWalkCycle(wxCommandEvent& event);
 	void OnLoadPattern(wxCommandEvent& event);
 	void OnSavePattern(wxCommandEvent& event);
 	void OnSaveLast(wxCommandEvent& event);
@@ -96,14 +104,17 @@ public:
 	void OnSetupBackgroundImages(wxCommandEvent& event);
 	void OnDebugParser(wxCommandEvent& event);
 	void OnPageChange( wxNotebookEvent& event);
+	void OnMouseWheel(wxMouseEvent& event);
 	void OnToggleButton(wxCommandEvent& event);
+	void OnKillFocus(wxFocusEvent& event);
+	void OnSetFocus(wxFocusEvent& event);
+	void OnTextEnter(wxCommandEvent& event);
+	void OnSize(wxSizeEvent& event);
 	void OnFileChangedScanFile(wxFileDirPickerEvent& event);
 	void OnFileChangedLastFile(wxFileDirPickerEvent& event);
 	void OnChoice(wxCommandEvent& event);
-	void OnTextEnter(wxCommandEvent& event);
-	void OnKillFocus(wxFocusEvent& event);
-	void OnSetFocus(wxFocusEvent& event);
 	void OnCheckBox(wxCommandEvent& event);
+	void OnScroll(wxScrollEvent& event);
 	void OnToggleAnkleLock(wxCommandEvent& event);
 	void OnChoiceDisplay(wxCommandEvent& event);
 

@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Last.h
+// Name               : FrameSetupBackgroundImages.cpp
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 10.06.2017
-// Copyright          : (C) 2017 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 18.02.2019
+// Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,25 +24,40 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef LAST_H_
-#define LAST_H_
+#include "FrameSetupBackgroundImages.h"
 
-/*!\class Last
- * \brief Last with NURBS hull
- *
- * NURBS Hull derived from either the foot model or a prototype last model.
- */
+FrameSetupBackgroundImages::FrameSetupBackgroundImages(wxWindow* parent,
+		wxWindowID id, const wxString& title, const wxPoint& pos,
+		const wxSize& size, long style)
+		: GUIFrameSetupBackgroundImages(parent, id, title, pos, size, style)
+{
 
-#include "../../3D/NURBS.h"
+}
 
-class Last {
-public:
-	Last();
-	virtual ~Last();
+FrameSetupBackgroundImages::~FrameSetupBackgroundImages()
+{
+}
 
-	void Paint(void) const;
+void FrameSetupBackgroundImages::OnAddUpdate(wxCommandEvent& event)
+{
+}
 
-	NURBS nurbs;
-};
+void FrameSetupBackgroundImages::OnRemove(wxCommandEvent& event)
+{
+}
 
-#endif /* LAST_H_ */
+void FrameSetupBackgroundImages::OnTextEnter(wxCommandEvent& event)
+{
+}
+
+void FrameSetupBackgroundImages::OnSpin(wxSpinEvent& event)
+{
+}
+
+void FrameSetupBackgroundImages::OnRightDown(wxMouseEvent& event)
+{
+}
+
+void FrameSetupBackgroundImages::OnScroll(wxScrollEvent& event)
+{
+}

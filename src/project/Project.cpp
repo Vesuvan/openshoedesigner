@@ -114,6 +114,8 @@ void Project::Reset(void)
 {
 	wxFileInputStream input(_T("data/FootModelDefault.txt"));
 	wxTextInputStream text(input);
+	lastModelL.Load("data/last.dat");
+	lastModelL.Test();
 	footL.LoadModel(&text);
 	footR.CopyModel(footL);
 	footR.mirrored = true;

@@ -9,6 +9,9 @@
 
 #include "gui.h"
 
+#include "../icons/FootMeasurements_small.xpm"
+#include "../icons/LegMeasurements.xpm"
+
 ///////////////////////////////////////////////////////////////////////////
 
 GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDocChildFrame( doc, view, parent, id, title, pos, size, style )
@@ -119,11 +122,6 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_menubar->Append( m_menuLast, _("&Last") ); 
 	
 	m_menuShoe = new wxMenu();
-	wxMenuItem* m_menuItemSetupShoe;
-	m_menuItemSetupShoe = new wxMenuItem( m_menuShoe, ID_SETUPSHOE, wxString( _("Setup &Shoe") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menuShoe->Append( m_menuItemSetupShoe );
-	m_menuItemSetupShoe->Enable( false );
-	
 	m_menuConstruction = new wxMenu();
 	wxMenuItem* m_menuConstructionItem = new wxMenuItem( m_menuShoe, wxID_ANY, _("&Construction method"), wxEmptyString, wxITEM_NORMAL, m_menuConstruction );
 	wxMenuItem* m_menuItemTestGenerator;
@@ -147,11 +145,6 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_menuConstruction->Append( m_menuItemConstructionDutch );
 	
 	m_menuShoe->Append( m_menuConstructionItem );
-	
-	wxMenuItem* m_menuItemEditWalkCycle;
-	m_menuItemEditWalkCycle = new wxMenuItem( m_menuShoe, ID_EDITWALKCYCLE, wxString( _("Define &Walkcycle Support") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menuShoe->Append( m_menuItemEditWalkCycle );
-	m_menuItemEditWalkCycle->Enable( false );
 	
 	m_menubar->Append( m_menuShoe, _("&Shoe") ); 
 	
@@ -336,8 +329,177 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	wxBoxSizer* bSizerFootMeasurements;
 	bSizerFootMeasurements = new wxBoxSizer( wxVERTICAL );
 	
-	m_panelFootMeasurements = new PanelFootMeasurements(m_panelMeasurementBased);
-	bSizerFootMeasurements->Add( m_panelFootMeasurements, 0, wxALL|wxEXPAND, 5 );
+	wxBoxSizer* bSizerFootMeasurementsHorizontal;
+	bSizerFootMeasurementsHorizontal = new wxBoxSizer( wxHORIZONTAL );
+	
+	wxBoxSizer* bSizerFootMeasurementsVertical;
+	bSizerFootMeasurementsVertical = new wxBoxSizer( wxVERTICAL );
+	
+	wxFlexGridSizer* fgSizerFootMeasurements;
+	fgSizerFootMeasurements = new wxFlexGridSizer( 8, 2, 0, 0 );
+	fgSizerFootMeasurements->AddGrowableCol( 1 );
+	fgSizerFootMeasurements->SetFlexibleDirection( wxHORIZONTAL );
+	fgSizerFootMeasurements->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_staticTextFootLength = new wxStaticText( m_panelMeasurementBased, wxID_ANY, _("Foot length:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextFootLength->Wrap( -1 );
+	fgSizerFootMeasurements->Add( m_staticTextFootLength, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
+	
+	m_textCtrlFootLength = new wxTextCtrl( m_panelMeasurementBased, ID_MEASUREMENT_FOOTLENGTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlFootLength->SetToolTip( _("Length of the foot (not length of the last). Measured from the longest toe to the heel.") );
+	
+	fgSizerFootMeasurements->Add( m_textCtrlFootLength, 0, wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_staticTextBallGirth = new wxStaticText( m_panelMeasurementBased, wxID_ANY, _("Ball girth:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextBallGirth->Wrap( -1 );
+	fgSizerFootMeasurements->Add( m_staticTextBallGirth, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_textCtrlBallGirth = new wxTextCtrl( m_panelMeasurementBased, ID_MEASUREMENT_BALLGIRTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlBallGirth->SetToolTip( _("Grith around the widest part at the ball of the foot.") );
+	
+	fgSizerFootMeasurements->Add( m_textCtrlBallGirth, 0, wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_staticTextWaistGirth = new wxStaticText( m_panelMeasurementBased, wxID_ANY, _("Waist girth:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextWaistGirth->Wrap( -1 );
+	fgSizerFootMeasurements->Add( m_staticTextWaistGirth, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
+	
+	m_textCtrlWaistGirth = new wxTextCtrl( m_panelMeasurementBased, ID_MEASUREMENT_WAISTGIRTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	fgSizerFootMeasurements->Add( m_textCtrlWaistGirth, 0, wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_staticTextInsteGirth = new wxStaticText( m_panelMeasurementBased, wxID_ANY, _("Instep girth:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextInsteGirth->Wrap( -1 );
+	fgSizerFootMeasurements->Add( m_staticTextInsteGirth, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
+	
+	m_textCtrlInstepGirth = new wxTextCtrl( m_panelMeasurementBased, ID_MEASUREMENT_INSTEPGIRTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	fgSizerFootMeasurements->Add( m_textCtrlInstepGirth, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
+	
+	m_staticTextLongHeelGirth = new wxStaticText( m_panelMeasurementBased, wxID_ANY, _("Long heel girth:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextLongHeelGirth->Wrap( -1 );
+	fgSizerFootMeasurements->Add( m_staticTextLongHeelGirth, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_textCtrlLongHeelGirth = new wxTextCtrl( m_panelMeasurementBased, ID_MEASUREMENT_LONGHEELGIRTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	fgSizerFootMeasurements->Add( m_textCtrlLongHeelGirth, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_staticTextShortHeelGirth = new wxStaticText( m_panelMeasurementBased, wxID_ANY, _("Short heel girth:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextShortHeelGirth->Wrap( -1 );
+	fgSizerFootMeasurements->Add( m_staticTextShortHeelGirth, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_textCtrlShortHeelGirth = new wxTextCtrl( m_panelMeasurementBased, ID_MEASUREMENT_SHORTHEELGIRTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	fgSizerFootMeasurements->Add( m_textCtrlShortHeelGirth, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_staticTextAngleMixing = new wxStaticText( m_panelMeasurementBased, wxID_ANY, _("Angle Mixing:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextAngleMixing->Wrap( -1 );
+	fgSizerFootMeasurements->Add( m_staticTextAngleMixing, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
+	
+	m_textCtrlAngleMixing = new wxTextCtrl( m_panelMeasurementBased, ID_MEASUREMENT_ANGLEMIXING, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlAngleMixing->SetToolTip( _("Mixing determines how much of the needed bending of the foot is done by the heel and how much is spread on the forefoot. 0% is all heel, 100% is all forefoot. 100% is impractical unless some serious misalignment of the foot is to be compensated.") );
+	
+	fgSizerFootMeasurements->Add( m_textCtrlAngleMixing, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_staticTextLegLengthDifference = new wxStaticText( m_panelMeasurementBased, wxID_ANY, _("Leg length difference:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextLegLengthDifference->Wrap( -1 );
+	fgSizerFootMeasurements->Add( m_staticTextLegLengthDifference, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
+	
+	m_textCtrlLegLengthDifference = new wxTextCtrl( m_panelMeasurementBased, ID_MEASUREMENT_LEGLENGTHDIFFERENCE, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlLegLengthDifference->SetToolTip( _("Distance the right leg is longer than the left (positive number). If the right leg is shorter than the left leg the number has to be negative.") );
+	
+	fgSizerFootMeasurements->Add( m_textCtrlLegLengthDifference, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	
+	bSizerFootMeasurementsVertical->Add( fgSizerFootMeasurements, 0, wxALIGN_CENTER_HORIZONTAL, 5 );
+	
+	
+	bSizerFootMeasurementsHorizontal->Add( bSizerFootMeasurementsVertical, 0, 0, 5 );
+	
+	
+	bSizerFootMeasurementsHorizontal->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizerShoeSizes;
+	bSizerShoeSizes = new wxBoxSizer( wxVERTICAL );
+	
+	m_buttonQuickSetup = new wxButton( m_panelMeasurementBased, ID_QUICKSETUPMEASUREMENTS, _("Quick Setup"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerShoeSizes->Add( m_buttonQuickSetup, 0, wxALL|wxEXPAND, 5 );
+	
+	wxStaticBoxSizer* sbSizerShoeSizes;
+	sbSizerShoeSizes = new wxStaticBoxSizer( new wxStaticBox( m_panelMeasurementBased, wxID_ANY, _("Shoesizes") ), wxVERTICAL );
+	
+	wxFlexGridSizer* fgSizerShoeSizes;
+	fgSizerShoeSizes = new wxFlexGridSizer( 6, 2, 0, 0 );
+	fgSizerShoeSizes->AddGrowableCol( 1 );
+	fgSizerShoeSizes->SetFlexibleDirection( wxHORIZONTAL );
+	fgSizerShoeSizes->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_staticTextShoeSizeEU = new wxStaticText( sbSizerShoeSizes->GetStaticBox(), wxID_ANY, _("EU:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextShoeSizeEU->Wrap( -1 );
+	fgSizerShoeSizes->Add( m_staticTextShoeSizeEU, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
+	
+	m_textCtrlShoeSizeEU = new wxTextCtrl( sbSizerShoeSizes->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTRE|wxTE_READONLY );
+	m_textCtrlShoeSizeEU->SetToolTip( _("Last length in Paris point") );
+	
+	fgSizerShoeSizes->Add( m_textCtrlShoeSizeEU, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
+	
+	m_staticTextShoeSizeUS = new wxStaticText( sbSizerShoeSizes->GetStaticBox(), wxID_ANY, _("US:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextShoeSizeUS->Wrap( -1 );
+	fgSizerShoeSizes->Add( m_staticTextShoeSizeUS, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_textCtrlShoeSizeUS = new wxTextCtrl( sbSizerShoeSizes->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTRE|wxTE_READONLY );
+	m_textCtrlShoeSizeUS->SetToolTip( _("Brannock-Scale") );
+	
+	fgSizerShoeSizes->Add( m_textCtrlShoeSizeUS, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
+	
+	m_staticTextShoeSizeUK = new wxStaticText( sbSizerShoeSizes->GetStaticBox(), wxID_ANY, _("UK:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextShoeSizeUK->Wrap( -1 );
+	fgSizerShoeSizes->Add( m_staticTextShoeSizeUK, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_textCtrlShoeSizeUK = new wxTextCtrl( sbSizerShoeSizes->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTRE|wxTE_READONLY );
+	m_textCtrlShoeSizeUK->SetToolTip( _("Last length in Barleycorns") );
+	
+	fgSizerShoeSizes->Add( m_textCtrlShoeSizeUK, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
+	
+	m_staticTextShoeSizeCN = new wxStaticText( sbSizerShoeSizes->GetStaticBox(), wxID_ANY, _("CN:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextShoeSizeCN->Wrap( -1 );
+	fgSizerShoeSizes->Add( m_staticTextShoeSizeCN, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
+	
+	m_textCtrlShoeSizeCN = new wxTextCtrl( sbSizerShoeSizes->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTRE|wxTE_READONLY );
+	m_textCtrlShoeSizeCN->SetToolTip( _("Foot length in cm") );
+	
+	fgSizerShoeSizes->Add( m_textCtrlShoeSizeCN, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
+	
+	m_staticTextShoeSizeJP = new wxStaticText( sbSizerShoeSizes->GetStaticBox(), wxID_ANY, _("JP:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextShoeSizeJP->Wrap( -1 );
+	fgSizerShoeSizes->Add( m_staticTextShoeSizeJP, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_textCtrlShoeSizeJP = new wxTextCtrl( sbSizerShoeSizes->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTRE|wxTE_READONLY );
+	m_textCtrlShoeSizeJP->SetToolTip( _("Foot length in mm") );
+	
+	fgSizerShoeSizes->Add( m_textCtrlShoeSizeJP, 0, wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 5 );
+	
+	m_staticTextShoeSizeAU = new wxStaticText( sbSizerShoeSizes->GetStaticBox(), wxID_ANY, _("AU:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextShoeSizeAU->Wrap( -1 );
+	fgSizerShoeSizes->Add( m_staticTextShoeSizeAU, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	m_textCtrlShoeSizeAU = new wxTextCtrl( sbSizerShoeSizes->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTRE|wxTE_READONLY );
+	m_textCtrlShoeSizeAU->SetToolTip( _("Last length in Barleycorns") );
+	
+	fgSizerShoeSizes->Add( m_textCtrlShoeSizeAU, 0, wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 5 );
+	
+	
+	sbSizerShoeSizes->Add( fgSizerShoeSizes, 0, wxALIGN_CENTER_HORIZONTAL, 5 );
+	
+	
+	bSizerShoeSizes->Add( sbSizerShoeSizes, 0, 0, 5 );
+	
+	
+	bSizerFootMeasurementsHorizontal->Add( bSizerShoeSizes, 0, 0, 5 );
+	
+	
+	bSizerFootMeasurementsHorizontal->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	
+	bSizerFootMeasurements->Add( bSizerFootMeasurementsHorizontal, 0, wxEXPAND, 5 );
+	
+	m_bitmapFoot = new wxStaticBitmap( m_panelMeasurementBased, ID_IMAGEFOOT, wxBitmap( FootMeasurements_small_xpm ), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerFootMeasurements->Add( m_bitmapFoot, 0, wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
 	
 	
 	m_panelMeasurementBased->SetSizer( bSizerFootMeasurements );
@@ -416,8 +578,116 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	
 	bSizerLeg->Add( bSizerLeftRight1, 0, wxEXPAND, 5 );
 	
-	m_panelLegMeasurements = new PanelLegMeasurements(m_panelPageLeg);
-	bSizerLeg->Add( m_panelLegMeasurements, 0, wxALL|wxEXPAND, 5 );
+	wxBoxSizer* bSizerLegMeasurements;
+	bSizerLegMeasurements = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_bitmapLeg = new wxStaticBitmap( m_panelPageLeg, wxID_ANY, wxBitmap( LegMeasurements_xpm ), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerLegMeasurements->Add( m_bitmapLeg, 0, wxALL, 5 );
+	
+	wxBoxSizer* bSizerLegMeasurementsVertical;
+	bSizerLegMeasurementsVertical = new wxBoxSizer( wxVERTICAL );
+	
+	wxFlexGridSizer* fgSizerLegMeasurements;
+	fgSizerLegMeasurements = new wxFlexGridSizer( 9, 2, 0, 0 );
+	fgSizerLegMeasurements->SetFlexibleDirection( wxBOTH );
+	fgSizerLegMeasurements->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	
+	m_staticTextGirth = new wxStaticText( m_panelPageLeg, wxID_ANY, _("Girth:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextGirth->Wrap( -1 );
+	fgSizerLegMeasurements->Add( m_staticTextGirth, 0, wxALL, 5 );
+	
+	m_staticTextLevel = new wxStaticText( m_panelPageLeg, wxID_ANY, _("Level:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextLevel->Wrap( -1 );
+	fgSizerLegMeasurements->Add( m_staticTextLevel, 0, wxALL, 5 );
+	
+	m_textCtrlBelowCrutchGirth = new wxTextCtrl( m_panelPageLeg, ID_MEASUREMENT_BELOWCRUTCHGIRTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlBelowCrutchGirth->SetToolTip( _("Below crutch girth") );
+	
+	fgSizerLegMeasurements->Add( m_textCtrlBelowCrutchGirth, 0, wxALL, 5 );
+	
+	m_textCtrlBelowCrutchLevel = new wxTextCtrl( m_panelPageLeg, ID_MEASUREMENT_BELOWCRUTCHLEVEL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlBelowCrutchLevel->SetToolTip( _("Below crutch level") );
+	
+	fgSizerLegMeasurements->Add( m_textCtrlBelowCrutchLevel, 0, wxALL, 5 );
+	
+	m_textCtrlMiddleOfCalfGirth = new wxTextCtrl( m_panelPageLeg, ID_MEASUREMENT_MIDDLEOFCALFGIRTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlMiddleOfCalfGirth->SetToolTip( _("Middle of calf girth") );
+	
+	fgSizerLegMeasurements->Add( m_textCtrlMiddleOfCalfGirth, 0, wxALL, 5 );
+	
+	m_textCtrlMiddleOfCalfLevel = new wxTextCtrl( m_panelPageLeg, ID_MEASUREMENT_MIDDLEOFCALFLEVEL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlMiddleOfCalfLevel->SetToolTip( _("Middle of calf level") );
+	
+	fgSizerLegMeasurements->Add( m_textCtrlMiddleOfCalfLevel, 0, wxALL, 5 );
+	
+	m_textCtrlAboveKneeGirth = new wxTextCtrl( m_panelPageLeg, ID_MEASUREMENT_ABOVEKNEEGIRTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlAboveKneeGirth->SetToolTip( _("Above knee girth") );
+	
+	fgSizerLegMeasurements->Add( m_textCtrlAboveKneeGirth, 0, wxALL, 5 );
+	
+	m_textCtrlAboveKneeLevel = new wxTextCtrl( m_panelPageLeg, ID_MEASUREMENT_ABOVEKNEELEVEL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlAboveKneeLevel->SetToolTip( _("Above knee level") );
+	
+	fgSizerLegMeasurements->Add( m_textCtrlAboveKneeLevel, 0, wxALL, 5 );
+	
+	m_textCtrlOverKneeCapGirth = new wxTextCtrl( m_panelPageLeg, ID_MEASUREMENT_OVERKNEECAPGIRTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlOverKneeCapGirth->SetToolTip( _("Over knee cap girth") );
+	
+	fgSizerLegMeasurements->Add( m_textCtrlOverKneeCapGirth, 0, wxALL, 5 );
+	
+	m_textCtrlOverKneeCapLevel = new wxTextCtrl( m_panelPageLeg, ID_MEASUREMENT_OVERKNEECAPLEVEL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlOverKneeCapLevel->SetToolTip( _("Over knee cap level") );
+	
+	fgSizerLegMeasurements->Add( m_textCtrlOverKneeCapLevel, 0, wxALL, 5 );
+	
+	m_textCtrlBelowKneeGirth = new wxTextCtrl( m_panelPageLeg, ID_MEASUREMENT_BELOWKNEEGIRTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlBelowKneeGirth->SetToolTip( _("Below knee girth") );
+	
+	fgSizerLegMeasurements->Add( m_textCtrlBelowKneeGirth, 0, wxALL, 5 );
+	
+	m_textCtrlBelowKneeLevel = new wxTextCtrl( m_panelPageLeg, ID_MEASUREMENT_BELOWKNEELEVEL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlBelowKneeLevel->SetToolTip( _("Below knee level") );
+	
+	fgSizerLegMeasurements->Add( m_textCtrlBelowKneeLevel, 0, wxALL, 5 );
+	
+	m_textCtrlMiddleOfShankGirth = new wxTextCtrl( m_panelPageLeg, ID_MEASUREMENT_MIDDLEOFSHANKGIRTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlMiddleOfShankGirth->SetToolTip( _("Middle of shank girth") );
+	
+	fgSizerLegMeasurements->Add( m_textCtrlMiddleOfShankGirth, 0, wxALL, 5 );
+	
+	m_textCtrlMiddleOfShankLevel = new wxTextCtrl( m_panelPageLeg, ID_MEASUREMENT_MIDDLEOFSHANKLEVEL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlMiddleOfShankLevel->SetToolTip( _("Middle of shank level") );
+	
+	fgSizerLegMeasurements->Add( m_textCtrlMiddleOfShankLevel, 0, wxALL, 5 );
+	
+	m_textCtrlAboveAnkleGirth = new wxTextCtrl( m_panelPageLeg, ID_MEASUREMENT_ABOVEANKLEGIRTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlAboveAnkleGirth->SetToolTip( _("Above ankle girth") );
+	
+	fgSizerLegMeasurements->Add( m_textCtrlAboveAnkleGirth, 0, wxALL, 5 );
+	
+	m_textCtrlAboveAnkleLevel = new wxTextCtrl( m_panelPageLeg, ID_MEASUREMENT_ABOVEANKLELEVEL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlAboveAnkleLevel->SetToolTip( _("Above ankle level") );
+	
+	fgSizerLegMeasurements->Add( m_textCtrlAboveAnkleLevel, 0, wxALL, 5 );
+	
+	m_textCtrlOverAnkleBoneGirth = new wxTextCtrl( m_panelPageLeg, ID_MEASUREMENT_OVERANKLEBONEGIRTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlOverAnkleBoneGirth->SetToolTip( _("Over ankle bone girth") );
+	
+	fgSizerLegMeasurements->Add( m_textCtrlOverAnkleBoneGirth, 0, wxALL, 5 );
+	
+	m_textCtrlOverAnkleBoneLevel = new wxTextCtrl( m_panelPageLeg, ID_MEASUREMENT_OVERANKLEBONELEVEL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER );
+	m_textCtrlOverAnkleBoneLevel->SetToolTip( _("Over ankle bone level") );
+	
+	fgSizerLegMeasurements->Add( m_textCtrlOverAnkleBoneLevel, 0, wxALL, 5 );
+	
+	
+	bSizerLegMeasurementsVertical->Add( fgSizerLegMeasurements, 0, 0, 5 );
+	
+	
+	bSizerLegMeasurements->Add( bSizerLegMeasurementsVertical, 0, wxALIGN_CENTER_VERTICAL, 5 );
+	
+	
+	bSizerLeg->Add( bSizerLegMeasurements, 0, wxEXPAND, 5 );
 	
 	
 	m_panelPageLeg->SetSizer( bSizerLeg );
@@ -643,10 +913,10 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	wxStaticBoxSizer* sbSizer9;
 	sbSizer9 = new wxStaticBoxSizer( new wxStaticBox( m_panelPageSole, wxID_ANY, _("Walkcycle Support Toe") ), wxVERTICAL );
 	
-	m_sliderSupportToeRadius = new wxSlider( sbSizer9->GetStaticBox(), wxID_ANY, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
+	m_sliderSupportToeRadius = new wxSlider( sbSizer9->GetStaticBox(), ID_SLIDERTOESUPPORTRADIUS, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
 	sbSizer9->Add( m_sliderSupportToeRadius, 0, wxALL|wxEXPAND, 5 );
 	
-	m_sliderSupportToeOffset = new wxSlider( sbSizer9->GetStaticBox(), wxID_ANY, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
+	m_sliderSupportToeOffset = new wxSlider( sbSizer9->GetStaticBox(), ID_SLIDERTOESUPPORTOFFSET, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
 	sbSizer9->Add( m_sliderSupportToeOffset, 0, wxALL|wxEXPAND, 5 );
 	
 	
@@ -836,13 +1106,11 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	this->Connect( m_menuItemEditBoneModel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnEditBoneModel ) );
 	this->Connect( m_menuItemLoadBoneModel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnLoadBoneModel ) );
 	this->Connect( m_menuItemSaveBoneModel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveBoneModel ) );
-	this->Connect( m_menuItemSetupShoe->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupShoe ) );
 	this->Connect( m_menuItemTestGenerator->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
 	this->Connect( m_menuItemConstructionClassic->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
 	this->Connect( m_menuItemConstructionCemented->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
 	this->Connect( m_menuItemConstructionMolded->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
 	this->Connect( m_menuItemConstructionDutch->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
-	this->Connect( m_menuItemEditWalkCycle->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnEditWalkCycle ) );
 	this->Connect( m_menuItemLoadPattern->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnLoadPattern ) );
 	this->Connect( m_menuItemSavePattern->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSavePattern ) );
 	this->Connect( m_menuItemSaveLast->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveLast ) );
@@ -867,37 +1135,179 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	this->Connect( m_menuItemSetupBackground->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupBackgroundImages ) );
 	this->Connect( m_menuItemdebugParser->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnDebugParser ) );
 	m_notebook->Connect( wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler( GUIFrameMain::OnPageChange ), NULL, this );
+	m_panelPageFoot->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_toggleBtnEditLeft->Connect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
 	m_toggleBtnEditRight->Connect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
+	m_textCtrlFootLength->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlFootLength->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlFootLength->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlFootLength->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlBallGirth->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlBallGirth->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlBallGirth->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlBallGirth->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlWaistGirth->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlWaistGirth->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlWaistGirth->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlWaistGirth->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlInstepGirth->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlInstepGirth->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlInstepGirth->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlInstepGirth->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlLongHeelGirth->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlLongHeelGirth->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlLongHeelGirth->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlLongHeelGirth->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlShortHeelGirth->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlShortHeelGirth->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlShortHeelGirth->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlShortHeelGirth->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlAngleMixing->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlAngleMixing->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlAngleMixing->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlAngleMixing->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlLegLengthDifference->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlLegLengthDifference->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlLegLengthDifference->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlLegLengthDifference->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_buttonQuickSetup->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnQuickSetupMeasurements ), NULL, this );
+	m_bitmapFoot->Connect( wxEVT_SIZE, wxSizeEventHandler( GUIFrameMain::OnSize ), NULL, this );
 	m_filePickerScanFile->Connect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( GUIFrameMain::OnFileChangedScanFile ), NULL, this );
 	m_buttonEditBoneModel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnEditBoneModel ), NULL, this );
 	m_filePickerLastModel->Connect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( GUIFrameMain::OnFileChangedLastFile ), NULL, this );
 	m_toggleBtnEditLeft1->Connect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
 	m_toggleBtnEditRight1->Connect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
+	m_textCtrlBelowCrutchGirth->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlBelowCrutchGirth->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlBelowCrutchGirth->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlBelowCrutchGirth->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlBelowCrutchLevel->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlBelowCrutchLevel->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlBelowCrutchLevel->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlBelowCrutchLevel->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlMiddleOfCalfGirth->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlMiddleOfCalfGirth->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlMiddleOfCalfGirth->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlMiddleOfCalfGirth->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlMiddleOfCalfLevel->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlMiddleOfCalfLevel->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlMiddleOfCalfLevel->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlMiddleOfCalfLevel->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlAboveKneeGirth->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlAboveKneeGirth->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlAboveKneeGirth->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlAboveKneeGirth->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlAboveKneeLevel->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlAboveKneeLevel->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlAboveKneeLevel->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlAboveKneeLevel->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlOverKneeCapGirth->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlOverKneeCapGirth->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlOverKneeCapGirth->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlOverKneeCapGirth->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlOverKneeCapLevel->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlOverKneeCapLevel->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlOverKneeCapLevel->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlOverKneeCapLevel->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlBelowKneeGirth->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlBelowKneeGirth->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlBelowKneeGirth->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlBelowKneeGirth->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlBelowKneeLevel->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlBelowKneeLevel->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlBelowKneeLevel->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlBelowKneeLevel->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlMiddleOfShankGirth->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlMiddleOfShankGirth->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlMiddleOfShankGirth->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlMiddleOfShankGirth->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlMiddleOfShankLevel->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlMiddleOfShankLevel->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlMiddleOfShankLevel->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlMiddleOfShankLevel->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlAboveAnkleGirth->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlAboveAnkleGirth->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlAboveAnkleGirth->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlAboveAnkleGirth->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlAboveAnkleLevel->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlAboveAnkleLevel->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlAboveAnkleLevel->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlAboveAnkleLevel->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlOverAnkleBoneGirth->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlOverAnkleBoneGirth->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlOverAnkleBoneGirth->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlOverAnkleBoneGirth->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlOverAnkleBoneLevel->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlOverAnkleBoneLevel->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlOverAnkleBoneLevel->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlOverAnkleBoneLevel->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_choiceShoeType->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChoice ), NULL, this );
 	m_textCtrlHeelHeight->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlHeelHeight->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlHeelHeight->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlHeelHeight->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_textCtrlBallHeight->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlBallHeight->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlBallHeight->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlBallHeight->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_textCtrlHeelPitch->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlHeelPitch->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlHeelPitch->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlHeelPitch->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_textCtrlToeSpring->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlToeSpring->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlToeSpring->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlToeSpring->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_choiceShoeHeight->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChoice ), NULL, this );
 	m_textCtrlUpperLevel->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlUpperLevel->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlUpperLevel->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlUpperLevel->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_textCtrlExtraLength->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlExtraLength->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlExtraLength->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlExtraLength->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_textCtrlFootCompression->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlFootCompression->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlFootCompression->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlFootCompression->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_checkBoxSeparatedHeel->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameMain::OnCheckBox ), NULL, this );
+	m_sliderSupportHeelRadius->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelRadius->Connect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelRadius->Connect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelRadius->Connect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelRadius->Connect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelRadius->Connect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelRadius->Connect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelRadius->Connect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelRadius->Connect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Connect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Connect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Connect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Connect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Connect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Connect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Connect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Connect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Connect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Connect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Connect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Connect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Connect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Connect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Connect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Connect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Connect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Connect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Connect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Connect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Connect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Connect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Connect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Connect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
 	m_checkBoxLockAnkle->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleAnkleLock ), NULL, this );
 	m_choiceDisplay->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChoiceDisplay ), NULL, this );
 }
@@ -920,13 +1330,11 @@ GUIFrameMain::~GUIFrameMain()
 	this->Disconnect( ID_EDITBONEMODEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnEditBoneModel ) );
 	this->Disconnect( ID_LOADFOOTMODEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnLoadBoneModel ) );
 	this->Disconnect( ID_SAVEFOOTMODEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveBoneModel ) );
-	this->Disconnect( ID_SETUPSHOE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupShoe ) );
 	this->Disconnect( ID_CONSTRUCTIONEXPERIMENTAL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
 	this->Disconnect( ID_CONSTRUCTIONWELDED, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
 	this->Disconnect( ID_CONSTRUCTIONCEMENTED, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
 	this->Disconnect( ID_CONSTRUCTIONMOLDED, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
 	this->Disconnect( ID_CONSTRUCTIONDUTCH, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
-	this->Disconnect( ID_EDITWALKCYCLE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnEditWalkCycle ) );
 	this->Disconnect( ID_LOADPATTERN, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnLoadPattern ) );
 	this->Disconnect( ID_SAVEPATTERN, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSavePattern ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveLast ) );
@@ -951,37 +1359,179 @@ GUIFrameMain::~GUIFrameMain()
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupBackgroundImages ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnDebugParser ) );
 	m_notebook->Disconnect( wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler( GUIFrameMain::OnPageChange ), NULL, this );
+	m_panelPageFoot->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_toggleBtnEditLeft->Disconnect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
 	m_toggleBtnEditRight->Disconnect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
+	m_textCtrlFootLength->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlFootLength->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlFootLength->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlFootLength->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlBallGirth->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlBallGirth->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlBallGirth->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlBallGirth->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlWaistGirth->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlWaistGirth->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlWaistGirth->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlWaistGirth->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlInstepGirth->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlInstepGirth->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlInstepGirth->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlInstepGirth->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlLongHeelGirth->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlLongHeelGirth->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlLongHeelGirth->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlLongHeelGirth->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlShortHeelGirth->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlShortHeelGirth->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlShortHeelGirth->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlShortHeelGirth->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlAngleMixing->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlAngleMixing->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlAngleMixing->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlAngleMixing->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlLegLengthDifference->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlLegLengthDifference->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlLegLengthDifference->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlLegLengthDifference->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_buttonQuickSetup->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnQuickSetupMeasurements ), NULL, this );
+	m_bitmapFoot->Disconnect( wxEVT_SIZE, wxSizeEventHandler( GUIFrameMain::OnSize ), NULL, this );
 	m_filePickerScanFile->Disconnect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( GUIFrameMain::OnFileChangedScanFile ), NULL, this );
 	m_buttonEditBoneModel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnEditBoneModel ), NULL, this );
 	m_filePickerLastModel->Disconnect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( GUIFrameMain::OnFileChangedLastFile ), NULL, this );
 	m_toggleBtnEditLeft1->Disconnect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
 	m_toggleBtnEditRight1->Disconnect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
+	m_textCtrlBelowCrutchGirth->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlBelowCrutchGirth->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlBelowCrutchGirth->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlBelowCrutchGirth->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlBelowCrutchLevel->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlBelowCrutchLevel->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlBelowCrutchLevel->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlBelowCrutchLevel->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlMiddleOfCalfGirth->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlMiddleOfCalfGirth->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlMiddleOfCalfGirth->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlMiddleOfCalfGirth->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlMiddleOfCalfLevel->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlMiddleOfCalfLevel->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlMiddleOfCalfLevel->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlMiddleOfCalfLevel->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlAboveKneeGirth->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlAboveKneeGirth->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlAboveKneeGirth->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlAboveKneeGirth->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlAboveKneeLevel->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlAboveKneeLevel->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlAboveKneeLevel->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlAboveKneeLevel->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlOverKneeCapGirth->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlOverKneeCapGirth->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlOverKneeCapGirth->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlOverKneeCapGirth->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlOverKneeCapLevel->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlOverKneeCapLevel->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlOverKneeCapLevel->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlOverKneeCapLevel->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlBelowKneeGirth->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlBelowKneeGirth->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlBelowKneeGirth->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlBelowKneeGirth->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlBelowKneeLevel->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlBelowKneeLevel->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlBelowKneeLevel->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlBelowKneeLevel->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlMiddleOfShankGirth->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlMiddleOfShankGirth->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlMiddleOfShankGirth->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlMiddleOfShankGirth->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlMiddleOfShankLevel->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlMiddleOfShankLevel->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlMiddleOfShankLevel->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlMiddleOfShankLevel->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlAboveAnkleGirth->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlAboveAnkleGirth->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlAboveAnkleGirth->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlAboveAnkleGirth->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlAboveAnkleLevel->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlAboveAnkleLevel->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlAboveAnkleLevel->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlAboveAnkleLevel->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlOverAnkleBoneGirth->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlOverAnkleBoneGirth->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlOverAnkleBoneGirth->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlOverAnkleBoneGirth->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_textCtrlOverAnkleBoneLevel->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlOverAnkleBoneLevel->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
+	m_textCtrlOverAnkleBoneLevel->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
+	m_textCtrlOverAnkleBoneLevel->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_choiceShoeType->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChoice ), NULL, this );
 	m_textCtrlHeelHeight->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlHeelHeight->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlHeelHeight->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlHeelHeight->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_textCtrlBallHeight->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlBallHeight->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlBallHeight->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlBallHeight->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_textCtrlHeelPitch->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlHeelPitch->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlHeelPitch->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlHeelPitch->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_textCtrlToeSpring->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlToeSpring->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlToeSpring->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlToeSpring->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_choiceShoeHeight->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChoice ), NULL, this );
 	m_textCtrlUpperLevel->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlUpperLevel->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlUpperLevel->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlUpperLevel->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_textCtrlExtraLength->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlExtraLength->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlExtraLength->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlExtraLength->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_textCtrlFootCompression->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
+	m_textCtrlFootCompression->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlFootCompression->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlFootCompression->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
 	m_checkBoxSeparatedHeel->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameMain::OnCheckBox ), NULL, this );
+	m_sliderSupportHeelRadius->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelRadius->Disconnect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelRadius->Disconnect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelRadius->Disconnect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelRadius->Disconnect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelRadius->Disconnect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelRadius->Disconnect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelRadius->Disconnect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelRadius->Disconnect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Disconnect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Disconnect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Disconnect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Disconnect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Disconnect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Disconnect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Disconnect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportHeelOffset->Disconnect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Disconnect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Disconnect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Disconnect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Disconnect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Disconnect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Disconnect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Disconnect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeRadius->Disconnect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Disconnect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Disconnect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Disconnect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Disconnect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Disconnect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Disconnect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Disconnect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
+	m_sliderSupportToeOffset->Disconnect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
 	m_checkBoxLockAnkle->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleAnkleLock ), NULL, this );
 	m_choiceDisplay->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChoiceDisplay ), NULL, this );
 	
@@ -1184,60 +1734,60 @@ GUIDialogQuickInitFoot::GUIDialogQuickInitFoot( wxWindow* parent, wxWindowID id,
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 	
-	wxBoxSizer* bSizer17;
-	bSizer17 = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer* bSizerMain;
+	bSizerMain = new wxBoxSizer( wxVERTICAL );
 	
-	wxBoxSizer* bSizer18;
-	bSizer18 = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer* bSizerSize;
+	bSizerSize = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_staticText37 = new wxStaticText( this, wxID_ANY, _("Shoesize:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText37->Wrap( -1 );
-	bSizer18->Add( m_staticText37, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	m_staticTextShoeSize = new wxStaticText( this, wxID_ANY, _("Shoesize:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextShoeSize->Wrap( -1 );
+	bSizerSize->Add( m_staticTextShoeSize, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 	
 	m_textCtrlShoeSize = new wxTextCtrl( this, wxID_ANY, _("39"), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER|wxTE_RIGHT );
-	bSizer18->Add( m_textCtrlShoeSize, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	bSizerSize->Add( m_textCtrlShoeSize, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 	
 	wxString m_choiceUnitChoices[] = { _("EU"), _("US"), _("CN"), _("UK"), _("JP"), _("AU"), _("mm"), _("cm"), _("in"), _("ft") };
 	int m_choiceUnitNChoices = sizeof( m_choiceUnitChoices ) / sizeof( wxString );
 	m_choiceUnit = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceUnitNChoices, m_choiceUnitChoices, 0 );
 	m_choiceUnit->SetSelection( 0 );
-	bSizer18->Add( m_choiceUnit, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	bSizerSize->Add( m_choiceUnit, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 	
 	
-	bSizer17->Add( bSizer18, 0, wxALIGN_CENTER_HORIZONTAL, 5 );
+	bSizerMain->Add( bSizerSize, 0, wxALIGN_CENTER_HORIZONTAL, 5 );
 	
-	wxBoxSizer* bSizer19;
-	bSizer19 = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer* bSizerWidth;
+	bSizerWidth = new wxBoxSizer( wxHORIZONTAL );
 	
 	m_radioBtnSmall = new wxRadioButton( this, wxID_ANY, _("small"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
-	bSizer19->Add( m_radioBtnSmall, 0, wxALL, 5 );
+	bSizerWidth->Add( m_radioBtnSmall, 0, wxALL, 5 );
 	
 	m_radioBtnMedium = new wxRadioButton( this, wxID_ANY, _("medium"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_radioBtnMedium->SetValue( true ); 
-	bSizer19->Add( m_radioBtnMedium, 0, wxALL, 5 );
+	bSizerWidth->Add( m_radioBtnMedium, 0, wxALL, 5 );
 	
 	m_radioBtnWide = new wxRadioButton( this, wxID_ANY, _("wide"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer19->Add( m_radioBtnWide, 0, wxALL, 5 );
+	bSizerWidth->Add( m_radioBtnWide, 0, wxALL, 5 );
 	
 	
-	bSizer17->Add( bSizer19, 0, 0, 5 );
+	bSizerMain->Add( bSizerWidth, 0, 0, 5 );
 	
-	wxBoxSizer* bSizer20;
-	bSizer20 = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer* bSizerButtons;
+	bSizerButtons = new wxBoxSizer( wxHORIZONTAL );
 	
 	m_buttonInit = new wxButton( this, wxID_OK, _("Init"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer20->Add( m_buttonInit, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+	bSizerButtons->Add( m_buttonInit, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
 	
 	m_buttonAbort = new wxButton( this, wxID_CANCEL, _("Abort"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer20->Add( m_buttonAbort, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	bSizerButtons->Add( m_buttonAbort, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 	
 	
-	bSizer17->Add( bSizer20, 0, wxALIGN_CENTER_HORIZONTAL, 5 );
+	bSizerMain->Add( bSizerButtons, 0, wxALIGN_CENTER_HORIZONTAL, 5 );
 	
 	
-	this->SetSizer( bSizer17 );
+	this->SetSizer( bSizerMain );
 	this->Layout();
-	bSizer17->Fit( this );
+	bSizerMain->Fit( this );
 	
 	// Connect Events
 	m_textCtrlShoeSize->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIDialogQuickInitFoot::OnText ), NULL, this );
@@ -1416,4 +1966,273 @@ GUIDialogAbout::GUIDialogAbout( wxWindow* parent, wxWindowID id, const wxString&
 
 GUIDialogAbout::~GUIDialogAbout()
 {
+}
+
+GUIDialogFormulaEditor::GUIDialogFormulaEditor( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizerMain;
+	bSizerMain = new wxBoxSizer( wxVERTICAL );
+	
+	m_dataViewListCtrl = new wxDataViewListCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_HORIZ_RULES|wxDV_SINGLE|wxDV_VERT_RULES );
+	m_dataViewListCtrl->SetToolTip( _("Available variables for formula.\nDouble-click to copy to cursor position.") );
+	
+	m_dataViewListColumnVariable = m_dataViewListCtrl->AppendTextColumn( _("Variable") );
+	m_dataViewListColumnFormula = m_dataViewListCtrl->AppendTextColumn( _("Formula") );
+	m_dataViewListColumnValue = m_dataViewListCtrl->AppendTextColumn( _("Value") );
+	bSizerMain->Add( m_dataViewListCtrl, 1, wxALL|wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizerVariableName;
+	bSizerVariableName = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticTextVariableName = new wxStaticText( this, wxID_ANY, _("<>"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextVariableName->Wrap( -1 );
+	bSizerVariableName->Add( m_staticTextVariableName, 0, wxALL, 5 );
+	
+	
+	bSizerMain->Add( bSizerVariableName, 0, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizerFormulaAndUnit;
+	bSizerFormulaAndUnit = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_textCtrlFormula = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_textCtrlFormula->SetToolTip( _("Enter formula or value. \nAllowed operations are: +, -, *, /, ^, cos, sin, tan, acos, asin, atan, exp, log, sqrt, cbrt, ceil, floor, round, abs") );
+	
+	bSizerFormulaAndUnit->Add( m_textCtrlFormula, 1, wxALL, 5 );
+	
+	m_textCtrlUnit = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY );
+	m_textCtrlUnit->SetToolTip( _("Unit") );
+	
+	bSizerFormulaAndUnit->Add( m_textCtrlUnit, 0, wxALL, 5 );
+	
+	
+	bSizerMain->Add( bSizerFormulaAndUnit, 0, wxEXPAND, 5 );
+	
+	m_textCtrlResult = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY );
+	m_textCtrlResult->SetToolTip( _("Result") );
+	
+	bSizerMain->Add( m_textCtrlResult, 0, wxALL|wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizerButtons;
+	bSizerButtons = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_buttonClear = new wxButton( this, wxID_ANY, _("Clear formula"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerButtons->Add( m_buttonClear, 0, wxALL, 5 );
+	
+	m_buttonCopyResultFormula = new wxButton( this, wxID_ANY, _("Copy result to formula"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerButtons->Add( m_buttonCopyResultFormula, 0, wxALL, 5 );
+	
+	
+	bSizerButtons->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	m_buttonCancel = new wxButton( this, wxID_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerButtons->Add( m_buttonCancel, 0, wxALL, 5 );
+	
+	m_buttonOK = new wxButton( this, wxID_OK, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerButtons->Add( m_buttonOK, 0, wxALL, 5 );
+	
+	
+	bSizerMain->Add( bSizerButtons, 0, wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
+	
+	
+	this->SetSizer( bSizerMain );
+	this->Layout();
+	
+	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_dataViewListCtrl->Connect( wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxDataViewEventHandler( GUIDialogFormulaEditor::OnItemActivated ), NULL, this );
+	m_buttonClear->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIDialogFormulaEditor::OnClearFormula ), NULL, this );
+	m_buttonCopyResultFormula->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIDialogFormulaEditor::OnCopyResultToFormula ), NULL, this );
+}
+
+GUIDialogFormulaEditor::~GUIDialogFormulaEditor()
+{
+	// Disconnect Events
+	m_dataViewListCtrl->Disconnect( wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxDataViewEventHandler( GUIDialogFormulaEditor::OnItemActivated ), NULL, this );
+	m_buttonClear->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIDialogFormulaEditor::OnClearFormula ), NULL, this );
+	m_buttonCopyResultFormula->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIDialogFormulaEditor::OnCopyResultToFormula ), NULL, this );
+	
+}
+
+GUIFrameSetupBackgroundImages::GUIFrameSetupBackgroundImages( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizerMain;
+	bSizerMain = new wxBoxSizer( wxHORIZONTAL );
+	
+	wxBoxSizer* bSizerLeftColumn;
+	bSizerLeftColumn = new wxBoxSizer( wxVERTICAL );
+	
+	m_listCtrl = new wxListCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_ICON );
+	bSizerLeftColumn->Add( m_listCtrl, 1, wxALL|wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizerButtons;
+	bSizerButtons = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_buttonAdd = new wxButton( this, wxID_ANY, _("Add/Update"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerButtons->Add( m_buttonAdd, 1, wxALL, 5 );
+	
+	m_buttonRemove = new wxButton( this, wxID_ANY, _("Remove"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerButtons->Add( m_buttonRemove, 1, wxALL, 5 );
+	
+	
+	bSizerLeftColumn->Add( bSizerButtons, 0, wxEXPAND, 5 );
+	
+	
+	bSizerMain->Add( bSizerLeftColumn, 1, wxEXPAND, 5 );
+	
+	wxBoxSizer* bSizerRightColumn;
+	bSizerRightColumn = new wxBoxSizer( wxVERTICAL );
+	
+	m_staticTextFilename = new wxStaticText( this, wxID_ANY, _("Filename:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextFilename->Wrap( -1 );
+	bSizerRightColumn->Add( m_staticTextFilename, 0, wxTOP|wxRIGHT|wxLEFT, 5 );
+	
+	m_filePicker = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, _("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
+	bSizerRightColumn->Add( m_filePicker, 0, wxALL|wxEXPAND, 5 );
+	
+	m_staticTextDirection = new wxStaticText( this, wxID_ANY, _("Direction:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextDirection->Wrap( -1 );
+	bSizerRightColumn->Add( m_staticTextDirection, 0, wxTOP|wxRIGHT|wxLEFT, 5 );
+	
+	wxGridSizer* gSizerDirection;
+	gSizerDirection = new wxGridSizer( 0, 2, 0, 0 );
+	
+	m_checkBoxFront = new wxCheckBox( this, wxID_ANY, _("Front"), wxDefaultPosition, wxDefaultSize, 0 );
+	gSizerDirection->Add( m_checkBoxFront, 0, wxTOP|wxRIGHT|wxLEFT, 5 );
+	
+	m_checkBoxBack = new wxCheckBox( this, wxID_ANY, _("Back"), wxDefaultPosition, wxDefaultSize, 0 );
+	gSizerDirection->Add( m_checkBoxBack, 0, wxTOP|wxRIGHT|wxLEFT, 5 );
+	
+	m_checkBoxLeft = new wxCheckBox( this, wxID_ANY, _("Left"), wxDefaultPosition, wxDefaultSize, 0 );
+	gSizerDirection->Add( m_checkBoxLeft, 0, wxTOP|wxRIGHT|wxLEFT, 5 );
+	
+	m_checkBoxRight = new wxCheckBox( this, wxID_ANY, _("Right"), wxDefaultPosition, wxDefaultSize, 0 );
+	gSizerDirection->Add( m_checkBoxRight, 0, wxTOP|wxRIGHT|wxLEFT, 5 );
+	
+	m_checkBoxTop = new wxCheckBox( this, wxID_ANY, _("Top"), wxDefaultPosition, wxDefaultSize, 0 );
+	gSizerDirection->Add( m_checkBoxTop, 0, wxTOP|wxRIGHT|wxLEFT, 5 );
+	
+	m_checkBoxBottom = new wxCheckBox( this, wxID_ANY, _("Bottom"), wxDefaultPosition, wxDefaultSize, 0 );
+	gSizerDirection->Add( m_checkBoxBottom, 0, wxTOP|wxRIGHT|wxLEFT, 5 );
+	
+	
+	bSizerRightColumn->Add( gSizerDirection, 0, wxEXPAND|wxBOTTOM, 5 );
+	
+	m_staticText46 = new wxStaticText( this, wxID_ANY, _("Scale:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText46->Wrap( -1 );
+	bSizerRightColumn->Add( m_staticText46, 0, wxTOP|wxRIGHT|wxLEFT, 5 );
+	
+	wxBoxSizer* bSizerScale;
+	bSizerScale = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_textCtrlScale = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerScale->Add( m_textCtrlScale, 1, wxTOP|wxBOTTOM|wxLEFT, 5 );
+	
+	m_spinBtnScale = new wxSpinButton( this, ID_SPINSCALE, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerScale->Add( m_spinBtnScale, 0, wxTOP|wxBOTTOM|wxRIGHT, 5 );
+	
+	
+	bSizerRightColumn->Add( bSizerScale, 0, wxEXPAND, 5 );
+	
+	m_staticTextOffsHor = new wxStaticText( this, wxID_ANY, _("Horizontal offset:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextOffsHor->Wrap( -1 );
+	bSizerRightColumn->Add( m_staticTextOffsHor, 0, wxTOP|wxRIGHT|wxLEFT, 5 );
+	
+	wxBoxSizer* bSizerHorizontalOffset;
+	bSizerHorizontalOffset = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_textCtrlOffsHor = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerHorizontalOffset->Add( m_textCtrlOffsHor, 1, wxTOP|wxBOTTOM|wxLEFT, 5 );
+	
+	m_spinBtnOffsHor = new wxSpinButton( this, ID_SPINOFFSHOR, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerHorizontalOffset->Add( m_spinBtnOffsHor, 0, wxTOP|wxBOTTOM|wxRIGHT, 5 );
+	
+	
+	bSizerRightColumn->Add( bSizerHorizontalOffset, 0, wxEXPAND, 5 );
+	
+	m_staticTextOffsVert = new wxStaticText( this, wxID_ANY, _("Vertical Offset:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextOffsVert->Wrap( -1 );
+	bSizerRightColumn->Add( m_staticTextOffsVert, 0, wxTOP|wxRIGHT|wxLEFT, 5 );
+	
+	wxBoxSizer* bSizerVerticalOffset;
+	bSizerVerticalOffset = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_textCtrlOffsVert = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerVerticalOffset->Add( m_textCtrlOffsVert, 1, wxTOP|wxBOTTOM|wxLEFT, 5 );
+	
+	m_spinBtnOffsVert = new wxSpinButton( this, ID_SPINOFFSVERT, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerVerticalOffset->Add( m_spinBtnOffsVert, 0, wxTOP|wxBOTTOM|wxRIGHT, 5 );
+	
+	
+	bSizerRightColumn->Add( bSizerVerticalOffset, 0, wxEXPAND, 5 );
+	
+	m_staticTextRotation = new wxStaticText( this, wxID_ANY, _("Rotation:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextRotation->Wrap( -1 );
+	bSizerRightColumn->Add( m_staticTextRotation, 0, wxTOP|wxRIGHT|wxLEFT, 5 );
+	
+	m_sliderRotation = new wxSlider( this, wxID_ANY, 0, -180, 180, wxDefaultPosition, wxDefaultSize, wxSL_AUTOTICKS|wxSL_HORIZONTAL|wxSL_LABELS );
+	bSizerRightColumn->Add( m_sliderRotation, 0, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5 );
+	
+	
+	bSizerRightColumn->Add( 0, 0, 1, wxEXPAND, 5 );
+	
+	m_buttonClose = new wxButton( this, ID_CLOSE, _("Close"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerRightColumn->Add( m_buttonClose, 0, wxALL|wxALIGN_RIGHT, 5 );
+	
+	
+	bSizerMain->Add( bSizerRightColumn, 1, wxEXPAND, 5 );
+	
+	
+	this->SetSizer( bSizerMain );
+	this->Layout();
+	
+	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_buttonAdd->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameSetupBackgroundImages::OnAddUpdate ), NULL, this );
+	m_buttonRemove->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameSetupBackgroundImages::OnRemove ), NULL, this );
+	m_textCtrlScale->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameSetupBackgroundImages::OnTextEnter ), NULL, this );
+	m_spinBtnScale->Connect( wxEVT_SCROLL_THUMBTRACK, wxSpinEventHandler( GUIFrameSetupBackgroundImages::OnSpin ), NULL, this );
+	m_textCtrlOffsHor->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameSetupBackgroundImages::OnTextEnter ), NULL, this );
+	m_spinBtnOffsHor->Connect( wxEVT_SCROLL_THUMBTRACK, wxSpinEventHandler( GUIFrameSetupBackgroundImages::OnSpin ), NULL, this );
+	m_textCtrlOffsVert->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameSetupBackgroundImages::OnTextEnter ), NULL, this );
+	m_spinBtnOffsVert->Connect( wxEVT_SCROLL_THUMBTRACK, wxSpinEventHandler( GUIFrameSetupBackgroundImages::OnSpin ), NULL, this );
+	m_sliderRotation->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( GUIFrameSetupBackgroundImages::OnRightDown ), NULL, this );
+	m_sliderRotation->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+	m_sliderRotation->Connect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+	m_sliderRotation->Connect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+	m_sliderRotation->Connect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+	m_sliderRotation->Connect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+	m_sliderRotation->Connect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+	m_sliderRotation->Connect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+	m_sliderRotation->Connect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+	m_sliderRotation->Connect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+}
+
+GUIFrameSetupBackgroundImages::~GUIFrameSetupBackgroundImages()
+{
+	// Disconnect Events
+	m_buttonAdd->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameSetupBackgroundImages::OnAddUpdate ), NULL, this );
+	m_buttonRemove->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameSetupBackgroundImages::OnRemove ), NULL, this );
+	m_textCtrlScale->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameSetupBackgroundImages::OnTextEnter ), NULL, this );
+	m_spinBtnScale->Disconnect( wxEVT_SCROLL_THUMBTRACK, wxSpinEventHandler( GUIFrameSetupBackgroundImages::OnSpin ), NULL, this );
+	m_textCtrlOffsHor->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameSetupBackgroundImages::OnTextEnter ), NULL, this );
+	m_spinBtnOffsHor->Disconnect( wxEVT_SCROLL_THUMBTRACK, wxSpinEventHandler( GUIFrameSetupBackgroundImages::OnSpin ), NULL, this );
+	m_textCtrlOffsVert->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameSetupBackgroundImages::OnTextEnter ), NULL, this );
+	m_spinBtnOffsVert->Disconnect( wxEVT_SCROLL_THUMBTRACK, wxSpinEventHandler( GUIFrameSetupBackgroundImages::OnSpin ), NULL, this );
+	m_sliderRotation->Disconnect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( GUIFrameSetupBackgroundImages::OnRightDown ), NULL, this );
+	m_sliderRotation->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+	m_sliderRotation->Disconnect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+	m_sliderRotation->Disconnect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+	m_sliderRotation->Disconnect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+	m_sliderRotation->Disconnect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+	m_sliderRotation->Disconnect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+	m_sliderRotation->Disconnect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+	m_sliderRotation->Disconnect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+	m_sliderRotation->Disconnect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( GUIFrameSetupBackgroundImages::OnScroll ), NULL, this );
+	
 }

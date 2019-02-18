@@ -62,11 +62,12 @@
 #include "../3D/OrientedMatrix.h"
 #include "../3D/Polygon3.h"
 //#include "../3D/Volume.h"
-#include "last/PolyHull.h"
+#include "../3D/PolyHull.h"
 
 #include "foot/FootMeasurements.h"
 #include "foot/FootModel.h"
 #include "last/Last.h"
+#include "last/PolyCylinder.h"
 #include "Shoe.h"
 #include "pattern/Pattern.h"
 
@@ -80,7 +81,7 @@ typedef wxInputStream DocumentIstream;
 typedef wxOutputStream DocumentOstream;
 #endif // wxUSE_STD_IOSTREAM/!wxUSE_STD_IOSTREAM
 
-class Project: public wxDocument {
+class Project:public wxDocument {
 	friend class WorkerThread;
 public:
 
@@ -107,13 +108,13 @@ public:
 	Shoe shoe;
 
 	// Last to generate
+	PolyCylinder lastModelL;
+	PolyCylinder lastModelR;
 	Last lastL;
 	Last lastR;
 
-
 	// Pattern for the upper of the shoe
 	Pattern pattern;
-
 
 	// +++ Generator +++
 	enum Generator {
@@ -132,8 +133,6 @@ public:
 	OrientedMatrix xray;
 	OrientedMatrix heightfield;
 	Polygon3 bow;
-
-
 
 public:
 	Project();
@@ -167,7 +166,8 @@ private:
 	wxCriticalSection CSLeft;
 	wxCriticalSection CSRight;
 
-DECLARE_DYNAMIC_CLASS(Project);
+DECLARE_DYNAMIC_CLASS(Project)
+	;
 };
 
 #endif /* PROJECT_H_ */

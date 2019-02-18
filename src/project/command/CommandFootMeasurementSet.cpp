@@ -25,7 +25,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "CommandFootMeasurementSet.h"
-#include "../../gui/guipanels.h"
+#include "../../gui/gui.h"
 
 CommandFootMeasurementSet::CommandFootMeasurementSet(const wxString& name,
 		Project* project, ProjectView::Side active, int parameter,

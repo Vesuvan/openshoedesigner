@@ -184,6 +184,9 @@ void ProjectView::PaintSole(void) const
 
 void ProjectView::PaintUpper(void) const
 {
+	Project* project = wxStaticCast(this->GetDocument(), Project);
+	glColor3f(0.1, 0.4, 0.0);
+	project->lastModelL.Paint();
 
 }
 
@@ -246,10 +249,9 @@ void ProjectView::OnUpdate3D(void)
 {
 	FrameMain* frame = wxStaticCast(GetFrame(), FrameMain);
 	FrameParent* parentframe = wxStaticCast(frame->GetParent(), FrameParent);
-	parentframe->settings.WriteToCanvas(frame->m_canvas3D);
+	parentframe->settingsStereo3D.WriteToCanvas(frame->m_canvas3D);
 	frame->m_canvas3D->Refresh();
 }
-
 
 bool ProjectView::OnClose(bool deleteWindow)
 {

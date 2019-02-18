@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Last.h
+// Name               : DialogFormulaEditor.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 10.06.2017
-// Copyright          : (C) 2017 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 17.02.2019
+// Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,25 +24,25 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef LAST_H_
-#define LAST_H_
+#ifndef SRC_GUI_DIALOGFORMULAEDITOR_H_
+#define SRC_GUI_DIALOGFORMULAEDITOR_H_
 
-/*!\class Last
- * \brief Last with NURBS hull
+/*!\class DialogFormulaEditor
+ * \brief ...
  *
- * NURBS Hull derived from either the foot model or a prototype last model.
+ * ...
  */
 
-#include "../../3D/NURBS.h"
+#include "gui.h"
 
-class Last {
+class DialogFormulaEditor:public GUIDialogFormulaEditor {
 public:
-	Last();
-	virtual ~Last();
+	DialogFormulaEditor(wxWindow* parent);
+	virtual ~DialogFormulaEditor();
 
-	void Paint(void) const;
-
-	NURBS nurbs;
+	void OnItemActivated(wxDataViewEvent& event);
+	void OnClearFormula(wxCommandEvent& event);
+	void OnCopyResultToFormula(wxCommandEvent& event);
 };
 
-#endif /* LAST_H_ */
+#endif /* SRC_GUI_DIALOGFORMULAEDITOR_H_ */
