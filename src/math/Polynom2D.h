@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : Polynom.h
+// Name               : Polynom2D.h
 // Purpose            :
 // Thread Safe        : No
 // Platform dependent : No
 // Compiler Options   : -lm
 // Author             : toby
-// Created            : 28.01.2017
+// Created            : 18.04.2017
 // Copyright          : (C) 2017 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,43 +24,32 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef POLYNOM_H_
-#define POLYNOM_H_
+#ifndef POLYNOM2D_H_
+#define POLYNOM2D_H_
 
-/*!\class Polynom
- * \brief Polynom up to an order of 4.
+/*!\class Polynom2D
+ * \brief ...
  *
- * This class contains a polynom with an order of 4. This polynom is intended for Spline3
- * interpolation. The setting functions support a number of one to four points.
- *
- * All formulas are calculated with the AXIOM computer algebra system.
+ * ...
  */
 
-class Polynom {
+#include "../3D/Vector3.h"
+
+class Polynom2D {
 public:
-	Polynom();
-	virtual ~Polynom();
+	double a[16];
 
-	double c0;
-	double c1;
-	double c2;
-	double c3;
+public:
 
-	void Set4(double r0, double v0, double r1, double v1, double r2, double v2,
-			double r3, double v3);
-	void Set4(double r0, double v0, double dv0, double r1, double v1,
-			double dv1);
-	void Set3(double r0, double v0, double r1, double v1, double r2, double v2);
-	void Set3(double r0, double v0, double dv0, double r1, double v1);
-	void Set2(double r0, double v0, double r1, double v1);
-	void Set2(double r0, double v0, double dv0);
-	void Set1(double r0, double v0);
+	Polynom2D();
+	virtual ~Polynom2D();
 
-	Polynom Derive() const;
-	Polynom Derive2() const;
-	Polynom Derive3() const;
+	double Evaluate(double x, double y);
 
-	double Evaluate(double r) const;
+	void Set44(const double v0, const Vector3 &n0, const double v1,
+			const Vector3 &n1, const double v2, const Vector3 &n2,
+			const double v3, const Vector3 &n3);
+
 };
 
-#endif /* POLYNOM_H_ */
+#endif /* POLYNOM2D_H_ */

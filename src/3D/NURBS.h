@@ -39,7 +39,7 @@
  */
 
 #include <vector>
-#include "../../3D/Vector3.h"
+#include "Vector3.h"
 
 class NURBS {
 public:

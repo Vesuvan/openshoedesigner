@@ -25,6 +25,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "Polynom.h"
 
+#include <cmath>
+
 Polynom::Polynom()
 {
 	c0 = c1 = c2 = c3 = 0.0;
@@ -203,7 +205,85 @@ Polynom Polynom::Derive3() const
 	return temp;
 }
 
+bool Polynom::Min(double& x) const
+{
+	if(fabs(c3) < 1e-9){
+		if(c2 < 1e-9) return false;
+		x = -c1 / (2 * c2);
+		return true;
+	}
+
+	double h = c2 * c3 - 3 * c1 * c3;
+	if(h < 0) return false;
+	h = sqrt(h) / (3 * c3);
+	double h2 = -c2 / (3 * c3);
+	double x1 = h2 + h;
+	double x2 = h2 - h;
+
+	if((6 * c3 * x1 + 2 * c2) >= 1e-9){
+		x = x1;
+		return true;
+	}
+	if((6 * c3 * x2 + 2 * c2) >= 1e-9){
+		x = x2;
+		return true;
+	}
+	return false;
+}
+
+bool Polynom::Max(double& x) const
+{
+	if(fabs(c3) < 1e-9){
+		if(c2 > -1e-9) return false;
+		x = -c1 / (2 * c2);
+		return true;
+	}
+
+	double h = c2 * c3 - 3 * c1 * c3;
+	if(h < 0) return false;
+	h = sqrt(h) / (3 * c3);
+	double h2 = -c2 / (3 * c3);
+	double x1 = h2 + h;
+	double x2 = h2 - h;
+
+	if((6 * c3 * x1 + 2 * c2) <= -1e-9){
+		x = x1;
+		return true;
+	}
+	if((6 * c3 * x2 + 2 * c2) <= -1e-9){
+		x = x2;
+		return true;
+	}
+	return false;
+}
+
+bool Polynom::MinLimited(double& x) const
+{
+	return false;
+}
+
+bool Polynom::MaxLimited(double& x) const
+{
+	return false;
+}
+
 double Polynom::Evaluate(double r) const
 {
 	return ((c3 * r + c2) * r + c1) * r + c0;
+}
+
+Polynom& Polynom::operator *=(const double& b)
+{
+	c0 *= b;
+	c1 *= b;
+	c2 *= b;
+	c3 *= b;
+	return *this;
+}
+
+const Polynom Polynom::operator *(const double& b) const
+{
+	Polynom temp = *this;
+	temp *= b;
+	return temp;
 }

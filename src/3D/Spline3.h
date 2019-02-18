@@ -38,8 +38,8 @@
  * can also be scaled to unity or in direct or interpoloated coordinates.
  */
 
-#include "Polynom.h"
-#include "../../3D/Vector3.h"
+#include "../math/Polynom.h"
+#include "Vector3.h"
 
 #include <vector>
 #include <cstdlib>
