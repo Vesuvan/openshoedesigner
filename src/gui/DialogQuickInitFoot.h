@@ -42,7 +42,7 @@ public:
 	virtual ~DialogQuickInitFoot();
 
 	MathParser parser;
-	virtual void OnText(wxCommandEvent& event);
+	virtual void OnTextEnter(wxCommandEvent& event);
 	void OnOK(wxCommandEvent& event);
 
 	double length;

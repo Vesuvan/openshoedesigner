@@ -2,10 +2,15 @@ openshoedesigner
 
 *~
 *.bak
-gmon.out
-/out
+*.pdf
+*.blend?
 
-/blender/images
+gmon.out
+
+/output
+
+/references
+/blender
 /rawWWW
 /WWW
 
@@ -14,8 +19,6 @@ gmon.out
 /Debug_Linux
 /Debug
 /Release
-
-/data
 
 /doc/html
 /doc/latex

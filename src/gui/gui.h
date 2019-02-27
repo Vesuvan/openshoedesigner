@@ -13,6 +13,7 @@
 #include <wx/intl.h>
 #include <wx/docview.h>
 #include <wx/config.h>
+#include "ExtendedTextCtrl.h"
 
 #include <wx/string.h>
 #include <wx/menu.h>
@@ -174,34 +175,34 @@ class GUIFrameMain : public wxDocChildFrame
 		wxChoicebook* m_choicebookMeasurement;
 		wxPanel* m_panelMeasurementBased;
 		wxStaticText* m_staticTextFootLength;
-		wxTextCtrl* m_textCtrlFootLength;
+		ExtendedTextCtrl* m_textCtrlFootLength;
 		wxStaticText* m_staticTextBallGirth;
-		wxTextCtrl* m_textCtrlBallGirth;
+		ExtendedTextCtrl* m_textCtrlBallGirth;
 		wxStaticText* m_staticTextWaistGirth;
-		wxTextCtrl* m_textCtrlWaistGirth;
+		ExtendedTextCtrl* m_textCtrlWaistGirth;
 		wxStaticText* m_staticTextInsteGirth;
-		wxTextCtrl* m_textCtrlInstepGirth;
+		ExtendedTextCtrl* m_textCtrlInstepGirth;
 		wxStaticText* m_staticTextLongHeelGirth;
-		wxTextCtrl* m_textCtrlLongHeelGirth;
+		ExtendedTextCtrl* m_textCtrlLongHeelGirth;
 		wxStaticText* m_staticTextShortHeelGirth;
-		wxTextCtrl* m_textCtrlShortHeelGirth;
+		ExtendedTextCtrl* m_textCtrlShortHeelGirth;
 		wxStaticText* m_staticTextAngleMixing;
-		wxTextCtrl* m_textCtrlAngleMixing;
+		ExtendedTextCtrl* m_textCtrlAngleMixing;
 		wxStaticText* m_staticTextLegLengthDifference;
-		wxTextCtrl* m_textCtrlLegLengthDifference;
+		ExtendedTextCtrl* m_textCtrlLegLengthDifference;
 		wxButton* m_buttonQuickSetup;
 		wxStaticText* m_staticTextShoeSizeEU;
-		wxTextCtrl* m_textCtrlShoeSizeEU;
+		ExtendedTextCtrl* m_textCtrlShoeSizeEU;
 		wxStaticText* m_staticTextShoeSizeUS;
-		wxTextCtrl* m_textCtrlShoeSizeUS;
+		ExtendedTextCtrl* m_textCtrlShoeSizeUS;
 		wxStaticText* m_staticTextShoeSizeUK;
-		wxTextCtrl* m_textCtrlShoeSizeUK;
+		ExtendedTextCtrl* m_textCtrlShoeSizeUK;
 		wxStaticText* m_staticTextShoeSizeCN;
-		wxTextCtrl* m_textCtrlShoeSizeCN;
+		ExtendedTextCtrl* m_textCtrlShoeSizeCN;
 		wxStaticText* m_staticTextShoeSizeJP;
-		wxTextCtrl* m_textCtrlShoeSizeJP;
+		ExtendedTextCtrl* m_textCtrlShoeSizeJP;
 		wxStaticText* m_staticTextShoeSizeAU;
-		wxTextCtrl* m_textCtrlShoeSizeAU;
+		ExtendedTextCtrl* m_textCtrlShoeSizeAU;
 		wxStaticBitmap* m_bitmapFoot;
 		wxPanel* m_panelScanBased;
 		wxStaticText* m_staticTextScanFile;
@@ -218,35 +219,35 @@ class GUIFrameMain : public wxDocChildFrame
 		wxStaticBitmap* m_bitmapLeg;
 		wxStaticText* m_staticTextGirth;
 		wxStaticText* m_staticTextLevel;
-		wxTextCtrl* m_textCtrlBelowCrutchGirth;
-		wxTextCtrl* m_textCtrlBelowCrutchLevel;
-		wxTextCtrl* m_textCtrlMiddleOfCalfGirth;
-		wxTextCtrl* m_textCtrlMiddleOfCalfLevel;
-		wxTextCtrl* m_textCtrlAboveKneeGirth;
-		wxTextCtrl* m_textCtrlAboveKneeLevel;
-		wxTextCtrl* m_textCtrlOverKneeCapGirth;
-		wxTextCtrl* m_textCtrlOverKneeCapLevel;
-		wxTextCtrl* m_textCtrlBelowKneeGirth;
-		wxTextCtrl* m_textCtrlBelowKneeLevel;
-		wxTextCtrl* m_textCtrlMiddleOfShankGirth;
-		wxTextCtrl* m_textCtrlMiddleOfShankLevel;
-		wxTextCtrl* m_textCtrlAboveAnkleGirth;
-		wxTextCtrl* m_textCtrlAboveAnkleLevel;
-		wxTextCtrl* m_textCtrlOverAnkleBoneGirth;
-		wxTextCtrl* m_textCtrlOverAnkleBoneLevel;
+		ExtendedTextCtrl* m_textCtrlBelowCrutchGirth;
+		ExtendedTextCtrl* m_textCtrlBelowCrutchLevel;
+		ExtendedTextCtrl* m_textCtrlMiddleOfCalfGirth;
+		ExtendedTextCtrl* m_textCtrlMiddleOfCalfLevel;
+		ExtendedTextCtrl* m_textCtrlAboveKneeGirth;
+		ExtendedTextCtrl* m_textCtrlAboveKneeLevel;
+		ExtendedTextCtrl* m_textCtrlOverKneeCapGirth;
+		ExtendedTextCtrl* m_textCtrlOverKneeCapLevel;
+		ExtendedTextCtrl* m_textCtrlBelowKneeGirth;
+		ExtendedTextCtrl* m_textCtrlBelowKneeLevel;
+		ExtendedTextCtrl* m_textCtrlMiddleOfShankGirth;
+		ExtendedTextCtrl* m_textCtrlMiddleOfShankLevel;
+		ExtendedTextCtrl* m_textCtrlAboveAnkleGirth;
+		ExtendedTextCtrl* m_textCtrlAboveAnkleLevel;
+		ExtendedTextCtrl* m_textCtrlOverAnkleBoneGirth;
+		ExtendedTextCtrl* m_textCtrlOverAnkleBoneLevel;
 		wxPanel* m_panelPageShoe;
 		wxChoice* m_choiceShoeType;
 		wxStaticText* m_staticTextHeelHeight;
-		wxTextCtrl* m_textCtrlHeelHeight;
+		ExtendedTextCtrl* m_textCtrlHeelHeight;
 		wxStaticText* m_staticTextBallHeight;
-		wxTextCtrl* m_textCtrlBallHeight;
+		ExtendedTextCtrl* m_textCtrlBallHeight;
 		wxStaticText* m_staticTextHeelPitch;
-		wxTextCtrl* m_textCtrlHeelPitch;
+		ExtendedTextCtrl* m_textCtrlHeelPitch;
 		wxStaticText* m_staticTextToeSpring;
-		wxTextCtrl* m_textCtrlToeSpring;
+		ExtendedTextCtrl* m_textCtrlToeSpring;
 		wxChoice* m_choiceShoeHeight;
 		wxStaticText* m_staticTextUpperLevel;
-		wxTextCtrl* m_textCtrlUpperLevel;
+		ExtendedTextCtrl* m_textCtrlUpperLevel;
 		wxStaticText* m_staticTextTipSymmetry;
 		wxSlider* m_sliderSymmetry;
 		wxStaticText* m_staticTextTipPointedness;
@@ -254,19 +255,19 @@ class GUIFrameMain : public wxDocChildFrame
 		wxStaticText* m_staticTextTipSharpness;
 		wxSlider* m_sliderTipSharpness;
 		wxStaticText* m_staticTextExtraLength;
-		wxTextCtrl* m_textCtrlExtraLength;
+		ExtendedTextCtrl* m_textCtrlExtraLength;
 		wxStaticText* m_staticTextFootCompression;
-		wxTextCtrl* m_textCtrlFootCompression;
+		ExtendedTextCtrl* m_textCtrlFootCompression;
 		wxPanel* m_panelPageSole;
 		wxCheckBox* m_checkBoxSeparatedHeel;
 		wxStaticText* m_staticText29;
-		wxTextCtrl* m_textCtrl29;
+		ExtendedTextCtrl* m_textCtrl29;
 		wxStaticText* m_staticText30;
-		wxTextCtrl* m_textCtrl31;
+		ExtendedTextCtrl* m_textCtrl31;
 		wxStaticText* m_staticText31;
-		wxTextCtrl* m_textCtrl35;
+		ExtendedTextCtrl* m_textCtrl35;
 		wxStaticText* m_staticText32;
-		wxTextCtrl* m_textCtrl33;
+		ExtendedTextCtrl* m_textCtrl33;
 		wxSlider* m_sliderSupportHeelRadius;
 		wxSlider* m_sliderSupportHeelOffset;
 		wxSlider* m_sliderSupportToeRadius;
@@ -387,7 +388,7 @@ class GUIDialogQuickInitFoot : public wxDialog
 	
 	protected:
 		wxStaticText* m_staticTextShoeSize;
-		wxTextCtrl* m_textCtrlShoeSize;
+		ExtendedTextCtrl* m_textCtrlShoeSize;
 		wxChoice* m_choiceUnit;
 		wxRadioButton* m_radioBtnSmall;
 		wxRadioButton* m_radioBtnMedium;
@@ -396,8 +397,7 @@ class GUIDialogQuickInitFoot : public wxDialog
 		wxButton* m_buttonAbort;
 		
 		// Virtual event handlers, overide them in your derived class
-		virtual void OnText( wxCommandEvent& event ) = 0;
-		virtual void OnOK( wxCommandEvent& event ) = 0;
+		virtual void OnTextEnter( wxCommandEvent& event ) = 0;
 		
 	
 	public:
@@ -416,15 +416,15 @@ class GUIFrameDebugParser : public wxFrame
 	
 	protected:
 		wxStaticText* m_staticText10;
-		wxTextCtrl* m_textCtrlExpression;
+		ExtendedTextCtrl* m_textCtrlExpression;
 		wxStaticText* m_staticText11;
-		wxTextCtrl* m_textCtrlNumber;
+		ExtendedTextCtrl* m_textCtrlNumber;
 		wxStaticText* m_staticText12;
-		wxTextCtrl* m_textCtrlError;
+		ExtendedTextCtrl* m_textCtrlError;
 		wxStaticText* m_staticText14;
-		wxTextCtrl* m_textCtrlUnit;
+		ExtendedTextCtrl* m_textCtrlUnit;
 		wxStaticText* m_staticText13;
-		wxTextCtrl* m_textCtrlSIBase;
+		ExtendedTextCtrl* m_textCtrlSIBase;
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnCloseX( wxCloseEvent& event ) = 0;
@@ -478,7 +478,7 @@ class GUIDialogAbout : public wxDialog
 	private:
 	
 	protected:
-		wxTextCtrl* m_textCtrl;
+		ExtendedTextCtrl* m_textCtrl;
 		wxButton* m_buttonClose;
 	
 	public:
@@ -501,9 +501,9 @@ class GUIDialogFormulaEditor : public wxDialog
 		wxDataViewColumn* m_dataViewListColumnFormula;
 		wxDataViewColumn* m_dataViewListColumnValue;
 		wxStaticText* m_staticTextVariableName;
-		wxTextCtrl* m_textCtrlFormula;
-		wxTextCtrl* m_textCtrlUnit;
-		wxTextCtrl* m_textCtrlResult;
+		ExtendedTextCtrl* m_textCtrlFormula;
+		ExtendedTextCtrl* m_textCtrlUnit;
+		ExtendedTextCtrl* m_textCtrlResult;
 		wxButton* m_buttonClear;
 		wxButton* m_buttonCopyResultFormula;
 		wxButton* m_buttonCancel;
@@ -543,13 +543,13 @@ class GUIFrameSetupBackgroundImages : public wxFrame
 		wxCheckBox* m_checkBoxTop;
 		wxCheckBox* m_checkBoxBottom;
 		wxStaticText* m_staticText46;
-		wxTextCtrl* m_textCtrlScale;
+		ExtendedTextCtrl* m_textCtrlScale;
 		wxSpinButton* m_spinBtnScale;
 		wxStaticText* m_staticTextOffsHor;
-		wxTextCtrl* m_textCtrlOffsHor;
+		ExtendedTextCtrl* m_textCtrlOffsHor;
 		wxSpinButton* m_spinBtnOffsHor;
 		wxStaticText* m_staticTextOffsVert;
-		wxTextCtrl* m_textCtrlOffsVert;
+		ExtendedTextCtrl* m_textCtrlOffsVert;
 		wxSpinButton* m_spinBtnOffsVert;
 		wxStaticText* m_staticTextRotation;
 		wxSlider* m_sliderRotation;

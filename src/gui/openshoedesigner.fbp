@@ -954,11 +954,11 @@
                 <property name="name">bSizer</property>
                 <property name="orient">wxVERTICAL</property>
                 <property name="permission">none</property>
-                <object class="sizeritem" expanded="0">
+                <object class="sizeritem" expanded="1">
                     <property name="border">5</property>
                     <property name="flag">wxEXPAND|wxALIGN_CENTER_HORIZONTAL</property>
                     <property name="proportion">1</property>
-                    <object class="wxSplitterWindow" expanded="0">
+                    <object class="wxSplitterWindow" expanded="1">
                         <property name="BottomDockable">1</property>
                         <property name="LeftDockable">1</property>
                         <property name="RightDockable">1</property>
@@ -1042,8 +1042,8 @@
                         <event name="OnSplitterSashPosChanging"></event>
                         <event name="OnSplitterUnsplit"></event>
                         <event name="OnUpdateUI"></event>
-                        <object class="splitteritem" expanded="0">
-                            <object class="wxPanel" expanded="0">
+                        <object class="splitteritem" expanded="1">
+                            <object class="wxPanel" expanded="1">
                                 <property name="BottomDockable">1</property>
                                 <property name="LeftDockable">1</property>
                                 <property name="RightDockable">1</property>
@@ -1117,16 +1117,16 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnUpdateUI"></event>
-                                <object class="wxBoxSizer" expanded="0">
+                                <object class="wxBoxSizer" expanded="1">
                                     <property name="minimum_size"></property>
                                     <property name="name">bSizerConfig</property>
                                     <property name="orient">wxVERTICAL</property>
                                     <property name="permission">none</property>
-                                    <object class="sizeritem" expanded="0">
+                                    <object class="sizeritem" expanded="1">
                                         <property name="border">5</property>
                                         <property name="flag">wxEXPAND | wxALL</property>
                                         <property name="proportion">1</property>
-                                        <object class="wxNotebook" expanded="0">
+                                        <object class="wxNotebook" expanded="1">
                                             <property name="BottomDockable">1</property>
                                             <property name="LeftDockable">1</property>
                                             <property name="RightDockable">1</property>
@@ -7136,11 +7136,11 @@
                                                     </object>
                                                 </object>
                                             </object>
-                                            <object class="notebookpage" expanded="0">
+                                            <object class="notebookpage" expanded="1">
                                                 <property name="bitmap"></property>
                                                 <property name="label">Shoe</property>
                                                 <property name="select">0</property>
-                                                <object class="wxPanel" expanded="0">
+                                                <object class="wxPanel" expanded="1">
                                                     <property name="BottomDockable">1</property>
                                                     <property name="LeftDockable">1</property>
                                                     <property name="RightDockable">1</property>
@@ -7214,16 +7214,16 @@
                                                     <event name="OnSetFocus"></event>
                                                     <event name="OnSize"></event>
                                                     <event name="OnUpdateUI"></event>
-                                                    <object class="wxBoxSizer" expanded="0">
+                                                    <object class="wxBoxSizer" expanded="1">
                                                         <property name="minimum_size"></property>
                                                         <property name="name">bSizerShoe</property>
                                                         <property name="orient">wxVERTICAL</property>
                                                         <property name="permission">none</property>
-                                                        <object class="sizeritem" expanded="0">
+                                                        <object class="sizeritem" expanded="1">
                                                             <property name="border">5</property>
                                                             <property name="flag">wxEXPAND</property>
                                                             <property name="proportion">0</property>
-                                                            <object class="wxStaticBoxSizer" expanded="0">
+                                                            <object class="wxStaticBoxSizer" expanded="1">
                                                                 <property name="id">wxID_ANY</property>
                                                                 <property name="label">Preset</property>
                                                                 <property name="minimum_size"></property>
@@ -7250,7 +7250,7 @@
                                                                         <property name="caption"></property>
                                                                         <property name="caption_visible">1</property>
                                                                         <property name="center_pane">0</property>
-                                                                        <property name="choices">&quot;Flats&quot; &quot;Custom&quot;</property>
+                                                                        <property name="choices"></property>
                                                                         <property name="close_button">1</property>
                                                                         <property name="context_help"></property>
                                                                         <property name="context_menu">1</property>
@@ -8036,11 +8036,11 @@
                                                                 </object>
                                                             </object>
                                                         </object>
-                                                        <object class="sizeritem" expanded="0">
+                                                        <object class="sizeritem" expanded="1">
                                                             <property name="border">5</property>
                                                             <property name="flag">wxEXPAND</property>
                                                             <property name="proportion">0</property>
-                                                            <object class="wxStaticBoxSizer" expanded="0">
+                                                            <object class="wxStaticBoxSizer" expanded="1">
                                                                 <property name="id">wxID_ANY</property>
                                                                 <property name="label">Preset</property>
                                                                 <property name="minimum_size"></property>
@@ -8067,7 +8067,7 @@
                                                                         <property name="caption"></property>
                                                                         <property name="caption_visible">1</property>
                                                                         <property name="center_pane">0</property>
-                                                                        <property name="choices">&quot;Low Cut&quot; &quot;Normal&quot; &quot;Boot (ankle)&quot; &quot;Boot (half calf)&quot; &quot;Boot (underknee)&quot; &quot;Boot (overknee)&quot; &quot;Boot (crutch)&quot; &quot;Boot (caps)&quot; &quot;&quot;</property>
+                                                                        <property name="choices"></property>
                                                                         <property name="close_button">1</property>
                                                                         <property name="context_help"></property>
                                                                         <property name="context_menu">1</property>
@@ -13739,7 +13739,7 @@
                 </object>
             </object>
         </object>
-        <object class="Dialog" expanded="0">
+        <object class="Dialog" expanded="1">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -13801,7 +13801,7 @@
             <event name="OnSetFocus"></event>
             <event name="OnSize"></event>
             <event name="OnUpdateUI"></event>
-            <object class="wxBoxSizer" expanded="0">
+            <object class="wxBoxSizer" expanded="1">
                 <property name="minimum_size"></property>
                 <property name="name">bSizerMain</property>
                 <property name="orient">wxVERTICAL</property>
@@ -13983,7 +13983,7 @@
                                 <event name="OnSetFocus"></event>
                                 <event name="OnSize"></event>
                                 <event name="OnText"></event>
-                                <event name="OnTextEnter">OnText</event>
+                                <event name="OnTextEnter">OnTextEnter</event>
                                 <event name="OnTextMaxLen"></event>
                                 <event name="OnTextURL"></event>
                                 <event name="OnUpdateUI"></event>
@@ -14425,7 +14425,7 @@
                                 <property name="window_extra_style"></property>
                                 <property name="window_name"></property>
                                 <property name="window_style"></property>
-                                <event name="OnButtonClick">OnOK</event>
+                                <event name="OnButtonClick"></event>
                                 <event name="OnChar"></event>
                                 <event name="OnEnterWindow"></event>
                                 <event name="OnEraseBackground"></event>

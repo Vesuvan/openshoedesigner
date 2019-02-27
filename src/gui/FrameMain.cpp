@@ -59,7 +59,7 @@ FrameMain::FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
 {
 	this->config = config;
 
-	presets.ReadFile(_T("data/ShoePresets.ini"));
+	presets.ReadFile(_T("data/Presets.ini"));
 
 	m_menuFile->Append(wxID_NEW);
 	m_menuFile->Append(wxID_OPEN);
@@ -174,12 +174,32 @@ bool FrameMain::TransferDataToWindow()
 
 		wxArrayString newStrings;
 		newStrings.Add(_("Custom"));
-		for(size_t n = 0; n < presets.section.size(); ++n)
-			newStrings.Add(presets.section[n].param[0].value);
+		IniFile::Section const * section = presets.FindSection(
+				_T("PRESET_SHOETYPE"));
+		while(section != NULL){
+			newStrings.Add(section->GetParameter(_T("Name")));
+			section = presets.NextSection(section);
+		}
 		wxArrayString temp = m_choiceShoeType->GetStrings();
 		if(newStrings != temp){
 			m_choiceShoeType->Set(newStrings);
 			m_choiceShoeType->SetSelection(0);
+		}
+	}
+	{	// Add strings to shoe-height ChoiceCtrl
+
+		wxArrayString newStrings;
+		newStrings.Add(_("Custom"));
+		IniFile::Section const * section = presets.FindSection(
+				_T("PRESET_HEIGHT"));
+		while(section != NULL){
+			newStrings.Add(section->GetParameter(_T("Name")));
+			section = presets.NextSection(section);
+		}
+		wxArrayString temp = m_choiceShoeHeight->GetStrings();
+		if(newStrings != temp){
+			m_choiceShoeHeight->Set(newStrings);
+			m_choiceShoeHeight->SetSelection(0);
 		}
 	}
 

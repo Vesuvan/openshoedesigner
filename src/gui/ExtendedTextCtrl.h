@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : IniFile.h
+// Name               : ExtendedTextCtrl.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 16.11.2018
-// Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 27.02.2019
+// Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,50 +24,39 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef _INIFILE_H_
-#define _INIFILE_H_
+#ifndef SRC_GUI_EXTENDEDTEXTCTRL_H_
+#define SRC_GUI_EXTENDEDTEXTCTRL_H_
 
-/*!\class IniFile
+/*!\class ExtendedTextCtrl
  * \brief ...
  *
  * ...
  */
 
-#include <wx/string.h>
-#include <vector>
+#include <wx/textctrl.h>
 
-class IniFile {
+class Project;
+
+class ExtendedTextCtrl:public wxTextCtrl {
 public:
-	class Section {
-	public:
-		class Parameter {
-		public:
-			Parameter(wxString name, wxString value);
-			wxString name;
-			wxString value;
-		};
-	public:
-		Section(wxString name);
-		wxString name;
-		std::vector <Parameter> param;
-		wxString GetParameter(wxString name, wxString defaultvalue = _T("")) const;
+	ExtendedTextCtrl(wxWindow* parent, wxWindowID id,
+			const wxString& value = "", const wxPoint& pos = wxDefaultPosition,
+			const wxSize& size = wxDefaultSize, long style = 0,
+			const wxValidator& validator = wxDefaultValidator,
+			const wxString& name = wxTextCtrlNameStr);
+	virtual ~ExtendedTextCtrl();
 
-	};
+	void SetProject(Project * project = NULL);
 
-public:
-	IniFile(bool casesensitive = true);
-	IniFile(wxString filename, bool casesensitive = true);
-	virtual ~IniFile();
-	bool ReadFile(wxString filename);
+protected:
+	void OnContextMenu(wxContextMenuEvent& event);
 
-	const Section* FindSection(wxString name) const;
-	const Section* NextSection(const IniFile::Section * lastsection) const;
-
-	std::vector <Section> section;
 private:
-	const bool casesensitive;
+	bool IsKnowID(int id) const;
 
-	wxString CleanString(wxString text);
+	Project* project;
+
+DECLARE_EVENT_TABLE()
 };
 
-#endif /* _INIFILE_H_ */
+#endif /* SRC_GUI_EXTENDEDTEXTCTRL_H_ */

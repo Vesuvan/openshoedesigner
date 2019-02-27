@@ -39,9 +39,12 @@ DialogQuickInitFoot::~DialogQuickInitFoot()
 {
 }
 
-void DialogQuickInitFoot::OnText(wxCommandEvent& event)
+void DialogQuickInitFoot::OnTextEnter(wxCommandEvent& event)
 {
 	ParseText(event.GetString());
+
+	//	m_textCtrlShoeSize->Navigate();
+	m_buttonInit->SetFocus();
 }
 
 void DialogQuickInitFoot::OnOK(wxCommandEvent& event)
