@@ -41,6 +41,16 @@ ParameterFormula::~ParameterFormula()
 {
 }
 
+ParameterFormula& ParameterFormula::operator=(const ParameterFormula& other)
+{
+	formula = other.formula;
+	value = other.value;
+	modified = other.modified;
+	errorFlag = other.errorFlag;
+	errorStr = other.errorStr;
+	return *this;
+}
+
 bool ParameterFormula::IsModified(void) const
 {
 	return modified;

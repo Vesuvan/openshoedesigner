@@ -28,6 +28,7 @@
 
 #include <cstdio>
 
+#include "../3D/OpenGLMaterial.h"
 #include "../gui/FrameMain.h"
 #include "../gui/FrameParent.h"
 #include "../main.h"
@@ -37,13 +38,17 @@ IMPLEMENT_DYNAMIC_CLASS(ProjectView, wxView)
 ProjectView::ProjectView()
 		: wxView()
 {
-	active = Left;
+	active = Both;
 
 	showLeft = true;
 	showRight = true;
+
+	showFootScan = true;
 	showBones = true;
 	showSkin = true;
 	showLeg = false;
+
+	showLastScan = true;
 	showLast = false;
 	showInsole = false;
 	showSole = false;
@@ -53,8 +58,6 @@ ProjectView::ProjectView()
 	showCoordinateSystem = true;
 	showBackground = false;
 
-	showFootScan = false;
-	showLastScan = false;
 }
 
 ProjectView::~ProjectView()
@@ -71,7 +74,7 @@ bool ProjectView::OnCreate(wxDocument* doc, long flags)
 	wxASSERT(frame == GetFrame());
 
 	BackgroundImage temp;
-	temp.LoadFile(_T("blender/images/Skel_right.jpg"), wxBITMAP_TYPE_JPEG);
+	temp.LoadFile(_T("references/bones/Skel_right.jpg"), wxBITMAP_TYPE_JPEG);
 	background.push_back(temp);
 
 //	Project* project = wxStaticCast(this->GetDocument(), Project);
@@ -87,28 +90,89 @@ void ProjectView::Paint(bool usePicking) const
 
 	Project* project = wxStaticCast(this->GetDocument(), Project);
 
-	glColor3f(0.8, 0.5, 0.0);
-//	project->vol.PaintSurface();
+//	glColor3f(0.8, 0.5, 0.0);
+	OpenGLMaterial matBones(OpenGLMaterial::pearl);
+	OpenGLMaterial matFoot(OpenGLMaterial::redrubber, 0.3);
+	matFoot.SetSimpleColor(0.8, 0.5, 0);
+	OpenGLMaterial matLast(OpenGLMaterial::cyanplastic);
+	OpenGLMaterial matFloor(OpenGLMaterial::whiteplastic);
+//	matFloor.SetSimpleColor(0.9, 0.9, 0.9);
+	OpenGLMaterial matLines;
+	matLines.SetSimpleColor(1, 1, 1, 0.6);
+	OpenGLMaterial matScan;
+	matScan.SetSimpleColor(0.4, 0.9, 0.6);
 
 	if(showLeft){
 		glPushMatrix();
-
 		if(shiftapart) glTranslatef(0, project->measL.ballGirth.value / M_PI,
 				0);
 
 		glLoadName(0); // Left
-		glPushName(1);
-		if(showBones) project->footL.PaintBones();
-		glPopName();
-		glPushName(2);
-		if(showSkin && !usePicking) project->footL.PaintSkin();
-		glPopName();
-		glPushName(3);
-		if(showLast) project->lastL.Paint();
-		glPopName();
-		glPushName(4);
-		if(showInsole) project->bow.Paint();
-		glPopName();
+
+		if(project->measurementsource == Project::fromFootScan && showFootScan){
+			glPushName(0);
+			matScan.UseColor(0.5);
+			glNormal3f(1, 0, 0);
+			project->footScan.Paint();
+			glPopName();
+		}
+
+		if(project->measurementsource == Project::fromMeasurements
+				&& showBones){
+			glPushName(1);
+			matBones.UseMaterial();
+			project->footL.PaintBones();
+			glPopName();
+		}
+
+		if(project->modeltype == Project::boneBased && showSkin && !usePicking){
+			glPushName(2);
+			matFoot.UseMaterial();
+			project->footL.PaintSkin();
+			glPopName();
+		}
+
+		if(project->modeltype == Project::lastBased && showLastScan){
+			glPushName(3);
+			matScan.UseMaterial();
+			project->lastModelL.Paint();
+			glPopName();
+		}
+
+		if(showLast){
+			glPushName(3);
+			matLast.UseMaterial();
+			project->lastL.Paint();
+			glPopName();
+		}
+
+		if(showInsole){
+			glPushName(4);
+			matLines.UseMaterial();
+			project->bow.Paint();
+			matLines.UseMaterial();
+			PaintInsole();
+			glPopName();
+		}
+
+		if(showSole){
+			glPushName(12);
+			PaintSole();
+			glPopName();
+		}
+		if(showUpper){
+			glPushName(13);
+			PaintUpper();
+			glPopName();
+		}
+
+		if(showCutaway){
+			OpenGLMaterial::EnableColors();
+			glPushName(14);
+			PaintCutaway();
+			glPopName();
+		}
+
 		glPopMatrix();
 	}
 	if(showRight){
@@ -117,33 +181,83 @@ void ProjectView::Paint(bool usePicking) const
 				0);
 
 		glLoadName(1); // Right
-		glPushName(1);
-		if(showBones) project->footR.PaintBones();
-		glPopName();
-		glPushName(2);
-		if(showSkin && !usePicking) project->footR.PaintSkin();
-		glPopName();
-		glPushName(3);
-		if(showLast) project->lastR.Paint();
-		glPopName();
+
+		if(project->measurementsource == Project::fromFootScan && showFootScan){
+			glPushName(0);
+			matScan.UseColor(0.5);
+			glNormal3f(1, 0, 0);
+			project->footScan.Paint();
+			glPopName();
+		}
+
+		if(project->measurementsource == Project::fromMeasurements
+				&& showBones){
+			glPushName(1);
+			matBones.UseMaterial();
+			project->footR.PaintBones();
+			glPopName();
+		}
+
+		if(project->modeltype == Project::boneBased && showSkin && !usePicking){
+			glPushName(2);
+			matFoot.UseMaterial();
+			project->footR.PaintSkin();
+			glPopName();
+		}
+
+		if(project->modeltype == Project::lastBased && showLastScan){
+			glPushName(3);
+			matScan.UseMaterial();
+			project->lastModelR.Paint();
+			glPopName();
+		}
+
+		if(showLast){
+			glPushName(3);
+			matLast.UseMaterial();
+			project->lastR.Paint();
+			glPopName();
+		}
+
+		if(showInsole){
+			glPushName(4);
+			matLines.UseMaterial();
+			project->bow.Paint();
+			matLines.UseMaterial();
+			PaintInsole();
+			glPopName();
+		}
+
+		if(showSole){
+			glPushName(12);
+			PaintSole();
+			glPopName();
+		}
+		if(showUpper){
+			glPushName(13);
+			PaintUpper();
+			glPopName();
+		}
+
+		if(showCutaway){
+			OpenGLMaterial::EnableColors();
+			glPushName(14);
+			PaintCutaway();
+			glPopName();
+		}
+
 		glPopMatrix();
 	}
 
-	glLoadName(11);
-	if(showInsole) PaintInsole();
-	glLoadName(12);
-	if(showSole) PaintSole();
-	glLoadName(13);
-	if(showUpper) PaintUpper();
-	glLoadName(14);
-	if(showCutaway) PaintCutaway();
-
 	if(!usePicking){
 		glLoadName(16);
+		matFloor.UseMaterial();
 		if(showFloor) PaintFloor();
 		glLoadName(17);
+		OpenGLMaterial::EnableColors();
 		if(showBackground) PaintBackground(false);
 	}
+	OpenGLMaterial::EnableColors();
 }
 
 void ProjectView::PaintLast(void) const
@@ -157,6 +271,8 @@ void ProjectView::PaintLast(void) const
 void ProjectView::PaintInsole(void) const
 {
 	Project* project = wxStaticCast(this->GetDocument(), Project);
+
+//	project->lastModelL.Paint();
 
 //	glColor3f(0.0, 0.75, 0.0);
 //	glBegin(GL_LINES);
@@ -199,14 +315,24 @@ void ProjectView::PaintCutaway(void) const
 void ProjectView::PaintFloor(void) const
 {
 	const float d = 0.5;
-
-	glColor3f(0.4, 0.4, 0.4);
-	glBegin(GL_QUADS);
+	const int N = 10;
+	const float dd = d / (float) N;
 	glNormal3f(0, 0, 1);
-	glVertex3f(-d, -d, 0);
-	glVertex3f(d, -d, 0);
-	glVertex3f(d, d, 0);
-	glVertex3f(-d, d, 0);
+//	glColor3f(0.4, 0.4, 0.4);
+
+	glBegin(GL_QUADS);
+
+	for(int n = -N; n < N; ++n){
+		for(int m = -N; m < N; ++m){
+
+			glVertex3f((n - 1) * dd, (m - 1) * dd, 0);
+			glVertex3f((n + 1) * dd, (m - 1) * dd, 0);
+			glVertex3f((n + 1) * dd, (m + 1) * dd, 0);
+			glVertex3f((n - 1) * dd, (m + 1) * dd, 0);
+
+		}
+	}
+
 	glEnd();
 }
 
@@ -223,6 +349,7 @@ const FootMeasurements* ProjectView::GetActiveFootMeasurements(void) const
 {
 	const Project* project = wxStaticCast(this->GetDocument(), Project);
 	switch(active){
+	case Both:
 	case Left:
 		return &(project->measL);
 	case Right:

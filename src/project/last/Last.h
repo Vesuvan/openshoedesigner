@@ -42,7 +42,13 @@ public:
 
 	void Paint(void) const;
 
+
+
 	NURBS nurbs;
+
+	bool IsModified(void) const;
+	void Modify(bool modified = true);
+	bool modified;
 };
 
 #endif /* LAST_H_ */

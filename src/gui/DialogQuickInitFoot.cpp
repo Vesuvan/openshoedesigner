@@ -47,7 +47,7 @@ void DialogQuickInitFoot::OnTextEnter(wxCommandEvent& event)
 	m_buttonInit->SetFocus();
 }
 
-void DialogQuickInitFoot::OnOK(wxCommandEvent& event)
+void DialogQuickInitFoot::OnClose(wxCommandEvent& event)
 {
 	ParseText(m_textCtrlShoeSize->GetValue());
 	event.Skip();
@@ -105,8 +105,7 @@ void DialogQuickInitFoot::ParseText(wxString text)
 		break;
 	}
 
-	width = 0.0;
-	if(m_radioBtnSmall->GetValue()) width = -1.0;
+	width = 0.9;
+	if(m_radioBtnSmall->GetValue()) width = 0.8;
 	if(m_radioBtnWide->GetValue()) width = 1.0;
-	width = (length / 3.0) * (1 + width / 5.0);
 }

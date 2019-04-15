@@ -71,14 +71,14 @@ bool IniFile::ReadFile(wxString filename)
 		const wxString x = text.ReadLine();
 		lineCount++;
 		if(x.IsEmpty()) continue;
-		const int posFirstChar = x.find_first_not_of(" \f\n\r\t");
-		const int posComment = x.find_first_of(";#-%");
+		const size_t posFirstChar = x.find_first_not_of(" \f\n\r\t");
+		const size_t posComment = x.find_first_of(";#-%");
 		if(posFirstChar == std::string::npos) continue;
 		if(posComment != std::string::npos && posComment == posFirstChar) continue;
-		const int posLeftBracket = x.find_first_of('[');
+		const size_t posLeftBracket = x.find_first_of('[');
 		if(posLeftBracket != std::string::npos
 				&& posLeftBracket == posFirstChar){
-			int posRightBracket = x.find_last_of(']');
+			size_t posRightBracket = x.find_last_of(']');
 			if(posRightBracket == std::string::npos){
 				printf("INI-File has a broken section header in line %lu.\n",
 						lineCount);
@@ -90,7 +90,7 @@ bool IniFile::ReadFile(wxString filename)
 			section.push_back(temp);
 			continue;
 		}
-		int posEqual = x.find_first_of('=');
+		size_t posEqual = x.find_first_of('=');
 		if(posEqual != std::string::npos){
 			if(posEqual == 0){
 				printf(
@@ -104,11 +104,12 @@ bool IniFile::ReadFile(wxString filename)
 						lineCount);
 				return false;
 			}
-			const int poskey0 = x.find_first_not_of(" \f\n\r\t");
-			const int poskey1 = x.find_last_not_of(" \f\n\r\t", posEqual - 1);
-			const int posvalue0 = x.find_first_not_of(" \f\n\r\t",
+			const size_t poskey0 = x.find_first_not_of(" \f\n\r\t");
+			const size_t poskey1 = x.find_last_not_of(" \f\n\r\t",
+					posEqual - 1);
+			const size_t posvalue0 = x.find_first_not_of(" \f\n\r\t",
 					posEqual + 1);
-			const int posvalue1 = x.find_last_not_of(" \f\n\r\t");
+			const size_t posvalue1 = x.find_last_not_of(" \f\n\r\t");
 
 			wxString key = CleanString(
 					x.substr(poskey0, poskey1 - poskey0 + 1));
@@ -126,8 +127,8 @@ bool IniFile::ReadFile(wxString filename)
 
 wxString IniFile::CleanString(wxString text)
 {
-	const int n0 = text.find_first_of("\"");
-	const int n1 = text.find_last_of("\"");
+	const size_t n0 = text.find_first_of("\"");
+	const size_t n1 = text.find_last_of("\"");
 	if(n0 == std::string::npos || n1 == std::string::npos) return text;
 	if(n0 == n1) return text;
 	text = text.substr(n0, n1 - n0);

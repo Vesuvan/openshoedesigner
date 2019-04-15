@@ -34,15 +34,15 @@
 
 class CommandProjectSetLegLengthDifference:public wxCommand {
 public:
-    CommandProjectSetLegLengthDifference(const wxString& name, Project* project,double value);
+    CommandProjectSetLegLengthDifference(const wxString& name, Project* project,wxString value);
 
     bool Do(void);
     bool Undo(void);
 
 protected:
     Project* project;
-    double value;
-    double oldValue;
+    wxString value;
+    wxString oldValue;
 };
 
 #endif /* __COMMANDPROJECTSETLEGLENGTHDIFFERENCE_H__ */

@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : PolyCylinder.h
+// Name               : LastModel.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 12.02.2019
+// Created            : 02.03.2019
 // Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,55 +24,48 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef SRC_PROJECT_LAST_POLYCYLINDER_H_
-#define SRC_PROJECT_LAST_POLYCYLINDER_H_
+#ifndef SRC_PROJECT_LAST_LASTMODEL_H_
+#define SRC_PROJECT_LAST_LASTMODEL_H_
 
-/*!\class PolyCylinder
- * \brief Stores sections of polygonwise defined shapes
+#include <string>
+
+#include "../../3D/Geometry.h"
+#include "../../math/BendLine.h"
+#include "../foot/FootMeasurements.h"
+#include "../Shoe.h"
+#include "PolyCylinder.h"
+
+/*!\class LastModel
+ * \brief ...
  *
  * ...
  */
 
-#include <string>
-#include <vector>
-
-#include "../../3D/Vector3.h"
-#include "../../math/Polynom.h"
-
-class PolyCylinder {
+class LastModel {
 public:
-	class CircleSection {
-	public:
-		class Segment {
-		public:
-			Polynom y0;
-			Polynom z0;
-			Polynom y;
-			Polynom z;
-			Polynom dy;
-			Polynom dz;
-			Segment();
-			void Scale(double sy = 1.0, double sz = 1.0);
-			void Paint(void) const;
-			double GetLength(void) const;
-		};
-		std::vector <Segment> segments;
-		CircleSection();
-		void Scale(double sy = 1.0, double sz = 1.0);
-		Vector3 Evaluate(double r);
-		double GetLength(void) const;
-		void Paint(void) const;
-	};
-	std::vector <CircleSection> sections;
-	double dx;
-	PolyCylinder();
+	std::string filename;
+	PolyCylinder data;
+	double sx;
+	double sy;
+	double sz;
 
-	void Scale(double sx, double sy = 1.0, double sz = 1.0);
+	Geometry geometry;
 
-	bool Load(std::string filename);
+	BendLine center;
+	bool mirrored;
 
+	LastModel();
+	virtual ~LastModel();
+	bool LoadModel(std::string filename);
+
+	void UpdateForm(const FootMeasurements &measurements);
+	void UpdatePosition(const Shoe &shoe, double offset = 0.0);
+	void UpdateGeometry(void);
 	void Paint(void) const;
-	void Test(void);
+
+	bool IsModified(void) const;
+	void Modify(bool modified = true);
+	bool modified;
 };
 
-#endif /* SRC_PROJECT_LAST_POLYCYLINDER_H_ */
+#endif /* SRC_PROJECT_LAST_LASTMODEL_H_ */

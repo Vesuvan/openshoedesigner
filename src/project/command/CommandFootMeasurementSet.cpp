@@ -29,151 +29,66 @@
 
 CommandFootMeasurementSet::CommandFootMeasurementSet(const wxString& name,
 		Project* project, ProjectView::Side active, int parameter,
-		wxString value) :
-		wxCommand(true, name), project(project), active(active), parameter(
-				parameter), value(value) {
+		wxString value)
+		: wxCommand(true, name), project(project), active(active), parameter(
+				parameter), value(value)
+{
 }
 
-bool CommandFootMeasurementSet::Do(void) {
-	if (project == NULL)
-		return false;
-	FootMeasurements *meas;
-	if (active == ProjectView::Left)
-		meas = &(project->measL);
-	if (active == ProjectView::Right)
-		meas = &(project->measR);
+bool CommandFootMeasurementSet::Do(void)
+{
+	if(project == NULL) return false;
 
-	oldValue = Replace(active, parameter, value);
-	const bool hasChanged = !value.IsSameAs(oldValue);
-	if (hasChanged) {
-		meas->Modify(true);
-		project->Update();
+	bool hasChanged = false;
+	if(active == ProjectView::Left || active == ProjectView::Both){
+		FootMeasurements *meas = &(project->measL);
+		oldValueLeft = Replace(meas, parameter, value);
+		bool temp = !value.IsSameAs(oldValueLeft);
+		if(temp) meas->Modify(true);
+		hasChanged |= temp;
 	}
+	if(active == ProjectView::Right || active == ProjectView::Both){
+		FootMeasurements *meas = &(project->measR);
+		oldValueRight = Replace(meas, parameter, value);
+		bool temp = !value.IsSameAs(oldValueRight);
+		if(temp) meas->Modify(true);
+		hasChanged |= temp;
+	}
+	if(hasChanged) project->Update();
 
 	return hasChanged;
-
-//	if(active == Project::Left || active == Project::Both){
-//		switch(param){
-//		case FootModel::Length:
-//			oldValueL = project->footL.length;
-//			project->footL.length = value;
-//			break;
-//		case FootModel::BallWidth:
-//			oldValueL = project->footL.ballwidth;
-//			project->footL.ballwidth = value;
-//			break;
-//		case FootModel::AnkleWidth:
-////			oldValueL = project->footL.anklewidth;
-////			project->footL.anklewidth = value;
-//			break;
-//		case FootModel::HeelWidth:
-////			oldValueL = project->footL.heelwidth;
-////			project->footL.heelwidth = value;
-//			break;
-//		case FootModel::Mixing:
-//			oldValueL = project->footL.mixing;
-//			project->footL.mixing = value;
-//			break;
-//		}
-//	}
-//	if(active == Project::Right || active == Project::Both){
-//		switch(param){
-//		case FootModel::Length:
-//			oldValueR = project->footR.length;
-//			project->footR.length = value;
-//			break;
-//		case FootModel::BallWidth:
-//			oldValueR = project->footR.ballwidth;
-//			project->footR.ballwidth = value;
-//			break;
-//		case FootModel::AnkleWidth:
-////			oldValueR = project->footR.anklewidth;
-////			project->footR.anklewidth = value;
-//			break;
-//		case FootModel::HeelWidth:
-////			oldValueR = project->footR.heelwidth;
-////			project->footR.heelwidth = value;
-//			break;
-//		case FootModel::Mixing:
-//			oldValueR = project->footR.mixing;
-//			project->footR.mixing = value;
-//			break;
-//		}
-//	}
-//	project->Update(Project::UpdateFoot, active);
-//	return true;
 }
 
-bool CommandFootMeasurementSet::Undo(void) {
-	if (project == NULL)
-		return false;
+bool CommandFootMeasurementSet::Undo(void)
+{
+	if(project == NULL) return false;
 
-	FootMeasurements *meas;
-	if (active == ProjectView::Left)
-		meas = &(project->measL);
-	if (active == ProjectView::Right)
-		meas = &(project->measR);
-	wxString currentValue;
+	bool hasChanged = false;
+	if(active == ProjectView::Left || active == ProjectView::Both){
+		FootMeasurements *meas = &(project->measL);
+		wxString currentValue;
+		currentValue = Replace(meas, parameter, oldValueLeft);
+		bool temp = !currentValue.IsSameAs(oldValueLeft);
+		if(temp) meas->Modify(true);
+		hasChanged |= temp;
 
-	currentValue = Replace(active, parameter, oldValue);
-	const bool hasChanged = !currentValue.IsSameAs(oldValue);
-	if (hasChanged) {
-		meas->Modify(true);
-		project->Update();
 	}
-
+	if(active == ProjectView::Right || active == ProjectView::Both){
+		FootMeasurements *meas = &(project->measR);
+		wxString currentValue;
+		currentValue = Replace(meas, parameter, oldValueRight);
+		bool temp = !currentValue.IsSameAs(oldValueRight);
+		if(temp) meas->Modify(true);
+		hasChanged |= temp;
+	}
+	if(hasChanged) project->Update();
 	return true;
-
-//	if(active == Project::Left || active == Project::Both){
-//		switch(param){
-//		case FootModel::Length:
-//			project->footL.length = oldValueL;
-//			break;
-//		case FootModel::BallWidth:
-//			project->footL.ballwidth = oldValueL;
-//			break;
-//		case FootModel::AnkleWidth:
-////			project->footL.anklewidth = oldValueL;
-//			break;
-//		case FootModel::HeelWidth:
-////			project->footL.heelwidth = oldValueL;
-//			break;
-//		case FootModel::Mixing:
-//			project->footL.mixing = oldValueL;
-//			break;
-//		}
-//	}
-//	if(active == Project::Right || active == Project::Both){
-//		switch(param){
-//		case FootModel::Length:
-//			project->footR.length = oldValueR;
-//			break;
-//		case FootModel::BallWidth:
-//			project->footR.ballwidth = oldValueR;
-//			break;
-//		case FootModel::AnkleWidth:
-////			project->footR.anklewidth = oldValueR;
-//			break;
-//		case FootModel::HeelWidth:
-////			project->footR.heelwidth = oldValueR;
-//			break;
-//		case FootModel::Mixing:
-//			project->footR.mixing = oldValueR;
-//			break;
-//		}
-//	}
-//	project->Update(Project::UpdateFoot, active);
-//	return true;
 }
 
-wxString CommandFootMeasurementSet::Replace(ProjectView::Side active,
-		int parameter, wxString newValue) {
+wxString CommandFootMeasurementSet::Replace(FootMeasurements *meas,
+		int parameter, wxString newValue)
+{
 	wxString lastValue;
-	FootMeasurements *meas;
-	if (active == ProjectView::Left)
-		meas = &(project->measL);
-	if (active == ProjectView::Right)
-		meas = &(project->measR);
 	ParameterFormula *param = GetParameterByID(meas, parameter);
 	lastValue = param->formula;
 	param->formula = newValue;
@@ -181,8 +96,9 @@ wxString CommandFootMeasurementSet::Replace(ProjectView::Side active,
 }
 
 ParameterFormula* CommandFootMeasurementSet::GetParameterByID(
-		FootMeasurements *meas, int id) {
-	switch (id) {
+		FootMeasurements *meas, int id)
+{
+	switch(id){
 	case ID_MEASUREMENT_FOOTLENGTH:
 		return &(meas->footLength);
 	case ID_MEASUREMENT_BALLGIRTH:
@@ -197,8 +113,6 @@ ParameterFormula* CommandFootMeasurementSet::GetParameterByID(
 		return &(meas->shortHeelGirth);
 	case ID_MEASUREMENT_ANGLEMIXING:
 		return &(meas->angleMixing);
-	case ID_MEASUREMENT_LEGLENGTHDIFFERENCE:
-		return &(meas->legLengthDifference);
 	case ID_MEASUREMENT_BELOWCRUTCHGIRTH:
 		return &(meas->belowCrutchGirth);
 	case ID_MEASUREMENT_BELOWCRUTCHLEVEL:

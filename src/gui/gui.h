@@ -36,6 +36,7 @@
 #include <wx/choicebk.h>
 #include <wx/choice.h>
 #include <wx/slider.h>
+#include <wx/statline.h>
 #include <wx/checkbox.h>
 #include <wx/treelist.h>
 #include <wx/listbox.h>
@@ -58,23 +59,23 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #define ID_QUICKSETUPMEASUREMENTS 1000
-#define ID_FULLSYMMETRY 1001
-#define ID_SYMMETRICMODEL 1002
-#define ID_INDIVIDUALMODEL 1003
-#define ID_COPYLEFTTORIGHT 1004
+#define ID_USEFOOTMEASUREMENTS 1001
+#define ID_USEFOOTSCAN 1002
+#define ID_MEASUREMENTSYMMETRY 1003
+#define ID_COPYACTIVETOINACTIVE 1004
 #define ID_COPYRIGHTTOLEFT 1005
-#define ID_USEFOOTMEASUREMENTS 1006
-#define ID_USEFOOTSCAN 1007
-#define ID_USEBONEBASEDMODEL 1008
-#define ID_USELASTBASEDMODEL 1009
-#define ID_EDITBONEMODEL 1010
-#define ID_LOADFOOTMODEL 1011
-#define ID_SAVEFOOTMODEL 1012
-#define ID_CONSTRUCTIONEXPERIMENTAL 1013
-#define ID_CONSTRUCTIONWELDED 1014
-#define ID_CONSTRUCTIONCEMENTED 1015
-#define ID_CONSTRUCTIONMOLDED 1016
-#define ID_CONSTRUCTIONDUTCH 1017
+#define ID_COPYLEFTTORIGHT 1006
+#define ID_USEBONEBASEDMODEL 1007
+#define ID_USELASTBASEDMODEL 1008
+#define ID_EDITBONEMODEL 1009
+#define ID_LOADFOOTMODEL 1010
+#define ID_SAVEFOOTMODEL 1011
+#define ID_CONSTRUCTIONEXPERIMENTAL 1012
+#define ID_CONSTRUCTIONWELDED 1013
+#define ID_CONSTRUCTIONCEMENTED 1014
+#define ID_CONSTRUCTIONMOLDED 1015
+#define ID_CONSTRUCTIONDUTCH 1016
+#define ID_CONSTRUCTIONGETA 1017
 #define ID_LOADPATTERN 1018
 #define ID_SAVEPATTERN 1019
 #define ID_STEREO3D 1020
@@ -93,53 +94,56 @@
 #define ID_SHOWBACKGROUND 1033
 #define ID_EDITLEFT 1034
 #define ID_EDITRIGHT 1035
-#define ID_MEASUREMENT_FOOTLENGTH 1036
-#define ID_MEASUREMENT_BALLGIRTH 1037
-#define ID_MEASUREMENT_WAISTGIRTH 1038
-#define ID_MEASUREMENT_INSTEPGIRTH 1039
-#define ID_MEASUREMENT_LONGHEELGIRTH 1040
-#define ID_MEASUREMENT_SHORTHEELGIRTH 1041
-#define ID_MEASUREMENT_ANGLEMIXING 1042
-#define ID_MEASUREMENT_LEGLENGTHDIFFERENCE 1043
-#define ID_IMAGEFOOT 1044
-#define ID_MEASUREMENT_BELOWCRUTCHGIRTH 1045
-#define ID_MEASUREMENT_BELOWCRUTCHLEVEL 1046
-#define ID_MEASUREMENT_MIDDLEOFCALFGIRTH 1047
-#define ID_MEASUREMENT_MIDDLEOFCALFLEVEL 1048
-#define ID_MEASUREMENT_ABOVEKNEEGIRTH 1049
-#define ID_MEASUREMENT_ABOVEKNEELEVEL 1050
-#define ID_MEASUREMENT_OVERKNEECAPGIRTH 1051
-#define ID_MEASUREMENT_OVERKNEECAPLEVEL 1052
-#define ID_MEASUREMENT_BELOWKNEEGIRTH 1053
-#define ID_MEASUREMENT_BELOWKNEELEVEL 1054
-#define ID_MEASUREMENT_MIDDLEOFSHANKGIRTH 1055
-#define ID_MEASUREMENT_MIDDLEOFSHANKLEVEL 1056
-#define ID_MEASUREMENT_ABOVEANKLEGIRTH 1057
-#define ID_MEASUREMENT_ABOVEANKLELEVEL 1058
-#define ID_MEASUREMENT_OVERANKLEBONEGIRTH 1059
-#define ID_MEASUREMENT_OVERANKLEBONELEVEL 1060
-#define ID_PRESETSHOETYPE 1061
-#define ID_HEELHEIGHT 1062
-#define ID_BALLHEIGHT 1063
-#define ID_HEELPITCH 1064
-#define ID_TOESPRING 1065
-#define ID_PRESETSHOEHEIGHT 1066
-#define ID_UPPERLEVEL 1067
-#define ID_TIPSYMMETRY 1068
-#define ID_TIPPOINTEDNESS 1069
-#define ID_TIPSHARPNESS 1070
-#define ID_EXTRALENGTH 1071
-#define ID_FOOTCOMPRESSION 1072
-#define ID_CHECKSEPARATEDHEEL 1073
-#define ID_SLIDERTOESUPPORTRADIUS 1074
-#define ID_SLIDERTOESUPPORTOFFSET 1075
-#define ID_GRIDLENGTH 1076
-#define ID_GRIDDIAMETER 1077
-#define ID_GRIDSKIN 1078
-#define ID_SPINSCALE 1079
-#define ID_SPINOFFSHOR 1080
-#define ID_SPINOFFSVERT 1081
-#define ID_CLOSE 1082
+#define ID_MEASUREMENTSOURCE 1036
+#define ID_MEASUREMENT_FOOTLENGTH 1037
+#define ID_MEASUREMENT_BALLGIRTH 1038
+#define ID_MEASUREMENT_WAISTGIRTH 1039
+#define ID_MEASUREMENT_INSTEPGIRTH 1040
+#define ID_MEASUREMENT_LONGHEELGIRTH 1041
+#define ID_MEASUREMENT_SHORTHEELGIRTH 1042
+#define ID_MEASUREMENT_ANGLEMIXING 1043
+#define ID_MEASUREMENT_LEGLENGTHDIFFERENCE 1044
+#define ID_IMAGEFOOT 1045
+#define ID_FOOTMODEL 1046
+#define ID_MEASUREMENT_BELOWCRUTCHGIRTH 1047
+#define ID_MEASUREMENT_BELOWCRUTCHLEVEL 1048
+#define ID_MEASUREMENT_MIDDLEOFCALFGIRTH 1049
+#define ID_MEASUREMENT_MIDDLEOFCALFLEVEL 1050
+#define ID_MEASUREMENT_ABOVEKNEEGIRTH 1051
+#define ID_MEASUREMENT_ABOVEKNEELEVEL 1052
+#define ID_MEASUREMENT_OVERKNEECAPGIRTH 1053
+#define ID_MEASUREMENT_OVERKNEECAPLEVEL 1054
+#define ID_MEASUREMENT_BELOWKNEEGIRTH 1055
+#define ID_MEASUREMENT_BELOWKNEELEVEL 1056
+#define ID_MEASUREMENT_MIDDLEOFSHANKGIRTH 1057
+#define ID_MEASUREMENT_MIDDLEOFSHANKLEVEL 1058
+#define ID_MEASUREMENT_ABOVEANKLEGIRTH 1059
+#define ID_MEASUREMENT_ABOVEANKLELEVEL 1060
+#define ID_MEASUREMENT_OVERANKLEBONEGIRTH 1061
+#define ID_MEASUREMENT_OVERANKLEBONELEVEL 1062
+#define ID_PRESETSHOETYPE 1063
+#define ID_HEELHEIGHT 1064
+#define ID_BALLHEIGHT 1065
+#define ID_HEELPITCH 1066
+#define ID_TOESPRING 1067
+#define ID_PRESETSHOEHEIGHT 1068
+#define ID_UPPERLEVEL 1069
+#define ID_TIPSYMMETRY 1070
+#define ID_TIPPOINTEDNESS 1071
+#define ID_TIPSHARPNESS 1072
+#define ID_EXTRALENGTH 1073
+#define ID_FOOTCOMPRESSION 1074
+#define ID_SELECTCONSTRUCTION 1075
+#define ID_CHECKSEPARATEDHEEL 1076
+#define ID_SLIDERTOESUPPORTRADIUS 1077
+#define ID_SLIDERTOESUPPORTOFFSET 1078
+#define ID_GRIDLENGTH 1079
+#define ID_GRIDDIAMETER 1080
+#define ID_GRIDSKIN 1081
+#define ID_SPINSCALE 1082
+#define ID_SPINOFFSHOR 1083
+#define ID_SPINOFFSVERT 1084
+#define ID_CLOSE 1085
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class GUIFrameMain
@@ -153,8 +157,8 @@ class GUIFrameMain : public wxDocChildFrame
 		wxMenu* m_menuFile;
 		wxMenu* m_menuEdit;
 		wxMenu* m_menuFoot;
-		wxMenu* m_menuSymmetry;
 		wxMenu* m_menuFootParameters;
+		wxMenu* m_menuMeasurementsCopy;
 		wxMenu* m_menuFootModel;
 		wxMenu* m_menuBoneModel;
 		wxMenu* m_menuLast;
@@ -259,6 +263,9 @@ class GUIFrameMain : public wxDocChildFrame
 		wxStaticText* m_staticTextFootCompression;
 		ExtendedTextCtrl* m_textCtrlFootCompression;
 		wxPanel* m_panelPageSole;
+		wxStaticText* m_staticTextConstruction;
+		wxChoice* m_choiceConstruction;
+		wxStaticLine* m_staticline1;
 		wxCheckBox* m_checkBoxSeparatedHeel;
 		wxStaticText* m_staticText29;
 		ExtendedTextCtrl* m_textCtrl29;
@@ -299,9 +306,8 @@ class GUIFrameMain : public wxDocChildFrame
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnClose( wxCloseEvent& event ) = 0;
 		virtual void OnQuickSetupMeasurements( wxCommandEvent& event ) = 0;
-		virtual void OnSetSymmetry( wxCommandEvent& event ) = 0;
-		virtual void OnCopyMeasurements( wxCommandEvent& event ) = 0;
 		virtual void OnChangeModel( wxCommandEvent& event ) = 0;
+		virtual void OnCopyMeasurements( wxCommandEvent& event ) = 0;
 		virtual void OnLoadFootSTL( wxCommandEvent& event ) = 0;
 		virtual void OnEditBoneModel( wxCommandEvent& event ) = 0;
 		virtual void OnLoadBoneModel( wxCommandEvent& event ) = 0;
@@ -318,9 +324,9 @@ class GUIFrameMain : public wxDocChildFrame
 		virtual void OnViewChange( wxCommandEvent& event ) = 0;
 		virtual void OnSetupBackgroundImages( wxCommandEvent& event ) = 0;
 		virtual void OnDebugParser( wxCommandEvent& event ) = 0;
-		virtual void OnPageChange( wxNotebookEvent& event ) = 0;
 		virtual void OnMouseWheel( wxMouseEvent& event ) = 0;
 		virtual void OnToggleButton( wxCommandEvent& event ) = 0;
+		virtual void OnPageChange( wxChoicebookEvent& event ) = 0;
 		virtual void OnKillFocus( wxFocusEvent& event ) = 0;
 		virtual void OnSetFocus( wxFocusEvent& event ) = 0;
 		virtual void OnTextEnter( wxCommandEvent& event ) = 0;
@@ -398,11 +404,12 @@ class GUIDialogQuickInitFoot : public wxDialog
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnTextEnter( wxCommandEvent& event ) = 0;
+		virtual void OnClose( wxCommandEvent& event ) = 0;
 		
 	
 	public:
 		
-		GUIDialogQuickInitFoot( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Initialize Settings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxSTAY_ON_TOP ); 
+		GUIDialogQuickInitFoot( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Initialize Settings"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION|wxCLOSE_BOX|wxDEFAULT_DIALOG_STYLE|wxSTAY_ON_TOP|wxSYSTEM_MENU ); 
 		~GUIDialogQuickInitFoot();
 	
 };

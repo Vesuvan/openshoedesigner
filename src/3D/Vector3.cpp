@@ -37,7 +37,7 @@ Vector3::Vector3(wxString string)
 
 wxString Vector3::ToString(void) const
 {
-	return wxString::Format(_T("%f#%f#%f"), x, y, z);
+	return wxString::Format(_T("%g#%g#%g"), x, y, z);
 }
 
 void Vector3::FromString(wxString const& string)

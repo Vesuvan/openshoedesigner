@@ -31,20 +31,94 @@
 #include <cstring>
 #include <cstdio>
 
-PolyCylinder::PolyCylinder()
-{
-}
-
-PolyCylinder::~PolyCylinder()
-{
-}
-
 PolyCylinder::CircleSection::Segment::Segment()
 {
 }
 
+void PolyCylinder::CircleSection::Segment::Scale(double sy, double sz)
+{
+	y = y0 * sy;
+	z = z0 * sz;
+	dy = y.Derive();
+	dz = z.Derive();
+}
+
+double PolyCylinder::CircleSection::Segment::GetLength(void) const
+{
+	double d = 0;
+
+	const double dr = 0.1;
+	for(double r = 0.0; r < (1.000001 - dr); r += dr){
+		const double hdy = dy.Evaluate(r + dr / 2) * dr;
+		const double hdz = dz.Evaluate(r + dr / 2) * dr;
+		d += sqrt(hdy * hdy + hdz * hdz);
+	}
+	return d;
+}
+
+void PolyCylinder::CircleSection::Segment::Paint(void) const
+{
+	glBegin(GL_LINE_STRIP);
+
+	const double dr = 0.2;
+
+	glNormal3d(0, dz.Evaluate(0), -dy.Evaluate(0));
+	glVertex3d(0, y.Evaluate(0), z.Evaluate(0));
+
+	for(double r = 0.0; r <= 1.00001; r += dr){
+		glNormal3d(0, dz.Evaluate(r), -dy.Evaluate(r));
+		glVertex3d(0, y.Evaluate(r), z.Evaluate(r));
+	}
+
+	glEnd();
+}
+
 PolyCylinder::CircleSection::CircleSection()
 {
+}
+
+void PolyCylinder::CircleSection::Scale(double sy, double sz)
+{
+	for(size_t n = 0; n < segments.size(); ++n)
+		segments[n].Scale(sy, sz);
+}
+
+double PolyCylinder::CircleSection::GetLength(void) const
+{
+	double d = 0.0;
+	for(size_t n = 0; n < segments.size(); ++n)
+		d += segments[n].GetLength();
+	return d;
+}
+
+Vector3 PolyCylinder::CircleSection::Evaluate(double r)
+{
+	if(r < 0.0) r = 1.0 - fmod(-r, 1.0);
+	const size_t M = segments.size();
+	double h = r * (double) M;
+	double p;
+	double q = modf(h, &p);
+	size_t m = (size_t) p;
+	if(m >= M) m -= M;
+	return Vector3(0, segments[m].y.Evaluate(q), segments[m].z.Evaluate(q));
+}
+
+void PolyCylinder::CircleSection::Paint(void) const
+{
+	for(size_t n = 0; n < segments.size(); ++n)
+		segments[n].Paint();
+}
+
+PolyCylinder::PolyCylinder()
+{
+	dx = 1.0;
+}
+
+void PolyCylinder::Scale(double sx, double sy, double sz)
+{
+	dx = sx;
+	for(size_t n = 0; n < sections.size(); ++n)
+		sections[n].Scale(sy, sz);
 }
 
 bool PolyCylinder::Load(std::string filename)
@@ -54,7 +128,7 @@ bool PolyCylinder::Load(std::string filename)
 	FILE* fhd = fopen(filename.c_str(), "rb");
 	if(fhd == NULL) return false;
 
-	// Test header
+// Test header
 	{
 		char header[10];
 		int res = fread(header, sizeof(char), 10, fhd);
@@ -67,7 +141,7 @@ bool PolyCylinder::Load(std::string filename)
 			return false;
 		}
 	}
-	// Test endianess
+// Test endianess
 	{
 		uint16_t magic;
 		int res = fread(&magic, sizeof(uint16_t), 1, fhd);
@@ -81,7 +155,7 @@ bool PolyCylinder::Load(std::string filename)
 		}
 	}
 
-	// Load dimensions from file.
+// Load dimensions from file.
 	uint32_t dim[4];
 	size_t res = fread(dim, sizeof(uint32_t), 4, fhd);
 	if(res < 4){
@@ -95,7 +169,7 @@ bool PolyCylinder::Load(std::string filename)
 
 	size_t N = dim[0] * dim[1] * dim[2] * dim[3];
 
-	// Load all double data en block.
+// Load all double data en block.
 	double *temp = new double[N];
 	res = fread(temp, sizeof(double), N, fhd);
 	if(res < N){
@@ -105,7 +179,7 @@ bool PolyCylinder::Load(std::string filename)
 	}
 	fclose(fhd);
 
-	// Spread the data into the model.
+// Spread the data into the model.
 	sections.resize(dim[0]);
 	size_t p = 0;
 	for(size_t n = 0; n < dim[0]; ++n){
@@ -124,43 +198,9 @@ bool PolyCylinder::Load(std::string filename)
 	}
 
 	delete[] temp;
+
+	dx = 1.0 / dim[0];
 	return true;
-}
-
-void PolyCylinder::CircleSection::Segment::Scale(double sy, double sz)
-{
-	y = y0 * sy;
-	z = z0 * sz;
-	dy = y.Derive();
-	dz = z.Derive();
-}
-
-void PolyCylinder::CircleSection::Segment::Paint(void) const
-{
-	glBegin(GL_LINE_STRIP);
-
-	const double nsc = 50;
-	const double dr = 0.2;
-
-	glNormal3d(0, dz.Evaluate(0) * nsc, -dy.Evaluate(0) * nsc);
-	glVertex3d(0, y.Evaluate(0), z.Evaluate(0));
-
-	for(double r = 0.0; r <= 1.00001; r += dr){
-		glNormal3d(0, dz.Evaluate(r) * nsc, -dy.Evaluate(r) * nsc);
-		glVertex3d(0, y.Evaluate(r), z.Evaluate(r));
-	}
-
-	glEnd();
-}
-
-void PolyCylinder::CircleSection::Paint(void) const
-{
-//	glPushMatrix();
-	for(size_t n = 0; n < segments.size(); n += 1){
-		segments[n].Paint();
-//			glTranslatef(0, 0, 0.01);
-	}
-//		glPopMatrix();
 }
 
 void PolyCylinder::Paint(void) const
@@ -168,31 +208,13 @@ void PolyCylinder::Paint(void) const
 	glPushMatrix();
 	for(size_t n = 0; n < sections.size(); ++n){
 		sections[n].Paint();
-		glTranslatef(0.004, 0, 0);
+		glTranslatef(dx, 0, 0);
 	}
 	glPopMatrix();
 }
 
-double PolyCylinder::CircleSection::Segment::GetLength(void) const
-{
-	double d = 0;
-
-	const double dr = 0.1;
-	for(double r = 0.0; r < (1.000001 - dr); r += dr){
-		const double hdy = dy.Evaluate(r + dr / 2) * dr;
-		const double hdz = dz.Evaluate(r + dr / 2) * dr;
-		d += sqrt(hdy * hdy + hdz * hdz);
-	}
-	return d;
-}
-
-double PolyCylinder::CircleSection::GetLength(void) const
-{
-	return segments[0].GetLength();
-}
-
 void PolyCylinder::Test(void)
 {
-	double L = sections[0].GetLength();
+//	double L = sections[0].GetLength();
 //	std::fprintf(stdout, "%g mm\n", L * 1e3);
 }

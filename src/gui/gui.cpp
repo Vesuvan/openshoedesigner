@@ -32,35 +32,6 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	
 	m_menuFoot->AppendSeparator();
 	
-	m_menuSymmetry = new wxMenu();
-	wxMenuItem* m_menuSymmetryItem = new wxMenuItem( m_menuFoot, wxID_ANY, _("&Symmetry"), wxEmptyString, wxITEM_NORMAL, m_menuSymmetry );
-	wxMenuItem* m_menuItemFullSymmetry;
-	m_menuItemFullSymmetry = new wxMenuItem( m_menuSymmetry, ID_FULLSYMMETRY, wxString( _("Model and Measurements symmetric") ) , wxEmptyString, wxITEM_RADIO );
-	m_menuSymmetry->Append( m_menuItemFullSymmetry );
-	m_menuItemFullSymmetry->Check( true );
-	
-	wxMenuItem* m_menuItemSymmetricModel;
-	m_menuItemSymmetricModel = new wxMenuItem( m_menuSymmetry, ID_SYMMETRICMODEL, wxString( _("Symmetric Model and Individual Measurements") ) , wxEmptyString, wxITEM_RADIO );
-	m_menuSymmetry->Append( m_menuItemSymmetricModel );
-	
-	wxMenuItem* m_menuItemIndividualModel;
-	m_menuItemIndividualModel = new wxMenuItem( m_menuSymmetry, ID_INDIVIDUALMODEL, wxString( _("Individual Model and Measurements") ) , wxEmptyString, wxITEM_RADIO );
-	m_menuSymmetry->Append( m_menuItemIndividualModel );
-	
-	m_menuSymmetry->AppendSeparator();
-	
-	wxMenuItem* m_menuItemFootCopyLeftToRight;
-	m_menuItemFootCopyLeftToRight = new wxMenuItem( m_menuSymmetry, ID_COPYLEFTTORIGHT, wxString( _("Copy Measurements from Left to Right") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menuSymmetry->Append( m_menuItemFootCopyLeftToRight );
-	
-	wxMenuItem* m_menuItemFootCopyRightToLeft;
-	m_menuItemFootCopyRightToLeft = new wxMenuItem( m_menuSymmetry, ID_COPYRIGHTTOLEFT, wxString( _("Copy Measurements from Right to Left") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menuSymmetry->Append( m_menuItemFootCopyRightToLeft );
-	
-	m_menuFoot->Append( m_menuSymmetryItem );
-	
-	m_menuFoot->AppendSeparator();
-	
 	m_menuFootParameters = new wxMenu();
 	wxMenuItem* m_menuFootParametersItem = new wxMenuItem( m_menuFoot, wxID_ANY, _("Foot &parameters"), wxEmptyString, wxITEM_NORMAL, m_menuFootParameters );
 	wxMenuItem* m_menuItemFootModelBone;
@@ -74,6 +45,34 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	
 	m_menuFoot->Append( m_menuFootParametersItem );
 	
+	wxMenuItem* m_menuItemSymmetry;
+	m_menuItemSymmetry = new wxMenuItem( m_menuFoot, ID_MEASUREMENTSYMMETRY, wxString( _("Symmetric foot measurements") ) , wxEmptyString, wxITEM_CHECK );
+	m_menuFoot->Append( m_menuItemSymmetry );
+	m_menuItemSymmetry->Check( true );
+	
+	m_menuMeasurementsCopy = new wxMenu();
+	wxMenuItem* m_menuMeasurementsCopyItem = new wxMenuItem( m_menuFoot, wxID_ANY, _("&Copy measurements"), wxEmptyString, wxITEM_NORMAL, m_menuMeasurementsCopy );
+	wxMenuItem* m_menuItemMeasurementsCopyActiveToInactive;
+	m_menuItemMeasurementsCopyActiveToInactive = new wxMenuItem( m_menuMeasurementsCopy, ID_COPYACTIVETOINACTIVE, wxString( _("from active side to inactive side") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuMeasurementsCopy->Append( m_menuItemMeasurementsCopyActiveToInactive );
+	
+	wxMenuItem* m_menuItemMeasurementsCopyRightToLeft;
+	m_menuItemMeasurementsCopyRightToLeft = new wxMenuItem( m_menuMeasurementsCopy, ID_COPYRIGHTTOLEFT, wxString( _("from right to left") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuMeasurementsCopy->Append( m_menuItemMeasurementsCopyRightToLeft );
+	
+	wxMenuItem* m_menuItemMeasurementsCopyLeftToRight;
+	m_menuItemMeasurementsCopyLeftToRight = new wxMenuItem( m_menuMeasurementsCopy, ID_COPYLEFTTORIGHT, wxString( _("from left to right") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuMeasurementsCopy->Append( m_menuItemMeasurementsCopyLeftToRight );
+	
+	m_menuFoot->Append( m_menuMeasurementsCopyItem );
+	
+	wxMenuItem* m_menuItemFootModelLoadSTL;
+	m_menuItemFootModelLoadSTL = new wxMenuItem( m_menuFoot, wxID_ANY, wxString( _("Load foot scan") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuFoot->Append( m_menuItemFootModelLoadSTL );
+	m_menuItemFootModelLoadSTL->Enable( false );
+	
+	m_menuFoot->AppendSeparator();
+	
 	m_menuFootModel = new wxMenu();
 	wxMenuItem* m_menuFootModelItem = new wxMenuItem( m_menuFoot, wxID_ANY, _("Foot &model"), wxEmptyString, wxITEM_NORMAL, m_menuFootModel );
 	wxMenuItem* m_menuItemBoneBasedModel;
@@ -86,13 +85,6 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_menuFootModel->Append( m_menuItemUseLastBasedModel );
 	
 	m_menuFoot->Append( m_menuFootModelItem );
-	
-	m_menuFoot->AppendSeparator();
-	
-	wxMenuItem* m_menuItemFootModelLoadSTL;
-	m_menuItemFootModelLoadSTL = new wxMenuItem( m_menuFoot, wxID_ANY, wxString( _("Load foot scan") ) , wxEmptyString, wxITEM_NORMAL );
-	m_menuFoot->Append( m_menuItemFootModelLoadSTL );
-	m_menuItemFootModelLoadSTL->Enable( false );
 	
 	m_menuBoneModel = new wxMenu();
 	wxMenuItem* m_menuBoneModelItem = new wxMenuItem( m_menuFoot, wxID_ANY, _("&Foot bone model"), wxEmptyString, wxITEM_NORMAL, m_menuBoneModel );
@@ -110,6 +102,10 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_menuBoneModel->Append( m_menuItemSaveBoneModel );
 	
 	m_menuFoot->Append( m_menuBoneModelItem );
+	
+	wxMenuItem* m_menuItemLastModelLoad;
+	m_menuItemLastModelLoad = new wxMenuItem( m_menuFoot, wxID_ANY, wxString( _("&Load Last model") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuFoot->Append( m_menuItemLastModelLoad );
 	
 	m_menubar->Append( m_menuFoot, _("F&oot") ); 
 	
@@ -141,8 +137,12 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_menuConstruction->Append( m_menuItemConstructionMolded );
 	
 	wxMenuItem* m_menuItemConstructionDutch;
-	m_menuItemConstructionDutch = new wxMenuItem( m_menuConstruction, ID_CONSTRUCTIONDUTCH, wxString( _("&Dutch Clog") ) , wxEmptyString, wxITEM_RADIO );
+	m_menuItemConstructionDutch = new wxMenuItem( m_menuConstruction, ID_CONSTRUCTIONDUTCH, wxString( _("&Dutch clog") ) , wxEmptyString, wxITEM_RADIO );
 	m_menuConstruction->Append( m_menuItemConstructionDutch );
+	
+	wxMenuItem* m_menuItemConstructionGeta;
+	m_menuItemConstructionGeta = new wxMenuItem( m_menuConstruction, ID_CONSTRUCTIONGETA, wxString( _("&Japanese Geta") ) , wxEmptyString, wxITEM_RADIO );
+	m_menuConstruction->Append( m_menuItemConstructionGeta );
 	
 	m_menuShoe->Append( m_menuConstructionItem );
 	
@@ -315,16 +315,19 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	
 	m_toggleBtnEditLeft = new wxToggleButton( m_panelPageFoot, ID_EDITLEFT, _("Left"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_toggleBtnEditLeft->SetValue( true ); 
+	m_toggleBtnEditLeft->SetToolTip( _("Edit left foots measurements.") );
+	
 	bSizerEditLeftRight->Add( m_toggleBtnEditLeft, 1, wxALL, 5 );
 	
 	m_toggleBtnEditRight = new wxToggleButton( m_panelPageFoot, ID_EDITRIGHT, _("Right"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_toggleBtnEditRight->SetValue( true ); 
+	m_toggleBtnEditRight->SetToolTip( _("Edit right foots measurements.") );
+	
 	bSizerEditLeftRight->Add( m_toggleBtnEditRight, 1, wxALL, 5 );
 	
 	
 	bSizerFoot->Add( bSizerEditLeftRight, 0, wxEXPAND, 5 );
 	
-	m_choicebookMeasurement = new wxChoicebook( m_panelPageFoot, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxCHB_DEFAULT );
+	m_choicebookMeasurement = new wxChoicebook( m_panelPageFoot, ID_MEASUREMENTSOURCE, wxDefaultPosition, wxDefaultSize, wxCHB_DEFAULT );
 	m_panelMeasurementBased = new wxPanel( m_choicebookMeasurement, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerFootMeasurements;
 	bSizerFootMeasurements = new wxBoxSizer( wxVERTICAL );
@@ -524,7 +527,7 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_choicebookMeasurement->AddPage( m_panelScanBased, _("Scan based"), false );
 	bSizerFoot->Add( m_choicebookMeasurement, 1, wxEXPAND | wxALL, 5 );
 	
-	m_choicebookFootModel = new wxChoicebook( m_panelPageFoot, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxCHB_DEFAULT );
+	m_choicebookFootModel = new wxChoicebook( m_panelPageFoot, ID_FOOTMODEL, wxDefaultPosition, wxDefaultSize, wxCHB_DEFAULT );
 	m_panelBoneBasedModel = new wxPanel( m_choicebookFootModel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizerBoneBasedModel;
 	bSizerBoneBasedModel = new wxBoxSizer( wxVERTICAL );
@@ -569,10 +572,13 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	
 	m_toggleBtnEditLeft1 = new wxToggleButton( m_panelPageLeg, ID_EDITLEFT, _("Left"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_toggleBtnEditLeft1->SetValue( true ); 
+	m_toggleBtnEditLeft1->SetToolTip( _("Edit left legs measurements.") );
+	
 	bSizerLeftRight1->Add( m_toggleBtnEditLeft1, 1, wxALL, 5 );
 	
 	m_toggleBtnEditRight1 = new wxToggleButton( m_panelPageLeg, ID_EDITRIGHT, _("Right"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_toggleBtnEditRight1->SetValue( true ); 
+	m_toggleBtnEditRight1->SetToolTip( _("Edit right legs measurements.") );
+	
 	bSizerLeftRight1->Add( m_toggleBtnEditRight1, 1, wxALL, 5 );
 	
 	
@@ -835,6 +841,19 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	wxBoxSizer* bSizer28;
 	bSizer28 = new wxBoxSizer( wxVERTICAL );
 	
+	m_staticTextConstruction = new wxStaticText( m_panelPageSole, wxID_ANY, _("Construction"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticTextConstruction->Wrap( -1 );
+	bSizer28->Add( m_staticTextConstruction, 0, wxALL, 5 );
+	
+	wxString m_choiceConstructionChoices[] = { _("Experimental Generator"), _("Welted Construction"), _("Cemented Sole"), _("Molded Sole"), _("Dutch Clog"), _("Geta") };
+	int m_choiceConstructionNChoices = sizeof( m_choiceConstructionChoices ) / sizeof( wxString );
+	m_choiceConstruction = new wxChoice( m_panelPageSole, ID_SELECTCONSTRUCTION, wxDefaultPosition, wxDefaultSize, m_choiceConstructionNChoices, m_choiceConstructionChoices, 0 );
+	m_choiceConstruction->SetSelection( 0 );
+	bSizer28->Add( m_choiceConstruction, 0, wxALL|wxEXPAND, 5 );
+	
+	m_staticline1 = new wxStaticLine( m_panelPageSole, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
+	bSizer28->Add( m_staticline1, 0, wxEXPAND | wxALL, 5 );
+	
 	m_checkBoxSeparatedHeel = new wxCheckBox( m_panelPageSole, ID_CHECKSEPARATEDHEEL, _("Separated heel"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer28->Add( m_checkBoxSeparatedHeel, 0, wxALL|wxEXPAND, 5 );
 	
@@ -1091,16 +1110,15 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	// Connect Events
 	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameMain::OnClose ) );
 	this->Connect( m_menuItemQuickSetup->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnQuickSetupMeasurements ) );
-	this->Connect( m_menuItemFullSymmetry->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
-	this->Connect( m_menuItemSymmetricModel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
-	this->Connect( m_menuItemIndividualModel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
-	this->Connect( m_menuItemFootCopyLeftToRight->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnCopyMeasurements ) );
-	this->Connect( m_menuItemFootCopyRightToLeft->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnCopyMeasurements ) );
 	this->Connect( m_menuItemFootModelBone->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChangeModel ) );
 	this->Connect( m_menuItemFootModelScan->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChangeModel ) );
+	this->Connect( m_menuItemSymmetry->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChangeModel ) );
+	this->Connect( m_menuItemMeasurementsCopyActiveToInactive->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnCopyMeasurements ) );
+	this->Connect( m_menuItemMeasurementsCopyRightToLeft->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnCopyMeasurements ) );
+	this->Connect( m_menuItemMeasurementsCopyLeftToRight->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnCopyMeasurements ) );
+	this->Connect( m_menuItemFootModelLoadSTL->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnLoadFootSTL ) );
 	this->Connect( m_menuItemBoneBasedModel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChangeModel ) );
 	this->Connect( m_menuItemUseLastBasedModel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChangeModel ) );
-	this->Connect( m_menuItemFootModelLoadSTL->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnLoadFootSTL ) );
 	this->Connect( m_menuItemEditBoneModel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnEditBoneModel ) );
 	this->Connect( m_menuItemLoadBoneModel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnLoadBoneModel ) );
 	this->Connect( m_menuItemSaveBoneModel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveBoneModel ) );
@@ -1109,6 +1127,7 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	this->Connect( m_menuItemConstructionCemented->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
 	this->Connect( m_menuItemConstructionMolded->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
 	this->Connect( m_menuItemConstructionDutch->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
+	this->Connect( m_menuItemConstructionGeta->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
 	this->Connect( m_menuItemLoadPattern->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnLoadPattern ) );
 	this->Connect( m_menuItemSavePattern->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSavePattern ) );
 	this->Connect( m_menuItemSaveLast->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveLast ) );
@@ -1132,10 +1151,10 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	this->Connect( m_menuItemShowBackground->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
 	this->Connect( m_menuItemSetupBackground->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupBackgroundImages ) );
 	this->Connect( m_menuItemdebugParser->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnDebugParser ) );
-	m_notebook->Connect( wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler( GUIFrameMain::OnPageChange ), NULL, this );
 	m_panelPageFoot->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_toggleBtnEditLeft->Connect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
 	m_toggleBtnEditRight->Connect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
+	m_choicebookMeasurement->Connect( wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGED, wxChoicebookEventHandler( GUIFrameMain::OnPageChange ), NULL, this );
 	m_textCtrlFootLength->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
 	m_textCtrlFootLength->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlFootLength->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
@@ -1171,6 +1190,7 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_buttonQuickSetup->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnQuickSetupMeasurements ), NULL, this );
 	m_bitmapFoot->Connect( wxEVT_SIZE, wxSizeEventHandler( GUIFrameMain::OnSize ), NULL, this );
 	m_filePickerScanFile->Connect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( GUIFrameMain::OnFileChangedScanFile ), NULL, this );
+	m_choicebookFootModel->Connect( wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGED, wxChoicebookEventHandler( GUIFrameMain::OnPageChange ), NULL, this );
 	m_buttonEditBoneModel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnEditBoneModel ), NULL, this );
 	m_filePickerLastModel->Connect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( GUIFrameMain::OnFileChangedLastFile ), NULL, this );
 	m_toggleBtnEditLeft1->Connect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
@@ -1269,6 +1289,7 @@ GUIFrameMain::GUIFrameMain(wxDocument* doc, wxView* view, wxDocParentFrame* pare
 	m_textCtrlFootCompression->Connect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlFootCompression->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlFootCompression->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_choiceConstruction->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ), NULL, this );
 	m_checkBoxSeparatedHeel->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameMain::OnCheckBox ), NULL, this );
 	m_sliderSupportHeelRadius->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
 	m_sliderSupportHeelRadius->Connect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
@@ -1315,16 +1336,15 @@ GUIFrameMain::~GUIFrameMain()
 	// Disconnect Events
 	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( GUIFrameMain::OnClose ) );
 	this->Disconnect( ID_QUICKSETUPMEASUREMENTS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnQuickSetupMeasurements ) );
-	this->Disconnect( ID_FULLSYMMETRY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
-	this->Disconnect( ID_SYMMETRICMODEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
-	this->Disconnect( ID_INDIVIDUALMODEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetSymmetry ) );
-	this->Disconnect( ID_COPYLEFTTORIGHT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnCopyMeasurements ) );
-	this->Disconnect( ID_COPYRIGHTTOLEFT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnCopyMeasurements ) );
 	this->Disconnect( ID_USEFOOTMEASUREMENTS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChangeModel ) );
 	this->Disconnect( ID_USEFOOTSCAN, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChangeModel ) );
+	this->Disconnect( ID_MEASUREMENTSYMMETRY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChangeModel ) );
+	this->Disconnect( ID_COPYACTIVETOINACTIVE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnCopyMeasurements ) );
+	this->Disconnect( ID_COPYRIGHTTOLEFT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnCopyMeasurements ) );
+	this->Disconnect( ID_COPYLEFTTORIGHT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnCopyMeasurements ) );
+	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnLoadFootSTL ) );
 	this->Disconnect( ID_USEBONEBASEDMODEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChangeModel ) );
 	this->Disconnect( ID_USELASTBASEDMODEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnChangeModel ) );
-	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnLoadFootSTL ) );
 	this->Disconnect( ID_EDITBONEMODEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnEditBoneModel ) );
 	this->Disconnect( ID_LOADFOOTMODEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnLoadBoneModel ) );
 	this->Disconnect( ID_SAVEFOOTMODEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveBoneModel ) );
@@ -1333,6 +1353,7 @@ GUIFrameMain::~GUIFrameMain()
 	this->Disconnect( ID_CONSTRUCTIONCEMENTED, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
 	this->Disconnect( ID_CONSTRUCTIONMOLDED, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
 	this->Disconnect( ID_CONSTRUCTIONDUTCH, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
+	this->Disconnect( ID_CONSTRUCTIONGETA, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ) );
 	this->Disconnect( ID_LOADPATTERN, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnLoadPattern ) );
 	this->Disconnect( ID_SAVEPATTERN, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSavePattern ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSaveLast ) );
@@ -1356,10 +1377,10 @@ GUIFrameMain::~GUIFrameMain()
 	this->Disconnect( ID_SHOWBACKGROUND, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnViewChange ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnSetupBackgroundImages ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( GUIFrameMain::OnDebugParser ) );
-	m_notebook->Disconnect( wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxNotebookEventHandler( GUIFrameMain::OnPageChange ), NULL, this );
 	m_panelPageFoot->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_toggleBtnEditLeft->Disconnect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
 	m_toggleBtnEditRight->Disconnect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
+	m_choicebookMeasurement->Disconnect( wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGED, wxChoicebookEventHandler( GUIFrameMain::OnPageChange ), NULL, this );
 	m_textCtrlFootLength->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( GUIFrameMain::OnKillFocus ), NULL, this );
 	m_textCtrlFootLength->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlFootLength->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
@@ -1395,6 +1416,7 @@ GUIFrameMain::~GUIFrameMain()
 	m_buttonQuickSetup->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnQuickSetupMeasurements ), NULL, this );
 	m_bitmapFoot->Disconnect( wxEVT_SIZE, wxSizeEventHandler( GUIFrameMain::OnSize ), NULL, this );
 	m_filePickerScanFile->Disconnect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( GUIFrameMain::OnFileChangedScanFile ), NULL, this );
+	m_choicebookFootModel->Disconnect( wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGED, wxChoicebookEventHandler( GUIFrameMain::OnPageChange ), NULL, this );
 	m_buttonEditBoneModel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnEditBoneModel ), NULL, this );
 	m_filePickerLastModel->Disconnect( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEventHandler( GUIFrameMain::OnFileChangedLastFile ), NULL, this );
 	m_toggleBtnEditLeft1->Disconnect( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( GUIFrameMain::OnToggleButton ), NULL, this );
@@ -1493,6 +1515,7 @@ GUIFrameMain::~GUIFrameMain()
 	m_textCtrlFootCompression->Disconnect( wxEVT_MOUSEWHEEL, wxMouseEventHandler( GUIFrameMain::OnMouseWheel ), NULL, this );
 	m_textCtrlFootCompression->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GUIFrameMain::OnSetFocus ), NULL, this );
 	m_textCtrlFootCompression->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIFrameMain::OnTextEnter ), NULL, this );
+	m_choiceConstruction->Disconnect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( GUIFrameMain::OnConstructionSelection ), NULL, this );
 	m_checkBoxSeparatedHeel->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( GUIFrameMain::OnCheckBox ), NULL, this );
 	m_sliderSupportHeelRadius->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
 	m_sliderSupportHeelRadius->Disconnect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GUIFrameMain::OnScroll ), NULL, this );
@@ -1789,12 +1812,14 @@ GUIDialogQuickInitFoot::GUIDialogQuickInitFoot( wxWindow* parent, wxWindowID id,
 	
 	// Connect Events
 	m_textCtrlShoeSize->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIDialogQuickInitFoot::OnTextEnter ), NULL, this );
+	m_buttonInit->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIDialogQuickInitFoot::OnClose ), NULL, this );
 }
 
 GUIDialogQuickInitFoot::~GUIDialogQuickInitFoot()
 {
 	// Disconnect Events
 	m_textCtrlShoeSize->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( GUIDialogQuickInitFoot::OnTextEnter ), NULL, this );
+	m_buttonInit->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GUIDialogQuickInitFoot::OnClose ), NULL, this );
 	
 }
 

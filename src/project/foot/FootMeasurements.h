@@ -79,8 +79,6 @@ private:
 
 public:
 
-	ParameterFormula legLengthDifference; // The shorter leg has a negative reading. The other leg has 0.
-
 	// Measurements for the foot
 	ParameterFormula footLength;
 	ParameterFormula ballGirth;

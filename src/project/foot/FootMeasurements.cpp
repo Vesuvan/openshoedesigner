@@ -30,8 +30,7 @@
 #include <math.h>
 
 FootMeasurements::FootMeasurements()
-		: legLengthDifference(_T("legLengthDifference")), footLength(
-				_T("footLength")), ballGirth(_T("ballGirth")), waistGirth(
+		: footLength(_T("footLength")), ballGirth(_T("ballGirth")), waistGirth(
 				_T("waistGirth")), instepGirth(_T("instepGirth")), longHeelGirth(
 				_T("longHeelGirth")), shortHeelGirth(_T("shortHeelGirth")), angleMixing(
 				_T("angleMixing")), belowCrutchGirth(_T("belowCrutchGirth")), belowCrutchLevel(
@@ -59,9 +58,8 @@ FootMeasurements::~FootMeasurements()
 
 void FootMeasurements::SetDefaults(void)
 {
-	legLengthDifference.formula = _T("0.0");
-	footLength.formula = _T("(39/3*2 - 1.5)/100");
-	ballGirth.formula = _T("footLength*0.93");
+	footLength.formula = _T("(39/3*2-1.5)/100");
+	ballGirth.formula = _T("footLength*0.95");
 	waistGirth.formula = _T("ballGirth");
 	instepGirth.formula = _T("waistGirth*1.05");
 	longHeelGirth.formula = _T("instepGirth*1.3");
@@ -102,7 +100,6 @@ void FootMeasurements::Update(void)
 
 void FootMeasurements::Update(MathParser &parser)
 {
-	legLengthDifference.Update(parser);
 	footLength.Update(parser);
 	ballGirth.Update(parser);
 	waistGirth.Update(parser);
@@ -127,18 +124,18 @@ void FootMeasurements::Update(MathParser &parser)
 	overAnkleBoneGirth.Update(parser);
 	overAnkleBoneLevel.Update(parser);
 
-	modified |= legLengthDifference.IsModified() | footLength.IsModified()
-			| ballGirth.IsModified() | waistGirth.IsModified()
-			| instepGirth.IsModified() | longHeelGirth.IsModified()
-			| shortHeelGirth.IsModified() | angleMixing.IsModified()
-			| belowCrutchGirth.IsModified() | belowCrutchLevel.IsModified()
-			| middleOfCalfGirth.IsModified() | middleOfCalfLevel.IsModified()
-			| aboveKneeGirth.IsModified() | aboveKneeLevel.IsModified()
-			| overKneeCapGirth.IsModified() | overKneeCapLevel.IsModified()
-			| belowKneeGirth.IsModified() | belowKneeLevel.IsModified()
-			| middleOfShankGirth.IsModified() | middleOfShankLevel.IsModified()
-			| aboveAnkleGirth.IsModified() | aboveAnkleLevel.IsModified()
-			| overAnkleBoneGirth.IsModified() | overAnkleBoneLevel.IsModified();
+	modified |= footLength.IsModified() | ballGirth.IsModified()
+			| waistGirth.IsModified() | instepGirth.IsModified()
+			| longHeelGirth.IsModified() | shortHeelGirth.IsModified()
+			| angleMixing.IsModified() | belowCrutchGirth.IsModified()
+			| belowCrutchLevel.IsModified() | middleOfCalfGirth.IsModified()
+			| middleOfCalfLevel.IsModified() | aboveKneeGirth.IsModified()
+			| aboveKneeLevel.IsModified() | overKneeCapGirth.IsModified()
+			| overKneeCapLevel.IsModified() | belowKneeGirth.IsModified()
+			| belowKneeLevel.IsModified() | middleOfShankGirth.IsModified()
+			| middleOfShankLevel.IsModified() | aboveAnkleGirth.IsModified()
+			| aboveAnkleLevel.IsModified() | overAnkleBoneGirth.IsModified()
+			| overAnkleBoneLevel.IsModified();
 }
 
 bool FootMeasurements::IsModified(void) const

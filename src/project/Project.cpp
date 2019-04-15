@@ -45,7 +45,7 @@
 IMPLEMENT_DYNAMIC_CLASS(Project, wxDocument)
 
 Project::Project()
-		: wxDocument()
+		: wxDocument(), legLengthDifference(_T("legLengthDifference"))
 {
 
 //	vol.SetSize(4, 4, 4, 0.1);
@@ -57,12 +57,6 @@ Project::Project()
 //	for(size_t n = 0; n < vol.Numel(); n++)
 //		vol[n] = 0.0;
 //	vol.CalcSurface();
-
-	measurementsSymmetric = true;
-	measurementsource = fromMeasurements;
-	modeltype = boneBased;
-
-	generator = Experimental;
 
 	thread0 = NULL;
 	thread1 = NULL;
@@ -112,14 +106,24 @@ void Project::StopAllThreads(void)
 
 void Project::Reset(void)
 {
+	measurementsSymmetric = true;
+	measurementsource = fromMeasurements;
+	modeltype = lastBased;
+
+	generator = Experimental;
+	legLengthDifference.formula = _T("0.0");
+
 	wxFileInputStream input(_T("data/FootModelDefault.txt"));
 	wxTextInputStream text(input);
 	footL.LoadModel(&text);
 	footR.CopyModel(footL);
 	footR.mirrored = true;
 
-	lastModelL.Load("data/LastScanDefault.dat");
-	lastModelL.Test();
+	footScan.InitExample();
+
+	lastModelR.LoadModel("data/LastScanDefault.dat");
+	lastModelL = lastModelR;
+	lastModelL.mirrored = true;
 }
 
 void Project::Update(void)
@@ -137,6 +141,11 @@ void Project::Update(void)
 		parser.AddAllowedUnit(_T("deg"), 0.017453);
 		parser.AddAllowedUnit(_T("gon"), 0.015708);
 		measL.Update(parser);
+		legLengthDifference.Update(parser);
+		if(legLengthDifference.IsModified()){
+			measL.Modify(true);
+			measR.Modify(true);
+		}
 		shoe.Update(parser);
 		if(shoe.IsModified()){
 			measL.Modify(true);
@@ -188,18 +197,25 @@ bool Project::UpdateLeft(void)
 	wxCriticalSectionLocker locker(CSLeft);
 	if(measL.IsModified()){
 		measL.Modify(false);
+		lastModelL.Modify(true);
 		footL.UpdateForm(measL);
 		return true;
 	}
 	if(footL.IsModifiedForm()){
 		footL.ModifyForm(false);
-		footL.UpdatePosition(shoe, measL.legLengthDifference.value,
+		footL.UpdatePosition(shoe, fmax(legLengthDifference.value, 0),
 				measL.angleMixing.value);
 		return true;
 	}
 	if(footL.IsModifiedPosition()){
 		footL.ModifyPosition(false);
 		footL.CalculateSkin();
+		return true;
+	}
+	if(lastModelL.IsModified()){
+		lastModelL.Modify(false);
+		lastModelL.UpdateForm(measL);
+		lastModelL.UpdateGeometry();
 		return true;
 	}
 
@@ -227,10 +243,6 @@ bool Project::UpdateLeft(void)
 
 		return true;
 	}
-	//
-	//
-	//				//	sole.origin.z -= 0.1;
-	//
 
 	printf("Update L - done\n");
 	return false;
@@ -241,12 +253,13 @@ bool Project::UpdateRight(void)
 	wxCriticalSectionLocker locker(CSRight);
 	if(measR.IsModified()){
 		measR.Modify(false);
+		lastModelR.Modify(true);
 		footR.UpdateForm(measR);
 		return true;
 	}
 	if(footR.IsModifiedForm()){
 		footR.ModifyForm(false);
-		footR.UpdatePosition(shoe, measR.legLengthDifference.value,
+		footR.UpdatePosition(shoe, fmax(-legLengthDifference.value, 0),
 				measR.angleMixing.value);
 		return true;
 	}
@@ -255,6 +268,14 @@ bool Project::UpdateRight(void)
 		footR.CalculateSkin();
 		return true;
 	}
+
+	if(lastModelR.IsModified()){
+		lastModelR.Modify(false);
+		lastModelR.UpdateForm(measR);
+		lastModelR.UpdateGeometry();
+		return true;
+	}
+
 	printf("Update R - done\n");
 	return false;
 }
@@ -338,11 +359,11 @@ DocumentIstream& Project::LoadObject(DocumentIstream& istream)
 	return istream;
 }
 
-bool Project::SaveSkin(wxString fileName)
+bool Project::SaveSkin(wxString fileName, bool left, bool right)
 {
 	wxFFileOutputStream outStream(fileName);
 	FileSTL temp;
-//	if(active == Left) temp.WriteStream(outStream, footL.skin.geometry);
-//	if(active == Right) temp.WriteStream(outStream, footR.skin.geometry);
+	if(left) temp.WriteStream(outStream, footL.skin.geometry);
+	if(right) temp.WriteStream(outStream, footR.skin.geometry);
 	return true;
 }

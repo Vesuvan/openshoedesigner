@@ -24,25 +24,46 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "OpenGLCanvas.h"
-
-#include "../StdInclude.h"
+#define GL_GLEXT_PROTOTYPES
 
 #ifdef __WXMAC__
 #include "OpenGL/glu.h"
 //#include "OpenGL/gl.h"
+#include "OpenGL/glext.h"
 #else
+#include <GL/gl.h>
+#include <GL/glext.h>
 #include <GL/glu.h>
-//#include <GL/gl.h>
 #endif
 
-static int wx_gl_attribs[] =
-	{WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 24, 0};
+#include "OpenGLCanvas.h"
+
+#include "../StdInclude.h"
+
+static int wx_gl_attribs[] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE,
+		24, 0};
+
+//static char *vertexShaderSource = "#version 330 core\n"
+//		"layout (location = 0) in vec3 aPos;\n"
+//		"uniform mat4 M;"
+//		"void main()\n"
+//		"{\n"
+//		"   gl_Position = M*vec4(aPos, 1.0);\n"
+//		"}\0";
+//
+//static char *fragmentShaderSource = "#version 330 core\n"
+//		"//layout(location = 0) out float depth;\n"
+//		"out vec4 col;"
+//		"void main()\n"
+//		"{\n"
+//		"   //depth = gl_FragCoord.z;\n"
+//		" col = vec4(gl_FragCoord.z,gl_FragCoord.z,gl_FragCoord.z,1);"
+//		"}\n\0";
 
 OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
-		const wxSize& size, long style, const wxString& name) :
-		wxGLCanvas(parent, id, wx_gl_attribs, pos, size,
-				style | wxFULL_REPAINT_ON_RESIZE, name)
+		const wxSize& size, long style, const wxString& name)
+		: wxGLCanvas(parent, id, wx_gl_attribs, pos, size,
+				style | wxFULL_REPAINT_ON_RESIZE, name), Light0(GL_LIGHT0)
 {
 
 	context = NULL;
@@ -66,6 +87,9 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	leftEyeB = 0;
 
 	rotationMode = rotateInterwoven;
+
+//	depthBuffer = 0;
+//	depthMap = 0;
 
 	this->Connect(wxEVT_PAINT, wxPaintEventHandler(OpenGLCanvas::OnPaint), NULL,
 			this);
@@ -95,7 +119,7 @@ OpenGLCanvas::~OpenGLCanvas()
 {
 #ifdef _USE_6DOFCONTROLLER
 	this->Disconnect(wxEVT_TIMER, wxTimerEventHandler(OpenGLCanvas::OnTimer),
-	NULL, this);
+			NULL, this);
 #endif
 	this->Disconnect(wxEVT_RIGHT_DCLICK,
 			wxMouseEventHandler(OpenGLCanvas::OnMouseEvent), NULL, this);
@@ -127,49 +151,10 @@ OpenGLCanvas::Context::Context(wxGLCanvas* canvas)
 {
 	SetCurrent(*canvas);
 
-	glEnable(GL_BLEND);
-	glEnable(GL_POINT_SMOOTH);
-	glEnable(GL_DEPTH_TEST);
-#if defined (__WIN32__)
-	glEnable(GL_NORMALIZE);
-#else
-	glEnable(GL_RESCALE_NORMAL);
-#endif
-	glFrontFace(GL_CCW);
-	glCullFace(GL_BACK);
-	glEnable(GL_CULL_FACE);
-
-	/* set viewing projection */
-	//	glMatrixMode(GL_PROJECTION);
-	//	glFrustum( -0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 3.0f);
-	// Is done in OnSize(...)
-	//	GLfloat attenuation[] =
-	//		{1.0f, -0.01f, -.000001f};
-	//glPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, attenuation, 0);
-	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-	glEnable(GL_COLOR_MATERIAL);
-
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glBlendFunc(GL_ONE, GL_ZERO); // disable alpha blending
-
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClearDepth(1.0f);
-
-	GLfloat ambient0[] = {0.5f, 0.5f, 0.5f};
-	GLfloat diffuse0[] = {0.6f, 0.6f, 0.6f};
-	GLfloat specular0[] = {0.9f, 0.9f, 0.9f};
-	GLfloat position0[] = {-20, 20, 50, 0};
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse0);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, specular0);
-	glLightfv(GL_LIGHT0, GL_POSITION, position0);
-	glEnable(GL_LIGHT0);
-
-	glEnable(GL_LIGHTING);
-
 	printf("GL_VERSION: ");
 	printf("%s", (char*) glGetString(GL_VERSION));
 	printf("\n");
+
 }
 
 void OpenGLCanvas::OnEnterWindow(wxMouseEvent& WXUNUSED(event))
@@ -281,6 +266,50 @@ void OpenGLCanvas::OnMouseEvent(wxMouseEvent& event)
 	if(event.Moving() || event.Dragging()) event.Skip();
 }
 
+void OpenGLCanvas::Init(void)
+{
+	glEnable(GL_BLEND);
+	glEnable(GL_POINT_SMOOTH);
+	glEnable(GL_DEPTH_TEST);
+#if defined (__WIN32__)
+	glEnable(GL_NORMALIZE);
+#else
+	glEnable(GL_RESCALE_NORMAL);
+#endif
+	glFrontFace(GL_CCW);
+	glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
+
+	// Scaling for point clouds
+	//	glMatrixMode(GL_PROJECTION);
+	//	glFrustum( -0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 3.0f);
+	// Is done in OnSize(...)
+	//	GLfloat attenuation[] =
+	//		{1.0f, -0.01f, -.000001f};
+	//glPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, attenuation, 0);
+
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(GL_ONE, GL_ZERO); // disable alpha blending
+
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearDepth(1.0f);
+
+	glEnable(GL_LIGHTING);
+
+	Light0.SetAmbient(0.2, 0.2, 0.2);
+	Light0.SetDiffuse(0.6, 0.6, 0.6);
+	Light0.SetSpecular(0.95, 0.95, 0.95);
+	Light0.SetPosition(1, 0.4, 1);
+	Light0.Enable();
+	Light0.Update();
+	Light0.moveWithCamera = true;
+
+//	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 100);
+}
+
 void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
 	if(!IsShown()) return;
@@ -290,12 +319,52 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 //	if(!GetContext()) return;
 //#endif
 
-	if(context == NULL) context = new Context(this);
+	if(context == NULL){
+		context = new Context(this);
+		context->SetCurrent(*this); // Link OpenGL to this area
+
+//		shadows.AddShader(GL_VERTEX_SHADER, vertexShaderSource);
+//		shadows.AddShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+//		shadows.LinkShader();
+//
+//		glGenFramebuffers(1, &depthBuffer);
+//		glGenTextures(1, &depthMap);
+		Init();
+	}
 	context->SetCurrent(*this); // Link OpenGL to this area
 
 	// set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
 
 	GetClientSize(&w, &h);
+
+//	{ // Shadowpass
+//		glBindTexture(GL_TEXTURE_2D, depthMap);
+//		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0,
+//		GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//
+//		glBindFramebuffer(GL_FRAMEBUFFER, depthBuffer);
+//		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+//		GL_TEXTURE_2D, depthMap, 0);
+//		glDrawBuffer(GL_NONE);
+//		glReadBuffer(GL_NONE);
+//		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//
+//		glViewport(0, 0, 1024, 1024);
+//		glBindFramebuffer(GL_FRAMEBUFFER, depthBuffer);
+//		glClear(GL_DEPTH_BUFFER_BIT);
+//
+//		shadows.Start();
+////		    ConfigureShaderAndMatrices();
+//
+//		Render();
+//		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//		shadows.Stop();
+//	}
+
 	glViewport(0, 0, (GLint) w, (GLint) h);
 
 	//	float specReflection[] = { 0.8f, 0.0f, 0.8f, 1.0f };
@@ -387,7 +456,20 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	//	if(m_gllist == 0){
 	//		m_gllist = glGenLists(1); // Make one (1) empty display list.
 	//		glNewList(m_gllist, GL_COMPILE_AND_EXECUTE);
+	Light0.Update(true);
+
+//	GLfloat matrix[16];
+//	glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
+//
+//	glMatrixMode(GL_PROJECTION);
+//	glLoadIdentity();
+//	gluOrtho2D(-2, 2, -2, 2);
+
+//	shadows.Start();
+//	shadows.SetUniformMatrix("M", matrix, 16);
 	Render();
+//	shadows.Stop();
+
 	//		glEndList();
 	//	}else{
 	//		glCallList(m_gllist);
@@ -419,6 +501,7 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 		glScalef(scale, scale, scale);
 		glMultMatrixd(rotmat.a);
 		glMultMatrixd(transmat.a);
+		Light0.Update(true);
 		Render();
 		//glCallList(m_gllist);
 
@@ -565,4 +648,3 @@ void OpenGLCanvas::Render()
 
 	glPopMatrix();
 }
-

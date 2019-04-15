@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : CommandFootMeasurementSet.h
-// Purpose            :
-// Thread Safe        : No
+// Name               : CommandProjectSetParameter.h
+// Purpose            : 
+// Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 30.04.2018
-// Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 13.04.2019
+// Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,35 +24,35 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef __COMMANDFOOTMEASUREMENTSET_H__
-#define __COMMANDFOOTMEASUREMENTSET_H__
+#ifndef SRC_PROJECT_COMMAND_COMMANDPROJECTSETPARAMETER_H_
+#define SRC_PROJECT_COMMAND_COMMANDPROJECTSETPARAMETER_H_
+
+/*!\class CommandProjectSetParameter
+ * \brief ...
+ *
+ * ...
+ */
 
 #include <wx/cmdproc.h>
 #include <wx/string.h>
 
-#include "../foot/ParameterFormula.h"
 #include "../Project.h"
-#include "../ProjectView.h"
 
-class CommandFootMeasurementSet:public wxCommand {
+class CommandProjectSetParameter:public wxCommand {
 public:
-	CommandFootMeasurementSet(const wxString& name, Project* project,
-			ProjectView::Side active, int parameter, wxString value);
+	CommandProjectSetParameter(const wxString& name, Project* project,
+			int parameter, int value);
 
 	bool Do(void);
 	bool Undo(void);
 
 protected:
-
-	wxString Replace(FootMeasurements *meas,int parameter, wxString newValue);
-	ParameterFormula* GetParameterByID(FootMeasurements *meas, int id);
-
 	Project* project;
-	ProjectView::Side active;
 	int parameter;
-	wxString value;
-	wxString oldValueLeft;
-	wxString oldValueRight;
+	int value;
+	int oldValue;
+	FootMeasurements oldMeasurements;
+
 };
 
-#endif /* __COMMANDFOOTMEASUREMENTSET_H__ */
+#endif /* SRC_PROJECT_COMMAND_COMMANDPROJECTSETPARAMETER_H_ */

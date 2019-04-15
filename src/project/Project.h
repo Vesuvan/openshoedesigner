@@ -60,6 +60,7 @@
 #include <iostream>
 
 #include "../3D/OrientedMatrix.h"
+#include "../3D/PointCloud.h"
 #include "../3D/Polygon3.h"
 //#include "../3D/Volume.h"
 #include "../3D/PolyHull.h"
@@ -67,7 +68,7 @@
 #include "foot/FootMeasurements.h"
 #include "foot/FootModel.h"
 #include "last/Last.h"
-#include "last/PolyCylinder.h"
+#include "last/LastModel.h"
 #include "Shoe.h"
 #include "pattern/Pattern.h"
 
@@ -89,15 +90,16 @@ public:
 	bool measurementsSymmetric;
 
 	enum MeasurementSource {
-		fromMeasurements, fromFootScan
+		fromMeasurements = 0, fromFootScan
 	} measurementsource;
 	FootMeasurements measL;
 	FootMeasurements measR;
+	ParameterFormula legLengthDifference; // Distance the right leg is shorter than the left.
 
-	//TODO: Add here some structures for a scan of the foot.
+	PointCloud footScan;
 
 	enum ModelType {
-		boneBased, lastBased
+		boneBased = 0, lastBased
 	} modeltype;
 	FootModel footL;
 	FootModel footR;
@@ -108,8 +110,8 @@ public:
 	Shoe shoe;
 
 	// Last to generate
-	PolyCylinder lastModelL;
-	PolyCylinder lastModelR;
+	LastModel lastModelL;
+	LastModel lastModelR;
 	Last lastL;
 	Last lastR;
 
@@ -118,7 +120,7 @@ public:
 
 	// +++ Generator +++
 	enum Generator {
-		Experimental, //!< Default generator for development of algorithms
+		Experimental = 0, //!< Default generator for development of algorithms
 		Welted, //!< Welt sewn shoes: Generates last, insole, sole, upper pattern and cutout
 		Cemented, //!< for cemented soles (simple, glued-together shoes)
 		Molded, //!< for industrial shoes, where the sole is injection-molded to the upper
@@ -146,7 +148,7 @@ public:
 
 	bool LoadModel(wxString fileName);
 	bool SaveModel(wxString fileName);
-	bool SaveSkin(wxString fileName);
+	bool SaveSkin(wxString fileName, bool left, bool right);
 
 	void Update(void);
 

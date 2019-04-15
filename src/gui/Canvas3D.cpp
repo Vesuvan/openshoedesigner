@@ -24,17 +24,20 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+//#define GL_GLEXT_PROTOTYPES
+
 #include "Canvas3D.h"
 
 #include "../StdInclude.h"
 #include <stdint.h>
 
+#include "../3D/OpenGLMaterial.h"
 #ifdef __WXMAC__
 #include "OpenGL/glu.h"
 //#include "OpenGL/gl.h"
 #else
-#include <GL/glu.h>
 //#include <GL/gl.h>
+#include <GL/glu.h>
 #endif
 
 Canvas3D::Canvas3D(wxWindow* parent)
@@ -101,24 +104,30 @@ void Canvas3D::Render()
 
 	if(projectview->showCoordinateSystem){
 
+		OpenGLMaterial matX(0.8, 0.0, 0.0, 0.8);
+		OpenGLMaterial matY(0.0, 0.8, 0.0, 0.8);
+		OpenGLMaterial matZ(0.0, 0.0, 0.8, 0.8);
+
 		const double len = 0.3;
 		const double rad = 0.04;
 		const uint_fast8_t N = 4;
 
+		matX.UseMaterial();
 		glBegin(GL_LINES);
-		glColor3f(0.8, 0.0, 0.0);
 		glNormal3f(-1, 0, 0);
 		glVertex3f(-len, 0, 0);
 		glNormal3f(1, 0, 0);
 		glVertex3f(len, 0, 0);
-
-		glColor3f(0.0, 0.8, 0.0);
+		glEnd();
+		matY.UseMaterial();
+		glBegin(GL_LINES);
 		glNormal3f(0, -1, 0);
 		glVertex3f(0, -len, 0);
 		glNormal3f(0, 1, 0);
 		glVertex3f(0, len, 0);
-
-		glColor3f(0.0, 0.0, 0.8);
+		glEnd();
+		matZ.UseMaterial();
+		glBegin(GL_LINES);
 		glNormal3f(0.0, 0.0, -1.0);
 		glVertex3f(0, 0, -len);
 		glNormal3f(0.0, 0.0, 1.0);
@@ -128,7 +137,7 @@ void Canvas3D::Render()
 		const double n0 = cos(M_PI_4);
 		const double n1 = sin(M_PI_4);
 
-		glColor3f(1, 0, 0);
+		matX.UseMaterial();
 		glBegin(GL_LINES);
 		for(uint_fast8_t n = 0; n < N; n++){
 			const double a = 2 * M_PI / N * (double) n;
@@ -140,7 +149,7 @@ void Canvas3D::Render()
 			glVertex3d(len - rad, rad * c, rad * s);
 		}
 		glEnd();
-		glColor3f(0, 1, 0);
+		matY.UseMaterial();
 		glBegin(GL_LINES);
 		for(uint_fast8_t n = 0; n < N; n++){
 			const double a = 2 * M_PI / N * (double) n;
@@ -151,7 +160,7 @@ void Canvas3D::Render()
 			glVertex3d(rad * s, len - rad, rad * c);
 		}
 		glEnd();
-		glColor3f(0, 0, 1);
+		matZ.UseMaterial();
 		glBegin(GL_LINES);
 		for(uint_fast8_t n = 0; n < N; n++){
 			const double a = 2 * M_PI / N * (double) n;
@@ -164,7 +173,8 @@ void Canvas3D::Render()
 		glEnd();
 	}
 	{
-		glColor3f(1, 1, 1);
+		OpenGLMaterial matCursor(1, 1, 1, 0.9);
+		matCursor.UseMaterial();
 		glBegin(GL_LINES);
 		Vector3 c = a + b;
 		glVertex3d(a.x, a.y, a.z);

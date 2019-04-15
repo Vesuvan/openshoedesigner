@@ -67,7 +67,7 @@ public:
 protected:
 	const wxBitmap bm0;
 	const wxBitmap bm1;
-
+	bool loopGuard;
 public:
 
 	bool TransferDataToWindow();

@@ -45,7 +45,7 @@ class FootMeasurements;
 class ProjectView:public wxView {
 public:
 	enum Side {
-		Left, Right
+		Left, Right, Both
 	};
 	enum FrameType {
 		mainframe, patternframe, walkcycleframe
@@ -62,9 +62,13 @@ public:
 
 	bool showLeft;
 	bool showRight;
+
+	bool showFootScan;
 	bool showBones;
 	bool showSkin;
 	bool showLeg;
+
+	bool showLastScan;
 	bool showLast;
 	bool showInsole;
 	bool showSole;
@@ -73,9 +77,6 @@ public:
 	bool showFloor;
 	bool showCoordinateSystem;
 	bool showBackground;
-
-	bool showFootScan;
-	bool showLastScan;
 
 	const FootMeasurements* GetActiveFootMeasurements(void) const;
 

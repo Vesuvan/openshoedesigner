@@ -47,6 +47,8 @@
 #include "OpenGLPick.h"
 #endif
 #include "AffineTransformMatrix.h"
+#include "OpenGLLight.h"
+//#include "OpenGLShader.h"
 #include <wx/glcanvas.h>
 #include <GL/gl.h>
 
@@ -94,6 +96,8 @@ public:
 	AffineTransformMatrix transmat;
 	float scale;
 
+	OpenGLLight Light0;
+
 protected:
 	int x; //!< Startpoint for mouse dragging
 	int y; //!< Startpoint for mouse dragging
@@ -104,12 +108,16 @@ protected:
 	float unitAtOrigin;
 	GLuint m_gllist;
 
+//	OpenGLShader shadows;
+//	GLuint depthBuffer;
+//	GLuint depthMap;
+
 private:
 	Context *context;
 
 #ifdef _USE_6DOFCONTROLLER
 	Control3D* control; //!< Link to 6DOF-controller
-	wxTimer timer; //!< Timer for polling the controller
+	wxTimer timer;//!< Timer for polling the controller
 #endif
 
 	// Methods
@@ -123,6 +131,7 @@ public:
 #endif
 
 protected:
+	virtual void Init(void);
 	virtual void Render(void);
 	virtual void RenderPick(void);
 

@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : CommandProjectSetLegLengthDifference.cpp
-// Purpose            :
-// Thread Safe        : No
+// Name               : PointCloud.cpp
+// Purpose            : 
+// Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 30.04.2018
-// Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 14.04.2019
+// Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,31 +24,42 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "CommandProjectSetLegLengthDifference.h"
+#include "PointCloud.h"
+#include <GL/gl.h>
 
-CommandProjectSetLegLengthDifference::CommandProjectSetLegLengthDifference(
-		const wxString& name, Project* project, wxString value)
-		: wxCommand(true, name), project(project), value(value)
+PointCloud::PointCloud()
 {
 }
 
-bool CommandProjectSetLegLengthDifference::Do(void)
+PointCloud::~PointCloud()
 {
-	if(project == NULL) return false;
-	oldValue = project->legLengthDifference.formula;
-	project->legLengthDifference.formula = value;
-	project->measL.Modify(true);
-	project->measR.Modify(true);
-	project->Update();
-	return true;
 }
 
-bool CommandProjectSetLegLengthDifference::Undo(void)
+void PointCloud::InitExample(void)
 {
-	if(project == NULL) return false;
-	project->legLengthDifference.formula = oldValue;
-	project->measL.Modify(true);
-	project->measR.Modify(true);
-	project->Update();
-	return true;
+	const size_t N = 10000;
+	p.resize(N);
+	for(size_t n = 0; n < N; ++n){
+		p[n].x = (float) rand() / (float) (RAND_MAX) * 0.3 - 0.1;
+		p[n].y = (float) rand() / (float) (RAND_MAX) * 0.2 - 0.1;
+		float d = p[n].y * p[n].y;
+		if(p[n].x > 0)
+			d += (p[n].x * p[n].x) / 4;
+		else
+			d += p[n].x * p[n].x;
+		if(d >= 0.01)
+			d = 0;
+		else
+			d = sqrt(0.01 - d);
+		p[n].z = (float) rand() / (float) (RAND_MAX) * 0.01 - 0.005 + d;
+	}
+}
+
+void PointCloud::Paint(void)
+{
+	glBegin(GL_POINTS);
+	const size_t N = p.size();
+	for(size_t n = 0; n < N; ++n)
+		glVertex3f(p[n].x, p[n].y, p[n].z);
+	glEnd();
 }

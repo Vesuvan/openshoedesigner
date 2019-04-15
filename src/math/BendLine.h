@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : CommandFootMeasurementSet.h
-// Purpose            :
-// Thread Safe        : No
+// Name               : BendLine.h
+// Purpose            : 
+// Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 30.04.2018
-// Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 02.03.2019
+// Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,35 +24,44 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef __COMMANDFOOTMEASUREMENTSET_H__
-#define __COMMANDFOOTMEASUREMENTSET_H__
+#ifndef SRC_3D_BENDLINE_H_
+#define SRC_3D_BENDLINE_H_
 
-#include <wx/cmdproc.h>
-#include <wx/string.h>
+/*!\class BendLine
+ * \brief Bend line with kernels for smooth bending
+ *
+ * kg = @(x) exp(-(x.^2)/2)/sqrt(2*pi);
+ *
+ * kp = @(x) exp(-abs(x))/2;
+ *
+ * ke = @(x) 3/4*max((1-x.^2),0);
+ *
+ * kc = @(x) 1./(pi*(1+x.^2));
+ *
+ */
 
-#include "../foot/ParameterFormula.h"
-#include "../Project.h"
-#include "../ProjectView.h"
+#include <cstddef>
+#include <vector>
 
-class CommandFootMeasurementSet:public wxCommand {
+class BendLine {
 public:
-	CommandFootMeasurementSet(const wxString& name, Project* project,
-			ProjectView::Side active, int parameter, wxString value);
+	BendLine();
+	virtual ~BendLine();
 
-	bool Do(void);
-	bool Undo(void);
+	enum Kernel {
+		Gauss, Picard, Epanechnikov, Cauchy
+	};
 
-protected:
+	void SetCount(size_t N);
+	void InitAngle(double a = 0);
+	void SetBend(double angle, double x0, double sigma = 0.1, Kernel kernel =
+			Gauss);
+	void Finish(double L = 1.0);
 
-	wxString Replace(FootMeasurements *meas,int parameter, wxString newValue);
-	ParameterFormula* GetParameterByID(FootMeasurements *meas, int id);
-
-	Project* project;
-	ProjectView::Side active;
-	int parameter;
-	wxString value;
-	wxString oldValueLeft;
-	wxString oldValueRight;
+	size_t N;
+	std::vector <double> angle;
+	std::vector <double> x;
+	std::vector <double> y;
 };
 
-#endif /* __COMMANDFOOTMEASUREMENTSET_H__ */
+#endif /* SRC_3D_BENDLINE_H_ */

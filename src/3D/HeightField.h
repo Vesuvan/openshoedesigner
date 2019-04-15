@@ -54,18 +54,19 @@ public:
 
 	void Paint(void) const;
 
-	AffineTransformMatrix matrix;
-	Vector3 color;
-
 private:
 
 	double * value;
 
+	unsigned int N;
 	unsigned int Nx;
 	unsigned int Ny;
-	unsigned int N;
 	float dx;
 	float dy;
+
+public:
+	Vector3 color;
+	AffineTransformMatrix matrix;
 };
 
 #endif /* HEIGHTFIELD_H_ */

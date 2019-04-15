@@ -43,7 +43,7 @@ public:
 
 	MathParser parser;
 	virtual void OnTextEnter(wxCommandEvent& event);
-	void OnOK(wxCommandEvent& event);
+	virtual void OnClose(wxCommandEvent& event);
 
 	double length;
 	double width;

@@ -163,9 +163,9 @@ void Polygon3::Resample(unsigned int N)
 	for(n = 0; n < N; n++){
 		L = dL * (double) n;
 		while(L > L1 && p < M - 1){
-			p++;
 			L0 = L1;
 			L1 = L0 + (elements[p + 1] - elements[p]).Abs();
+			p++;
 		}
 		temp.Add(
 				elements[p]

@@ -98,7 +98,7 @@ void HeightField::Clear(void)
 void HeightField::SetValues(double* v, unsigned int size)
 {
 	if(size > N) return;
-	for(int n = 0; n < size; n++)
+	for(size_t n = 0; n < size; ++n)
 		this->value[n] = v[n];
 }
 

@@ -32,7 +32,6 @@
 
 #include "../3D/FileSTL.h"
 #include "../languages.h"
-//#include <wx/file.h>
 #include <wx/cmdproc.h>
 #include <wx/filedlg.h>
 #include <wx/filename.h>
@@ -41,7 +40,6 @@
 #include <cfloat>
 
 #include "../project/command/CommandFootMeasurementSet.h"
-//#include "../project/command/CommandFootMeasurementSet.h"
 #include "../project/command/CommandFootModelSetParameter.h"
 #include "../project/command/CommandProjectSetLegLengthDifference.h"
 #include "../project/command/CommandShoePreset.h"
@@ -49,6 +47,8 @@
 
 #include "../icons/FootMeasurements.xpm"
 #include "../icons/FootMeasurements_small.xpm"
+#include "../project/command/CommandFootMeasurementsCopy.h"
+#include "../project/command/CommandProjectSetParameter.h"
 
 #include "FrameParent.h"
 
@@ -57,6 +57,7 @@ FrameMain::FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
 		: GUIFrameMain(doc, view, parent), bm0(FootMeasurements_small_xpm), bm1(
 				FootMeasurements_xpm)
 {
+	loopGuard = false;
 	this->config = config;
 
 	presets.ReadFile(_T("data/Presets.ini"));
@@ -166,44 +167,37 @@ void FrameMain::OnClose(wxCloseEvent& event)
 bool FrameMain::TransferDataToWindow()
 {
 	const ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
-	Project* project = wxStaticCast(GetDocument(), Project);
+	const Project* project = wxStaticCast(GetDocument(), Project);
 	const FootMeasurements * foot = projectview->GetActiveFootMeasurements();
 	const Shoe * shoe = &(project->shoe);
 
-	{	// Add strings to shoe-type ChoiceCtrl
-
-		wxArrayString newStrings;
-		newStrings.Add(_("Custom"));
-		IniFile::Section const * section = presets.FindSection(
-				_T("PRESET_SHOETYPE"));
-		while(section != NULL){
-			newStrings.Add(section->GetParameter(_T("Name")));
-			section = presets.NextSection(section);
-		}
-		wxArrayString temp = m_choiceShoeType->GetStrings();
-		if(newStrings != temp){
-			m_choiceShoeType->Set(newStrings);
-			m_choiceShoeType->SetSelection(0);
-		}
-	}
-	{	// Add strings to shoe-height ChoiceCtrl
-
-		wxArrayString newStrings;
-		newStrings.Add(_("Custom"));
-		IniFile::Section const * section = presets.FindSection(
-				_T("PRESET_HEIGHT"));
-		while(section != NULL){
-			newStrings.Add(section->GetParameter(_T("Name")));
-			section = presets.NextSection(section);
-		}
-		wxArrayString temp = m_choiceShoeHeight->GetStrings();
-		if(newStrings != temp){
-			m_choiceShoeHeight->Set(newStrings);
-			m_choiceShoeHeight->SetSelection(0);
-		}
-	}
-
 	// Set checkboxes and selections in main menu
+	loopGuard = true;
+	if(project->measurementsource == Project::fromMeasurements) m_menuFoot->Check(
+	ID_USEFOOTMEASUREMENTS,
+			project->measurementsource == Project::fromMeasurements);
+	if(project->measurementsource == Project::fromFootScan) m_menuFoot->Check(
+	ID_USEFOOTSCAN, project->measurementsource == Project::fromFootScan);
+	m_menuFoot->Check(ID_MEASUREMENTSYMMETRY, project->measurementsSymmetric);
+
+	if(project->modeltype == Project::boneBased) m_menuFoot->Check(
+	ID_USEBONEBASEDMODEL, project->modeltype == Project::boneBased);
+	if(project->modeltype == Project::lastBased) m_menuFoot->Check(
+	ID_USELASTBASEDMODEL, project->modeltype == Project::lastBased);
+
+	if(project->generator == Project::Experimental) m_menuConstruction->Check(
+	ID_CONSTRUCTIONEXPERIMENTAL, project->generator == Project::Experimental);
+	if(project->generator == Project::Welted) m_menuConstruction->Check(
+	ID_CONSTRUCTIONWELDED, project->generator == Project::Welted);
+	if(project->generator == Project::Cemented) m_menuConstruction->Check(
+	ID_CONSTRUCTIONCEMENTED, project->generator == Project::Cemented);
+	if(project->generator == Project::Molded) m_menuConstruction->Check(
+	ID_CONSTRUCTIONMOLDED, project->generator == Project::Molded);
+	if(project->generator == Project::Dutch) m_menuConstruction->Check(
+	ID_CONSTRUCTIONDUTCH, project->generator == Project::Dutch);
+	if(project->generator == Project::Geta) m_menuConstruction->Check(
+	ID_CONSTRUCTIONGETA, project->generator == Project::Geta);
+
 	m_menuView->Check(ID_STEREO3D, m_canvas3D->stereoMode != stereoOff);
 	m_menuView->Check(ID_SHOWLEFT, projectview->showLeft);
 	m_menuView->Check(ID_SHOWRIGHT, projectview->showRight);
@@ -220,6 +214,35 @@ bool FrameMain::TransferDataToWindow()
 			projectview->showCoordinateSystem);
 	m_menuView->Check(ID_SHOWBACKGROUND, projectview->showBackground);
 
+	// On Page Foot:
+	if(projectview->active == ProjectView::Left
+			|| projectview->active == ProjectView::Both){
+		m_toggleBtnEditLeft->SetValue(true);
+		m_toggleBtnEditLeft1->SetValue(true);
+	}else{
+		m_toggleBtnEditLeft->SetValue(false);
+		m_toggleBtnEditLeft1->SetValue(false);
+	}
+	if(projectview->active == ProjectView::Right
+			|| projectview->active == ProjectView::Both){
+		m_toggleBtnEditRight->SetValue(true);
+		m_toggleBtnEditRight1->SetValue(true);
+	}else{
+		m_toggleBtnEditRight->SetValue(false);
+		m_toggleBtnEditRight1->SetValue(false);
+	}
+
+	if(project->measurementsource == Project::fromMeasurements){
+		m_choicebookMeasurement->SetSelection(0);
+	}else{
+		m_choicebookMeasurement->SetSelection(1);
+	}
+	if(project->modeltype == Project::boneBased){
+		m_choicebookFootModel->SetSelection(0);
+	}else{
+		m_choicebookFootModel->SetSelection(1);
+	}
+
 	TransferParameterToTextCtrl(foot->footLength, m_textCtrlFootLength,
 			unitDistance);
 	TransferParameterToTextCtrl(foot->ballGirth, m_textCtrlBallGirth,
@@ -234,7 +257,7 @@ bool FrameMain::TransferDataToWindow()
 			unitDistance);
 	TransferParameterToTextCtrl(foot->angleMixing, m_textCtrlAngleMixing,
 			unitPercent);
-	TransferParameterToTextCtrl(foot->legLengthDifference,
+	TransferParameterToTextCtrl(project->legLengthDifference,
 			m_textCtrlLegLengthDifference, unitDistance);
 
 	m_textCtrlShoeSizeEU->SetValue(
@@ -255,6 +278,11 @@ bool FrameMain::TransferDataToWindow()
 	m_textCtrlShoeSizeAU->SetValue(
 			wxString::Format(_T("%g"),
 					round(foot->GetSize(FootMeasurements::AU))));
+
+	m_filePickerLastModel->SetFileName(
+			wxFileName(project->lastModelL.filename));
+
+	// On Page Leg:
 
 	TransferParameterToTextCtrl(foot->belowCrutchGirth,
 			m_textCtrlBelowCrutchGirth, unitDistance);
@@ -289,6 +317,39 @@ bool FrameMain::TransferDataToWindow()
 	TransferParameterToTextCtrl(foot->overAnkleBoneLevel,
 			m_textCtrlOverAnkleBoneLevel, unitDistance);
 
+	// On Page Shoe:
+
+	{	// Add strings to shoe-type ChoiceCtrl
+		wxArrayString newStrings;
+		newStrings.Add(_("Custom"));
+		IniFile::Section const * section = presets.FindSection(
+				_T("PRESET_SHOETYPE"));
+		while(section != NULL){
+			newStrings.Add(section->GetParameter(_T("Name")));
+			section = presets.NextSection(section);
+		}
+		wxArrayString temp = m_choiceShoeType->GetStrings();
+		if(newStrings != temp){
+			m_choiceShoeType->Set(newStrings);
+			m_choiceShoeType->SetSelection(0);
+		}
+	}
+	{	// Add strings to shoe-height ChoiceCtrl
+		wxArrayString newStrings;
+		newStrings.Add(_("Custom"));
+		IniFile::Section const * section = presets.FindSection(
+				_T("PRESET_HEIGHT"));
+		while(section != NULL){
+			newStrings.Add(section->GetParameter(_T("Name")));
+			section = presets.NextSection(section);
+		}
+		wxArrayString temp = m_choiceShoeHeight->GetStrings();
+		if(newStrings != temp){
+			m_choiceShoeHeight->Set(newStrings);
+			m_choiceShoeHeight->SetSelection(0);
+		}
+	}
+
 	TransferParameterToTextCtrl(shoe->heelHeight, m_textCtrlHeelHeight,
 			unitDistance);
 	TransferParameterToTextCtrl(shoe->ballHeight, m_textCtrlBallHeight,
@@ -304,29 +365,18 @@ bool FrameMain::TransferDataToWindow()
 	TransferParameterToTextCtrl(shoe->footCompression,
 			m_textCtrlFootCompression, unitPercent);
 
-//	m_textCtrlToeAngle->SetValue(shoe->exprToeAngle);
-//
-//	m_sliderMixing->SetValue(foot->mixing * 100.0);
-//
-//	m_textCtrlResultHeelHeight->SetValue(
-//			settings.Distance.TextFromSIWithUnit(foot->heelHeight, 1));
-//	m_textCtrlResultBallHeight->SetValue(
-//			settings.Distance.TextFromSIWithUnit(foot->ballHeight, 1));
-//	m_textCtrlResultToeAngle->SetValue(
-//			settings.Angle.TextFromSIWithUnit(foot->toeAngle, 1));
-//	m_textCtrlResultMixing->SetValue(
-//			settings.Percent.TextFromSIWithUnit(foot->mixing, 1));
+	// On Page Sole
 
-//	m_panelFootMeasurements->TransferDataToWindow();
-//	m_panelLegMeasurements->TransferDataToWindow();
+	m_choiceConstruction->SetSelection((int) project->generator);
+
+	loopGuard = false;
+
 	return true;
 }
 
 bool FrameMain::TransferDataFromWindow()
 {
 	ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
-	Project* project = wxStaticCast(GetDocument(), Project);
-
 	projectview->showBones = m_menuView->IsChecked(ID_SHOWBONES);
 	projectview->showSkin = m_menuView->IsChecked(ID_SHOWSKIN);
 	projectview->showLeg = m_menuView->IsChecked(ID_SHOWLEG);
@@ -339,13 +389,10 @@ bool FrameMain::TransferDataFromWindow()
 	projectview->showCoordinateSystem = m_menuView->IsChecked(
 	ID_SHOWCOORDINATESYSTEM);
 	projectview->showBackground = m_menuView->IsChecked(ID_SHOWBACKGROUND);
-
-	const FootMeasurements *foot = projectview->GetActiveFootMeasurements();
-
 	return true;
 }
 
-void FrameMain::RefreshCanvas(wxCommandEvent& event)
+void FrameMain::RefreshCanvas(wxCommandEvent& WXUNUSED(event))
 {
 	m_canvas3D->Refresh();
 	Refresh();
@@ -438,20 +485,67 @@ void FrameMain::OnSize(wxSizeEvent& event)
 
 void FrameMain::OnPageChange(wxNotebookEvent& event)
 {
+	if(loopGuard) return;
+	std::cout << "OnPageChange( " << event.GetId() << " )\n";
+
+	Project* project = wxStaticCast(GetDocument(), Project);
+	switch(event.GetId()){
+	case ID_MEASUREMENTSOURCE:
+		project->GetCommandProcessor()->Submit(
+				new CommandProjectSetParameter(_("Set source."), project,
+						event.GetId(),
+						m_choicebookMeasurement->GetSelection()));
+		break;
+	case ID_FOOTMODEL:
+		project->GetCommandProcessor()->Submit(
+				new CommandProjectSetParameter(_("Set footmodel."), project,
+						event.GetId(), m_choicebookFootModel->GetSelection()));
+		break;
+	default:
+		return;
+	}
+	TransferDataToWindow();
 }
 
 void FrameMain::OnToggleButton(wxCommandEvent& event)
 {
-	printf("ToggleButton %u pressed.\n", event.GetId());
+	ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
+	Project* project = wxStaticCast(GetDocument(), Project);
+	if(project->measurementsSymmetric){
+		projectview->active = ProjectView::Both;
+		TransferDataToWindow();
+		return;
+	}
+	switch(event.GetId()){
+	case ID_EDITLEFT:
+		if(projectview->active == ProjectView::Right){
+			projectview->active = ProjectView::Both;
+		}else{
+			projectview->active = ProjectView::Right;
+		}
+		break;
+	case ID_EDITRIGHT:
+		if(projectview->active == ProjectView::Left){
+			projectview->active = ProjectView::Both;
+		}else{
+			projectview->active = ProjectView::Left;
+		}
+		break;
+	default:
+		printf("ToggleButton %u pressed.\n", event.GetId());
+		break;
+	}
+	TransferDataToWindow();
 }
 
 void FrameMain::OnChoice(wxCommandEvent& event)
 {
-	printf("Preset selected %u\n", event.GetId());
+	std::cout << "OnChoice( " << event.GetId() << " )\n";
+
 	switch(event.GetId()){
-	case ID_PRESETSHOEHEIGHT:
-		break;
 	case ID_PRESETSHOETYPE:
+		break;
+	case ID_PRESETSHOEHEIGHT:
 		break;
 	default:
 		event.Skip();
@@ -471,11 +565,12 @@ void FrameMain::OnChoice(wxCommandEvent& event)
 
 void FrameMain::OnCheckBox(wxCommandEvent& event)
 {
-	printf("CheckBox %u pressed.\n", event.GetId());
+	std::cout << "OnCheckBox( " << event.GetId() << " )\n";
 }
 
 void FrameMain::OnScroll(wxScrollEvent& event)
 {
+	std::cout << "OnScroll( " << event.GetId() << " )\n";
 }
 
 void FrameMain::OnSetFocus(wxFocusEvent& event)
@@ -568,13 +663,19 @@ void FrameMain::OnTextEnter(wxCommandEvent& event)
 	case ID_MEASUREMENT_LONGHEELGIRTH:
 	case ID_MEASUREMENT_SHORTHEELGIRTH:
 	case ID_MEASUREMENT_ANGLEMIXING:
-	case ID_MEASUREMENT_LEGLENGTHDIFFERENCE:
 		project->GetCommandProcessor()->Submit(
 				new CommandFootMeasurementSet(
 						wxString::Format(_("Set %s to %s"),
 								GetNameByID(event.GetId()), newFormula),
 						project, projectview->active, event.GetId(),
 						newFormula));
+		m_panelPageFoot->Navigate();
+		break;
+	case ID_MEASUREMENT_LEGLENGTHDIFFERENCE:
+		project->GetCommandProcessor()->Submit(
+				new CommandProjectSetLegLengthDifference(
+						wxString::Format(_("Set leg length difference to %s"),
+								newFormula), project, newFormula));
 		m_panelPageFoot->Navigate();
 		break;
 	case ID_MEASUREMENT_BELOWCRUTCHGIRTH:
@@ -621,6 +722,8 @@ void FrameMain::OnTextEnter(wxCommandEvent& event)
 
 void FrameMain::OnMouseWheel(wxMouseEvent& event)
 {
+	std::cout << "OnMouseWheel( " << event.GetId() << " )\n";
+
 }
 
 wxString FrameMain::GetNameByID(int id)
@@ -820,21 +923,27 @@ void FrameMain::TransferParameterToTextCtrl(const ParameterFormula parameter,
 
 void FrameMain::OnChoiceDisplay(wxCommandEvent& event)
 {
+	std::cout << "OnChoiceDisplay( " << event.GetId() << " )\n";
+
 }
 
 void FrameMain::OnToggleAnkleLock(wxCommandEvent& event)
 {
+	std::cout << "OnToggleAnkleLock( " << event.GetId() << " )\n";
+
 }
 
 void FrameMain::OnFileChangedScanFile(wxFileDirPickerEvent& event)
 {
+	std::cout << "OnFileChangedScanFile( " << event.GetId() << " )\n";
 }
 
 void FrameMain::OnFileChangedLastFile(wxFileDirPickerEvent& event)
 {
+	std::cout << "OnFileChangedLastFile( " << event.GetId() << " )\n";
 }
 
-void FrameMain::OnQuickSetupMeasurements(wxCommandEvent& event)
+void FrameMain::OnQuickSetupMeasurements(wxCommandEvent& WXUNUSED(event))
 {
 	DialogQuickInitFoot dialog(this);
 	if(dialog.ShowModal() == wxID_OK){
@@ -851,63 +960,88 @@ void FrameMain::OnQuickSetupMeasurements(wxCommandEvent& event)
 						projectview->active, ID_MEASUREMENT_FOOTLENGTH,
 						lengthStr));
 
-//		ballGirth.formula = _T("footLength*0.93");
-
-//		const FootMeasurements *foot = projectview->GetActiveFootMeasurements();
-
-//		if(fabs(foot->footLength - dialog.length) > FLT_EPSILON) project->GetCommandProcessor()->Submit(
-//				new CommandFootSetSize(
-//						wxString::Format(_("Set footlength to %g"),
-//								dialog.length), project, FootModel::Length,
-//						dialog.length));
-//		if(fabs(foot->ballwidth - dialog.width) > FLT_EPSILON) project->GetCommandProcessor()->Submit(
-//				new CommandFootSetSize(
-//						wxString::Format(_("Set ballwidth to %g"),
-//								dialog.width), project, FootModel::BallWidth,
-//						dialog.width));
-
-//		if(fabs(foot->anklewidth - dialog.width) > FLT_EPSILON) project->GetCommandProcessor()->Submit(
-//				new CommandFootSetSize(
-//						wxString::Format(_("Set anklewidth to %g"),
-//								dialog.width), project, FootModel::AnkleWidth,
-//						dialog.width));
-//		if(fabs(foot->heelwidth - dialog.width) > FLT_EPSILON) project->GetCommandProcessor()->Submit(
-//				new CommandFootSetSize(
-//						wxString::Format(_("Set heelwidth to %g"),
-//								dialog.width), project, FootModel::HeelWidth,
-//						dialog.width));
+		wxString girthStr = wxString::Format(_T("footLength*%g"), dialog.width);
+		project->GetCommandProcessor()->Submit(
+				new CommandFootMeasurementSet(
+				_("Set ballgirth to ") + girthStr, project,
+						projectview->active, ID_MEASUREMENT_BALLGIRTH,
+						girthStr));
 	}
-}
-
-void FrameMain::OnSetSymmetry(wxCommandEvent& event)
-{
-	switch(event.GetId()){
-	case ID_FULLSYMMETRY:
-		break;
-	case ID_SYMMETRICMODEL:
-		break;
-	case ID_INDIVIDUALMODEL:
-		break;
-	default:
-		break;
-	}
-	event.Skip();
-}
-
-void FrameMain::OnCopyMeasurements(wxCommandEvent& event)
-{
 }
 
 void FrameMain::OnChangeModel(wxCommandEvent& event)
 {
+	if(loopGuard) return;
+	std::cout << "OnChangeModel( " << event.GetId() << " )\n";
+	Project* project = wxStaticCast(GetDocument(), Project);
+	ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
+	switch(event.GetId()){
+	case ID_MEASUREMENTSYMMETRY:
+		projectview->active = ProjectView::Both;
+		project->GetCommandProcessor()->Submit(
+				new CommandProjectSetParameter(_("Change symmetry"), project,
+				ID_MEASUREMENTSYMMETRY, (int) !project->measurementsSymmetric));
+		break;
+	case ID_USEFOOTMEASUREMENTS:
+		project->GetCommandProcessor()->Submit(
+				new CommandProjectSetParameter(_("Use foot measurements"),
+						project,
+						ID_MEASUREMENTSOURCE,
+						(int) Project::MeasurementSource::fromMeasurements));
+		break;
+	case ID_USEFOOTSCAN:
+		project->GetCommandProcessor()->Submit(
+				new CommandProjectSetParameter(_("Use foot scan"), project,
+				ID_MEASUREMENTSOURCE,
+						(int) Project::MeasurementSource::fromFootScan));
+		break;
+	case ID_USEBONEBASEDMODEL:
+		project->GetCommandProcessor()->Submit(
+				new CommandProjectSetParameter(_("Use bone-based model"),
+						project,
+						ID_FOOTMODEL, (int) Project::ModelType::boneBased));
+		break;
+	case ID_USELASTBASEDMODEL:
+		project->GetCommandProcessor()->Submit(
+				new CommandProjectSetParameter(_("Use last-based model"),
+						project,
+						ID_FOOTMODEL, (int) Project::ModelType::lastBased));
+		break;
+	}
+}
+
+void FrameMain::OnCopyMeasurements(wxCommandEvent& event)
+{
+	Project* project = wxStaticCast(GetDocument(), Project);
+	ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
+	switch(event.GetId()){
+	case ID_COPYACTIVETOINACTIVE:
+		project->GetCommandProcessor()->Submit(
+				new CommandFootMeasurementsCopy(
+						_("Copy active to inactive measurements"), project,
+						projectview->active != ProjectView::Right));
+		break;
+	case ID_COPYLEFTTORIGHT:
+		project->GetCommandProcessor()->Submit(
+				new CommandFootMeasurementsCopy(
+						_("Copy left to right measurements"), project, true));
+		break;
+	case ID_COPYRIGHTTOLEFT:
+		project->GetCommandProcessor()->Submit(
+				new CommandFootMeasurementsCopy(
+						_("Copy right to left measurements"), project, false));
+		break;
+	}
 }
 
 void FrameMain::OnLoadFootSTL(wxCommandEvent& event)
 {
+	std::cout << "OnLoadFootSTL( " << event.GetId() << " )\n";
 }
 
 void FrameMain::OnEditBoneModel(wxCommandEvent& event)
 {
+	std::cout << "OnEditBoneModel( " << event.GetId() << " )\n";
 }
 
 void FrameMain::OnLoadBoneModel(wxCommandEvent& event)
@@ -960,15 +1094,63 @@ void FrameMain::OnSaveBoneModel(wxCommandEvent& event)
 
 void FrameMain::OnConstructionSelection(wxCommandEvent& event)
 {
-	event.Skip();
+	Project* project = wxStaticCast(GetDocument(), Project);
+
+	switch(event.GetId()){
+	case ID_SELECTCONSTRUCTION:
+		project->GetCommandProcessor()->Submit(
+				new CommandProjectSetParameter(_("Set construction method"),
+						project,
+						ID_SELECTCONSTRUCTION, event.GetSelection()));
+		break;
+	case ID_CONSTRUCTIONEXPERIMENTAL:
+		project->GetCommandProcessor()->Submit(
+				new CommandProjectSetParameter(
+						_("Select experimental generator"), project,
+						ID_SELECTCONSTRUCTION, (int) Project::Experimental));
+		break;
+	case ID_CONSTRUCTIONWELDED:
+		project->GetCommandProcessor()->Submit(
+				new CommandProjectSetParameter(_("Select welted construction"),
+						project,
+						ID_SELECTCONSTRUCTION, (int) Project::Welted));
+		break;
+	case ID_CONSTRUCTIONCEMENTED:
+		project->GetCommandProcessor()->Submit(
+				new CommandProjectSetParameter(
+						_("Select cemented construction"), project,
+						ID_SELECTCONSTRUCTION, (int) Project::Cemented));
+		break;
+	case ID_CONSTRUCTIONMOLDED:
+		project->GetCommandProcessor()->Submit(
+				new CommandProjectSetParameter(
+						_("Select molded sole construction"), project,
+						ID_SELECTCONSTRUCTION, (int) Project::Molded));
+		break;
+	case ID_CONSTRUCTIONDUTCH:
+		project->GetCommandProcessor()->Submit(
+				new CommandProjectSetParameter(
+						_("Select generator for Dutch clogs"), project,
+						ID_SELECTCONSTRUCTION, (int) Project::Dutch));
+		break;
+	case ID_CONSTRUCTIONGETA:
+		project->GetCommandProcessor()->Submit(
+				new CommandProjectSetParameter(
+						_("Select generator for Japanese getas"), project,
+						ID_SELECTCONSTRUCTION, (int) Project::Geta));
+		break;
+	}
+	TransferDataToWindow();
 }
 
 void FrameMain::OnLoadPattern(wxCommandEvent& event)
 {
+	std::cout << "OnLoadPattern( " << event.GetId() << " )\n";
 }
 
 void FrameMain::OnSavePattern(wxCommandEvent& event)
 {
+	std::cout << "OnSavePattern( " << event.GetId() << " )\n";
 }
 
 void FrameMain::OnSaveLast(wxCommandEvent& event)
@@ -981,24 +1163,35 @@ void FrameMain::OnSaveLast(wxCommandEvent& event)
 		wxFileName fileName;
 		fileName = dialog.GetPath();
 		Project* project = wxStaticCast(GetDocument(), Project);
-		project->SaveSkin(fileName.GetFullPath());
+		ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
+		project->SaveSkin(fileName.GetFullPath(),
+				projectview->active != ProjectView::Right,
+				projectview->active == ProjectView::Right);
 	}
 }
 
 void FrameMain::OnSaveInsole(wxCommandEvent& event)
 {
+	std::cout << "OnSaveInsole( " << event.GetId() << " )\n";
+
 }
 
 void FrameMain::OnSaveSole(wxCommandEvent& event)
 {
+	std::cout << "OnSaveSole( " << event.GetId() << " )\n";
+
 }
 
 void FrameMain::OnSaveCutaway(wxCommandEvent& event)
 {
+	std::cout << "OnSaveCutaway( " << event.GetId() << " )\n";
+
 }
 
 void FrameMain::OnPackZip(wxCommandEvent& event)
 {
+	std::cout << "OnPackZip( " << event.GetId() << " )\n";
+
 }
 
 void FrameMain::OnToggleStereo3D(wxCommandEvent& event)
@@ -1031,6 +1224,7 @@ void FrameMain::OnViewChange(wxCommandEvent& event)
 
 void FrameMain::OnSetupBackgroundImages(wxCommandEvent& event)
 {
+	std::cout << "OnSetupBackgroundImages( " << event.GetId() << " )\n";
 }
 
 void FrameMain::OnDebugParser(wxCommandEvent& event)

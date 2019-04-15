@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : CommandFootMeasurementSet.h
-// Purpose            :
-// Thread Safe        : No
+// Name               : PointCloud.h
+// Purpose            : 
+// Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 30.04.2018
-// Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 14.04.2019
+// Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,35 +24,28 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef __COMMANDFOOTMEASUREMENTSET_H__
-#define __COMMANDFOOTMEASUREMENTSET_H__
+#ifndef SRC_3D_POINTCLOUD_H_
+#define SRC_3D_POINTCLOUD_H_
 
-#include <wx/cmdproc.h>
-#include <wx/string.h>
+/*!\class PointCloud
+ * \brief ...
+ *
+ * ...
+ */
 
-#include "../foot/ParameterFormula.h"
-#include "../Project.h"
-#include "../ProjectView.h"
+#include <vector>
+#include "Vector3.h"
 
-class CommandFootMeasurementSet:public wxCommand {
+class PointCloud {
 public:
-	CommandFootMeasurementSet(const wxString& name, Project* project,
-			ProjectView::Side active, int parameter, wxString value);
+	PointCloud();
+	virtual ~PointCloud();
 
-	bool Do(void);
-	bool Undo(void);
+	void InitExample(void);
 
-protected:
+	void Paint(void);
 
-	wxString Replace(FootMeasurements *meas,int parameter, wxString newValue);
-	ParameterFormula* GetParameterByID(FootMeasurements *meas, int id);
-
-	Project* project;
-	ProjectView::Side active;
-	int parameter;
-	wxString value;
-	wxString oldValueLeft;
-	wxString oldValueRight;
+	std::vector <Vector3> p;
 };
 
-#endif /* __COMMANDFOOTMEASUREMENTSET_H__ */
+#endif /* SRC_3D_POINTCLOUD_H_ */

@@ -39,6 +39,9 @@ public:
 	ParameterFormula(const wxString name, const wxString formula = _T(""));
 	virtual ~ParameterFormula();
 
+	// Copy assignment, because of const-name. (Copy constructor has no problems with the const.)
+	ParameterFormula& operator=(const ParameterFormula &other);
+
 	const wxString name;
 	wxString formula;
 	double value; //!< Calculated value
