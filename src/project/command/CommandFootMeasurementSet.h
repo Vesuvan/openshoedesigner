@@ -27,10 +27,16 @@
 #ifndef __COMMANDFOOTMEASUREMENTSET_H__
 #define __COMMANDFOOTMEASUREMENTSET_H__
 
+/*!\class CommandFootMeasurementSet
+ * \brief Command to change foot measurements parameters
+ *
+ * ...
+ */
+
 #include <wx/cmdproc.h>
 #include <wx/string.h>
 
-#include "../foot/ParameterFormula.h"
+#include "../../math/ParameterFormula.h"
 #include "../Project.h"
 #include "../ProjectView.h"
 

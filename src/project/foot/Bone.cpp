@@ -300,20 +300,20 @@ void Bone::Setup(Bone *parent)
 
 	matrix.TranslateLocal(anchor.x, anchor.y, anchor.z);
 	matrix = matrix
-			* AffineTransformMatrix::RotateAroundVector(Vector3(1, 0, 0),
+			* AffineTransformMatrix::RotationAroundVector(Vector3(1, 0, 0),
 					rotx / 2);
 	matrix = matrix
-			* AffineTransformMatrix::RotateAroundVector(Vector3(0, 1, 0),
+			* AffineTransformMatrix::RotationAroundVector(Vector3(0, 1, 0),
 					roty / 2);
 
 	Vector3 temp = link * (rLocal + r1);
 	matrix.TranslateLocal(temp.x, temp.y, temp.z);
 
 	matrix = matrix
-			* AffineTransformMatrix::RotateAroundVector(Vector3(1, 0, 0),
+			* AffineTransformMatrix::RotationAroundVector(Vector3(1, 0, 0),
 					rotx / 2);
 	matrix = matrix
-			* AffineTransformMatrix::RotateAroundVector(Vector3(0, 1, 0),
+			* AffineTransformMatrix::RotationAroundVector(Vector3(0, 1, 0),
 					roty / 2);
 
 	p1 = matrix.Transform(Vector3(0, 0, 0));

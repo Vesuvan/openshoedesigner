@@ -105,7 +105,7 @@ void DialogQuickInitFoot::ParseText(wxString text)
 		break;
 	}
 
-	width = 0.9;
-	if(m_radioBtnSmall->GetValue()) width = 0.8;
-	if(m_radioBtnWide->GetValue()) width = 1.0;
+	width = 1.0;
+	if(m_radioBtnSmall->GetValue()) width = 0.9;
+	if(m_radioBtnWide->GetValue()) width = 1.1;
 }

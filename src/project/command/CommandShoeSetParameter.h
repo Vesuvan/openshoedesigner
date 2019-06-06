@@ -27,10 +27,16 @@
 #ifndef __COMMANDSHOESETPARAMETER_H__
 #define __COMMANDSHOESETPARAMETER_H__
 
+/*!\class CommandShoeSetParameter
+ * \brief Command to set the parameters of the shoe
+ *
+ * ...
+ */
+
 #include <wx/cmdproc.h>
 #include <wx/string.h>
 
-#include "../foot/ParameterFormula.h"
+#include "../../math/ParameterFormula.h"
 #include "../Project.h"
 
 class CommandShoeSetParameter:public wxCommand {

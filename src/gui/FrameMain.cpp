@@ -940,7 +940,9 @@ void FrameMain::OnFileChangedScanFile(wxFileDirPickerEvent& event)
 
 void FrameMain::OnFileChangedLastFile(wxFileDirPickerEvent& event)
 {
-	std::cout << "OnFileChangedLastFile( " << event.GetId() << " )\n";
+	Project* project = wxStaticCast(GetDocument(), Project);
+	project->LoadLastModel(event.GetPath());
+	Refresh();
 }
 
 void FrameMain::OnQuickSetupMeasurements(wxCommandEvent& WXUNUSED(event))
@@ -987,25 +989,25 @@ void FrameMain::OnChangeModel(wxCommandEvent& event)
 				new CommandProjectSetParameter(_("Use foot measurements"),
 						project,
 						ID_MEASUREMENTSOURCE,
-						(int) Project::MeasurementSource::fromMeasurements));
+						(int) Project::fromMeasurements));
 		break;
 	case ID_USEFOOTSCAN:
 		project->GetCommandProcessor()->Submit(
 				new CommandProjectSetParameter(_("Use foot scan"), project,
 				ID_MEASUREMENTSOURCE,
-						(int) Project::MeasurementSource::fromFootScan));
+						(int) Project::fromFootScan));
 		break;
 	case ID_USEBONEBASEDMODEL:
 		project->GetCommandProcessor()->Submit(
 				new CommandProjectSetParameter(_("Use bone-based model"),
 						project,
-						ID_FOOTMODEL, (int) Project::ModelType::boneBased));
+						ID_FOOTMODEL, (int) Project::boneBased));
 		break;
 	case ID_USELASTBASEDMODEL:
 		project->GetCommandProcessor()->Submit(
 				new CommandProjectSetParameter(_("Use last-based model"),
 						project,
-						ID_FOOTMODEL, (int) Project::ModelType::lastBased));
+						ID_FOOTMODEL, (int) Project::lastBased));
 		break;
 	}
 }
@@ -1060,7 +1062,7 @@ void FrameMain::OnLoadBoneModel(wxCommandEvent& event)
 		wxFileName fileName(dialog.GetPath());
 		Project* project = wxStaticCast(GetDocument(), Project);
 
-		if(project->LoadModel(fileName.GetFullPath())){
+		if(project->LoadFootModel(fileName.GetFullPath())){
 			filepaths.lastFootDirectory = fileName.GetPath();
 			TransferDataToWindow();
 		}
@@ -1085,7 +1087,7 @@ void FrameMain::OnSaveBoneModel(wxCommandEvent& event)
 	if(dialog.ShowModal() == wxID_OK){
 		wxFileName fileName(dialog.GetPath());
 		Project* project = wxStaticCast(GetDocument(), Project);
-		if(project->SaveModel(fileName.GetFullPath())){
+		if(project->SaveFootModel(fileName.GetFullPath())){
 			filepaths.lastFootDirectory = fileName.GetPath();
 			TransferDataToWindow();
 		}
@@ -1164,9 +1166,15 @@ void FrameMain::OnSaveLast(wxCommandEvent& event)
 		fileName = dialog.GetPath();
 		Project* project = wxStaticCast(GetDocument(), Project);
 		ProjectView* projectview = wxStaticCast(GetView(), ProjectView);
-		project->SaveSkin(fileName.GetFullPath(),
-				projectview->active != ProjectView::Right,
-				projectview->active == ProjectView::Right);
+		if(project->modeltype == Project::boneBased){
+			project->SaveSkin(fileName.GetFullPath(),
+					projectview->active != ProjectView::Right,
+					projectview->active == ProjectView::Right);
+		}else{
+			project->SaveLast(fileName.GetFullPath(),
+					projectview->active != ProjectView::Right,
+					projectview->active == ProjectView::Right);
+		}
 	}
 }
 

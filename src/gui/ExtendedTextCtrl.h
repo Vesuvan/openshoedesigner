@@ -28,7 +28,7 @@
 #define SRC_GUI_EXTENDEDTEXTCTRL_H_
 
 /*!\class ExtendedTextCtrl
- * \brief ...
+ * \brief TODO: Not yet sure if needed
  *
  * ...
  */

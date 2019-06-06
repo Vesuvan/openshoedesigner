@@ -27,6 +27,12 @@
 #ifndef __COMMANDFOOTMODELSETPARAMETER_H__
 #define __COMMANDFOOTMODELSETPARAMETER_H__
 
+/*!\class CommandFootModelSetParameter
+ * \brief Command to change foot model parameters
+ *
+ * This command changes the parameters of teh bone / foot model.
+ */
+
 #include <wx/cmdproc.h>
 #include <wx/string.h>
 

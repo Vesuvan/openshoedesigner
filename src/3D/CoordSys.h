@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : SettingsStereo3D.h
+// Name               : CoordSys.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 18.02.2019
+// Created            : 30.05.2019
 // Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,38 +24,54 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef _SETTINGSSTEREO3D_H_
-#define _SETTINGSSTEREO3D_H_
+#ifndef SRC_3D_COORDSYS_H_
+#define SRC_3D_COORDSYS_H_
+#include "Vector3.h"
 
-/*!\class SettingsStereo3D
- * \brief ...
+/*!\class CoordSys
+ * \brief Coordinate system in 3D space
  *
- * ...
+ * Class for keeping track of a coordinate system and mapping Vector3%s into it.
  */
 
-#include <wx/config.h>
-#include "../3D/OpenGLCanvas.h"
-
-class SettingsStereo3D {
+class CoordSys {
 public:
-	SettingsStereo3D();
-	virtual ~SettingsStereo3D();
+	enum orientation {
+		rhs, ///< Right handed side system
+		lsh  ///< Left handed side system
+	} side;
 
-	float eyeDistance;
-	float focalDistance;
-	unsigned char backgroundGrayLevel;
-	unsigned char rightEyeR;
-	unsigned char rightEyeG;
-	unsigned char rightEyeB;
-	unsigned char leftEyeR;
-	unsigned char leftEyeG;
-	unsigned char leftEyeB;
+public:
+	CoordSys();
+	virtual ~CoordSys();
 
-	bool Load(wxConfig * config);
-	bool Save(wxConfig * config);
+	void SetOrientation(orientation side);
 
-	void WriteToCanvas(OpenGLCanvas * canvas);
+	void SetCenter(const Vector3 & center);
+	void SetX(const Vector3 &x);
+	void SetY(const Vector3 &y);
+	void SetZ(const Vector3 &z);
 
+	void RecalculateX(void);
+	void RecalculateY(void);
+	void RecalculateZ(void);
+
+	double GetLocalX(const Vector3 &vec) const;
+	double GetLocalY(const Vector3 &vec) const;
+	double GetLocalZ(const Vector3 &vec) const;
+
+	Vector3 GetGlobal(double x, double y = 0.0, double z = 0.0) const;
+
+public:
+	Vector3 center;
+	Vector3 ex;
+	Vector3 ey;
+	Vector3 ez;
+
+private:
+	enum {
+		none, xWasSet, yWasSet, zWasSet
+	} lastSet;
 };
 
-#endif /* _SETTINGSSTEREO3D_H_ */
+#endif /* SRC_3D_COORDSYS_H_ */

@@ -29,6 +29,7 @@
 
 /*!\class OpenGLLight
  * \brief ...
+ * \ingroup View3D
  *
  * ...
  */

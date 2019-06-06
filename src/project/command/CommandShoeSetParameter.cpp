@@ -95,8 +95,7 @@ ParameterFormula* CommandShoeSetParameter::GetParameterByID(Shoe *shoe, int id)
 	default:
 		throw(std::invalid_argument(
 				std::string(__FILE__)
-						+ " : Replace() : Passed invalid/unhandled ID ("
-						+ std::to_string(parameter) + ")."));
+						+ " : Replace() : Passed invalid/unhandled ID."));
 	}
 	return NULL;
 }

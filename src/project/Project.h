@@ -63,7 +63,6 @@
 #include "../3D/PointCloud.h"
 #include "../3D/Polygon3.h"
 //#include "../3D/Volume.h"
-#include "../3D/PolyHull.h"
 
 #include "foot/FootMeasurements.h"
 #include "foot/FootModel.h"
@@ -104,14 +103,13 @@ public:
 	FootModel footL;
 	FootModel footR;
 
-	//TODO: Add here some structures for a last based model
+	LastModel lastModelL;
+	LastModel lastModelR;
 
 	// +++ Shoe +++
 	Shoe shoe;
 
 	// Last to generate
-	LastModel lastModelL;
-	LastModel lastModelR;
 	Last lastL;
 	Last lastR;
 
@@ -130,7 +128,6 @@ public:
 
 	// Generated products / debugging structures
 
-	PolyHull test;
 	//	Volume vol;
 	OrientedMatrix xray;
 	OrientedMatrix heightfield;
@@ -146,8 +143,10 @@ public:
 	DocumentOstream& SaveObject(DocumentOstream& ostream);
 	DocumentIstream& LoadObject(DocumentIstream& istream);
 
-	bool LoadModel(wxString fileName);
-	bool SaveModel(wxString fileName);
+	bool LoadFootModel(wxString fileName);
+	bool SaveFootModel(wxString fileName);
+	bool LoadLastModel(wxString fileName);
+	bool SaveLast(wxString fileName, bool left, bool right);
 	bool SaveSkin(wxString fileName, bool left, bool right);
 
 	void Update(void);

@@ -24,15 +24,15 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef SRC_PROJECT_FOOT_PARAMETERFORMULA_H_
-#define SRC_PROJECT_FOOT_PARAMETERFORMULA_H_
+#ifndef _PARAMETERFORMULA_H_
+#define _PARAMETERFORMULA_H_
 /*!\class ParameterFormula
  * \brief Parameter with the cpability of keeping a separate formula and value.
  *
  */
 
 #include <wx/string.h>
-#include "../../math/MathParser.h"
+#include "MathParser.h"
 
 class ParameterFormula {
 public:
@@ -58,7 +58,8 @@ public:
 	 * \return Calculated value
 	 */
 	double Update(MathParser &parser);
+	void Modify(bool modify = true);
 	bool IsModified(void) const;
 };
 
-#endif /* SRC_PROJECT_FOOT_PARAMETERFORMULA_H_ */
+#endif /* _PARAMETERFORMULA_H_ */

@@ -24,14 +24,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef SRC_GUI_FRAMEPARENT_H_
-#define SRC_GUI_FRAMEPARENT_H_
+#ifndef _FRAMEPARENT_H_
+#define _FRAMEPARENT_H_
 
 /*!\class FrameParent
  * \brief Parentframe for the application
  *
  * Parent frame for the SDI application.
  */
+
+#include "../Config.h"
 
 #include <wx/config.h>
 #include <wx/docview.h>
@@ -42,7 +44,6 @@
 
 #ifdef _USE_6DOFCONTROLLER
 #include "../controller/Control3D.h"
-#include "../controller/DialogSetup6DOFController.h"
 #endif
 #ifdef _USE_MIDI
 #include "../controller/MidiPort.h"
@@ -66,7 +67,7 @@ public:
 #ifdef _USE_6DOFCONTROLLER
 	void OnSetupController(wxCommandEvent& event);
 #endif
-#ifdef __USEMIDI
+#ifdef _USE_MIDI
 	void OnSetupMidi(wxCommandEvent& event);
 #endif
 	void OnSetupUnits(wxCommandEvent& event);
@@ -85,7 +86,7 @@ public:
 	wxConfig* config;
 
 	wxHelpController* m_helpController;
-	DialogSetupStereo3D* dialogSetupStereo3D;
+	DialogSetupStereo3D * dialogSetupStereo3D;
 	SettingsStereo3D settingsStereo3D;
 	CollectionUnits units;
 
@@ -104,4 +105,4 @@ public:
 wxDECLARE_EVENT_TABLE();
 };
 
-#endif /* SRC_GUI_FRAMEPARENT_H_ */
+#endif /* _FRAMEPARENT_H_ */

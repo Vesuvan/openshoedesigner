@@ -31,7 +31,8 @@
  * \brief Simple 3D text with block-front
  * \ingroup View3D
  *
- * ...
+ * This class uses a simple low ascii pixel front to render texts in 3D opengl
+ * space.
  */
 
 #include "OpenGLImage.h"

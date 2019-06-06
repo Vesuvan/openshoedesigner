@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : PolyHull.h
+// Name               : CoreDensityEstimator.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 23.01.2017
-// Copyright          : (C) 2017 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 05.06.2019
+// Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,32 +24,38 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef POLYHULL_H_
-#define POLYHULL_H_
+#ifndef SRC_MATH_COREDENSITYESTIMATOR_H_
+#define SRC_MATH_COREDENSITYESTIMATOR_H_
 
-/*!\class PolyHull
- * \brief ...
+/*!\class CoreDensityEstimator
+ * \brief Core density estimation
  *
- * ...
+ * This Class does a (cyclic) core density estimation.
  */
 
-#include "Spline3.h"
+#include <cstddef>
 #include <vector>
 
-class PolyHull {
+class CoreDensityEstimator {
 public:
+	CoreDensityEstimator();
+	virtual ~CoreDensityEstimator();
 
-	class Level:public Spline3 {
-	public:
-		Level();
+	void SetRange(double t0, double t1, size_t N, bool cyclic = false);
+	void Zero(void);
+
+	enum coretype {
+		Epanechnikov
 	};
 
-	PolyHull();
-	virtual ~PolyHull();
-
-	std::vector <Level> levels;
+	void Add(coretype core, double sigma, double pos, double weight = 1.0);
 
 	void Paint(void) const;
+
+private:
+	bool cyclic;
+	std::vector <double> x;
+	std::vector <double> y;
 };
 
-#endif /* POLYHULL_H_ */
+#endif /* SRC_MATH_COREDENSITYESTIMATOR_H_ */

@@ -41,7 +41,7 @@
  */
 
 #include <wx/string.h>
-#include "foot/ParameterFormula.h"
+#include "../math/ParameterFormula.h"
 
 class Shoe {
 public:

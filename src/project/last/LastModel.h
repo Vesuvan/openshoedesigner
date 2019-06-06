@@ -26,31 +26,44 @@
 
 #ifndef SRC_PROJECT_LAST_LASTMODEL_H_
 #define SRC_PROJECT_LAST_LASTMODEL_H_
+/*!\class LastModel
+ * \brief Rescales and handles a last
+ *
+ * This class reads in a list from a STL or OBJ (Wavefront) file and displays the result.
+ * It analyses and normalises the form of the last. This last is the rescaled and adapted
+ * to the foot measurements and the shoe form.
+ *
+ * This last is used as the starting point for the upper pattern and the sole generation.
+ *
+ * Alternatively this class takes over the data from the bone model and provides the data
+ * to the abovementioned steps. In this case the data is not transformed and adapted. This
+ * step has already been done on the foot-model.
+ */
+
+#include "../../math/BendLine.h"
+#include "../../math/Symmetry.h"
+#include "../../3D/Hull.h"
+#include "../../3D/Polygon3.h"
 
 #include <string>
 
-#include "../../3D/Geometry.h"
-#include "../../math/BendLine.h"
-#include "../foot/FootMeasurements.h"
-#include "../Shoe.h"
-#include "PolyCylinder.h"
-
-/*!\class LastModel
- * \brief ...
- *
- * ...
- */
-
+#include "../../math/CoreDensityEstimator.h"
+#include "../../math/FormFinder.h"
+class FootMeasurements;
+class Shoe;
 class LastModel {
 public:
 	std::string filename;
-	PolyCylinder data;
 	double sx;
 	double sy;
 	double sz;
 
-	Geometry geometry;
+	Polygon3 loop;
+	Symmetry symmetry;
+	FormFinder formfinder;
+	CoreDensityEstimator cde;
 
+	Hull hull;
 	BendLine center;
 	bool mirrored;
 
@@ -58,14 +71,17 @@ public:
 	virtual ~LastModel();
 	bool LoadModel(std::string filename);
 
+	void AnalyseForm(void);
+
 	void UpdateForm(const FootMeasurements &measurements);
 	void UpdatePosition(const Shoe &shoe, double offset = 0.0);
-	void UpdateGeometry(void);
 	void Paint(void) const;
 
 	bool IsModified(void) const;
 	void Modify(bool modified = true);
 	bool modified;
+private:
+	static bool Vector3MinX(const Vector3 a, const Vector3 b);
 };
 
 #endif /* SRC_PROJECT_LAST_LASTMODEL_H_ */

@@ -40,11 +40,11 @@ ProjectView::ProjectView()
 {
 	active = Both;
 
-	showLeft = true;
+	showLeft = false;
 	showRight = true;
 
 	showFootScan = true;
-	showBones = true;
+	showBones = false;
 	showSkin = true;
 	showLeg = false;
 

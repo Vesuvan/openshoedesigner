@@ -32,6 +32,9 @@
 #include "../languages.h"
 #include "../project/ProjectView.h"
 #include "IDs.h"
+#ifdef _USE_6DOFCONTROLLER
+#include "../controller/DialogSetup6DOFController.h"
+#endif
 
 wxBEGIN_EVENT_TABLE(FrameParent, wxDocParentFrame)
 
@@ -54,14 +57,14 @@ EVT_MENU(ID_REFRESH3DVIEW, FrameParent::OnRefreshView3D)
 wxEND_EVENT_TABLE()
 
 FrameParent::FrameParent(wxDocManager *manager, wxConfig* config,
-		wxFrame *parent, wxWindowID id, const wxString& title)
-		: wxDocParentFrame(manager, parent, id, title)
+		wxFrame *parent, wxWindowID id, const wxString& title) :
+		wxDocParentFrame(manager, parent, id, title)
 {
 	this->config = config;
 	settingsStereo3D.Load(config);
 	units.Load(config);
 #ifdef _USE_6DOFCONTROLLER
-	control.Load(config);
+	control.GetConfigFrom(config);
 #endif
 	wxMenu *m_menuFile = new wxMenu;
 	m_menuFile->Append(wxID_NEW);

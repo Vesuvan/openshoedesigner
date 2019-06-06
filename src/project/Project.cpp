@@ -121,7 +121,8 @@ void Project::Reset(void)
 
 	footScan.InitExample();
 
-	lastModelR.LoadModel("data/LastScanDefault.dat");
+//	lastModelR.LoadModel("data/Last_Default_Normalized.stl");
+	lastModelR.LoadModel("data/Last_Flat_FreeStyle_RoundTipWide.stl");
 	lastModelL = lastModelR;
 	lastModelL.mirrored = true;
 }
@@ -215,7 +216,7 @@ bool Project::UpdateLeft(void)
 	if(lastModelL.IsModified()){
 		lastModelL.Modify(false);
 		lastModelL.UpdateForm(measL);
-		lastModelL.UpdateGeometry();
+//		lastModelL.UpdateGeometry();
 		return true;
 	}
 
@@ -272,7 +273,7 @@ bool Project::UpdateRight(void)
 	if(lastModelR.IsModified()){
 		lastModelR.Modify(false);
 		lastModelR.UpdateForm(measR);
-		lastModelR.UpdateGeometry();
+//		lastModelR.UpdateGeometry();
 		return true;
 	}
 
@@ -291,44 +292,6 @@ void Project::OnCalculationDone(wxThreadEvent& event)
 
 	CS.Leave();
 	UpdateAllViews(); // This has been done by OnRefreshViews.
-}
-
-bool Project::LoadModel(wxString fileName)
-{
-	wxFileInputStream input(fileName);
-	wxTextInputStream text(input);
-
-//	bool flag = false;
-//	if(active == Left){
-//		flag = footL.LoadModel(&text);
-//		if(symmetry == Full) footR.CopyModel(footL);
-//	}
-//	if(active == Right){
-//		flag = footR.LoadModel(&text);
-//		if(symmetry == Full) footR.CopyModel(footL);
-//	}
-	return false;
-}
-
-bool Project::SaveModel(wxString fileName)
-{
-	wxFileOutputStream output(fileName);
-	wxTextOutputStream text(output);
-	return footL.SaveModel(&text);
-}
-
-DocumentOstream& Project::SaveObject(DocumentOstream& ostream)
-{
-	wxDocument::SaveObject(ostream);
-#if wxUSE_STD_IOSTREAM
-	DocumentOstream& stream = ostream;
-#else
-	wxTextOutputStream stream(ostream);
-#endif
-
-// TODO: Add Project data
-
-	return ostream;
 }
 
 DocumentIstream& Project::LoadObject(DocumentIstream& istream)
@@ -359,6 +322,62 @@ DocumentIstream& Project::LoadObject(DocumentIstream& istream)
 	return istream;
 }
 
+DocumentOstream& Project::SaveObject(DocumentOstream& ostream)
+{
+	wxDocument::SaveObject(ostream);
+#if wxUSE_STD_IOSTREAM
+	DocumentOstream& stream = ostream;
+#else
+	wxTextOutputStream stream(ostream);
+#endif
+
+// TODO: Add Project data
+
+	return ostream;
+}
+
+bool Project::LoadFootModel(wxString fileName)
+{
+	wxFileInputStream input(fileName);
+	wxTextInputStream text(input);
+
+//	bool flag = false;
+//	if(active == Left){
+//		flag = footL.LoadModel(&text);
+//		if(symmetry == Full) footR.CopyModel(footL);
+//	}
+//	if(active == Right){
+//		flag = footR.LoadModel(&text);
+//		if(symmetry == Full) footR.CopyModel(footL);
+//	}
+	return false;
+}
+
+bool Project::SaveFootModel(wxString fileName)
+{
+	wxFileOutputStream output(fileName);
+	wxTextOutputStream text(output);
+	return footL.SaveModel(&text);
+}
+
+bool Project::LoadLastModel(wxString fileName)
+{
+	if(!lastModelR.LoadModel(fileName.ToStdString()))return false;
+	lastModelL = lastModelR;
+	lastModelL.mirrored = true;
+	return true;
+}
+
+bool Project::SaveLast(wxString fileName, bool left, bool right)
+{
+	wxFFileOutputStream outStream(fileName);
+	FileSTL temp;
+//	if(left) temp.WriteStream(outStream, lastModelL.geometry);
+//	if(right) temp.WriteStream(outStream, lastModelR.geometry);
+	return true;
+
+}
+
 bool Project::SaveSkin(wxString fileName, bool left, bool right)
 {
 	wxFFileOutputStream outStream(fileName);
@@ -367,3 +386,4 @@ bool Project::SaveSkin(wxString fileName, bool left, bool right)
 	if(right) temp.WriteStream(outStream, footR.skin.geometry);
 	return true;
 }
+

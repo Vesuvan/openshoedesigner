@@ -28,9 +28,10 @@
 #define SRC_GUI_COLLECTIONFILEPATHS_H_
 
 /*!\class CollectionFilepaths
- * \brief ...
+ * \brief Collection of paths
  *
- * ...
+ * Collects the various paths used in the GUI. The paths can be stored in the
+ * programs config file / registry.
  */
 
 #include <wx/string.h>

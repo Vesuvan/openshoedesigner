@@ -28,7 +28,7 @@
 #define SRC_PROJECT_COMMAND_COMMANDPROJECTSETPARAMETER_H_
 
 /*!\class CommandProjectSetParameter
- * \brief ...
+ * \brief Command to set a parameter for the project itself
  *
  * ...
  */

@@ -27,11 +27,12 @@
 #include "Vector3.h"
 
 #include <wx/tokenzr.h>
-#include <wx/arrimpl.cpp> // this is a magic incantation which must be done!
-WX_DEFINE_OBJARRAY(ArrayOfVector3)
 
 Vector3::Vector3(wxString string)
 {
+	x = 0;
+	y = 0;
+	z = 0;
 	this->FromString(string);
 }
 
@@ -100,4 +101,17 @@ bool Vector3::operator ==(const Vector3& b) const
 	return (((this->x - b.x) * (this->x - b.x)
 			+ (this->y - b.y) * (this->y - b.y)
 			+ (this->z - b.z) * (this->z - b.z)) <= epsilon2);
+}
+
+Vector3 Vector3::Orthogonal(void) const
+{
+	Vector3 temp;
+	const float ax = fabs(x);
+	const float ay = fabs(y);
+	const float az = fabs(z);
+	if(ax < ay && ax < az) temp.Set(x, z, y);
+	if(ay < az && ay < ax) temp.Set(z, y, x);
+	if(az < ax && az < ay) temp.Set(y, x, z);
+	temp *= (*this);
+	return temp.Normalize();
 }

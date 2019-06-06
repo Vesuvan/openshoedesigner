@@ -28,9 +28,10 @@
 #define POLYNOM2D_H_
 
 /*!\class Polynom2D
- * \brief ...
+ * \brief Polynom in 2 dimensions
  *
- * ...
+ * Calculates and stores a polynom in 2 dimenstions. The polynom is defined by
+ * four points and four normal vectors.
  */
 
 #include "../3D/Vector3.h"

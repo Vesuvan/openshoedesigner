@@ -30,13 +30,21 @@
 /*!\class BendLine
  * \brief Bend line with kernels for smooth bending
  *
- * kg = @(x) exp(-(x.^2)/2)/sqrt(2*pi);
+ * * Epanechnikov (sharp, compact support)
  *
- * kp = @(x) exp(-abs(x))/2;
+ * 		ke = @(x) 3/4*max((1-x.^2),0);
  *
- * ke = @(x) 3/4*max((1-x.^2),0);
+ * * Gauss Kernel (standard normal distributed kernel)
  *
- * kc = @(x) 1./(pi*(1+x.^2));
+ * 		kg = @(x) exp(-(x.^2)/2)/sqrt(2*pi);
+ *
+ * * Picard Kernel (pointy kernel, drops to zero in reasonable distance)
+ *
+ * 		kp = @(x) exp(-abs(x))/2;
+ *
+ * * Cauchy Kernel (wide support)
+ *
+ * 		kc = @(x) 1./(pi*(1+x.^2));
  *
  */
 
@@ -49,7 +57,10 @@ public:
 	virtual ~BendLine();
 
 	enum Kernel {
-		Gauss, Picard, Epanechnikov, Cauchy
+		Gauss, //!< Gauss Kernel
+		Picard, //!< Picard Kernel
+		Epanechnikov, //!< Epanechnikov Kernel
+		Cauchy //!< Cauchy Kernel
 	};
 
 	void SetCount(size_t N);

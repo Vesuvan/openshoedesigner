@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : SettingsStereo3D.h
+// Name               : Symmetry.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 18.02.2019
+// Created            : 27.05.2019
 // Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,38 +24,49 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef _SETTINGSSTEREO3D_H_
-#define _SETTINGSSTEREO3D_H_
+#ifndef SRC_MATH_SYMMETRY_H_
+#define SRC_MATH_SYMMETRY_H_
 
-/*!\class SettingsStereo3D
- * \brief ...
+/*!\class Symmetry
+ * \brief Fourier-transform-based symmetry search
  *
- * ...
+ * Uses the result of the FourierTransform class to find symmetries in polygons.
+ * Allows for adding multiple testing Polygon3%s and combining the result.
+ *
+ * The symmetry axes are found by calculating a core desity estimation on the
+ * symmetry axes provided at each frequency.
  */
 
-#include <wx/config.h>
-#include "../3D/OpenGLCanvas.h"
+#include <vector>
+#include "../3D/Vector3.h"
+#include "FourierTransform.h"
 
-class SettingsStereo3D {
+class Symmetry {
 public:
-	SettingsStereo3D();
-	virtual ~SettingsStereo3D();
+	Symmetry();
+	virtual ~Symmetry();
 
-	float eyeDistance;
-	float focalDistance;
-	unsigned char backgroundGrayLevel;
-	unsigned char rightEyeR;
-	unsigned char rightEyeG;
-	unsigned char rightEyeB;
-	unsigned char leftEyeR;
-	unsigned char leftEyeG;
-	unsigned char leftEyeB;
+	void InitSupport(size_t N);
 
-	bool Load(wxConfig * config);
-	bool Save(wxConfig * config);
+	void AddTransform(const FourierTransform &transform);
 
-	void WriteToCanvas(OpenGLCanvas * canvas);
+	void FindPeaks(void);
+
+	void Paint(void) const;
+
+public:
+	double minsymmetry;
+	double sigma;
+	Vector3 center;
+	Vector3 localx;
+	Vector3 localy;
+	std::vector <double> support;
+	std::vector <double> angle;
+	std::vector <double> strength;
+
+private:
+	static double Epanechnikov(double x);
 
 };
 
-#endif /* _SETTINGSSTEREO3D_H_ */
+#endif /* SRC_MATH_SYMMETRY_H_ */

@@ -213,6 +213,84 @@ void PolyCylinder::Paint(void) const
 	glPopMatrix();
 }
 
+void PolyCylinder::GenerateGeometry(Geometry &geometry, bool mirrored)
+{
+	geometry.Clear();
+	size_t N = 64;
+	const double dr = 1.0 / (double) N;
+	Vector3 a, b, c, d;
+
+	{
+		a.Zero();
+		double r = 0.0;
+		for(size_t m = 0; m < N; ++m){
+			a += sections[0].Evaluate(r);
+			r += dr;
+		}
+		a /= N;
+		a.x = -0.5 * dx;
+		r = 0.0;
+		b = sections[0].Evaluate(0);
+		for(size_t m = 0; m < N; ++m){
+			r += dr;
+			c = sections[0].Evaluate(r);
+			if(mirrored){
+				geometry.AddTriangle(a, b, c);
+			}else{
+				geometry.AddTriangle(a, c, b);
+			}
+			b = c;
+		}
+	}
+
+	for(size_t n = 1; n <  sections.size(); ++n){
+		double r = 0.0;
+		a =  sections[n - 1].Evaluate(r);
+		b =  sections[n].Evaluate(r);
+		a.x = (n - 1) *  dx;
+		b.x = (n) *  dx;
+		for(size_t m = 0; m < N; ++m){
+			r += dr;
+			c =  sections[n - 1].Evaluate(r);
+			d =  sections[n].Evaluate(r);
+			c.x = (n - 1) *  dx;
+			d.x = (n) *  dx;
+			if(mirrored){
+				geometry.AddQuad(a, b, d, c);
+			}else{
+				geometry.AddQuad(b, a, c, d);
+			}
+			a = c;
+			b = d;
+		}
+	}
+	{
+		a.Zero();
+		double r = 0.0;
+		for(size_t m = 0; m < N; ++m){
+			a +=  sections[ sections.size() - 1].Evaluate(r);
+			r += dr;
+		}
+		a /= N;
+		a.x = ((double) ( sections.size() - 1) + 0.5) *  dx;
+		r = 0.0;
+		b =  sections[ sections.size() - 1].Evaluate(0);
+		b.x = ( sections.size() - 1) *  dx;
+		for(size_t m = 0; m < N; ++m){
+			r += dr;
+			c =  sections[ sections.size() - 1].Evaluate(r);
+			c.x = ( sections.size() - 1) *  dx;
+			if(mirrored){
+				geometry.AddTriangle(a, c, b);
+			}else{
+				geometry.AddTriangle(a, b, c);
+			}
+			b = c;
+		}
+	}
+}
+
+
 void PolyCylinder::Test(void)
 {
 //	double L = sections[0].GetLength();

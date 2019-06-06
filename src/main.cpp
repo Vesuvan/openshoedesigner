@@ -41,7 +41,9 @@ openshoedesigner::openshoedesigner()
 {
 	config = new wxConfig(_T("openshoedesigner"));
 
-	unsigned int selectedLanguage = wxLANGUAGE_DEFAULT;
+	unsigned int selectedLanguage = wxLocale::GetSystemLanguage();
+	if(selectedLanguage == wxLANGUAGE_UNKNOWN) selectedLanguage =
+			wxLANGUAGE_DEFAULT;
 
 	// Read language from config.
 	wxString str;
@@ -54,7 +56,7 @@ openshoedesigner::openshoedesigner()
 	}
 
 	if(!locale.Init(selectedLanguage, wxLOCALE_DONT_LOAD_DEFAULT)){
-		wxLogError
+		wxLogWarning
 		(_T("This language is not supported by the system."));
 		return;
 	}
@@ -66,7 +68,7 @@ openshoedesigner::openshoedesigner()
 		temp =
 		_T("The translation catalog for ") + locale.GetCanonicalName() +
 		_T(" was not loaded !");
-		wxLogError
+		wxLogWarning
 		(temp);
 	}
 	locale.AddCatalog("wxstd");
@@ -145,7 +147,7 @@ wxFrame* openshoedesigner::CreateChildFrame(wxView* view,
 	wxDocument *doc = view->GetDocument();
 
 	switch(frametype){
-	case ProjectView::FrameType::mainframe:
+	case ProjectView::mainframe:
 		subframe = new FrameMain(doc, view, config,
 				wxStaticCast(GetTopWindow(), wxDocParentFrame));
 		break;

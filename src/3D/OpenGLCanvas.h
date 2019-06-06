@@ -28,8 +28,8 @@
 #define OPENGLCANVAS_H_
 
 /*!\class OpenGLCanvas
- * \ingroup View3D
  * \brief Extended wxGLCanvas
+ * \ingroup View3D
  *
  * Provides features like:
  *  * Mouse movement
@@ -117,7 +117,7 @@ private:
 
 #ifdef _USE_6DOFCONTROLLER
 	Control3D* control; //!< Link to 6DOF-controller
-	wxTimer timer;//!< Timer for polling the controller
+	wxTimer timer; //!< Timer for polling the controller
 #endif
 
 	// Methods

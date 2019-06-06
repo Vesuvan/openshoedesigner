@@ -28,14 +28,11 @@
 #define MAIN_H_
 
 #include "StdInclude.h"
-#include "project/Project.h"
-#include "project/ProjectView.h"
+#include "gui/FrameMain.h"
 
 #include <wx/app.h>
 #include <wx/intl.h>
 #include <wx/config.h>
-
-class FrameMain;
 
 class openshoedesigner:public wxApp {
 public:

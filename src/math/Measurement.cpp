@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : PolyHull.cpp
+// Name               : Measurement.cpp
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 23.01.2017
-// Copyright          : (C) 2017 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 27.05.2019
+// Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,35 +24,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "PolyHull.h"
+#include "Measurement.h"
 
-PolyHull::Level::Level()
+Measurement::Measurement()
 {
+	// TODO Auto-generated constructor stub
 
 }
 
-PolyHull::PolyHull()
+Measurement::~Measurement()
 {
-	Level temp;
-
-	temp.AddVector(-0.04, 0, 0.12);
-	temp.AddVector(0.0, 0, 0.11);
-	temp.AddVector(0.1, 0, 0.003);
-	temp.AddVector(0.15, 0, 0.0);
-	temp.AddVector(0.1, 0.0, 0.2);
-	temp.Normalize();
-	temp.Calculate();
-
-	levels.push_back(temp);
+	// TODO Auto-generated destructor stub
 }
 
-PolyHull::~PolyHull()
-{
-}
-
-void PolyHull::Paint(void) const
-{
-	for(std::vector <Level>::const_iterator level = levels.begin();
-			level != levels.end(); ++level)
-		level->Paint();
-}

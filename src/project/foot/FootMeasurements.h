@@ -43,7 +43,7 @@
  */
 
 #include "../../math/MathParser.h"
-#include "ParameterFormula.h"
+#include "../../math/ParameterFormula.h"
 #include <wx/string.h>
 
 class FootMeasurements {

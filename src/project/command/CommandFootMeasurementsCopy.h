@@ -28,15 +28,15 @@
 #define _COMMANDFOOTMEASUREMENTSCOPY_H_
 
 /*!\class CommandFootMeasurementsCopy
- * \brief ...
+ * \brief Command to copy the measurements of the foot
  *
- * ...
+ * Copies the measurements of the foot from lest to right or vice versae.
  */
 
 #include <wx/cmdproc.h>
 #include <wx/string.h>
 
-#include "../foot/ParameterFormula.h"
+#include "../../math/ParameterFormula.h"
 #include "../Project.h"
 #include "../ProjectView.h"
 

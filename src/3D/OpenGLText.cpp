@@ -45,7 +45,6 @@ void OpenGLText::Paint(wxString text) const
 {
 	if(text.IsEmpty()) return;
 	Update();
-//	glColor3f(1.0, 1.0, 1.0);
 
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glEnable(GL_TEXTURE_2D);

@@ -43,23 +43,6 @@
 static int wx_gl_attribs[] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE,
 		24, 0};
 
-//static char *vertexShaderSource = "#version 330 core\n"
-//		"layout (location = 0) in vec3 aPos;\n"
-//		"uniform mat4 M;"
-//		"void main()\n"
-//		"{\n"
-//		"   gl_Position = M*vec4(aPos, 1.0);\n"
-//		"}\0";
-//
-//static char *fragmentShaderSource = "#version 330 core\n"
-//		"//layout(location = 0) out float depth;\n"
-//		"out vec4 col;"
-//		"void main()\n"
-//		"{\n"
-//		"   //depth = gl_FragCoord.z;\n"
-//		" col = vec4(gl_FragCoord.z,gl_FragCoord.z,gl_FragCoord.z,1);"
-//		"}\n\0";
-
 OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
 		const wxSize& size, long style, const wxString& name)
 		: wxGLCanvas(parent, id, wx_gl_attribs, pos, size,
@@ -87,9 +70,6 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	leftEyeB = 0;
 
 	rotationMode = rotateInterwoven;
-
-//	depthBuffer = 0;
-//	depthMap = 0;
 
 	this->Connect(wxEVT_PAINT, wxPaintEventHandler(OpenGLCanvas::OnPaint), NULL,
 			this);
@@ -119,7 +99,7 @@ OpenGLCanvas::~OpenGLCanvas()
 {
 #ifdef _USE_6DOFCONTROLLER
 	this->Disconnect(wxEVT_TIMER, wxTimerEventHandler(OpenGLCanvas::OnTimer),
-			NULL, this);
+	NULL, this);
 #endif
 	this->Disconnect(wxEVT_RIGHT_DCLICK,
 			wxMouseEventHandler(OpenGLCanvas::OnMouseEvent), NULL, this);
@@ -151,10 +131,10 @@ OpenGLCanvas::Context::Context(wxGLCanvas* canvas)
 {
 	SetCurrent(*canvas);
 
+
 	printf("GL_VERSION: ");
 	printf("%s", (char*) glGetString(GL_VERSION));
 	printf("\n");
-
 }
 
 void OpenGLCanvas::OnEnterWindow(wxMouseEvent& WXUNUSED(event))
@@ -173,7 +153,7 @@ void OpenGLCanvas::OnTimer(wxTimerEvent& event)
 	const float resRot = 2000;
 	const float resMov = 5 * unitAtOrigin;
 
-	rotmat = AffineTransformMatrix::RotateInterwoven(
+	rotmat = AffineTransformMatrix::RotationInterwoven(
 			(float) control->GetAxis(3) / resRot,
 			(float) control->GetAxis(4) / resRot,
 			(float) control->GetAxis(5) / resRot) * rotmat;
@@ -212,7 +192,7 @@ void OpenGLCanvas::OnMouseEvent(wxMouseEvent& event)
 		case rotateTrackball:
 			{
 				const double r = (double) ((w < h)? w : h) / 2.2;
-				rotmat = AffineTransformMatrix::RotateTrackball(
+				rotmat = AffineTransformMatrix::RotationTrackball(
 						(double) (x - w / 2), (double) (h / 2 - y),
 						(double) (event.m_x - w / 2),
 						(double) (h / 2 - event.m_y), r) * rotmat;
@@ -220,20 +200,20 @@ void OpenGLCanvas::OnMouseEvent(wxMouseEvent& event)
 			}
 		case rotateInterwoven:
 			{
-				rotmat = AffineTransformMatrix::RotateXY(event.m_x - x,
+				rotmat = AffineTransformMatrix::RotationXY(event.m_x - x,
 						event.m_y - y, 0.5) * rotmat;
 				break;
 			}
 		case rotateTurntable:
 			{
-				rotmat = AffineTransformMatrix::RotateAroundVector(
+				rotmat = AffineTransformMatrix::RotationAroundVector(
 						Vector3(1, 0, 0), -M_PI / 2);
 				turntableX += (double) (event.m_x - x) / 100;
 				turntableY += (double) (event.m_y - y) / 100;
-				rotmat = AffineTransformMatrix::RotateAroundVector(
+				rotmat = AffineTransformMatrix::RotationAroundVector(
 						Vector3(1, 0, 0), turntableY) * rotmat;
 				rotmat = rotmat
-						* AffineTransformMatrix::RotateAroundVector(
+						* AffineTransformMatrix::RotationAroundVector(
 								Vector3(0, 0, 1), turntableX);
 				break;
 			}
@@ -307,9 +287,7 @@ void OpenGLCanvas::Init(void)
 	Light0.Update();
 	Light0.moveWithCamera = true;
 
-//	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 100);
 }
-
 void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
 	if(!IsShown()) return;
@@ -322,13 +300,6 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	if(context == NULL){
 		context = new Context(this);
 		context->SetCurrent(*this); // Link OpenGL to this area
-
-//		shadows.AddShader(GL_VERTEX_SHADER, vertexShaderSource);
-//		shadows.AddShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
-//		shadows.LinkShader();
-//
-//		glGenFramebuffers(1, &depthBuffer);
-//		glGenTextures(1, &depthMap);
 		Init();
 	}
 	context->SetCurrent(*this); // Link OpenGL to this area
@@ -336,35 +307,6 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	// set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
 
 	GetClientSize(&w, &h);
-
-//	{ // Shadowpass
-//		glBindTexture(GL_TEXTURE_2D, depthMap);
-//		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0,
-//		GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//
-//		glBindFramebuffer(GL_FRAMEBUFFER, depthBuffer);
-//		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-//		GL_TEXTURE_2D, depthMap, 0);
-//		glDrawBuffer(GL_NONE);
-//		glReadBuffer(GL_NONE);
-//		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//
-//		glViewport(0, 0, 1024, 1024);
-//		glBindFramebuffer(GL_FRAMEBUFFER, depthBuffer);
-//		glClear(GL_DEPTH_BUFFER_BIT);
-//
-//		shadows.Start();
-////		    ConfigureShaderAndMatrices();
-//
-//		Render();
-//		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//		shadows.Stop();
-//	}
-
 	glViewport(0, 0, (GLint) w, (GLint) h);
 
 	//	float specReflection[] = { 0.8f, 0.0f, 0.8f, 1.0f };
@@ -456,19 +398,9 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	//	if(m_gllist == 0){
 	//		m_gllist = glGenLists(1); // Make one (1) empty display list.
 	//		glNewList(m_gllist, GL_COMPILE_AND_EXECUTE);
+
 	Light0.Update(true);
-
-//	GLfloat matrix[16];
-//	glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
-//
-//	glMatrixMode(GL_PROJECTION);
-//	glLoadIdentity();
-//	gluOrtho2D(-2, 2, -2, 2);
-
-//	shadows.Start();
-//	shadows.SetUniformMatrix("M", matrix, 16);
 	Render();
-//	shadows.Stop();
 
 	//		glEndList();
 	//	}else{
@@ -648,3 +580,4 @@ void OpenGLCanvas::Render()
 
 	glPopMatrix();
 }
+

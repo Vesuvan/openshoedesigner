@@ -68,6 +68,9 @@ bool SettingsStereo3D::Load(wxConfig* config)
 	config->Read(_T("Stereo3DFocalDistance"), &dval, 1.0);
 	focalDistance = dval;
 
+	// Plausibility check
+	eyeDistance = fmin(fmax(eyeDistance, 0.001), 1);
+	focalDistance = fmin(fmax(focalDistance, 0.01), 10);
 	return true;
 }
 

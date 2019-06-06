@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : CommandProjectSetLegLengthDifference.h
-// Purpose            :
-// Thread Safe        : No
+// Name               : FormFinder.h
+// Purpose            : 
+// Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 30.04.2018
-// Copyright          : (C) 2018 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 31.05.2019
+// Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,29 +24,36 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef __COMMANDPROJECTSETLEGLENGTHDIFFERENCE_H__
-#define __COMMANDPROJECTSETLEGLENGTHDIFFERENCE_H__
-
-/*!\class CommandProjectSetLegLengthDifference
- * \brief Command to set the leg length difference
+#ifndef SRC_MATH_FORMFINDER_H_
+#define SRC_MATH_FORMFINDER_H_
+/*!\class FormFinder
+ * \brief Finds forms in a Polygon3
+ *
+ * This is used to identify shapes.
  */
 
-#include <wx/cmdproc.h>
-#include <wx/string.h>
+#include <vector>
+#include "../3D/Polygon3.h"
+#include "../3D/Vector3.h"
+#include "PolyFilter.h"
 
-#include "../Project.h"
-
-class CommandProjectSetLegLengthDifference:public wxCommand {
+class FormFinder {
 public:
-    CommandProjectSetLegLengthDifference(const wxString& name, Project* project,wxString value);
+	FormFinder();
+	virtual ~FormFinder();
 
-    bool Do(void);
-    bool Undo(void);
+	void AddPolygon(const Polygon3 &poly, size_t Nsections);
 
-protected:
-    Project* project;
-    wxString value;
-    wxString oldValue;
+	void Paint(void) const;
+
+	std::vector <Vector3> a;
+	std::vector <Vector3> b;
+	std::vector <Vector3> c;
+	std::vector <Vector3> d;
+
+	std::vector <double> bend;
+
+	PolyFilter pf;
 };
 
-#endif /* __COMMANDPROJECTSETLEGLENGTHDIFFERENCE_H__ */
+#endif /* SRC_MATH_FORMFINDER_H_ */

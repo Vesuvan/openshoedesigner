@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : PolyCylinder.h
+// Name               : Measurement.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 12.02.2019
+// Created            : 27.05.2019
 // Copyright          : (C) 2019 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
@@ -24,55 +24,21 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef SRC_PROJECT_LAST_POLYCYLINDER_H_
-#define SRC_PROJECT_LAST_POLYCYLINDER_H_
+#ifndef _MATH_MEASUREMENT_H_
+#define _MATH_MEASUREMENT_H_
 
-/*!\class PolyCylinder
- * \brief Stores sections of polygonwise defined shapes
+/*!\class Measurement
+ * \brief Number and Unit
  *
- * ...
+ * Class to represent a number with a unit.
  */
 
-#include <string>
-#include <vector>
+#include "Unit.h"
 
-#include "../../3D/Vector3.h"
-#include "../../math/Polynom.h"
-
-class PolyCylinder {
+class Measurement:public Unit {
 public:
-	class CircleSection {
-	public:
-		class Segment {
-		public:
-			Polynom y0;
-			Polynom z0;
-			Polynom y;
-			Polynom z;
-			Polynom dy;
-			Polynom dz;
-			Segment();
-			void Scale(double sy = 1.0, double sz = 1.0);
-			void Paint(void) const;
-			double GetLength(void) const;
-		};
-		std::vector <Segment> segments;
-		CircleSection();
-		void Scale(double sy = 1.0, double sz = 1.0);
-		Vector3 Evaluate(double r);
-		double GetLength(void) const;
-		void Paint(void) const;
-	};
-	std::vector <CircleSection> sections;
-	double dx;
-	PolyCylinder();
-
-	void Scale(double sx, double sy = 1.0, double sz = 1.0);
-
-	bool Load(std::string filename);
-
-	void Paint(void) const;
-	void Test(void);
+	Measurement();
+	virtual ~Measurement();
 };
 
-#endif /* SRC_PROJECT_LAST_POLYCYLINDER_H_ */
+#endif /* _MATH_MEASUREMENT_H_ */

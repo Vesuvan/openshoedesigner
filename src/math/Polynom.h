@@ -33,7 +33,7 @@
  * This class contains a polynom with an order of 4. This polynom is intended for Spline3
  * interpolation. The setting functions support a number of one to four points.
  *
- * All formulas are calculated with the AXIOM computer algebra system.
+ * (All formulas are calculated with the AXIOM computer algebra system.)
  */
 
 class Polynom {

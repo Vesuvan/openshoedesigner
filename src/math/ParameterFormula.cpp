@@ -51,6 +51,11 @@ ParameterFormula& ParameterFormula::operator=(const ParameterFormula& other)
 	return *this;
 }
 
+void ParameterFormula::Modify(bool modify)
+{
+	this->modified = modify;
+}
+
 bool ParameterFormula::IsModified(void) const
 {
 	return modified;

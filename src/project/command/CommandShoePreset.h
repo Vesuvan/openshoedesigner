@@ -27,6 +27,12 @@
 #ifndef __COMMANDSHOEPRESET_H__
 #define __COMMANDSHOEPRESET_H__
 
+/*!\class CommandShoePreset
+ * \brief Command to select a preset for the shoe
+ *
+ * ...
+ */
+
 #include <wx/cmdproc.h>
 #include <wx/string.h>
 #include "../Project.h"

@@ -28,9 +28,11 @@
 #define SRC_GUI_COLLECTIONUNITS_H_
 
 /*!\class CollectionUnits
- * \brief ...
+ * \brief Collection of available units
  *
- * ...
+ * Collection of units from different measurement system. These conversions
+ * are used to display different types of units while calculating in SI
+ * internally.
  */
 
 #include <wx/config.h>
