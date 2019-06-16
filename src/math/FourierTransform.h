@@ -28,7 +28,7 @@
 #define _MATH_FOURIERTRANSFORM_H_
 
 /*!\class FourierTransform
- * \brief Fourier Transform for not equidistant sampled data
+ * \brief Fourier Transform for non-uniformly sampled data
  *
  * Applies a Fourier Transform for arbitrarily sampled data. A time vector has to be passed
  * to the function additionally to the (complex) input samples. Functions for rescaling the
@@ -36,6 +36,7 @@
  * well. Also a fft-like result can be requested (FLikeFFT).
  *
  * Note: The result is calculated to return the correct result with a symmetric spectrum.
+ *
  * Example: A x(t)=cos(2*pi*10*t) Fourier-transformed results in two peaks in the spektrum.
  * One at -10 Hz and one at +10 Hz. Both with a height of 1/2. Because the synthesis
  * function would be xx(t) = 0.5*exp(j*2*pi*-10*t) + 0.5*exp(j*2*pi*10*t).
@@ -56,7 +57,7 @@ public:
 	void TSetSize(size_t N);
 	size_t TGetSize(void) const;
 
-	/**\brief Fills the T vector with equidistant points like Matlabs linspace command.
+	/**\brief Fills the T vector with equidistant points like Matlabs/Octaves linspace command.
 	 *
 	 * \param t0 First point on the T axis
 	 * \param t1 Last point on the T axis
@@ -72,6 +73,7 @@ public:
 	void TScale(const double scale);
 
 	void FLinspace(double f0, double f1, size_t N = 0);
+
 	//!\brief Set up an analysis that is similar to a FFT
 	void FLikeFFT(size_t N);
 

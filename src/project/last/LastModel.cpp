@@ -37,7 +37,7 @@
 #include "../../3D/BoundingBox.h"
 #include "../../3D/FileSTL.h"
 #include "../../3D/OpenGLMaterial.h"
-#include "../../math/CoreDensityEstimator.h"
+#include "../../math/KernelDensityEstimator.h"
 #include "../../math/NelderMeadOptimizer.h"
 #include "../../math/PCA.h"
 #include "../../math/FourierTransform.h"
@@ -120,145 +120,143 @@ void LastModel::AnalyseForm(void)
 	for(size_t i = 0; i < hull.GetVertexCount(); ++i)
 		pca.Add(hull.GetVertex(i));
 	pca.Calculate();
-
-	// Remove orientation
+	// Make coordinate system right handed
 	if((pca.X * pca.Y).Dot(pca.Z) > 0) pca.Y = -pca.Y;
 
-	AffineTransformMatrix temp;
-	temp.a[0] = pca.X.x;
-	temp.a[1] = pca.X.y;
-	temp.a[2] = pca.X.z;
-	temp.a[4] = pca.Z.x;
-	temp.a[5] = pca.Z.y;
-	temp.a[6] = pca.Z.z;
-	temp.a[8] = pca.Y.x;
-	temp.a[9] = pca.Y.y;
-	temp.a[10] = pca.Y.z;
-	temp.a[12] = pca.center.x;
-	temp.a[13] = pca.center.y;
-	temp.a[14] = pca.center.z;
-	temp = temp.Inverse();
-
+	// Remove orientation
+	AffineTransformMatrix temp(pca.X, pca.Y, pca.Z, pca.center);
+	temp.Invert();
 	hull.ApplyTransformation(temp);
 
-	// Scan Shape at 20% and 80%
+	// Scan Shape for symmetry
 	BoundingBox bb;
 	for(size_t i = 0; i < hull.GetVertexCount(); ++i)
 		bb.Insert(hull.GetVertex(i));
 
-	Polygon3 shape1 = hull.IntersectPlane(Vector3(1, 0, 0),
-			bb.xmin + bb.GetSizeX() * 0.2);
-	Polygon3 shape2 = hull.IntersectPlane(Vector3(1, 0, 0),
-			bb.xmin + bb.GetSizeX() * 0.8);
+	symmetry.Init(180);
+	for(double cut = 0.2; cut < 0.81; cut += 0.2){
 
-	Vector3 center = shape1.GetCenter();
-	Vector3 rot = shape1.GetRotationalAxis();
-	if(rot.x < 0) rot = -rot;
+		Polygon3 loop = hull.IntersectPlane(Vector3(1, 0, 0),
+				bb.xmin + bb.GetSizeX() * cut);
 
-	Vector3 localx(0, 1, 0);
-	Vector3 localy = rot * localx;
-	localy.Normalize();
+		Vector3 rot = loop.GetRotationalAxis();
+		if(rot.x < 0) rot = -rot;
 
-	symmetry.center = center;
-	symmetry.localx = localx;
-	symmetry.localy = localy;
+		coordsys.SetCenter(loop.GetCenter());
+		coordsys.SetEx(Vector3(0, 1, 0));
+		coordsys.SetEz(rot);
+		coordsys.CalculateEy();
 
-	FourierTransform ft1, ft2;
-	ft1.TSetSize(shape1.GetCount());
-	for(size_t n = 0; n < shape1.GetCount(); ++n){
-		Vector3 v0 = shape1[n] - center;
-		ft1.t[n] = atan2(v0.Dot(localy), v0.Dot(localx));
-		ft1.InRe[n] = v0.Abs();
-		ft1.InIm[n] = 0.0;
+//	Vector3 localx(0, 1, 0);
+//	Vector3 localy = rot * localx;
+//	localy.Normalize();
+
+		FourierTransform ft;
+		ft.TSetSize(loop.GetCount());
+		for(size_t n = 0; n < loop.GetCount(); ++n){
+			ft.t[n] = atan2(coordsys.GetLocalY(loop[n]),
+					coordsys.GetLocalX(loop[n]));
+			ft.InRe[n] = (loop[n] - coordsys.GetCenter()).Abs();
+			ft.InIm[n] = 0.0;
+		}
+		ft.TUnwrap();
+		ft.TSetLoopLength(2 * M_PI);
+		ft.TScale(1.0 / (2 * M_PI));
+		ft.FLinspace(0, 30, 31);
+		ft.Transform();
+		ft.SingleSidedResult();
+		symmetry.AddTransform(ft);
 	}
-	ft1.TUnwrap();
-	ft1.TSetLoopLength(2 * M_PI);
-	ft1.TScale(1.0 / (2 * M_PI));
-	ft1.FLinspace(0, 20, 21);
-	ft1.Transform();
-	ft1.SingleSidedResult();
 
-	ft2.TSetSize(shape2.GetCount());
-	for(size_t n = 0; n < shape2.GetCount(); ++n){
-		Vector3 v0 = shape2[n] - center;
-		ft2.t[n] = atan2(v0.Dot(localy), v0.Dot(localx));
-		ft2.InRe[n] = v0.Abs();
-		ft2.InIm[n] = 0.0;
+	symmetry.Normalize();
+	symmetry.FindPeaks(0.01);
+//	std::cout << "count() = " << symmetry.Count() << "\n";
+//	std::cout << "pos[0] = " << symmetry.Pos(0) / M_PI * 180 << "\n";
+//	std::cout << "pos[1] = " << symmetry.Pos(1) / M_PI * 180 << "\n";
+//	std::cout << "pos[2] = " << symmetry.Pos(2) / M_PI * 180 << "\n";
+//	std::cout << "pos[3] = " << symmetry.Pos(3) / M_PI * 180 << "\n";
+	{
+		AffineTransformMatrix comp;
+		comp *= AffineTransformMatrix::RotationAroundVector(coordsys.GetEz(),
+		M_PI_2 - symmetry.Pos(0));
+		hull.ApplyTransformation(comp);
 	}
-	ft2.TUnwrap();
-	ft2.TSetLoopLength(2 * M_PI);
-	ft2.TScale(1.0 / (2 * M_PI));
-	ft2.FLinspace(0, 20, 21);
-	ft2.Transform();
-	ft2.SingleSidedResult();
-
-	symmetry.InitSupport(360);
-	symmetry.AddTransform(ft1);
-	symmetry.AddTransform(ft2);
-	symmetry.FindPeaks();
-	AffineTransformMatrix comp;
-	comp *= AffineTransformMatrix::RotationAroundVector(rot,
-	M_PI_2 - symmetry.angle[0]);
-	hull.ApplyTransformation(comp);
 
 	bb.Clear();
 	for(size_t i = 0; i < hull.GetVertexCount(); ++i)
 		bb.Insert(hull.GetVertex(i));
-	shape1 = hull.IntersectPlane(Vector3(1, 0, 0),
-			bb.xmin + bb.GetSizeX() * 0.2);
-	shape2 = hull.IntersectPlane(Vector3(1, 0, 0),
-			bb.xmin + bb.GetSizeX() * 0.8);
 
-	rot = shape1.GetRotationalAxis();
-	if(rot.x > 0) shape1.Reverse();
-	rot = shape2.GetRotationalAxis();
-	if(rot.x > 0) shape2.Reverse();
+	//	shape2 = hull.IntersectPlane(Vector3(1, 0, 0),
+//			bb.xmin + bb.GetSizeX() * 0.8);
+	kde.XLinspace(0, 2 * M_PI, 360);
+	kde.XSetCyclic(2 * M_PI);
 
-	cde.SetRange(0, 2 * M_PI, 100, true);
+	for(double cut = 0.2; cut < 0.81; cut += 0.2){
 
-	{
-		const double Lmax = shape1.GetLength();
-		for(size_t n = 0; n < shape1.Size(); ++n){
-			const Vector3 temp = (shape1[(n + 1) % shape1.Size()] - shape1[n]);
+		loop = hull.IntersectPlane(Vector3(1, 0, 0),
+				bb.xmin + bb.GetSizeX() * cut);
+
+		Vector3 rot = loop.GetRotationalAxis();
+		if(rot.x > 0) loop.Reverse();
+
+		const double Lmax = loop.GetLength();
+		for(size_t n = 0; n < loop.Size(); ++n){
+			const Vector3 temp = (loop[(n + 1) % loop.Size()] - loop[n]);
 			double a = atan2(temp.y, -temp.z);
-			cde.Add(CoreDensityEstimator::Epanechnikov, 0.5, a,
+			kde.Insert(a, KernelDensityEstimator::SilvermanKernel, 0.2,
 					temp.Abs() / Lmax);
 		}
 	}
+	kde.Normalize();
+
+	kde.Attenuate(0, KernelDensityEstimator::CauchyKernel, 0.5, 0.75);
+	kde.Attenuate(M_PI, KernelDensityEstimator::CauchyKernel, 0.5, 0.75);
+
+	kde.FindPeaks(0.1);
+//	std::cout << kde.Count() << " [0] = " << kde.Pos(0) / M_PI * 180 << "\n";
+
 	{
-		const double Lmax = shape2.GetLength();
-		for(size_t n = 0; n < shape2.Size(); ++n){
-			const Vector3 temp = (shape2[(n + 1) % shape2.Size()] - shape2[n]);
-			double a = atan2(temp.y, -temp.z);
-			cde.Add(CoreDensityEstimator::Epanechnikov, 0.5, a,
-					temp.Abs() / Lmax);
-		}
+		AffineTransformMatrix comp;
+		comp *= AffineTransformMatrix::RotationAroundVector(coordsys.GetEz(),
+				3 * M_PI_2 - kde.Pos(0));
+		hull.ApplyTransformation(comp);
 	}
+
+//	{
+//		const double Lmax = shape2.GetLength();
+//		for(size_t n = 0; n < shape2.Size(); ++n){
+//			const Vector3 temp = (shape2[(n + 1) % shape2.Size()] - shape2[n]);
+//			double a = atan2(temp.y, -temp.z);
+//			cde.Add(CoreDensityEstimator::Epanechnikov, 0.5, a,
+//					temp.Abs() / Lmax);
+//		}
+//	}
 
 //	cde.Add(CoreDensityEstimator::Epanechnikov, 1, 1, 1);
 //	cde.Add(CoreDensityEstimator::Epanechnikov, 0.5, 2.5, 1);
+	{
+		loop = hull.IntersectPlane(Vector3(0, 1, 0), 0.0);
+		loop.Resample(100);
+		Vector3 rot = loop.GetRotationalAxis();
+		if(rot.y < 0) loop.Reverse();
 
-	loop = shape1;
+		coordsys.SetCenter(loop.GetCenter());
+		coordsys.ResetRotationAndScale();
+	}
+	formfinder.AddPolygon(loop, loop.GetCount() / 8);
 
-//	loop = hull.IntersectPlane(Vector3(0, 1, 0), 0.0);
-//	loop.Resample(100);
-//	rot = loop.GetRotationalAxis();
-//	if(rot.y < 0) loop.Reverse();
-//
-//	formfinder.AddPolygon(loop, loop.GetCount() / 8);
-
-//	std::vector <Vector3>::iterator min = std::min_element(formfinder.b.begin(),
-//			formfinder.b.end(), Vector3MinX);
-//	size_t dist = std::distance(formfinder.b.begin(), min);
-//	std::cout << dist << "\n";
-//	std::rotate(formfinder.a.begin(), formfinder.a.begin() + dist,
-//			formfinder.a.end());
-//	std::rotate(formfinder.b.begin(), formfinder.b.begin() + dist,
-//			formfinder.b.end());
-//	std::rotate(formfinder.c.begin(), formfinder.c.begin() + dist,
-//			formfinder.c.end());
-//	std::rotate(formfinder.d.begin(), formfinder.d.begin() + dist,
-//			formfinder.d.end());
+	std::vector <Vector3>::iterator min = std::min_element(formfinder.b.begin(),
+			formfinder.b.end(), Vector3MinX);
+	size_t dist = std::distance(formfinder.b.begin(), min);
+	std::cout << dist << "\n";
+	std::rotate(formfinder.a.begin(), formfinder.a.begin() + dist,
+			formfinder.a.end());
+	std::rotate(formfinder.b.begin(), formfinder.b.begin() + dist,
+			formfinder.b.end());
+	std::rotate(formfinder.c.begin(), formfinder.c.begin() + dist,
+			formfinder.c.end());
+	std::rotate(formfinder.d.begin(), formfinder.d.begin() + dist,
+			formfinder.d.end());
 
 	MatlabFile mf("data/dist.mat");
 
@@ -379,9 +377,8 @@ void LastModel::UpdatePosition(const Shoe& shoe, double offset)
 
 void LastModel::Paint(void) const
 {
-//	data.Paint();
 //	hull.Paint();
-//	symmetry.Paint();
+
 	OpenGLMaterial::EnableColors();
 	glColor3f(1, 1, 1);
 	glNormal3f(1, 0, 0);
@@ -389,7 +386,14 @@ void LastModel::Paint(void) const
 	OpenGLMaterial yellow(1, 1, 0);
 	yellow.UseColor(1.0);
 	formfinder.Paint();
-	cde.Paint();
+
+	glPushMatrix();
+	coordsys.MultMatrix();
+//	symmetry.Paint();
+//	kde.Paint();
+	glPopMatrix();
+
+	coordsys.Paint(0.3);
 
 	OpenGLMaterial::EnableColors();
 

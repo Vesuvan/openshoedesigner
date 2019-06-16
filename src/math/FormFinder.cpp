@@ -108,7 +108,7 @@ void FormFinder::Paint(void) const
 
 	double pos;
 	for(size_t n = 0; n < N; n += 1){
-		if(pf.GetExtremum(pos, a[n].z, b[n].z, c[n].z, d[n].z)){
+		if(pf.GetExtremum(pos, a[n].x, b[n].x, c[n].x, d[n].x)){
 			if(pos < 0 || pos > pf.GetSize()) continue;
 			Vector3 temp = ((a[n] * pos + b[n]) * pos + c[n]) * pos + d[n];
 			glVertex3f(temp.x, temp.y, temp.z);

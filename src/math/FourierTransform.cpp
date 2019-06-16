@@ -145,7 +145,7 @@ void FourierTransform::FLikeFFT(size_t N)
 
 void FourierTransform::Transform(void)
 {
-//  for wxMaxima:
+//  from wxMaxima:
 //		I(t,t0,t1,x0,x1):=(x1-x0)/(t1-t0)*(t-t0)+x0;
 //		integrate(I(t,t0,t1,xRe0,xRe1)*cos(2*%pi*f*t)+I(t,t0,t1,xIm0,xIm1)*sin(2*%pi*f*t),t,t0,t1)
 //		integrate(I(t,t0,t1,xIm0,xIm1)*cos(2*%pi*f*t)-I(t,t0,t1,xRe0,xRe1)*sin(2*%pi*f*t),t,t0,t1)
@@ -163,7 +163,7 @@ void FourierTransform::Transform(void)
 			const double xIm0 = InIm[m];
 			const double xIm1 = (m < InIm.size() - 1)? InIm[m + 1] : InIm[0];
 
-			// The distinction of fr == 0 is necessary, becaus a central element of the
+			// The distinction of fr == 0 is necessary, because a central element of the
 			// Fourier calculation is sin(fr)/fr which is 1 for fr = 0 as per definition
 			// of the sinc (and L'Hopital's rule).
 			if(fabs(fr) < 1e-9){

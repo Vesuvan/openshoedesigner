@@ -40,15 +40,17 @@
  * step has already been done on the foot-model.
  */
 
-#include "../../math/BendLine.h"
-#include "../../math/Symmetry.h"
-#include "../../3D/Hull.h"
-#include "../../3D/Polygon3.h"
-
 #include <string>
 
-#include "../../math/CoreDensityEstimator.h"
+#include "../../3D/AffineTransformMatrix.h"
+#include "../../3D/Hull.h"
+#include "../../3D/Polygon3.h"
+#include "../../3D/Vector3.h"
+#include "../../math/BendLine.h"
 #include "../../math/FormFinder.h"
+#include "../../math/KernelDensityEstimator.h"
+#include "../../math/Symmetry.h"
+
 class FootMeasurements;
 class Shoe;
 class LastModel {
@@ -61,7 +63,8 @@ public:
 	Polygon3 loop;
 	Symmetry symmetry;
 	FormFinder formfinder;
-	CoreDensityEstimator cde;
+	KernelDensityEstimator kde;
+	AffineTransformMatrix coordsys;
 
 	Hull hull;
 	BendLine center;

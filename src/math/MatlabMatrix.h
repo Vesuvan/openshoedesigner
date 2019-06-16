@@ -94,7 +94,6 @@ public:
 			const size_t p4 = 0);
 	double operator()(const size_t p1, const size_t p2, const size_t p3 = 0,
 			const size_t p4 = 0) const;
-
 	double& At(const size_t p1, const size_t p2, const size_t p3 = 0,
 			const size_t p4 = 0);
 	const double& At(const size_t p1, const size_t p2, const size_t p3 = 0,

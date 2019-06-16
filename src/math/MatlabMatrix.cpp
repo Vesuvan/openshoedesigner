@@ -344,7 +344,6 @@ double MatlabMatrix::operator ()(const size_t p1, const size_t p2,
 	const size_t pos = p1 + (p2 + (p3 + p4 * Size(3)) * Size(2)) * Size(1);
 	return buffer[pos];
 }
-
 double& MatlabMatrix::At(const size_t p1, const size_t p2, const size_t p3,
 		const size_t p4)
 {

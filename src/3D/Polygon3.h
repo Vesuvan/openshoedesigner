@@ -90,7 +90,7 @@ public:
 	/*! \brief Apply the transformation matrix to the points in the polygon.
 	 *
 	 * The transformation matrix is reset to the identity matrix afterwards.
-	 * This command results in no change on the output of Paint command.
+	 * This command results in no change on the output of the Paint command.
 	 */
 	void ApplyTransformation(void);
 
@@ -134,7 +134,7 @@ public:
 	size_t Size(void) const;
 
 	Vector3& operator[](size_t index);
-	Vector3 operator[](size_t index) const;
+	const Vector3& operator[](size_t index) const;
 
 	/*! \brief Get the center of the Polygon.
 	 *

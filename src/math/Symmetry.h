@@ -37,35 +37,30 @@
  * symmetry axes provided at each frequency.
  */
 
+#include <stddef.h>
 #include <vector>
-#include "../3D/Vector3.h"
-#include "FourierTransform.h"
 
-class Symmetry {
+#include "KernelDensityEstimator.h"
+
+class FourierTransform;
+
+class Symmetry:public KernelDensityEstimator {
 public:
 	Symmetry();
 	virtual ~Symmetry();
 
-	void InitSupport(size_t N);
+	void Init(size_t N);
 
 	void AddTransform(const FourierTransform &transform);
 
-	void FindPeaks(void);
+	void Normalize(void);
 
 	void Paint(void) const;
 
 public:
-	double minsymmetry;
 	double sigma;
-	Vector3 center;
-	Vector3 localx;
-	Vector3 localy;
-	std::vector <double> support;
-	std::vector <double> angle;
-	std::vector <double> strength;
 
 private:
-	static double Epanechnikov(double x);
 
 };
 

@@ -179,7 +179,7 @@ void Polygon3::Resample(unsigned int N)
 			ds.Zero();
 		temp[n] = elements[m % M] + ds * (L - L0);
 	}
-	// Adjust the last vector perfectly, is the polygon is not closed
+	// Adjust the last vector perfectly, if the polygon is not closed.
 	if(!isClosed) temp[N - 1] = elements[M - 1];
 	// Copy temp to elements. Swap needs constant time and temp is destructed anyway.
 	elements.swap(temp);
@@ -337,7 +337,7 @@ Vector3& Polygon3::operator [](size_t index)
 	return elements[index];
 }
 
-Vector3 Polygon3::operator [](size_t index) const
+const Vector3& Polygon3::operator [](size_t index) const
 {
 	return elements[index];
 }

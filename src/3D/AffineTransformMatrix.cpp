@@ -26,33 +26,48 @@
 
 #include "AffineTransformMatrix.h"
 
-#include "Vector3.h"
-
-#include <wx/tokenzr.h>
-#include <wx/string.h>
-#include <wx/txtstrm.h>
-
+#include <GL/gl.h>
 #include <math.h>
 #include <stdint.h>
-#include <assert.h>
+#include <wx/chartype.h>
+#include <wx/string.h>
+#include <wx/tokenzr.h>
+#include <wx/txtstrm.h>
+#include <cassert>
+
+#include "OpenGLMaterial.h"
+#include "Vector3.h"
 
 AffineTransformMatrix::AffineTransformMatrix()
 {
+	side = rhs;
 	SetIdentity();
 }
 
-/*!\brief Copies a matrix by inserting a given matrix into \a a.
- *  \param b The matrix to copy.
- */
-void AffineTransformMatrix::Set(AffineTransformMatrix const& b)
+AffineTransformMatrix::AffineTransformMatrix(const Vector3& ex,
+		const Vector3& ey, const Vector3& ez, const Vector3& center)
 {
-	if(this == &b) return;
-	for(uint_fast8_t i = 0; i < 16; i++)
-		a[i] = b.a[i];
-	TakeMatrixApart();
+	a[0] = ex.x;
+	a[1] = ex.y;
+	a[2] = ex.z;
+	a[3] = 0.0;
+	a[4] = ey.x;
+	a[5] = ey.y;
+	a[6] = ey.z;
+	a[7] = 0.0;
+	a[8] = ez.x;
+	a[9] = ez.y;
+	a[10] = ez.z;
+	a[11] = 0.0;
+	a[12] = tx = center.x;
+	a[13] = ty = center.y;
+	a[14] = tz = center.z;
+	a[15] = 1.0;
+	rx = ry = rz = 0.0;
+	sx = sy = sz = 1.0;
+	side = ((ex * ey).Dot(ez) > 0)? rhs : lhs;
 }
 
-//! Resets the matrix to the identity matrix.
 void AffineTransformMatrix::SetIdentity()
 {
 	rx = ry = rz = 0.0;
@@ -62,196 +77,203 @@ void AffineTransformMatrix::SetIdentity()
 		a[i] = 0;
 	a[0] = 1.0;
 	a[5] = 1.0;
-	a[10] = 1.0;
+	a[10] = (side == rhs)? 1.0 : -1.0;
 	a[15] = 1.0;
 }
 
-//! Returns the center point of the matrix.
+void AffineTransformMatrix::ResetRotationAndScale(void)
+{
+	rx = ry = rz = 0.0;
+	sx = sy = sz = 1.0;
+	for(uint_fast8_t i = 0; i < 12; ++i)
+		a[i] = 0;
+	a[0] = 1.0;
+	a[5] = 1.0;
+	a[10] = (side == rhs)? 1.0 : -1.0;
+	a[15] = 1.0;
+}
+
+void AffineTransformMatrix::Set(AffineTransformMatrix const& b)
+{
+	if(this == &b) return;
+	for(uint_fast8_t i = 0; i < 16; i++)
+		a[i] = b.a[i];
+	TakeMatrixApart();
+}
+
+void AffineTransformMatrix::SetCenter(const Vector3& center)
+{
+	a[12] = tx = center.x;
+	a[13] = ty = center.y;
+	a[14] = tz = center.z;
+}
+
+void AffineTransformMatrix::SetEx(const Vector3& ex)
+{
+	a[0] = ex.x;
+	a[1] = ex.y;
+	a[2] = ex.z;
+}
+
+void AffineTransformMatrix::SetEy(const Vector3& ey)
+{
+	a[4] = ey.x;
+	a[5] = ey.y;
+	a[6] = ey.z;
+}
+
+void AffineTransformMatrix::SetEz(const Vector3& ez)
+{
+	a[8] = ez.x;
+	a[9] = ez.y;
+	a[10] = ez.z;
+}
+
+void AffineTransformMatrix::CalculateEx(void)
+{
+	if(side == rhs){
+		a[0] = a[5] * a[10] - a[6] * a[9];
+		a[1] = a[6] * a[8] - a[4] * a[10];
+		a[2] = a[4] * a[9] - a[5] * a[8];
+	}else{
+		a[0] = a[9] * a[6] - a[10] * a[5];
+		a[1] = a[10] * a[4] - a[8] * a[6];
+		a[2] = a[8] * a[5] - a[9] * a[4];
+	}
+}
+
+void AffineTransformMatrix::CalculateEy(void)
+{
+	if(side == rhs){
+		a[4] = a[9] * a[2] - a[10] * a[1];
+		a[5] = a[10] * a[0] - a[8] * a[2];
+		a[6] = a[8] * a[1] - a[9] * a[0];
+	}else{
+		a[4] = a[1] * a[10] - a[2] * a[9];
+		a[5] = a[2] * a[8] - a[0] * a[10];
+		a[6] = a[0] * a[9] - a[1] * a[8];
+	}
+}
+
+void AffineTransformMatrix::CalculateEz(void)
+{
+	if(side == rhs){
+		a[8] = a[1] * a[6] - a[2] * a[5];
+		a[9] = a[2] * a[4] - a[0] * a[6];
+		a[10] = a[0] * a[5] - a[1] * a[4];
+	}else{
+		a[8] = a[5] * a[2] - a[6] * a[1];
+		a[9] = a[6] * a[0] - a[4] * a[2];
+		a[10] = a[4] * a[1] - a[5] * a[0];
+	}
+}
+
+void AffineTransformMatrix::Normalize(void)
+{
+	const double v0 = a[0] * a[0] + a[1] * a[1] + a[2] * a[2];
+	const double v1 = a[4] * a[4] + a[5] * a[5] + a[6] * a[6];
+	const double v2 = a[8] * a[8] + a[9] * a[9] + a[10] * a[10];
+	if(v0 > 0){
+		a[0] /= v0;
+		a[1] /= v0;
+		a[2] /= v0;
+	}
+	if(v1 > 0){
+		a[4] /= v1;
+		a[5] /= v1;
+		a[6] /= v1;
+	}
+	if(v2 > 0){
+		a[8] /= v2;
+		a[9] /= v2;
+		a[10] /= v2;
+	}
+}
+
 Vector3 AffineTransformMatrix::GetCenter(void) const
 {
-	Vector3 temp;
-	temp.x = a[12];
-	temp.y = a[13];
-	temp.z = a[14];
-	return temp;
+	return Vector3(a[12], a[13], a[14]);
 }
 
-//! Generate a string containing the matrix.
-wxString AffineTransformMatrix::ToString()
+Vector3 AffineTransformMatrix::GetEx(void) const
 {
-	TakeMatrixApart();
-	wxString temp;
-	temp += wxString::Format(_T("%f#%f#%f#"), tx, ty, tz);
-	temp += wxString::Format(_T("%f#%f#%f#"), rx, ry, rz);
-	temp += wxString::Format(_T("%f#%f#%f"), sx, sy, sz);
-	return temp;
+	return Vector3(a[0], a[1], a[2]);
 }
 
-//! Setup the matrix from a string.
-void AffineTransformMatrix::FromString(wxString const& string)
+Vector3 AffineTransformMatrix::GetEy(void) const
 {
-	wxStringTokenizer tkz(string, wxT("#"));
-	while(tkz.HasMoreTokens()){
-		wxString token = tkz.GetNextToken();
-		switch(tkz.CountTokens()){
-		case 8:
-			token.ToDouble(&tx);
-			break;
-		case 7:
-			token.ToDouble(&ty);
-			break;
-		case 6:
-			token.ToDouble(&tz);
-			break;
-		case 5:
-			token.ToDouble(&rx);
-			break;
-		case 4:
-			token.ToDouble(&ry);
-			break;
-		case 3:
-			token.ToDouble(&rz);
-			break;
-		case 2:
-			token.ToDouble(&sx);
-			break;
-		case 1:
-			token.ToDouble(&sy);
-			break;
-		case 0:
-			token.ToDouble(&sz);
-			break;
-		}
-	}
-	PutMatrixTogether();
+	return Vector3(a[4], a[5], a[6]);
 }
 
-void AffineTransformMatrix::ToStream(wxTextOutputStream& stream)
+Vector3 AffineTransformMatrix::GetEz(void) const
 {
-	for(uint_fast8_t n = 0; n < 16; n++){
-		if(n > 0) stream << _T(" ");
-		stream.WriteDouble(a[n]);
-	}
+	return Vector3(a[8], a[9], a[10]);
 }
 
-void AffineTransformMatrix::FromStream(wxTextInputStream& stream)
+AffineTransformMatrix& AffineTransformMatrix::operator*=(
+		const AffineTransformMatrix& b)
 {
-	for(uint_fast8_t n = 0; n < 16; n++)
-		stream >> a[n];
-	TakeMatrixApart();
+	//Generated with this code:
+	//php -r'for($i=0;$i<4;$i++){for($j=0;$j<4;$j++){printf("this->a[%u]=",$i*4+$j);for($k=0;$k<4;$k++){printf("c[%u]*b.a[%u]%s",$k*4+$j,$i*4+$k,($k==3)?";\r\n":"+");}}}'
+
+	// The php code generates all combinations.
+	// The axiom code optimizes it a little more, because b.a[3], b.a[7] and b.a[11] are
+	// zero and b.a[15] is one.
+
+	// Axiom:
+	// this:=matrix([[c[0],c[4],c[8],c[12]],[c[1],c[5],c[9],c[13]],[c[2],c[6],c[10],c[14]],[0,0,0,1]]);
+	// b:=matrix([[ba[0],ba[4],ba[8],ba[12]],[ba[1],ba[5],ba[9],ba[13]],[ba[2],ba[6],ba[10],ba[14]],[0,0,0,1]]);
+
+	double c[16];
+	for(uint_fast8_t i = 0; i < 16; i++)
+		c[i] = this->a[i];
+
+	this->a[0] = c[0] * b.a[0] + c[4] * b.a[1] + c[8] * b.a[2];
+	this->a[1] = c[1] * b.a[0] + c[5] * b.a[1] + c[9] * b.a[2];
+	this->a[2] = c[2] * b.a[0] + c[6] * b.a[1] + c[10] * b.a[2];
+	this->a[3] = 0;
+
+	this->a[4] = c[0] * b.a[4] + c[4] * b.a[5] + c[8] * b.a[6];
+	this->a[5] = c[1] * b.a[4] + c[5] * b.a[5] + c[9] * b.a[6];
+	this->a[6] = c[2] * b.a[4] + c[6] * b.a[5] + c[10] * b.a[6];
+	this->a[7] = 0;
+
+	this->a[8] = c[0] * b.a[8] + c[4] * b.a[9] + c[8] * b.a[10];
+	this->a[9] = c[1] * b.a[8] + c[5] * b.a[9] + c[9] * b.a[10];
+	this->a[10] = c[2] * b.a[8] + c[6] * b.a[9] + c[10] * b.a[10];
+	this->a[11] = 0;
+
+	this->a[12] = c[0] * b.a[12] + c[4] * b.a[13] + c[8] * b.a[14] + c[12];
+	this->a[13] = c[1] * b.a[12] + c[5] * b.a[13] + c[9] * b.a[14] + c[13];
+	this->a[14] = c[2] * b.a[12] + c[6] * b.a[13] + c[10] * b.a[14] + c[14];
+	this->a[15] = 1;
+
+	return *this;
 }
 
-//! Calculate rx,ry,rz,tx,ty,tz and sx,sy,sz from the matrix.
-void AffineTransformMatrix::TakeMatrixApart(void)
+const AffineTransformMatrix AffineTransformMatrix::operator*(
+		const AffineTransformMatrix& b) const
 {
-	double b[16];
-
-	tx = a[12];
-	ty = a[13];
-	tz = a[14];
-
-	sx = sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
-	sy = sqrt(a[4] * a[4] + a[5] * a[5] + a[6] * a[6]);
-	sz = sqrt(a[8] * a[8] + a[9] * a[9] + a[10] * a[10]);
-
-	if(fabs(sx) > 0.0){
-		b[0] = a[0] / sx;
-		b[1] = a[1] / sx;
-		b[2] = a[2] / sx;
-	}else{
-		b[0] = 0.0;
-		b[1] = 0.0;
-		b[2] = 0.0;
-	}
-	if(fabs(sy) > 0.0){
-		b[4] = a[4] / sy;
-		b[5] = a[5] / sy;
-		b[6] = a[6] / sy;
-	}else{
-		b[4] = 0.0;
-		b[5] = 0.0;
-		b[6] = 0.0;
-	}
-	if(fabs(sz) > 0.0){
-		b[8] = a[8] / sz;
-		b[9] = a[9] / sz;
-		b[10] = a[10] / sz;
-	}else{
-		b[8] = 0.0;
-		b[9] = 0.0;
-		b[10] = 0.0;
-	}
-
-	//FIXME: I think this if(...) is wrong, because b[0] can be 0.
-	if(fabs(b[0]) > 0.0 || fabs(b[1]) > 0.0){
-		rz = atan2(b[1], b[0]);
-	}else{
-		rz = 0.0;
-	}
-	double coz = cos(rz);
-	double siz = sin(rz);
-
-	if(fabs(b[0]) > 0.0 || fabs(b[1]) > 0.0 || fabs(b[2]) > 0.0){
-		ry = atan2(-b[2], sqrt(b[0] * b[0] + b[1] * b[1]));
-	}else{
-		ry = 0.0;
-	}
-	double coy = cos(ry);
-	double siy = sin(ry);
-
-	b[0] = b[5] * coy * siz - b[6] * siy + b[4] * coy * coz;
-	b[1] = -b[4] * siz + b[5] * coz;
-	b[2] = b[5] * siy * siz + b[4] * coz * siy + b[6] * coy;
-
-	if(fabs(b[1]) > 0.0 || fabs(b[2]) > 0.0){
-		rx = atan2(b[2], b[1]);
-	}else{
-		rx = 0.0;
-	}
+	AffineTransformMatrix c = *this;
+	c *= b;
+	return c;
 }
 
-//! Calculate the matrix from rx,ry,rz,tx,ty,tz and sx,sy,sz.
-void AffineTransformMatrix::PutMatrixTogether(void)
+AffineTransformMatrix& AffineTransformMatrix::operator/=(
+		const AffineTransformMatrix& b)
 {
-	const double cox = cos(rx);
-	const double six = sin(rx);
-	const double coy = cos(ry);
-	const double siy = sin(ry);
-	const double coz = cos(rz);
-	const double siz = sin(rz);
-
-	//Matrix calculated with Axiom:
-	// Rx := matrix[[1,0,0],[0,cox,-six],[0,six,cox]]
-	// Ry := matrix[[coy,0,siy],[0,1,0],[-siy,0,coy]]
-	// Rz := matrix[[coz,-siz,0],[siz,coz,0],[0,0,1]]
-	// S := matrix[[sx,0,0],[0,sy,0],[0,0,sz]]
-	// Rz*Ry*Rx*S
-
-	a[0] = coy * coz * sx;
-	a[1] = coy * siz * sx;
-	a[2] = -siy * sx;
-	a[3] = 0.0;
-	a[4] = (-cox * siz + coz * six * siy) * sy;
-	a[5] = (six * siy * siz + cox * coz) * sy;
-	a[6] = coy * six * sy;
-	a[7] = 0.0;
-	a[8] = (six * siz + cox * coz * siy) * sz;
-	a[9] = (cox * siy * siz - coz * six) * sz;
-	a[10] = cox * coy * sz;
-	a[11] = 0.0;
-	a[12] = tx;
-	a[13] = ty;
-	a[14] = tz;
-	a[15] = 1.0;
+	(*this) = (*this) * (b.Inverse());
+	return *this;
 }
 
-/*! \brief Inverts the matrix.
- *
- * The transform used in here is optimized for matrices with 0,0,0,1 in the last row.
- * It would not give the correct results for other matrices,
- *
- * \return Inverted matrix.
- */
+const AffineTransformMatrix AffineTransformMatrix::operator/(
+		const AffineTransformMatrix& b) const
+{
+	AffineTransformMatrix c = *this;
+	c /= b;
+	return c;
+}
+
 const AffineTransformMatrix AffineTransformMatrix::Inverse() const
 {
 	//Axiom code:
@@ -316,200 +338,17 @@ const AffineTransformMatrix AffineTransformMatrix::Inverse() const
 	return b;
 }
 
-//! Overloaded operator to allow correct multiplication of two matrices.
-AffineTransformMatrix& AffineTransformMatrix::operator*=(
-		const AffineTransformMatrix& b)
+void AffineTransformMatrix::Invert(void)
 {
-	//Generated with this code:
-	//php -r'for($i=0;$i<4;$i++){for($j=0;$j<4;$j++){printf("this->a[%u]=",$i*4+$j);for($k=0;$k<4;$k++){printf("c[%u]*b.a[%u]%s",$k*4+$j,$i*4+$k,($k==3)?";\r\n":"+");}}}'
-
-	// The php code generates all combinations.
-	// The axiom code optimizes it a little more, because b.a[3], b.a[7] and b.a[11] are
-	// zero and b.a[15] is one.
-
-	// Axiom:
-	// this:=matrix([[c[0],c[4],c[8],c[12]],[c[1],c[5],c[9],c[13]],[c[2],c[6],c[10],c[14]],[0,0,0,1]]);
-	// b:=matrix([[ba[0],ba[4],ba[8],ba[12]],[ba[1],ba[5],ba[9],ba[13]],[ba[2],ba[6],ba[10],ba[14]],[0,0,0,1]]);
-
-	double c[16];
-	for(uint_fast8_t i = 0; i < 16; i++)
-		c[i] = this->a[i];
-
-	this->a[0] = c[0] * b.a[0] + c[4] * b.a[1] + c[8] * b.a[2];
-	this->a[1] = c[1] * b.a[0] + c[5] * b.a[1] + c[9] * b.a[2];
-	this->a[2] = c[2] * b.a[0] + c[6] * b.a[1] + c[10] * b.a[2];
-	this->a[3] = 0;
-
-	this->a[4] = c[0] * b.a[4] + c[4] * b.a[5] + c[8] * b.a[6];
-	this->a[5] = c[1] * b.a[4] + c[5] * b.a[5] + c[9] * b.a[6];
-	this->a[6] = c[2] * b.a[4] + c[6] * b.a[5] + c[10] * b.a[6];
-	this->a[7] = 0;
-
-	this->a[8] = c[0] * b.a[8] + c[4] * b.a[9] + c[8] * b.a[10];
-	this->a[9] = c[1] * b.a[8] + c[5] * b.a[9] + c[9] * b.a[10];
-	this->a[10] = c[2] * b.a[8] + c[6] * b.a[9] + c[10] * b.a[10];
-	this->a[11] = 0;
-
-	this->a[12] = c[0] * b.a[12] + c[4] * b.a[13] + c[8] * b.a[14] + c[12];
-	this->a[13] = c[1] * b.a[12] + c[5] * b.a[13] + c[9] * b.a[14] + c[13];
-	this->a[14] = c[2] * b.a[12] + c[6] * b.a[13] + c[10] * b.a[14] + c[14];
-	this->a[15] = 1;
-
-	return *this;
+	(*this) = (*this).Inverse();
 }
 
-//! Overloaded operator to allow correct multiplication of two matrices.
-const AffineTransformMatrix AffineTransformMatrix::operator*(
-		const AffineTransformMatrix& b) const
-{
-	AffineTransformMatrix c = *this;
-	c *= b;
-	return c;
-}
-
-/*!\brief  Overloaded operator to allow correct division of two matrices.
- *
- * The division is done by inverting the second matrix and the multiplying both.
- */
-AffineTransformMatrix& AffineTransformMatrix::operator/=(
-		const AffineTransformMatrix& b)
-{
-	(*this) = (*this) * (b.Inverse());
-	return *this;
-}
-
-//! Overloaded operator to allow correct division of two matrices.
-const AffineTransformMatrix AffineTransformMatrix::operator/(
-		const AffineTransformMatrix& b) const
-{
-	AffineTransformMatrix c = *this;
-	c /= b;
-	return c;
-}
-
-//! Apply the transformation matrix on a given vector.
-Vector3 AffineTransformMatrix::Transform(Vector3 const& v) const
-{
-	//Axiom code:
-	// R:=matrix([[a[0],a[4],a[8],a[12]],[a[1],a[5],a[9],a[13]],[a[2],a[6],a[10],a[14]],[0,0,0,1]])
-	// V:=matrix([[x],[y],[z],[1]])
-	// R*V
-
-	Vector3 temp;
-	temp.x = a[0] * v.x + a[4] * v.y + a[8] * v.z + a[12];
-	temp.y = a[1] * v.x + a[5] * v.y + a[9] * v.z + a[13];
-	temp.z = a[2] * v.x + a[6] * v.y + a[10] * v.z + a[14];
-	return temp;
-}
-
-//! Operator reference for Vector3 transformations.
-Vector3 AffineTransformMatrix::operator ()(const Vector3 &v) const
-{
-	Vector3 temp;
-		temp.x = a[0] * v.x + a[4] * v.y + a[8] * v.z + a[12];
-		temp.y = a[1] * v.x + a[5] * v.y + a[9] * v.z + a[13];
-		temp.z = a[2] * v.x + a[6] * v.y + a[10] * v.z + a[14];
-		return temp;
-}
-
-//! Apply the transformation matrix on a given vector without shifting the vector.
-Vector3 AffineTransformMatrix::TransformNoShift(Vector3 const& v) const
-{
-	//Axiom code:
-	// R:=matrix([[a[0],a[4],a[8],0],[a[1],a[5],a[9],0],[a[2],a[6],a[10],0],[0,0,0,1]])
-	// V:=matrix([[x],[y],[z],[1]])
-	// R*V
-
-	Vector3 temp;
-	temp.x = a[0] * v.x + a[4] * v.y + a[8] * v.z;
-	temp.y = a[1] * v.x + a[5] * v.y + a[9] * v.z;
-	temp.z = a[2] * v.x + a[6] * v.y + a[10] * v.z;
-	return temp;
-}
-
-//! Function returning an identity matrix.
 AffineTransformMatrix AffineTransformMatrix::Identity()
 {
 	AffineTransformMatrix a;
 	return a;
 }
 
-//! Translate matrix in the global coordinate system.
-void AffineTransformMatrix::TranslateGlobal(double const& x, double const& y,
-		double const& z)
-{
-	// Axiom code:
-	// this:=matrix([[a[0],a[4],a[8],a[12]],[a[1],a[5],a[9],a[13]],[a[2],a[6],a[10],a[14]],[0,0,0,1]]);
-	// T:=matrix([[1,0,0,x],[0,1,0,y],[0,0,1,z],[0,0,0,1]]);
-	// T*this
-	a[12] += x;
-	a[13] += y;
-	a[14] += z;
-}
-
-//! Translate matrix in the local, rotated coordinate system.
-void AffineTransformMatrix::TranslateLocal(double const& x, double const& y,
-		double const& z)
-{
-	// Axiom code:
-	// this:=matrix([[a[0],a[4],a[8],a[12]],[a[1],a[5],a[9],a[13]],[a[2],a[6],a[10],a[14]],[0,0,0,1]]);
-	// T:=matrix([[1,0,0,x],[0,1,0,y],[0,0,1,z],[0,0,0,1]]);
-	// this*T
-	a[12] += x * a[0] + y * a[4] + z * a[8];
-	a[13] += x * a[1] + y * a[5] + z * a[9];
-	a[14] += x * a[2] + y * a[6] + z * a[10];
-}
-
-//! Scale matrix in the global coordinate system.
-void AffineTransformMatrix::ScaleGlobal(double const& x, double const& y,
-		double const& z)
-{
-	// Axiom code:
-	// this:=matrix([[a[0],a[4],a[8],a[12]],[a[1],a[5],a[9],a[13]],[a[2],a[6],a[10],a[14]],[0,0,0,1]]);
-	// S:=matrix([[x,0,0,0],[0,y,0,0],[0,0,z,0],[0,0,0,1]]);
-	// S*this
-
-	a[0] *= x;
-	a[1] *= y;
-	a[2] *= z;
-	a[4] *= x;
-	a[5] *= y;
-	a[6] *= z;
-	a[8] *= x;
-	a[9] *= y;
-	a[10] *= z;
-	a[12] *= x;
-	a[13] *= y;
-	a[14] *= z;
-}
-
-//! Scale matrix in the local coordinate system.
-void AffineTransformMatrix::ScaleLocal(const double& x, const double& y,
-		const double& z)
-{
-	// Axiom code:
-	// this:=matrix([[a[0],a[4],a[8],a[12]],[a[1],a[5],a[9],a[13]],[a[2],a[6],a[10],a[14]],[0,0,0,1]]);
-	// S:=matrix([[x,0,0,0],[0,y,0,0],[0,0,z,0],[0,0,0,1]]);
-	// this*S
-
-	a[0] *= x;
-	a[1] *= x;
-	a[2] *= x;
-	a[4] *= y;
-	a[5] *= y;
-	a[6] *= y;
-	a[8] *= z;
-	a[9] *= z;
-	a[10] *= z;
-}
-
-/*!\brief Rotation around a given vector.
- *
- * Generates a rotation matrix around a given vector.
- * \param vector Axis of rotation.
- * \param phi Angle of rotation.
- * \return Rotation matrix.
- */
 AffineTransformMatrix AffineTransformMatrix::RotationAroundVector(
 		Vector3 const& vector, double const& phi)
 {
@@ -537,15 +376,6 @@ AffineTransformMatrix AffineTransformMatrix::RotationAroundVector(
 	return a;
 }
 
-/*! \brief Rotation by mouse.
- *
- * This function is only a drop in until the RotateByTrackball function works.
- *
- * \param x Movement of mouse in x direction (=xnew-xold).
- * \param y Movement of mouse in y direction (=ynew-yold).
- * \param scale Scaling of the movement.
- * \return Rotation matrix.
- */
 AffineTransformMatrix AffineTransformMatrix::RotationXY(int const& x,
 		int const& y, double const& scale)
 {
@@ -578,7 +408,6 @@ AffineTransformMatrix AffineTransformMatrix::RotationXY(int const& x,
 	return a;
 }
 
-//! Rotation by the Z,Y,X rule.
 AffineTransformMatrix AffineTransformMatrix::RotationXYZ(double const& x,
 		double const& y, double const& z)
 {
@@ -612,16 +441,6 @@ AffineTransformMatrix AffineTransformMatrix::RotationXYZ(double const& x,
 	return a;
 }
 
-/*!\brief An interwoven rotation.
- *
- * Generates a rotation matrix around x,y,z.
- * In this case the rotations are interwoven:
- *
- * Every rotation (around x, around y and around z) is done
- * in infinitesimal small steps. On step around x, one step around y, ...
- *
- * This results in a rotation as expected from a 6 DOF controller.
- */
 AffineTransformMatrix AffineTransformMatrix::RotationInterwoven(double const& x,
 		double const& y, double const& z)
 {
@@ -631,15 +450,6 @@ AffineTransformMatrix AffineTransformMatrix::RotationInterwoven(double const& x,
 	return AffineTransformMatrix::RotationAroundVector(R, alpha);
 }
 
-/*!\brief Rotate around a virtual trackball.
- *
- * @param x1 Old x-mouse position on screen
- * @param y1 Old y-mouse position on screen
- * @param x2 New x-mouse position on screen
- * @param y2 New y-mouse position on screen
- * @param r Radius of a sphere in screen units.
- * @return Rotational Matrix
- */
 AffineTransformMatrix AffineTransformMatrix::RotationTrackball(const double& x1,
 		const double& y1, const double& x2, const double& y2, const double& r)
 {
@@ -664,6 +474,150 @@ AffineTransformMatrix AffineTransformMatrix::RotationTrackball(const double& x1,
 	return AffineTransformMatrix::RotationAroundVector(A, alpha);
 }
 
+void AffineTransformMatrix::TranslateGlobal(double const& x, double const& y,
+		double const& z)
+{
+	// Axiom code:
+	// this:=matrix([[a[0],a[4],a[8],a[12]],[a[1],a[5],a[9],a[13]],[a[2],a[6],a[10],a[14]],[0,0,0,1]]);
+	// T:=matrix([[1,0,0,x],[0,1,0,y],[0,0,1,z],[0,0,0,1]]);
+	// T*this
+	a[12] += x;
+	a[13] += y;
+	a[14] += z;
+}
+
+void AffineTransformMatrix::TranslateLocal(double const& x, double const& y,
+		double const& z)
+{
+	// Axiom code:
+	// this:=matrix([[a[0],a[4],a[8],a[12]],[a[1],a[5],a[9],a[13]],[a[2],a[6],a[10],a[14]],[0,0,0,1]]);
+	// T:=matrix([[1,0,0,x],[0,1,0,y],[0,0,1,z],[0,0,0,1]]);
+	// this*T
+	a[12] += x * a[0] + y * a[4] + z * a[8];
+	a[13] += x * a[1] + y * a[5] + z * a[9];
+	a[14] += x * a[2] + y * a[6] + z * a[10];
+}
+
+void AffineTransformMatrix::ScaleGlobal(double const& x, double const& y,
+		double const& z)
+{
+	// Axiom code:
+	// this:=matrix([[a[0],a[4],a[8],a[12]],[a[1],a[5],a[9],a[13]],[a[2],a[6],a[10],a[14]],[0,0,0,1]]);
+	// S:=matrix([[x,0,0,0],[0,y,0,0],[0,0,z,0],[0,0,0,1]]);
+	// S*this
+
+	a[0] *= x;
+	a[1] *= y;
+	a[2] *= z;
+	a[4] *= x;
+	a[5] *= y;
+	a[6] *= z;
+	a[8] *= x;
+	a[9] *= y;
+	a[10] *= z;
+	a[12] *= x;
+	a[13] *= y;
+	a[14] *= z;
+}
+
+void AffineTransformMatrix::ScaleLocal(const double& x, const double& y,
+		const double& z)
+{
+	// Axiom code:
+	// this:=matrix([[a[0],a[4],a[8],a[12]],[a[1],a[5],a[9],a[13]],[a[2],a[6],a[10],a[14]],[0,0,0,1]]);
+	// S:=matrix([[x,0,0,0],[0,y,0,0],[0,0,z,0],[0,0,0,1]]);
+	// this*S
+
+	a[0] *= x;
+	a[1] *= x;
+	a[2] *= x;
+	a[4] *= y;
+	a[5] *= y;
+	a[6] *= y;
+	a[8] *= z;
+	a[9] *= z;
+	a[10] *= z;
+}
+
+Vector3 AffineTransformMatrix::Transform(Vector3 const& v) const
+{
+	//Axiom code:
+	// R:=matrix([[a[0],a[4],a[8],a[12]],[a[1],a[5],a[9],a[13]],[a[2],a[6],a[10],a[14]],[0,0,0,1]])
+	// V:=matrix([[x],[y],[z],[1]])
+	// R*V
+
+	Vector3 temp;
+	temp.x = a[0] * v.x + a[4] * v.y + a[8] * v.z + a[12];
+	temp.y = a[1] * v.x + a[5] * v.y + a[9] * v.z + a[13];
+	temp.z = a[2] * v.x + a[6] * v.y + a[10] * v.z + a[14];
+	return temp;
+}
+
+Vector3 AffineTransformMatrix::Transform(const double x, const double y,
+		const double z) const
+{
+	Vector3 temp;
+	temp.x = a[0] * x + a[4] * y + a[8] * z + a[12];
+	temp.y = a[1] * x + a[5] * y + a[9] * z + a[13];
+	temp.z = a[2] * x + a[6] * y + a[10] * z + a[14];
+	return temp;
+}
+
+Vector3 AffineTransformMatrix::TransformNoShift(Vector3 const& v) const
+{
+	//Axiom code:
+	// R:=matrix([[a[0],a[4],a[8],0],[a[1],a[5],a[9],0],[a[2],a[6],a[10],0],[0,0,0,1]])
+	// V:=matrix([[x],[y],[z],[1]])
+	// R*V
+
+	Vector3 temp;
+	temp.x = a[0] * v.x + a[4] * v.y + a[8] * v.z;
+	temp.y = a[1] * v.x + a[5] * v.y + a[9] * v.z;
+	temp.z = a[2] * v.x + a[6] * v.y + a[10] * v.z;
+	return temp;
+}
+
+Vector3 AffineTransformMatrix::TransformNoShift(const double x, const double y,
+		const double z) const
+{
+	Vector3 temp;
+	temp.x = a[0] * x + a[4] * y + a[8] * z;
+	temp.y = a[1] * x + a[5] * y + a[9] * z;
+	temp.z = a[2] * x + a[6] * y + a[10] * z;
+	return temp;
+}
+
+Vector3 AffineTransformMatrix::operator *(const Vector3& v) const
+{
+	return Transform(v);
+}
+
+Vector3 AffineTransformMatrix::operator ()(const Vector3 &v) const
+{
+	return Transform(v);
+}
+
+Vector3 AffineTransformMatrix::operator ()(const double x, const double y,
+		const double z) const
+{
+	return Transform(x, y, z);
+}
+
+double AffineTransformMatrix::GetLocalX(const Vector3& v) const
+{
+	return (v.x - a[12]) * a[0] + (v.y - a[13]) * a[1] + (v.z - a[14]) * a[2];
+}
+
+double AffineTransformMatrix::GetLocalY(const Vector3& v) const
+{
+	return (v.x - a[12]) * a[4] + (v.y - a[13]) * a[5] + (v.z - a[14]) * a[6];
+}
+
+double AffineTransformMatrix::GetLocalZ(const Vector3& v) const
+{
+	return (v.x - a[12]) * a[8] + (v.y - a[13]) * a[9] + (v.z - a[14]) * a[10];
+}
+
 double AffineTransformMatrix::Distance(const AffineTransformMatrix& other) const
 {
 	const bool useNaiveDistance = true;
@@ -674,7 +628,6 @@ double AffineTransformMatrix::Distance(const AffineTransformMatrix& other) const
 			temp += (a[n] - other.a[n]) * (a[n] - other.a[n]);
 		return sqrt(temp);
 	}
-
 
 	// If two matrices are identical, the matrix times the inverse of the other
 	// should be the identity matrix.
@@ -1061,3 +1014,267 @@ double AffineTransformMatrix::Distance(const AffineTransformMatrix& other) const
 	return sqrt(R22);
 }
 
+void AffineTransformMatrix::TakeMatrixApart(void)
+{
+	double b[16];
+
+	tx = a[12];
+	ty = a[13];
+	tz = a[14];
+
+	sx = sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
+	sy = sqrt(a[4] * a[4] + a[5] * a[5] + a[6] * a[6]);
+	sz = sqrt(a[8] * a[8] + a[9] * a[9] + a[10] * a[10]);
+
+	if(fabs(sx) > 0.0){
+		b[0] = a[0] / sx;
+		b[1] = a[1] / sx;
+		b[2] = a[2] / sx;
+	}else{
+		b[0] = 0.0;
+		b[1] = 0.0;
+		b[2] = 0.0;
+	}
+	if(fabs(sy) > 0.0){
+		b[4] = a[4] / sy;
+		b[5] = a[5] / sy;
+		b[6] = a[6] / sy;
+	}else{
+		b[4] = 0.0;
+		b[5] = 0.0;
+		b[6] = 0.0;
+	}
+	if(fabs(sz) > 0.0){
+		b[8] = a[8] / sz;
+		b[9] = a[9] / sz;
+		b[10] = a[10] / sz;
+	}else{
+		b[8] = 0.0;
+		b[9] = 0.0;
+		b[10] = 0.0;
+	}
+
+	if(fabs(b[0]) > 0.0 || fabs(b[1]) > 0.0){
+		rz = atan2(b[1], b[0]);
+	}else{
+		rz = 0.0;
+	}
+	double coz = cos(rz);
+	double siz = sin(rz);
+
+	if(fabs(b[0]) > 0.0 || fabs(b[1]) > 0.0 || fabs(b[2]) > 0.0){
+		ry = atan2(-b[2], sqrt(b[0] * b[0] + b[1] * b[1]));
+	}else{
+		ry = 0.0;
+	}
+	double coy = cos(ry);
+	double siy = sin(ry);
+
+	b[0] = b[5] * coy * siz - b[6] * siy + b[4] * coy * coz;
+	b[1] = -b[4] * siz + b[5] * coz;
+	b[2] = b[5] * siy * siz + b[4] * coz * siy + b[6] * coy;
+
+	if(fabs(b[1]) > 0.0 || fabs(b[2]) > 0.0){
+		rx = atan2(b[2], b[1]);
+	}else{
+		rx = 0.0;
+	}
+}
+
+void AffineTransformMatrix::PutMatrixTogether(void)
+{
+	const double cox = cos(rx);
+	const double six = sin(rx);
+	const double coy = cos(ry);
+	const double siy = sin(ry);
+	const double coz = cos(rz);
+	const double siz = sin(rz);
+
+	//Matrix calculated with Axiom:
+	// Rx := matrix[[1,0,0],[0,cox,-six],[0,six,cox]]
+	// Ry := matrix[[coy,0,siy],[0,1,0],[-siy,0,coy]]
+	// Rz := matrix[[coz,-siz,0],[siz,coz,0],[0,0,1]]
+	// S := matrix[[sx,0,0],[0,sy,0],[0,0,sz]]
+	// Rz*Ry*Rx*S
+
+	a[0] = coy * coz * sx;
+	a[1] = coy * siz * sx;
+	a[2] = -siy * sx;
+	a[3] = 0.0;
+	a[4] = (-cox * siz + coz * six * siy) * sy;
+	a[5] = (six * siy * siz + cox * coz) * sy;
+	a[6] = coy * six * sy;
+	a[7] = 0.0;
+	a[8] = (six * siz + cox * coz * siy) * sz;
+	a[9] = (cox * siy * siz - coz * six) * sz;
+	a[10] = cox * coy * sz;
+	a[11] = 0.0;
+	a[12] = tx;
+	a[13] = ty;
+	a[14] = tz;
+	a[15] = 1.0;
+}
+
+wxString AffineTransformMatrix::ToString()
+{
+	TakeMatrixApart();
+	wxString temp;
+	temp += wxString::Format(_T("%f#%f#%f#"), tx, ty, tz);
+	temp += wxString::Format(_T("%f#%f#%f#"), rx, ry, rz);
+	temp += wxString::Format(_T("%f#%f#%f"), sx, sy, sz);
+	return temp;
+}
+
+void AffineTransformMatrix::FromString(wxString const& string)
+{
+	wxStringTokenizer tkz(string, wxT("#"));
+	while(tkz.HasMoreTokens()){
+		wxString token = tkz.GetNextToken();
+		switch(tkz.CountTokens()){
+		case 8:
+			token.ToDouble(&tx);
+			break;
+		case 7:
+			token.ToDouble(&ty);
+			break;
+		case 6:
+			token.ToDouble(&tz);
+			break;
+		case 5:
+			token.ToDouble(&rx);
+			break;
+		case 4:
+			token.ToDouble(&ry);
+			break;
+		case 3:
+			token.ToDouble(&rz);
+			break;
+		case 2:
+			token.ToDouble(&sx);
+			break;
+		case 1:
+			token.ToDouble(&sy);
+			break;
+		case 0:
+			token.ToDouble(&sz);
+			break;
+		}
+	}
+	PutMatrixTogether();
+}
+
+void AffineTransformMatrix::ToStream(wxTextOutputStream& stream)
+{
+	for(uint_fast8_t n = 0; n < 16; n++){
+		if(n > 0) stream << _T(" ");
+		stream.WriteDouble(a[n]);
+	}
+}
+
+void AffineTransformMatrix::FromStream(wxTextInputStream& stream)
+{
+	for(uint_fast8_t n = 0; n < 16; n++)
+		stream >> a[n];
+	TakeMatrixApart();
+}
+
+void AffineTransformMatrix::MultMatrix(void) const
+{
+	glMultMatrixd(a);
+}
+
+void AffineTransformMatrix::Paint(const double scale) const
+{
+	OpenGLMaterial matX(0.8, 0.0, 0.0, 0.8);
+	OpenGLMaterial matY(0.0, 0.8, 0.0, 0.8);
+	OpenGLMaterial matZ(0.0, 0.0, 0.8, 0.8);
+
+	const double len = scale;
+	const double rad = 0.133 * scale;
+	const uint_fast8_t N = 4;
+	{
+		matX.UseMaterial();
+		const Vector3 v = this->TransformNoShift(len, 0, 0);
+		const Vector3 n = this->TransformNoShift(1, 0, 0);
+		glBegin(GL_LINES);
+		glNormal3f(-n.x, -n.y, -n.z);
+		glVertex3f(a[12] - v.x, a[13] - v.y, a[14] - v.z);
+		glNormal3f(n.x, n.y, n.z);
+		glVertex3f(a[12] + v.x, a[13] + v.y, a[14] + v.z);
+		glEnd();
+	}
+	{
+		matY.UseMaterial();
+		const Vector3 v = this->TransformNoShift(0, len, 0);
+		const Vector3 n = this->TransformNoShift(0, 1, 0);
+		glBegin(GL_LINES);
+		glNormal3f(-n.x, -n.y, -n.z);
+		glVertex3f(a[12] - v.x, a[13] - v.y, a[14] - v.z);
+		glNormal3f(n.x, n.y, n.z);
+		glVertex3f(a[12] + v.x, a[13] + v.y, a[14] + v.z);
+		glEnd();
+	}
+	{
+		matZ.UseMaterial();
+		const Vector3 v = this->TransformNoShift(0, 0, len);
+		const Vector3 n = this->TransformNoShift(0, 0, 1);
+		glBegin(GL_LINES);
+		glNormal3f(-n.x, -n.y, -n.z);
+		glVertex3f(a[12] - v.x, a[13] - v.y, a[14] - v.z);
+		glNormal3f(n.x, n.y, n.z);
+		glVertex3f(a[12] + v.x, a[13] + v.y, a[14] + v.z);
+		glEnd();
+	}
+
+	const double n0 = cos(M_PI_4);
+	const double n1 = sin(M_PI_4);
+	{
+		matX.UseMaterial();
+		glBegin(GL_LINES);
+		const Vector3 p0 = this->Transform(len, 0, 0);
+		for(uint_fast8_t i = 0; i < N; ++i){
+			const double a = 2 * M_PI / N * (double) i;
+			const double c = cos(a);
+			const double s = sin(a);
+			const Vector3 p = this->Transform(len - rad, rad * c, rad * s);
+			const Vector3 n = this->TransformNoShift(n0, c * n1, s * n1);
+			glNormal3d(n.x, n.y, n.z);
+			glVertex3d(p0.x, p0.y, p0.z);
+			glVertex3d(p.x, p.y, p.z);
+		}
+		glEnd();
+	}
+	{
+		matY.UseMaterial();
+		glBegin(GL_LINES);
+		const Vector3 p0 = this->Transform(0, len, 0);
+		for(uint_fast8_t i = 0; i < N; ++i){
+			const double a = 2 * M_PI / N * (double) i;
+			const double c = cos(a);
+			const double s = sin(a);
+			const Vector3 p = this->Transform(rad * s, len - rad, rad * c);
+			const Vector3 n = this->TransformNoShift(s * n1, n0, c * n1);
+			glNormal3d(n.x, n.y, n.z);
+			glVertex3d(p0.x, p0.y, p0.z);
+			glVertex3d(p.x, p.y, p.z);
+		}
+		glEnd();
+	}
+	{
+		matZ.UseMaterial();
+		glBegin(GL_LINES);
+		const Vector3 p0 = this->Transform(0, 0, len);
+		for(uint_fast8_t i = 0; i < N; ++i){
+			const double a = 2 * M_PI / N * (double) i;
+			const double c = cos(a);
+			const double s = sin(a);
+			const Vector3 p = this->Transform(rad * c, rad * s, len - rad);
+			const Vector3 n = this->TransformNoShift(c * n1, s * n1, n0);
+			glNormal3d(n.x, n.y, n.z);
+			glVertex3d(p0.x, p0.y, p0.z);
+			glVertex3d(p.x, p.y, p.z);
+		}
+		glEnd();
+	}
+	OpenGLMaterial::EnableColors();
+}
