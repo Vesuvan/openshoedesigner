@@ -74,7 +74,7 @@ public:
 	virtual ~LastModel();
 	bool LoadModel(std::string filename);
 
-	void AnalyseForm(void);
+	bool AnalyseForm(void);
 
 	void UpdateForm(const FootMeasurements &measurements);
 	void UpdatePosition(const Shoe &shoe, double offset = 0.0);

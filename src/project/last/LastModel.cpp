@@ -46,9 +46,11 @@
 
 LastModel::LastModel()
 {
-	center.SetCount(101);
-	center.InitAngle(0);
-	center.Finish(0.3);
+	center.XLinspace(0, 1, 101);
+	center.YInit(0);
+	center.Insert(0.3, -1.2, 0.3, BendLine::EpanechnikovKernel);
+	center.Insert(0.75, 1.3, 0.03, BendLine::GaussianKernel);
+	center.Finish(0.0);
 
 	sx = sy = sz = 0.01;
 
@@ -111,7 +113,7 @@ bool LastModel::Vector3MinX(const Vector3 a, const Vector3 b)
 	return a.x < b.x;
 }
 
-void LastModel::AnalyseForm(void)
+bool LastModel::AnalyseForm(void)
 {
 
 	// Find orientation of mesh
@@ -170,6 +172,7 @@ void LastModel::AnalyseForm(void)
 
 	symmetry.Normalize();
 	symmetry.FindPeaks(0.01);
+	if(symmetry.ResultSize() == 0) return false;
 //	std::cout << "count() = " << symmetry.Count() << "\n";
 //	std::cout << "pos[0] = " << symmetry.Pos(0) / M_PI * 180 << "\n";
 //	std::cout << "pos[1] = " << symmetry.Pos(1) / M_PI * 180 << "\n";
@@ -178,15 +181,15 @@ void LastModel::AnalyseForm(void)
 	{
 		AffineTransformMatrix comp;
 		comp *= AffineTransformMatrix::RotationAroundVector(coordsys.GetEz(),
-		M_PI_2 - symmetry.Pos(0));
+		M_PI_2 - symmetry.ResultX(0));
 		hull.ApplyTransformation(comp);
 	}
 
-	bb.Clear();
-	for(size_t i = 0; i < hull.GetVertexCount(); ++i)
-		bb.Insert(hull.GetVertex(i));
+//	bb.Clear();
+//	for(size_t i = 0; i < hull.GetVertexCount(); ++i)
+//		bb.Insert(hull.GetVertex(i));
 
-	//	shape2 = hull.IntersectPlane(Vector3(1, 0, 0),
+//	shape2 = hull.IntersectPlane(Vector3(1, 0, 0),
 //			bb.xmin + bb.GetSizeX() * 0.8);
 	kde.XLinspace(0, 2 * M_PI, 360);
 	kde.XSetCyclic(2 * M_PI);
@@ -203,22 +206,23 @@ void LastModel::AnalyseForm(void)
 		for(size_t n = 0; n < loop.Size(); ++n){
 			const Vector3 temp = (loop[(n + 1) % loop.Size()] - loop[n]);
 			double a = atan2(temp.y, -temp.z);
-			kde.Insert(a, KernelDensityEstimator::SilvermanKernel, 0.2,
-					temp.Abs() / Lmax);
+			kde.Insert(a, 0.2, temp.Abs() / Lmax,
+					KernelDensityEstimator::SilvermanKernel);
 		}
 	}
 	kde.Normalize();
 
-	kde.Attenuate(0, KernelDensityEstimator::CauchyKernel, 0.5, 0.75);
-	kde.Attenuate(M_PI, KernelDensityEstimator::CauchyKernel, 0.5, 0.75);
+	kde.Attenuate(0, 0.75, 0.5, KernelDensityEstimator::CauchyKernel);
+	kde.Attenuate(M_PI, 0.75, 0.5, KernelDensityEstimator::CauchyKernel);
 
 	kde.FindPeaks(0.1);
+	if(kde.ResultSize() == 0) return false;
 //	std::cout << kde.Count() << " [0] = " << kde.Pos(0) / M_PI * 180 << "\n";
 
 	{
 		AffineTransformMatrix comp;
 		comp *= AffineTransformMatrix::RotationAroundVector(coordsys.GetEz(),
-				3 * M_PI_2 - kde.Pos(0));
+				3 * M_PI_2 - kde.ResultX(0));
 		hull.ApplyTransformation(comp);
 	}
 
@@ -236,6 +240,7 @@ void LastModel::AnalyseForm(void)
 //	cde.Add(CoreDensityEstimator::Epanechnikov, 0.5, 2.5, 1);
 	{
 		loop = hull.IntersectPlane(Vector3(0, 1, 0), 0.0);
+
 		loop.Resample(100);
 		Vector3 rot = loop.GetRotationalAxis();
 		if(rot.y < 0) loop.Reverse();
@@ -319,6 +324,8 @@ void LastModel::AnalyseForm(void)
 //	for(size_t i = 0; i < loop.elements.Count(); i++)
 //		pca.Add(loop.elements[i]);
 
+	return true;
+
 }
 
 void LastModel::UpdateForm(const FootMeasurements& measurements)
@@ -392,6 +399,8 @@ void LastModel::Paint(void) const
 //	symmetry.Paint();
 //	kde.Paint();
 	glPopMatrix();
+
+	center.Paint();
 
 	coordsys.Paint(0.3);
 

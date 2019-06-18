@@ -40,10 +40,6 @@ Symmetry::Symmetry()
 	Init(180);
 }
 
-Symmetry::~Symmetry()
-{
-}
-
 void Symmetry::Init(size_t N)
 {
 	XLinspace(0, M_PI, N);
@@ -64,7 +60,7 @@ void Symmetry::AddTransform(const FourierTransform& transform)
 
 		const double da = M_PI / (double) f;
 		for(size_t m = 0; m < F; ++m){
-			Insert(a, EpanechnikovKernel, sigma, d);
+			Insert(a, sigma, d, EpanechnikovKernel);
 			a += da;
 		}
 	}

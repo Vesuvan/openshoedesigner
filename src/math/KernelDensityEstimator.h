@@ -48,20 +48,33 @@
  * Uniform      |  92.9 %
  * Logistic     |  88.7 %
  * Sigmoid      |  84.3 %
+ *
+ * * Epanechnikov (sharp, compact support)
+ *
+ * 		ke = @(x) 3/4*max((1-x.^2),0);
+ *
+ * * Gauss Kernel (standard normal distributed kernel)
+ *
+ * 		kg = @(x) exp(-(x.^2)/2)/sqrt(2*pi);
+ *
+ * * Picard Kernel (pointy kernel, drops to zero in reasonable distance)
+ *
+ * 		kp = @(x) exp(-abs(x))/2;
+ *
+ * * Cauchy Kernel (wide support)
+ *
+ * 		kc = @(x) 1./(pi*(1+x.^2));
+ *
+ *
  */
 
 #include <cstddef>
-#include <vector>
 
-class KernelDensityEstimator {
+#include "DependentVector.h"
+
+class KernelDensityEstimator:public DependentVector {
 public:
 	KernelDensityEstimator();
-
-	void XLinspace(double t0, double t1, size_t N);
-	void XSetCyclic(double cyclelength);
-	void XSetLinear(void);
-
-	void YInit(double value = 0.0);
 
 	enum kerneltype {
 		EpanechnikovKernel, //!< Parabolic window
@@ -78,31 +91,17 @@ public:
 		PicardKernel,
 		CauchyKernel
 	};
-	void Insert(double pos, kerneltype kernel = EpanechnikovKernel,
-			double sigma = 1.0, double weight = 1.0);
+
+	void YInit(double value = 0.0);
+
+	void Insert(double pos, double weight = 1.0, double sigma = 1.0,
+			kerneltype kernel = EpanechnikovKernel);
+
+	void Attenuate(double pos, double weight = 1.0, double sigma = 1.0,
+			kerneltype kernel = EpanechnikovKernel);
 
 	void Normalize(void);
 	void NormalizeByWeightSum(void);
-
-	void Attenuate(double pos, kerneltype kernel = EpanechnikovKernel,
-			double sigma = 1.0, double weight = 1.0);
-
-	size_t FindPeaks(const double minvalue = 0.001);
-	size_t FindValleys(const double maxvalue = 0.001);
-	size_t Count(void) const;
-	double Pos(size_t index) const;
-	double Value(size_t index) const;
-
-	double Area(void) const;
-
-	size_t Size(void) const; //!< Size of the array with the estimated distribution
-	double& operator[](size_t index); //!< Access operator to the array with the estimated distribution
-	const double& operator[](size_t index) const; //!< Read-only access operator to the array with the estimated distribution
-
-	KernelDensityEstimator& operator *=(const double v);
-	KernelDensityEstimator& operator /=(const double v);
-
-	void Paint(void) const;
 
 	static double EpanechnikovFunction(double x);
 	static double CosineFunction(double x);
@@ -119,14 +118,8 @@ public:
 	static double CauchyFunction(double x);
 
 private:
-	bool cyclic;
-	double cyclelength;
 	size_t count;
 	double weightsum;
-	std::vector <double> x;
-	std::vector <double> y;
-	std::vector <double> resultpos;
-	std::vector <double> resultvalue;
 };
 
 #endif /* SRC_MATH_KERNELDENSITYESTIMATOR_H_ */

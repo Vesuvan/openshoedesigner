@@ -27,8 +27,8 @@
 #include "PCA.h"
 
 #include <GL/gl.h>
-#include <iostream>
-#include <ostream>
+//#include <iostream>
+//#include <ostream>
 
 PCA::PCA()
 {

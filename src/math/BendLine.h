@@ -29,50 +29,15 @@
 
 /*!\class BendLine
  * \brief Bend line with kernels for smooth bending
- *
- * * Epanechnikov (sharp, compact support)
- *
- * 		ke = @(x) 3/4*max((1-x.^2),0);
- *
- * * Gauss Kernel (standard normal distributed kernel)
- *
- * 		kg = @(x) exp(-(x.^2)/2)/sqrt(2*pi);
- *
- * * Picard Kernel (pointy kernel, drops to zero in reasonable distance)
- *
- * 		kp = @(x) exp(-abs(x))/2;
- *
- * * Cauchy Kernel (wide support)
- *
- * 		kc = @(x) 1./(pi*(1+x.^2));
- *
  */
 
-#include <cstddef>
-#include <vector>
+#include "KernelDensityEstimator.h"
 
-class BendLine {
+class BendLine:public KernelDensityEstimator {
 public:
 	BendLine();
-	virtual ~BendLine();
 
-	enum Kernel {
-		Gauss, //!< Gauss Kernel
-		Picard, //!< Picard Kernel
-		Epanechnikov, //!< Epanechnikov Kernel
-		Cauchy //!< Cauchy Kernel
-	};
-
-	void SetCount(size_t N);
-	void InitAngle(double a = 0);
-	void SetBend(double angle, double x0, double sigma = 0.1, Kernel kernel =
-			Gauss);
-	void Finish(double L = 1.0);
-
-	size_t N;
-	std::vector <double> angle;
-	std::vector <double> x;
-	std::vector <double> y;
+	void Finish(double startangle = 0.0);
 };
 
 #endif /* SRC_3D_BENDLINE_H_ */

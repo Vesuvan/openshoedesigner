@@ -47,7 +47,6 @@ class FourierTransform;
 class Symmetry:public KernelDensityEstimator {
 public:
 	Symmetry();
-	virtual ~Symmetry();
 
 	void Init(size_t N);
 

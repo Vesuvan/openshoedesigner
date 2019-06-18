@@ -30,83 +30,25 @@
 
 BendLine::BendLine()
 {
-	N = 0;
 }
 
-BendLine::~BendLine()
+void BendLine::Finish(double startangle)
 {
-}
-
-void BendLine::SetCount(size_t N)
-{
-	this->N = N;
-	angle.resize(N);
-	x.resize(N);
-	y.resize(N);
-}
-
-void BendLine::InitAngle(double a)
-{
-	for(size_t n = 0; n < N; ++n)
-		angle[n] = a;
-}
-
-void BendLine::SetBend(double angle, double x0, double sigma, Kernel kernel)
-{
-	std::vector <double> temp;
-	temp.resize(N);
-	double r = -x0 / sigma;
-	const double dr = 1.0 / sigma / (double) (N - 1);
-	switch(kernel){
-	case Gauss:
-		{
-			const double f = 1.0 / sqrt(2 * M_PI);
-			for(size_t n = 0; n < N; ++n){
-				temp[n] = exp(-r * r / 2) * f;
-				r += dr;
-			}
-		}
-		break;
-	case Picard:
-		{
-			for(size_t n = 0; n < N; ++n){
-				temp[n] = 0.5 * exp(-fabs(r) / 2);
-				r += dr;
-			}
-		}
-		break;
-	case Epanechnikov:
-		{
-			for(size_t n = 0; n < N; ++n){
-				temp[n] = 0.75 * fmax(1 - r * r, 0);
-				r += dr;
-			}
-		}
-		break;
-	case Cauchy:
-		{
-			for(size_t n = 0; n < N; ++n){
-				temp[n] = 1.0 / (M_PI * (1 + r * r));
-				r += dr;
-			}
-		}
-		break;
+	Integrate();
+	operator+=(startangle);
+	const size_t N = Size();
+	X(0) = 0.0;
+	Y(0) = 0.0;
+	double dx = X(1) - X(0);
+	double a = (Y(1) + Y(0)) / 2.0;
+	for(size_t n = 2; n < N; ++n){
+		double xn = X(n - 2) + cos(a) * dx;
+		double yn = Y(n - 2) + sin(a) * dx;
+		dx = X(n) - X(n - 1);
+		a = (Y(n) + Y(n - 1)) / 2.0;
+		X(n - 1) = xn;
+		Y(n - 1) = yn;
 	}
-	for(size_t n = 1; n < N; ++n)
-		temp[n] += temp[n - 1];
-	const double a = 1.0 / (temp[N - 1] - temp[0]);
-	const double b = temp[0];
-	for(size_t n = 0; n < N; ++n)
-		this->angle[n] += angle * (temp[n] - b) * a;
-}
-
-void BendLine::Finish(double L)
-{
-	x[0] = 0.0;
-	y[0] = 0.0;
-	const double dr = L / (N - 1);
-	for(size_t n = 1; n < N; ++n){
-		x[n] = x[n - 1] + dr * cos(angle[n]);
-		y[n] = y[n - 1] + dr * sin(angle[n]);
-	}
+	X(N - 1) = X(N - 2) + cos(a) * dx;
+	Y(N - 1) = Y(N - 2) + sin(a) * dx;
 }
