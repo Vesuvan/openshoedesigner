@@ -81,7 +81,7 @@ public:
 
 public:
 	void SetIdentity(void); //!< Resets the matrix to the identity matrix.
-	void ResetRotationAndScale(void);
+	void ResetRotationAndScale(void); //!< Resets the rotation and scale, but keeps the translation
 
 	void Set(AffineTransformMatrix const& b); //!< Copies a matrix by inserting a given matrix into \a a.
 	void SetCenter(const Vector3 &center);
@@ -207,11 +207,11 @@ public:
 
 	wxString ToString(); //!< Generate a string containing the matrix.
 	void FromString(wxString const& string); //!< Setup the matrix from a string.
-
 	void ToStream(wxTextOutputStream & stream);
 	void FromStream(wxTextInputStream & stream);
-	void MultMatrix(void) const;
-	void Paint(const double scale = 1.0) const;
+
+	void MultMatrix(void) const; //!< Multiplay the matrix into OpenGL
+	void Paint(const double scale = 1.0) const; //!< Display the coordinate system on OpenGL
 };
 
 #endif /* AFFINETRANSFORMMATRIX_H_ */

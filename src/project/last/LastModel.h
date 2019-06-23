@@ -56,11 +56,14 @@ class Shoe;
 class LastModel {
 public:
 	std::string filename;
+
+
 	double sx;
 	double sy;
 	double sz;
 
 	Polygon3 loop;
+	Polygon3 test;
 	Symmetry symmetry;
 	FormFinder formfinder;
 	KernelDensityEstimator kde;
@@ -84,7 +87,7 @@ public:
 	void Modify(bool modified = true);
 	bool modified;
 private:
-	static bool Vector3MinX(const Vector3 a, const Vector3 b);
+	static bool Vector3XLess(const Vector3 a, const Vector3 b);
 };
 
 #endif /* SRC_PROJECT_LAST_LASTMODEL_H_ */

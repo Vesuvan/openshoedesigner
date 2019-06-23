@@ -38,7 +38,6 @@
  */
 
 #include <stddef.h>
-#include <vector>
 
 #include "KernelDensityEstimator.h"
 
@@ -49,18 +48,13 @@ public:
 	Symmetry();
 
 	void Init(size_t N);
-
 	void AddTransform(const FourierTransform &transform);
-
 	void Normalize(void);
 
 	void Paint(void) const;
 
 public:
 	double sigma;
-
-private:
-
 };
 
 #endif /* SRC_MATH_SYMMETRY_H_ */

@@ -30,15 +30,17 @@
 wxDEFINE_EVENT(wxEVT_COMMAND_THREAD_COMPLETED, wxThreadEvent);
 wxDEFINE_EVENT(wxEVT_COMMAND_THREAD_UPDATE, wxThreadEvent);
 
-WorkerThread::WorkerThread(Project * project, size_t threadNr) :
-		wxThread(wxTHREAD_DETACHED), threadNr(threadNr) {
+WorkerThread::WorkerThread(Project * project, size_t threadNr)
+		: wxThread(wxTHREAD_DETACHED), threadNr(threadNr)
+{
 	this->project = project;
 }
 
-WorkerThread::~WorkerThread() {
-	if (project != NULL) {
+WorkerThread::~WorkerThread()
+{
+	if(project != NULL){
 		wxCriticalSectionLocker enter(project->CS);
-		switch (threadNr) {
+		switch(threadNr){
 		case 0:
 			project->thread0 = NULL;
 			break;
@@ -49,21 +51,18 @@ WorkerThread::~WorkerThread() {
 	}
 }
 
-wxThread::ExitCode WorkerThread::Entry() {
-	if (threadNr >= 2)
-		return (wxThread::ExitCode) 1;
+wxThread::ExitCode WorkerThread::Entry()
+{
+	if(threadNr >= 2) return (wxThread::ExitCode) 1;
 
-	if (TestDestroy())
-		return (wxThread::ExitCode) 2;
+	if(TestDestroy()) return (wxThread::ExitCode) 2;
 	bool flag = true;
-	while (flag && !TestDestroy()) {
-		if (threadNr == 0)
-			flag = project->UpdateLeft();
-		if (threadNr == 1)
-			flag = project->UpdateRight();
+	while(flag && !TestDestroy()){
+		if(threadNr == 0) flag = project->UpdateLeft();
+		if(threadNr == 1) flag = project->UpdateRight();
 		wxQueueEvent(project, new wxThreadEvent(wxEVT_COMMAND_THREAD_UPDATE));
 	}
 	wxQueueEvent(project, new wxThreadEvent(wxEVT_COMMAND_THREAD_COMPLETED));
-	printf("Thread%u exit.\n", threadNr);
+	std::cout << "Thread" << threadNr << " exit.\n";
 	return (wxThread::ExitCode) 0;
 }

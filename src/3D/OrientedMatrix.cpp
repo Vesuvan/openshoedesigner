@@ -240,12 +240,12 @@ void OrientedMatrix::Paint(void) const
 				if(Ny == 1){
 					for(size_t x = 0; x < (Nx - 1); x++){
 						for(size_t z = 0; z < (Nz - 1); z++){
-							const double v0 = MatlabMatrix::GetValue(x, 0, z);
-							const double v1 = MatlabMatrix::GetValue(x, 0,
+							const double v0 = MatlabMatrix::operator()(x, 0, z);
+							const double v1 = MatlabMatrix::operator()(x, 0,
 									z + 1);
-							const double v2 = MatlabMatrix::GetValue(x + 1, 0,
+							const double v2 = MatlabMatrix::operator()(x + 1, 0,
 									z + 1);
-							const double v3 = MatlabMatrix::GetValue(x + 1, 0,
+							const double v3 = MatlabMatrix::operator()(x + 1, 0,
 									z);
 							if(v0 == DBL_MAX || v1 == DBL_MAX || v2 == DBL_MAX
 									|| v3 == DBL_MAX) continue;
@@ -260,12 +260,12 @@ void OrientedMatrix::Paint(void) const
 				if(Nz == 1){
 					for(size_t x = 0; x < (Nx - 1); x++){
 						for(size_t y = 0; y < (Ny - 1); y++){
-							const double v0 = MatlabMatrix::GetValue(x, y, 0);
-							const double v1 = MatlabMatrix::GetValue(x + 1, y,
+							const double v0 = MatlabMatrix::operator()(x, y, 0);
+							const double v1 = MatlabMatrix::operator()(x + 1, y,
 									0);
-							const double v2 = MatlabMatrix::GetValue(x + 1,
+							const double v2 = MatlabMatrix::operator()(x + 1,
 									y + 1, 0);
-							const double v3 = MatlabMatrix::GetValue(x, y + 1,
+							const double v3 = MatlabMatrix::operator()(x, y + 1,
 									0);
 							if(v0 == DBL_MAX || v1 == DBL_MAX || v2 == DBL_MAX
 									|| v3 == DBL_MAX) continue;
@@ -292,12 +292,12 @@ void OrientedMatrix::Paint(void) const
 				if(Ny == 1){
 					for(size_t x = 0; x < (Nx - 1); x++){
 						for(size_t z = 0; z < (Nz - 1); z++){
-							const double v0 = MatlabMatrix::GetValue(x, 0, z);
-							const double v1 = MatlabMatrix::GetValue(x, 0,
+							const double v0 = MatlabMatrix::operator()(x, 0, z);
+							const double v1 = MatlabMatrix::operator()(x, 0,
 									z + 1);
-							const double v2 = MatlabMatrix::GetValue(x + 1, 0,
+							const double v2 = MatlabMatrix::operator()(x + 1, 0,
 									z + 1);
-							const double v3 = MatlabMatrix::GetValue(x + 1, 0,
+							const double v3 = MatlabMatrix::operator()(x + 1, 0,
 									z);
 							if(v0 == DBL_MAX || v1 == DBL_MAX || v2 == DBL_MAX
 									|| v3 == DBL_MAX) continue;
@@ -320,12 +320,12 @@ void OrientedMatrix::Paint(void) const
 				if(Nz == 1){
 					for(size_t x = 0; x < (Nx - 1); x++){
 						for(size_t y = 0; y < (Ny - 1); y++){
-							const double v0 = MatlabMatrix::GetValue(x, y, 0);
-							const double v1 = MatlabMatrix::GetValue(x + 1, y,
+							const double v0 = MatlabMatrix::operator()(x, y, 0);
+							const double v1 = MatlabMatrix::operator()(x + 1, y,
 									0);
-							const double v2 = MatlabMatrix::GetValue(x + 1,
+							const double v2 = MatlabMatrix::operator()(x + 1,
 									y + 1, 0);
-							const double v3 = MatlabMatrix::GetValue(x, y + 1,
+							const double v3 = MatlabMatrix::operator()(x, y + 1,
 									0);
 							if(v0 == DBL_MAX || v1 == DBL_MAX || v2 == DBL_MAX
 									|| v3 == DBL_MAX) continue;

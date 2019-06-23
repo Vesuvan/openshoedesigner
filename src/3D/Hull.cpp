@@ -278,12 +278,14 @@ Vector3 Hull::GetCenter(void) const
 }
 
 Vector3 Hull::PlaneProjection(const Vector3& a, const Vector3& b, Vector3 n,
-		double d) const
+		double d)
 {
 	// Assume, that n is of length 1
+	// Project a onto the normal vector of the plane, distance relative to the center
 	const double sa = n.Dot(a) - d;
 	const double sb = n.Dot(b) - d;
 	if(sa - sb == 0) return (a + b) / 2;
+	// Project the line from a to b onto the plane, return the intersecting point
 	return (b * sa - a * sb) / (sa - sb);
 }
 
@@ -311,7 +313,17 @@ Polygon3 Hull::IntersectPlane(Vector3 n, double d)
 			"Hull:IntersectPlane - Wrong triangle selected."));
 	if(dir == -1) nt = e[ne].tb;
 	while(!edges.empty()){
-		temp.InsertPoint(PlaneProjection(v[e[ne].va], v[e[ne].vb], n, d));
+
+		const Vector3 a = v[e[ne].va];
+		const Vector3 b = v[e[ne].vb];
+		const double sa = n.Dot(a) - d;
+		const double sb = n.Dot(b) - d;
+		const double f = (sa - sb == 0)? (0.5) : (sa / (sa - sb));
+
+		temp.InsertPoint(a + (b - a) * f,
+				(vn[e[ne].va] + (vn[e[ne].vb] - vn[e[ne].va]) * f).Normal());
+
+//		temp.InsertPoint(PlaneProjection(a, b, n, d));
 		edges.erase(ne);
 
 		if(edges.find(t[nt].ea) != edges.end()){

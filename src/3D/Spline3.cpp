@@ -85,9 +85,9 @@ void Spline3::Calculate(void)
 	points[0].r0 = 0.0;
 	if(N == 1){
 		points[0].length = 0.0;
-		points[0].px.Set1(points[0].r0, points[0].x);
-		points[0].py.Set1(points[0].r0, points[0].y);
-		points[0].pz.Set1(points[0].r0, points[0].z);
+		points[0].px = Polynom::ByValue(points[0].r0, points[0].x);
+		points[0].py = Polynom::ByValue(points[0].r0, points[0].y);
+		points[0].pz = Polynom::ByValue(points[0].r0, points[0].z);
 		return;
 	}
 	for(size_t n = 0; n < N - 1; n++)
@@ -114,29 +114,32 @@ void Spline3::Calculate(void)
 			points[n + 1].r0 = points[n].r0 + points[n].length;
 	}
 	if(N == 2){
-		points[0].px.Set2(points[0].r0, points[0].x, points[1].r0, points[1].x);
-		points[0].py.Set2(points[0].r0, points[0].y, points[1].r0, points[1].y);
-		points[0].pz.Set2(points[0].r0, points[0].z, points[1].r0, points[1].z);
+		points[0].px = Polynom::ByValue(points[0].r0, points[0].x, points[1].r0,
+				points[1].x);
+		points[0].py = Polynom::ByValue(points[0].r0, points[0].y, points[1].r0,
+				points[1].y);
+		points[0].pz = Polynom::ByValue(points[0].r0, points[0].z, points[1].r0,
+				points[1].z);
 		if(closed){
 			if(symmetric){
-				points[1].px.Set2(points[0].r0 - points[1].length, points[1].x,
-						points[0].r0, points[0].x);
-				points[1].py.Set2(points[0].r0 - points[1].length, points[1].y,
-						points[0].r0, points[0].y);
-				points[1].pz.Set2(points[0].r0 - points[1].length, points[1].z,
-						points[0].r0, points[0].z);
+				points[1].px = Polynom::ByValue(points[0].r0 - points[1].length,
+						points[1].x, points[0].r0, points[0].x);
+				points[1].py = Polynom::ByValue(points[0].r0 - points[1].length,
+						points[1].y, points[0].r0, points[0].y);
+				points[1].pz = Polynom::ByValue(points[0].r0 - points[1].length,
+						points[1].z, points[0].r0, points[0].z);
 			}else{
-				points[1].px.Set2(points[1].r0, points[1].x,
+				points[1].px = Polynom::ByValue(points[1].r0, points[1].x,
 						points[1].r0 + points[1].length, points[0].x);
-				points[1].py.Set2(points[1].r0, points[1].y,
+				points[1].py = Polynom::ByValue(points[1].r0, points[1].y,
 						points[1].r0 + points[1].length, points[0].y);
-				points[1].pz.Set2(points[1].r0, points[1].z,
+				points[1].pz = Polynom::ByValue(points[1].r0, points[1].z,
 						points[1].r0 + points[1].length, points[0].z);
 			}
 		}else{
-			points[1].px.Set1(points[1].r0, points[1].x);
-			points[1].py.Set1(points[1].r0, points[1].y);
-			points[1].pz.Set1(points[1].r0, points[1].z);
+			points[1].px = Polynom::ByValue(points[1].r0, points[1].x);
+			points[1].py = Polynom::ByValue(points[1].r0, points[1].y);
+			points[1].pz = Polynom::ByValue(points[1].r0, points[1].z);
 		}
 		return;
 	}
@@ -180,30 +183,33 @@ void Spline3::Calculate(void)
 		const double r1 = points[n].r0 + points[n].length;
 
 		if(C0 && C1){
-			points[n].px.Set2(r0, points[n].x, r1, points[n1].x);
-			points[n].py.Set2(r0, points[n].y, r1, points[n1].y);
-			points[n].pz.Set2(r0, points[n].z, r1, points[n1].z);
+			points[n].px = Polynom::ByValue(r0, points[n].x, r1, points[n1].x);
+			points[n].py = Polynom::ByValue(r0, points[n].y, r1, points[n1].y);
+			points[n].pz = Polynom::ByValue(r0, points[n].z, r1, points[n1].z);
 		}
 		if(C0 && !C1){
-			points[n].px.Set3(r1, points[n1].x, points[n1].dvx, r0,
-					points[n].x);
-			points[n].py.Set3(r1, points[n1].y, points[n1].dvy, r0,
-					points[n].y);
-			points[n].pz.Set3(r1, points[n1].z, points[n1].dvz, r0,
-					points[n].z);
+			points[n].px = Polynom::ByDerivative(r1, points[n1].x,
+					points[n1].dvx, r0, points[n].x);
+			points[n].py = Polynom::ByDerivative(r1, points[n1].y,
+					points[n1].dvy, r0, points[n].y);
+			points[n].pz = Polynom::ByDerivative(r1, points[n1].z,
+					points[n1].dvz, r0, points[n].z);
 		}
 		if(!C0 && C1){
-			points[n].px.Set3(r0, points[n].x, points[n].dvx, r1, points[n1].x);
-			points[n].py.Set3(r0, points[n].y, points[n].dvy, r1, points[n1].y);
-			points[n].pz.Set3(r0, points[n].z, points[n].dvz, r1, points[n1].z);
+			points[n].px = Polynom::ByDerivative(r0, points[n].x, points[n].dvx,
+					r1, points[n1].x);
+			points[n].py = Polynom::ByDerivative(r0, points[n].y, points[n].dvy,
+					r1, points[n1].y);
+			points[n].pz = Polynom::ByDerivative(r0, points[n].z, points[n].dvz,
+					r1, points[n1].z);
 		}
 		if(!C0 && !C1){
-			points[n].px.Set4(r0, points[n].x, points[n].dvx, r1, points[n1].x,
-					points[n1].dvx);
-			points[n].py.Set4(r0, points[n].y, points[n].dvy, r1, points[n1].y,
-					points[n1].dvy);
-			points[n].pz.Set4(r0, points[n].z, points[n].dvz, r1, points[n1].z,
-					points[n1].dvz);
+			points[n].px = Polynom::ByValue(r0, points[n].x, points[n].dvx, r1,
+					points[n1].x, points[n1].dvx);
+			points[n].py = Polynom::ByValue(r0, points[n].y, points[n].dvy, r1,
+					points[n1].y, points[n1].dvy);
+			points[n].pz = Polynom::ByValue(r0, points[n].z, points[n].dvz, r1,
+					points[n1].z, points[n1].dvz);
 		}
 	}
 }
@@ -213,10 +219,9 @@ Vector3 Spline3::Evaluate(double r)
 	Vector3 temp;
 	const size_t N = points.size();
 	size_t m = 0;
-	if(symmetric) m = ((N -1)/ 2)+1;
-	for(size_t n=0;n<N;n++){
-
-
+	if(symmetric) m = ((N - 1) / 2) + 1;
+	for(size_t n = 0; n < N; n++){
+		throw(std::logic_error(__FILE__ "Not implemented."));
 	}
 	return temp;
 }

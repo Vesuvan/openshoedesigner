@@ -56,6 +56,51 @@ LastModel::LastModel()
 
 	mirrored = false;
 	modified = true;
+
+	Polynom p = Polynom::ByValue(-1, 1, 0, 0, 1, 1);
+	std::cout << p << "\n";
+
+//	KernelDensityEstimator kde0;
+//	kde0.XLinspace(-5, 5, 301);
+//	kde0.Insert(0, 1, 1, KernelDensityEstimator::CauchyKernel);
+//	kde0.Export("/tmp/CauchyKernel.mat");
+//	kde0.YInit();
+//	kde0.Insert(0, 1, 1, KernelDensityEstimator::CosineKernel);
+//	kde0.Export("/tmp/CosineKernel.mat");
+//	kde0.YInit();
+//	kde0.Insert(0, 1, 1, KernelDensityEstimator::EpanechnikovKernel);
+//	kde0.Export("/tmp/EpanechnikovKernel.mat");
+//	kde0.YInit();
+//	kde0.Insert(0, 1, 1, KernelDensityEstimator::GaussianKernel);
+//	kde0.Export("/tmp/GaussianKernel.mat");
+//	kde0.YInit();
+//	kde0.Insert(0, 1, 1, KernelDensityEstimator::LogisticKernel);
+//	kde0.Export("/tmp/LogisticKernel.mat");
+//	kde0.YInit();
+//	kde0.Insert(0, 1, 1, KernelDensityEstimator::PicardKernel);
+//	kde0.Export("/tmp/PicardKernel.mat");
+//	kde0.YInit();
+//	kde0.Insert(0, 1, 1, KernelDensityEstimator::QuarticKernel);
+//	kde0.Export("/tmp/QuarticKernel.mat");
+//	kde0.YInit();
+//	kde0.Insert(0, 1, 1, KernelDensityEstimator::SigmoidKernel);
+//	kde0.Export("/tmp/SigmoidKernel.mat");
+//	kde0.YInit();
+//	kde0.Insert(0, 1, 1, KernelDensityEstimator::SilvermanKernel);
+//	kde0.Export("/tmp/SilvermanKernel.mat");
+//	kde0.YInit();
+//	kde0.Insert(0, 1, 1, KernelDensityEstimator::TriangularKernel);
+//	kde0.Export("/tmp/TriangularKernel.mat");
+//	kde0.YInit();
+//	kde0.Insert(0, 1, 1, KernelDensityEstimator::TricubeKernel);
+//	kde0.Export("/tmp/TricubeKernel.mat");
+//	kde0.YInit();
+//	kde0.Insert(0, 1, 1, KernelDensityEstimator::TriweightKernel);
+//	kde0.Export("/tmp/TriweightKernel.mat");
+//	kde0.YInit();
+//	kde0.Insert(0, 1, 1, KernelDensityEstimator::UniformKernel);
+//	kde0.Export("/tmp/UniformKernel.mat");
+
 }
 
 LastModel::~LastModel()
@@ -108,96 +153,250 @@ bool LastModel::LoadModel(std::string filename)
 	return false;
 }
 
-bool LastModel::Vector3MinX(const Vector3 a, const Vector3 b)
+bool LastModel::Vector3XLess(const Vector3 a, const Vector3 b)
 {
 	return a.x < b.x;
 }
 
 bool LastModel::AnalyseForm(void)
 {
+	MatlabFile mf("/tmp/test.mat");
 
-	// Find orientation of mesh
-	PCA pca;
-	pca.SetCenter(hull.GetCenter());
-	for(size_t i = 0; i < hull.GetVertexCount(); ++i)
-		pca.Add(hull.GetVertex(i));
-	pca.Calculate();
-	// Make coordinate system right handed
-	if((pca.X * pca.Y).Dot(pca.Z) > 0) pca.Y = -pca.Y;
+	{
+		// Find orientation of mesh
 
-	// Remove orientation
-	AffineTransformMatrix temp(pca.X, pca.Y, pca.Z, pca.center);
-	temp.Invert();
-	hull.ApplyTransformation(temp);
+		PCA pca;
+		pca.SetCenter(hull.GetCenter());
+		for(size_t i = 0; i < hull.GetVertexCount(); ++i)
+			pca.Add(hull.GetVertex(i));
+		pca.Calculate();
+		// Make coordinate system right handed
+		if((pca.X * pca.Y).Dot(pca.Z) > 0) pca.Y = -pca.Y;
+		// Remove orientation
+		AffineTransformMatrix temp(pca.X, pca.Y, pca.Z, pca.center);
+		temp.Invert();
+		hull.ApplyTransformation(temp);
+	}
 
-	// Scan Shape for symmetry
 	BoundingBox bb;
 	for(size_t i = 0; i < hull.GetVertexCount(); ++i)
 		bb.Insert(hull.GetVertex(i));
 
-	symmetry.Init(180);
-	for(double cut = 0.2; cut < 0.81; cut += 0.2){
-
-		Polygon3 loop = hull.IntersectPlane(Vector3(1, 0, 0),
-				bb.xmin + bb.GetSizeX() * cut);
-
-		Vector3 rot = loop.GetRotationalAxis();
-		if(rot.x < 0) rot = -rot;
-
-		coordsys.SetCenter(loop.GetCenter());
-		coordsys.SetEx(Vector3(0, 1, 0));
-		coordsys.SetEz(rot);
-		coordsys.CalculateEy();
-
-//	Vector3 localx(0, 1, 0);
-//	Vector3 localy = rot * localx;
-//	localy.Normalize();
-
-		FourierTransform ft;
-		ft.TSetSize(loop.GetCount());
-		for(size_t n = 0; n < loop.GetCount(); ++n){
-			ft.t[n] = atan2(coordsys.GetLocalY(loop[n]),
-					coordsys.GetLocalX(loop[n]));
-			ft.InRe[n] = (loop[n] - coordsys.GetCenter()).Abs();
-			ft.InIm[n] = 0.0;
-		}
-		ft.TUnwrap();
-		ft.TSetLoopLength(2 * M_PI);
-		ft.TScale(1.0 / (2 * M_PI));
-		ft.FLinspace(0, 30, 31);
-		ft.Transform();
-		ft.SingleSidedResult();
-		symmetry.AddTransform(ft);
-	}
-
-	symmetry.Normalize();
-	symmetry.FindPeaks(0.01);
-	if(symmetry.ResultSize() == 0) return false;
-//	std::cout << "count() = " << symmetry.Count() << "\n";
-//	std::cout << "pos[0] = " << symmetry.Pos(0) / M_PI * 180 << "\n";
-//	std::cout << "pos[1] = " << symmetry.Pos(1) / M_PI * 180 << "\n";
-//	std::cout << "pos[2] = " << symmetry.Pos(2) / M_PI * 180 << "\n";
-//	std::cout << "pos[3] = " << symmetry.Pos(3) / M_PI * 180 << "\n";
 	{
+		// Scan Shape for symmetry
+
+		symmetry.Init(180);
+		for(double cut = 0.2; cut < 0.81; cut += 0.2){
+			Polygon3 section = hull.IntersectPlane(Vector3(1, 0, 0),
+					bb.xmin + bb.GetSizeX() * cut);
+
+			Vector3 rot = section.GetRotationalAxis();
+			if(rot.x < 0) rot = -rot;
+
+			coordsys.SetCenter(section.GetCenter());
+			coordsys.SetEx(Vector3(0, 1, 0));
+			coordsys.SetEz(rot);
+			coordsys.CalculateEy();
+
+			FourierTransform ft;
+			ft.TSetSize(section.Size());
+			for(size_t n = 0; n < section.Size(); ++n){
+				ft.t[n] = atan2(coordsys.GetLocalY(section[n]),
+						coordsys.GetLocalX(section[n]));
+				ft.InRe[n] = (section[n] - coordsys.GetCenter()).Abs();
+				ft.InIm[n] = 0.0;
+			}
+			ft.TUnwrap();
+			ft.TSetLoopLength(2 * M_PI);
+			ft.TScale(1.0 / (2 * M_PI));
+			ft.FLinspace(0, 30, 31);
+			ft.Transform();
+			ft.SingleSidedResult();
+			symmetry.AddTransform(ft);
+		}
+
+		symmetry.Normalize();
+		symmetry.FindPeaks(0.01);
+		if(symmetry.ResultSize() == 0) return false;
 		AffineTransformMatrix comp;
-		comp *= AffineTransformMatrix::RotationAroundVector(coordsys.GetEz(),
+		comp *= AffineTransformMatrix::RotationAroundVector(Vector3(1, 0, 0),
 		M_PI_2 - symmetry.ResultX(0));
 		hull.ApplyTransformation(comp);
 	}
 
-//	bb.Clear();
-//	for(size_t i = 0; i < hull.GetVertexCount(); ++i)
-//		bb.Insert(hull.GetVertex(i));
+	{
+		// Find sole
 
-//	shape2 = hull.IntersectPlane(Vector3(1, 0, 0),
-//			bb.xmin + bb.GetSizeX() * 0.8);
-	kde.XLinspace(0, 2 * M_PI, 360);
-	kde.XSetCyclic(2 * M_PI);
+		kde.XLinspace(0, 2 * M_PI, 360);
+		kde.XSetCyclic(2 * M_PI);
 
-	for(double cut = 0.2; cut < 0.81; cut += 0.2){
+		for(double cut = 0.2; cut < 0.81; cut += 0.2){
+			Polygon3 section = hull.IntersectPlane(Vector3(1, 0, 0),
+					bb.xmin + bb.GetSizeX() * cut);
+
+			Vector3 rot = section.GetRotationalAxis();
+			if(rot.x > 0) section.Reverse();
+
+			const double Lmax = section.GetLength();
+			for(size_t n = 0; n < section.Size(); ++n){
+				const Vector3 temp = (section[(n + 1) % section.Size()]
+						- section[n]);
+				double a = atan2(temp.y, -temp.z);
+				kde.Insert(a, temp.Abs() / Lmax, 0.2,
+						KernelDensityEstimator::SilvermanKernel);
+			}
+		}
+
+		kde.Normalize();
+
+		kde.Attenuate(0, 0.75, 0.5, KernelDensityEstimator::CauchyKernel);
+		kde.Attenuate(M_PI, 0.75, 0.5, KernelDensityEstimator::CauchyKernel);
+
+		kde.FindPeaks(0.1);
+		if(kde.ResultSize() == 0) return false;
+		AffineTransformMatrix comp;
+		comp *= AffineTransformMatrix::RotationAroundVector(Vector3(1, 0, 0),
+				3 * M_PI_2 - kde.ResultX(0));
+		hull.ApplyTransformation(comp);
+	}
+
+	// For Testing purposes change front and back.
+//	{
+//		hull.ApplyTransformation(
+//				AffineTransformMatrix::RotationAroundVector(Vector3(0, 0, 1),
+//				M_PI));
+//		bb.Clear();
+//		for(size_t i = 0; i < hull.GetVertexCount(); ++i)
+//			bb.Insert(hull.GetVertex(i));
+//	}
+
+	{
+		// Test for front/back reversal
+
+//		loop.Clear();
+		std::vector <double> ratio;
+		for(double cut = 0.1; cut < 0.91; cut += 0.1){
+			Polygon3 section = hull.IntersectPlane(Vector3(1, 0, 0),
+					bb.xmin + bb.GetSizeX() * cut);
+			BoundingBox temp;
+			for(size_t n = 0; n < section.Size(); ++n)
+				temp.Insert(section[n]);
+			ratio.push_back(temp.GetSizeZ() / temp.GetSizeY());
+//			loop += section.GetCenter();
+		}
+		PolyFilter pfr(2, ratio.size());
+		Polynom pr = pfr.Filter(ratio);
+		pr.ShiftX(1);
+		pr.ScaleX(0.1);
+
+//		test.Clear();
+//		for(double r = 0; r <= 1; r += 0.01)
+//			test += Vector3(bb.xmin + bb.GetSizeX() * r, 0.0, pr.Evaluate(r));
+
+		pr.Derive();
+		if(pr.Evaluate(0.5) > 0.0){
+			// Reverse last
+			std::cout << "Reverse last.\n";
+			hull.ApplyTransformation(
+					AffineTransformMatrix::RotationAroundVector(
+							Vector3(0, 0, 1),
+							M_PI));
+			bb.Clear();
+			for(size_t i = 0; i < hull.GetVertexCount(); ++i)
+				bb.Insert(hull.GetVertex(i));
+		}
+
+//		double maxr;
+//		if(pr.ExtremumPos(maxr)){
+//			std::cout << "maxr = " << maxr << "\n";
+//		}
+//
+//		std::vector <double> temp = loop.GetZVectorD();
+//		PolyFilter pf(3, loop.Size());
+//		Polynom pz = pf.Filter(temp);
+//		pz.ShiftX(1);
+//		pz.ScaleX(0.1);
+//
+//		loop.Clear();
+//		for(double r = 0; r <= 1; r += 0.01)
+//			loop += Vector3(bb.xmin + bb.GetSizeX() * r, 0.0, pz.Evaluate(r));
+//
+//		double pp;
+//		double pn;
+//		if(pz.ExtremumPos(pp) && pz.ExtremumNeg(pn)){
+//			if(pp > pn && pp < 1.0 && pn > 0.0){
+//				// Revert last
+//				std::cout << "Rotate last by 180.\n";
+//				hull.ApplyTransformation(
+//						AffineTransformMatrix::RotationAroundVector(
+//								Vector3(0, 0, 1),
+//								M_PI));
+//			}
+//		}
+	}
+
+	bb.Clear();
+	for(size_t i = 0; i < hull.GetVertexCount(); ++i)
+		bb.Insert(hull.GetVertex(i));
+
+//	return true;
+	{
+		// Scan for left/right
+
+//		double ip = 0.5;
+		loop.Clear();
+
+//		kde.XLinspace(0, 1, 100);
+//		kde.XSetLinear();
+		for(double cut = 0.1; cut < 0.91; cut += 0.1){
+			Polygon3 section = hull.IntersectPlane(Vector3(1, 0, 0),
+					bb.xmin + bb.GetSizeX() * cut);
+			loop += section.GetCenter();
+
+//			BoundingBox bb2;
+//			for(size_t n = 0; n < section.Size(); ++n)
+//				bb2.Insert(section[n]);
+
+//			kde.Insert(cut, bb2.GetSizeZ() / bb2.GetSizeY(), 0.3,
+//					KernelDensityEstimator::TriweightKernel);
+		}
+//		kde.NormalizeByWeightSum();
+
+		std::vector <double> temp = loop.GetYVectorD();
+		PolyFilter pf(2, loop.Size());
+		Polynom py = pf.Filter(temp);
+		py.ShiftX(1);
+
+		py.ScaleX(0.1);
+
+//		test.Clear();
+//		for(double r = 0; r <= 1; r += 0.01)
+//			test += Vector3(bb.xmin + bb.GetSizeX() * r, py.Evaluate(r), 0.0);
+
+		py.ScaleX(1.0 / bb.GetSizeX()); // Normale with lastlength
+		py.ScaleY(1.0 / bb.GetSizeY()); // Normalize with lastwidth
+
+		std::cout << "py = " << py << ";\n";
+
+		double chir = py[0];
+//		if(py[0] > 1.0) std::cout << "Right last\n";
+//		if(py[0] < -1.0) std::cout << "Left last\n";
+
+//		pf.Export("/tmp/pf.mat");
+
+//		if(pz.InflectionPoint(ip)) std::cout << "Inflection point: " << ip
+//				<< "\n";
+
+//		coordsys.SetCenter(Vector3(bb.xmin, 0, 0));
+//		coordsys.SetEx(Vector3(bb.GetSizeX(), 0, 0));
+//		coordsys.SetEy(Vector3(0, 0, 1));
+//		coordsys.CalculateEz();
+
+		kde.XLinspace(0, 2 * M_PI, 360);
+		kde.XSetCyclic(2 * M_PI);
 
 		loop = hull.IntersectPlane(Vector3(1, 0, 0),
-				bb.xmin + bb.GetSizeX() * cut);
+				bb.xmin + bb.GetSizeX() * 0.5);
 
 		Vector3 rot = loop.GetRotationalAxis();
 		if(rot.x > 0) loop.Reverse();
@@ -206,24 +405,54 @@ bool LastModel::AnalyseForm(void)
 		for(size_t n = 0; n < loop.Size(); ++n){
 			const Vector3 temp = (loop[(n + 1) % loop.Size()] - loop[n]);
 			double a = atan2(temp.y, -temp.z);
-			kde.Insert(a, 0.2, temp.Abs() / Lmax,
-					KernelDensityEstimator::SilvermanKernel);
+			kde.Insert(a, temp.Abs() / Lmax, 0.3,
+					KernelDensityEstimator::SigmoidKernel);
 		}
-	}
-	kde.Normalize();
 
-	kde.Attenuate(0, 0.75, 0.5, KernelDensityEstimator::CauchyKernel);
-	kde.Attenuate(M_PI, 0.75, 0.5, KernelDensityEstimator::CauchyKernel);
+		kde.Normalize();
 
-	kde.FindPeaks(0.1);
-	if(kde.ResultSize() == 0) return false;
-//	std::cout << kde.Count() << " [0] = " << kde.Pos(0) / M_PI * 180 << "\n";
+//		kde.Attenuate(0, 0.75, 0.5, KernelDensityEstimator::CauchyKernel);
+//		kde.Attenuate(M_PI, 0.75, 0.5, KernelDensityEstimator::CauchyKernel);
 
-	{
-		AffineTransformMatrix comp;
-		comp *= AffineTransformMatrix::RotationAroundVector(coordsys.GetEz(),
-				3 * M_PI_2 - kde.ResultX(0));
-		hull.ApplyTransformation(comp);
+		double minRight = 1e9;
+		double minLeft = 1e9;
+		for(size_t n = 0; n < kde.Size(); ++n){
+			if(kde.X(n) > M_PI && kde.X(n) < 3 * M_PI_2 && kde.Y(n) < minRight) minRight =
+					kde.Y(n);
+			if(kde.X(n) < 2 * M_PI && kde.X(n) > 3 * M_PI_2
+					&& kde.Y(n) < minLeft) minLeft = kde.Y(n);
+
+		}
+
+//		std::cout << "minLeft = " << minLeft << ";\n";
+//		std::cout << "minRight = " << minRight << ";\n";
+
+		chir += 4.0 * (minLeft - minRight) / (minLeft + minRight);
+
+		if(chir < -0.5){
+			AffineTransformMatrix temp;
+			temp.ScaleGlobal(1.0, -1.0, 1.0);
+			hull.ApplyTransformation(temp);
+
+			std::cout << "Flip sides left to right.\n";
+
+			bb.Clear();
+			for(size_t i = 0; i < hull.GetVertexCount(); ++i)
+				bb.Insert(hull.GetVertex(i));
+		}
+
+//		std::cout << chir << " ";
+//		if(chir > 0.0)
+//			std::cout << " = Right last ";
+//		else
+//			std::cout << " = Left last ";
+//		if(fabs(chir) < 0.5) std::cout << "(Insole recommended)";
+//		std::cout << "\n";
+
+		coordsys.SetCenter(Vector3());
+		coordsys.SetEx(Vector3(0, 1, 0));
+		coordsys.SetEy(Vector3(0, 0, 1));
+		coordsys.CalculateEz();
 	}
 
 //	{
@@ -239,49 +468,76 @@ bool LastModel::AnalyseForm(void)
 //	cde.Add(CoreDensityEstimator::Epanechnikov, 1, 1, 1);
 //	cde.Add(CoreDensityEstimator::Epanechnikov, 0.5, 2.5, 1);
 	{
-		loop = hull.IntersectPlane(Vector3(0, 1, 0), 0.0);
-
-		loop.Resample(100);
-		Vector3 rot = loop.GetRotationalAxis();
-		if(rot.y < 0) loop.Reverse();
-
-		coordsys.SetCenter(loop.GetCenter());
-		coordsys.ResetRotationAndScale();
+		loop = hull.IntersectPlane(Vector3(0, 1, 0),
+				bb.ymin + bb.GetSizeY() * 0.5);
+//			const size_t N = loop.Size();
+//			size_t Nmin = 0;
+//			size_t Nmax = 0;
+//			for(size_t n = 0; n < N; ++n){
+//				if(loop[n].x < loop[Nmin].x) Nmin = n;
+//				if(loop[n].x > loop[Nmax].x) Nmax = n;
+//			}
+//			Polygon3 pmin;
+//			for(size_t n = Nmin; n < (N + Nmin); ++n){
+//				const size_t m = n % N;
+//				pmin += loop[m];
+//				if(m == Nmax) break;
+//			}
+//			Polygon3 pmax;
+//			for(size_t n = Nmax; n < (N + Nmax); ++n){
+//				const size_t m = n % N;
+//				pmax += loop[m];
+//				if(m == Nmin) break;
+//			}
+//
+//			pmin.Resample(100);
+//			pmax.Resample(100);
+//			pmax.Reverse();
+//
+//			for(size_t n = 0; n < 100; ++n)
+//				pmin[n] += pmax[n];
+//			pmin /= 2.0;
+//
+//			loop = pmin;
+//		loop.Resample(100);
+//		Vector3 rot = loop.GetRotationalAxis();
+//		if(rot.y < 0) loop.Reverse();
+//
+//		coordsys.SetCenter(loop.GetCenter());
+//		coordsys.ResetRotationAndScale();
 	}
-	formfinder.AddPolygon(loop, loop.GetCount() / 8);
+//	formfinder.AddPolygon(loop, loop.GetCount() / 8);
 
-	std::vector <Vector3>::iterator min = std::min_element(formfinder.b.begin(),
-			formfinder.b.end(), Vector3MinX);
-	size_t dist = std::distance(formfinder.b.begin(), min);
-	std::cout << dist << "\n";
-	std::rotate(formfinder.a.begin(), formfinder.a.begin() + dist,
-			formfinder.a.end());
-	std::rotate(formfinder.b.begin(), formfinder.b.begin() + dist,
-			formfinder.b.end());
-	std::rotate(formfinder.c.begin(), formfinder.c.begin() + dist,
-			formfinder.c.end());
-	std::rotate(formfinder.d.begin(), formfinder.d.begin() + dist,
-			formfinder.d.end());
+//	std::vector <Vector3>::iterator min = std::min_element(formfinder.b.begin(),
+//			formfinder.b.end(), Vector3XLess);
+//	size_t dist = std::distance(formfinder.b.begin(), min);
+//	std::cout << dist << "\n";
+//	std::rotate(formfinder.a.begin(), formfinder.a.begin() + dist,
+//			formfinder.a.end());
+//	std::rotate(formfinder.b.begin(), formfinder.b.begin() + dist,
+//			formfinder.b.end());
+//	std::rotate(formfinder.c.begin(), formfinder.c.begin() + dist,
+//			formfinder.c.end());
+//	std::rotate(formfinder.d.begin(), formfinder.d.begin() + dist,
+//			formfinder.d.end());
 
-	MatlabFile mf("data/dist.mat");
-
-	MatlabMatrix F("F", 12, formfinder.a.size());
-	for(size_t n = 0; n < formfinder.a.size(); ++n){
-		F.Insert(formfinder.a[n].x);
-		F.Insert(formfinder.b[n].x);
-		F.Insert(formfinder.c[n].x);
-		F.Insert(formfinder.d[n].x);
-		F.Insert(formfinder.a[n].y);
-		F.Insert(formfinder.b[n].y);
-		F.Insert(formfinder.c[n].y);
-		F.Insert(formfinder.d[n].y);
-		F.Insert(formfinder.a[n].z);
-		F.Insert(formfinder.b[n].z);
-		F.Insert(formfinder.c[n].z);
-		F.Insert(formfinder.d[n].z);
-	}
-	F.Transpose();
-	mf.WriteMatrix(F);
+//	MatlabMatrix F("F", 12, formfinder.a.size());
+//	for(size_t n = 0; n < formfinder.a.size(); ++n){
+//		F.Insert(formfinder.a[n].x);
+//		F.Insert(formfinder.b[n].x);
+//		F.Insert(formfinder.c[n].x);
+//		F.Insert(formfinder.d[n].x);
+//		F.Insert(formfinder.a[n].y);
+//		F.Insert(formfinder.b[n].y);
+//		F.Insert(formfinder.c[n].y);
+//		F.Insert(formfinder.d[n].y);
+//		F.Insert(formfinder.a[n].z);
+//		F.Insert(formfinder.b[n].z);
+//		F.Insert(formfinder.c[n].z);
+//		F.Insert(formfinder.d[n].z);
+//	}
+//	F.Transpose();
+//	mf.WriteMatrix(F);
 
 //	MatlabMatrix P("P", 2, shape1.GetCount());
 //			P.Insert(v0.Dot(localx));
@@ -384,24 +640,35 @@ void LastModel::UpdatePosition(const Shoe& shoe, double offset)
 
 void LastModel::Paint(void) const
 {
-//	hull.Paint();
+	hull.Paint();
 
-	OpenGLMaterial::EnableColors();
-	glColor3f(1, 1, 1);
-	glNormal3f(1, 0, 0);
-	loop.Paint();
-	OpenGLMaterial yellow(1, 1, 0);
-	yellow.UseColor(1.0);
+	OpenGLMaterial white(OpenGLMaterial::whiteplastic, 1.0);
+	white.UseMaterial();
+
+	loop.Paint(true, 0.25);
+
+	OpenGLMaterial green(OpenGLMaterial::whiterubber, 1.0);
+	green.UseMaterial();
+
+	test.Paint();
+
+	OpenGLMaterial yellow(OpenGLMaterial::yellowplastic, 1.0);
+	yellow.UseMaterial();
+
 	formfinder.Paint();
 
 	glPushMatrix();
 	coordsys.MultMatrix();
+
 //	symmetry.Paint();
-//	kde.Paint();
+	kde.Paint();
+	kde.PaintCircle(0.05);
+	kde.PaintCircle(0.1);
+	kde.PaintCircle(0.15);
+
 	glPopMatrix();
 
-	center.Paint();
-
+//	center.Paint();
 	coordsys.Paint(0.3);
 
 	OpenGLMaterial::EnableColors();

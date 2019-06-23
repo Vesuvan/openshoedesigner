@@ -26,9 +26,6 @@
 
 #ifndef SRC_MATH_POLYFILTER_H_
 #define SRC_MATH_POLYFILTER_H_
-#include <cstddef>
-#include <vector>
-
 /*!\class PolyFilter
  * \brief Polynom interpolator
  *
@@ -48,9 +45,16 @@
  * ~~~
  */
 
+#include <cstddef>
+#include <string>
+#include <vector>
+
+class Polynom;
+
 class PolyFilter {
 public:
 	PolyFilter();
+	PolyFilter(size_t order, size_t size);
 	virtual ~PolyFilter();
 
 	void Init(size_t order, size_t N);
@@ -58,17 +62,9 @@ public:
 	size_t GetSize(void) const;
 	size_t GetOrder(void) const;
 
-	double FilterA(const std::vector <double> &vec, size_t pos) const;
-	double FilterB(const std::vector <double> &vec, size_t pos) const;
-	double FilterC(const std::vector <double> &vec, size_t pos) const;
-	double FilterD(const std::vector <double> &vec, size_t pos) const;
+	Polynom Filter(const std::vector <double> &vec, size_t pos = 0) const;
 
-	bool GetExtremum(double &pos, const double a, const double b,
-			const double c, const double d) const;
-	bool GetExtremum2(double &pos, const double a, const double b,
-			const double c, const double d) const;
-	bool GetInflectionPoint(double &pos, const double a, const double b,
-			const double c, const double d) const;
+	void Export(std::string filename) const;
 
 private:
 	size_t order;

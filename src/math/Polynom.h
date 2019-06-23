@@ -28,47 +28,105 @@
 #define POLYNOM_H_
 
 /*!\class Polynom
- * \brief Polynom up to an order of 4.
+ * \brief Polynom.
  *
- * This class contains a polynom with an order of 4. This polynom is intended for Spline3
- * interpolation. The setting functions support a number of one to four points.
+ * This class contains a polynom of arbitrary order.
  *
- * (All formulas are calculated with the AXIOM computer algebra system.)
+ * The coefficients are stored Matlab / Octave style: The first coefficient is the one for the highest power.
+ *
+ * e.g. \f[
+ * 	f(r) = c_0\cdot r^3 + c_1\cdot r^2 + c_2 \cdot r + c_3
+ * \f]
+ * The vector returned by the stream output << can be used directly in the Matlab/Octave polyval command.
+ *
+ * \htmlonly
+ * <svg width="300" height="200">
+ * <path transform="translate(0,-852.35945)" d="m 280,1032.3594 -15,5 0,-10 15,5 -260,0 -2e-6,-160.00001 4.999999,15 -9.999999,0 5,-15 c 0,0 61.281556,160.00001 129.999982,160.00001 68.71843,0 129.99999,-160.00001 129.99999,-160.00001"  stroke="black"  stroke-width="2" fill="none" />
+ * </svg>
+ * \endhtmlonly
+ *
  */
+
+#include <stddef.h>
+#include <ostream>
+#include <vector>
 
 class Polynom {
 public:
-	Polynom();
-	virtual ~Polynom();
+	Polynom(size_t N = 0);
+	Polynom(const std::vector <double> &vec);
+	static Polynom ByValue(double r0, double v0); ///< Initialize by 1 point with position and value (actually only the value is used, because it is a constant)
+	static Polynom ByValue(double r0, double v0, double r1, double v1); ///< Initialize by 2 points with position and value
+	static Polynom ByValue(double r0, double v0, double r1, double v1,
+			double r2, double v2); ///< Initialize by 3 points with position and value
+	static Polynom ByValue(double r0, double v0, double r1, double v1,
+			double r2, double v2, double r3, double v3); ///< Initialize by 4 points with position and value
 
-	double c0;
-	double c1;
-	double c2;
-	double c3;
+	static Polynom ByDerivative(double r0, double v0, double dv0); ///< Initialize by 1 point with position, value and derivative
+	static Polynom ByDerivative(double r0, double v0, double dv0, double r1,
+			double v1); ///< Initialize by 1 point with position, value and derivative and a second point only with position and value
+	static Polynom ByDerivative(double r0, double v0, double dv0, double r1,
+			double v1, double dv1); ///< Initialize by 2 points with position, value and derivative
 
-	void Set4(double r0, double v0, double r1, double v1, double r2, double v2,
-			double r3, double v3);
-	void Set4(double r0, double v0, double dv0, double r1, double v1,
-			double dv1);
-	void Set3(double r0, double v0, double r1, double v1, double r2, double v2);
-	void Set3(double r0, double v0, double dv0, double r1, double v1);
-	void Set2(double r0, double v0, double r1, double v1);
-	void Set2(double r0, double v0, double dv0);
-	void Set1(double r0, double v0);
+	size_t Size(void) const;
+	void Resize(size_t N);
 
-	bool Min(double &x) const;
-	bool Max(double &x) const;
-	bool MinLimited(double &x) const;
-	bool MaxLimited(double &x) const;
+	double& operator[](size_t index); ///< Access the coefficients
+	const double& operator[](size_t index) const; ///< Const access the coefficients
 
-	Polynom Derive() const;
-	Polynom Derive2() const;
-	Polynom Derive3() const;
-
+	Polynom& operator+=(const double &b);
+	const Polynom operator+(const double& b) const;
+	Polynom& operator-=(const double &b);
+	const Polynom operator-(const double& b) const;
 	Polynom& operator*=(const double &b);
 	const Polynom operator*(const double& b) const;
+	Polynom& operator/=(const double &b);
+	const Polynom operator/(const double& b) const;
 
-	double Evaluate(double r) const;
+	Polynom& operator+=(const Polynom &b);
+	const Polynom operator+(const Polynom& b) const;
+	Polynom& operator-=(const Polynom &b);
+	const Polynom operator-(const Polynom& b) const;
+	Polynom& operator*=(const Polynom &b);
+	const Polynom operator*(const Polynom& b) const;
+
+	void ScaleX(double val); ///< Increase the width of the graph by a factor of val
+	void ScaleY(double val); ///< Increase the height of the graph by a factor of val
+	void ShiftX(double val); ///< Shift the graph right by val
+	void ShiftY(double val); ///< Shift the graph up by val
+
+	Polynom Derivative(size_t order = 1) const; ///< Return the derivative without changing the polynom
+	void Derive(size_t order = 1); ///< Derive the polynom itself
+
+	Polynom Integral(size_t order = 1) const; ///< Return the integral of the polynom without changing it itself
+	void Integrate(size_t order = 1); ///< Integrate the polynom. (The integration constant has to be added simply by the operator+
+
+	bool ExtremumPos(double &x) const; ///< Return the positive extremum, if there is any (up to an order of 3 (4 coefficients))
+	bool ExtremumNeg(double &x) const; ///< Return the negative extremum, if there is any (up to an order of 3 (4 coefficients))
+	bool InflectionPoint(double &pos) const; ///< Return the inflection point (only working for an order of exactly 3 (4 coefficients))
+
+	void InvertLinear(void); ///< If the polynom is a line (2 coefficients) and not a constant, it is inverted.
+
+	double Evaluate(double x) const;
+
+	/*! \brief Output coefficients
+	 *~~~~~
+	 * Polynom p(-1,1,0,0,1,0);
+	 * std::cout << p << "\n";
+	 *~~~~~
+	 */
+	friend std::ostream &operator<<(std::ostream &os, const Polynom &p)
+	{
+		os << "[";
+		for(size_t n = 0; n < p.Size(); ++n){
+			if(n > 0) os << ", ";
+			os << p[n];
+		}
+		os << "]";
+		return os;
+	}
+private:
+	std::vector <double> c;
 };
 
 #endif /* POLYNOM_H_ */

@@ -29,9 +29,7 @@
 #include <GL/gl.h>
 #include <cmath>
 #include <cstdlib>
-#include <iterator>
 
-#include "../3D/OpenGLMaterial.h"
 #include "FourierTransform.h"
 
 Symmetry::Symmetry()
@@ -60,7 +58,7 @@ void Symmetry::AddTransform(const FourierTransform& transform)
 
 		const double da = M_PI / (double) f;
 		for(size_t m = 0; m < F; ++m){
-			Insert(a, sigma, d, EpanechnikovKernel);
+			Insert(a, d, sigma, EpanechnikovKernel);
 			a += da;
 		}
 	}
@@ -74,40 +72,9 @@ void Symmetry::Normalize(void)
 
 void Symmetry::Paint(void) const
 {
-	OpenGLMaterial mat;
-	mat.SetSimpleColor(0.8, 0.8, 0.8);
-	mat.UseColor(1); // Emitter material -> normals not needed
-
 	glPushMatrix();
 	KernelDensityEstimator::Paint();
 	glRotatef(180.0, 0.0, 0.0, 1.0);
 	KernelDensityEstimator::Paint();
 	glPopMatrix();
-
-	mat.SetSimpleColor(0.3, 0.3, 0.3);
-	mat.UseColor(1);
-
-	glBegin(GL_LINE_LOOP);
-	for(size_t n = 0; n < 100; ++n){
-		const float co = cos(2 * M_PI / 100 * n);
-		const float si = sin(2 * M_PI / 100 * n);
-		glVertex2f(co, si);
-	}
-	glEnd();
-	glBegin(GL_LINE_LOOP);
-	for(size_t n = 0; n < 100; ++n){
-		const float co = cos(2 * M_PI / 100 * n);
-		const float si = sin(2 * M_PI / 100 * n);
-		glVertex2f(co * 0.5, si * 0.5);
-	}
-	glEnd();
-	glBegin(GL_LINE_LOOP);
-	for(size_t n = 0; n < 100; ++n){
-		const float co = cos(2 * M_PI / 100 * n);
-		const float si = sin(2 * M_PI / 100 * n);
-		glVertex2f(co * 0.25, si * 0.25);
-	}
-	glEnd();
-
-	OpenGLMaterial::EnableColors();
 }

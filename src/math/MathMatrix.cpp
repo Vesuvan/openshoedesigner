@@ -35,7 +35,7 @@
 MathMatrix::MathMatrix()
 {
 	// TODO Auto-generated constructor stub
-	
+
 }
 
 MathMatrix::~MathMatrix()
@@ -311,7 +311,7 @@ MathMatrix MathMatrix::XRay(Method method) const
 				{
 					double vm = -DBL_MAX;
 					for(size_t y = 0; y < Ny; y++){
-						const double v = MatlabMatrix::GetValue(x, y, z);
+						const double v = MatlabMatrix::operator()(x, y, z);
 						if(v > vm) vm = v;
 					}
 					temp.Insert(vm);
@@ -321,7 +321,7 @@ MathMatrix MathMatrix::XRay(Method method) const
 				{
 					double vm = DBL_MAX;
 					for(size_t y = 0; y < Ny; y++){
-						const double v = MatlabMatrix::GetValue(x, y, z);
+						const double v = MatlabMatrix::operator()(x, y, z);
 						if(v < vm) vm = v;
 					}
 					temp.Insert(vm);
@@ -331,7 +331,7 @@ MathMatrix MathMatrix::XRay(Method method) const
 				{
 					double vm = 0;
 					for(size_t y = 0; y < Ny; y++){
-						const double v = MatlabMatrix::GetValue(x, y, z);
+						const double v = MatlabMatrix::operator()(x, y, z);
 						vm += v;
 					}
 					temp.Insert(vm / (double) Ny);
@@ -341,7 +341,7 @@ MathMatrix MathMatrix::XRay(Method method) const
 				{
 					double vm = 0;
 					for(size_t y = 0; y < Ny; y++){
-						const double v = MatlabMatrix::GetValue(x, y, z);
+						const double v = MatlabMatrix::operator()(x, y, z);
 						vm += v;
 					}
 					temp.Insert(vm);

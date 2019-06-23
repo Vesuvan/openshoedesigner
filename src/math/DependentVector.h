@@ -37,20 +37,23 @@
 // http://courses.cms.caltech.edu/cs11/material/cpp/donnie/cpp-ops.html
 //
 #include <stddef.h>
+#include <string>
 #include <vector>
 
 class DependentVector {
 public:
 	DependentVector();
 
+	void Clear(void);
 	void Resize(size_t N);
+	void PushBack(double x, double y);
+	size_t Size(void) const; //!< Size of the array
+
 	void XLinspace(double t0, double t1, size_t N);
 	void XSetCyclic(double cyclelength);
 	void XSetLinear(void);
 	bool IsCyclic(void) const;
 	double CycleLength(void) const;
-
-	size_t Size(void) const; //!< Size of the array
 
 	void YInit(double value = 0.0);
 
@@ -70,7 +73,7 @@ public:
 
 	void Sort(void);
 	void Reverse(void);
-	void Resample(size_t N);
+	void Resample(size_t Nnew);
 
 	void CumSum(void);
 	void Integrate(void);
@@ -86,6 +89,9 @@ public:
 	double ResultY(size_t index) const;
 
 	void Paint(void) const;
+	static void PaintCircle(double radius); //TODO This function is in the wrong place/class (again). It needs a better "home".
+
+	void Export(std::string filename) const; ///< Export as a Matlab/Octave .mat file.
 
 private:
 	bool cyclic;

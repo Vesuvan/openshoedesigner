@@ -39,8 +39,8 @@ void PolyCylinder::CircleSection::Segment::Scale(double sy, double sz)
 {
 	y = y0 * sy;
 	z = z0 * sz;
-	dy = y.Derive();
-	dz = z.Derive();
+	dy = y.Derivative();
+	dz = z.Derivative();
 }
 
 double PolyCylinder::CircleSection::Segment::GetLength(void) const
@@ -185,15 +185,17 @@ bool PolyCylinder::Load(std::string filename)
 	for(size_t n = 0; n < dim[0]; ++n){
 		sections[n].segments.resize(dim[1]);
 		for(size_t m = 0; m < dim[1]; ++m){
-			sections[n].segments[m].z0.c3 = temp[p++];
-			sections[n].segments[m].z0.c2 = temp[p++];
-			sections[n].segments[m].z0.c1 = temp[p++];
-			sections[n].segments[m].z0.c0 = temp[p++];
-			sections[n].segments[m].y0.c3 = temp[p++];
-			sections[n].segments[m].y0.c2 = temp[p++];
-			sections[n].segments[m].y0.c1 = temp[p++];
-			sections[n].segments[m].y0.c0 = temp[p++];
-			sections[n].segments[m].Scale(0.002, 0.002);
+			sections[n].segments[m].z0.Resize(4);
+			sections[n].segments[m].y0.Resize(4);
+			sections[n].segments[m].z0[0] = temp[p++];
+			sections[n].segments[m].z0[1] = temp[p++];
+			sections[n].segments[m].z0[2] = temp[p++];
+			sections[n].segments[m].z0[3] = temp[p++];
+			sections[n].segments[m].y0[0] = temp[p++];
+			sections[n].segments[m].y0[1] = temp[p++];
+			sections[n].segments[m].y0[2] = temp[p++];
+			sections[n].segments[m].y0[3] = temp[p++];
+			sections[n].segments[m].Scale(0.006, 0.006);
 		}
 	}
 
@@ -243,18 +245,18 @@ void PolyCylinder::GenerateGeometry(Geometry &geometry, bool mirrored)
 		}
 	}
 
-	for(size_t n = 1; n <  sections.size(); ++n){
+	for(size_t n = 1; n < sections.size(); ++n){
 		double r = 0.0;
-		a =  sections[n - 1].Evaluate(r);
-		b =  sections[n].Evaluate(r);
-		a.x = (n - 1) *  dx;
-		b.x = (n) *  dx;
+		a = sections[n - 1].Evaluate(r);
+		b = sections[n].Evaluate(r);
+		a.x = (n - 1) * dx;
+		b.x = (n) * dx;
 		for(size_t m = 0; m < N; ++m){
 			r += dr;
-			c =  sections[n - 1].Evaluate(r);
-			d =  sections[n].Evaluate(r);
-			c.x = (n - 1) *  dx;
-			d.x = (n) *  dx;
+			c = sections[n - 1].Evaluate(r);
+			d = sections[n].Evaluate(r);
+			c.x = (n - 1) * dx;
+			d.x = (n) * dx;
 			if(mirrored){
 				geometry.AddQuad(a, b, d, c);
 			}else{
@@ -268,18 +270,18 @@ void PolyCylinder::GenerateGeometry(Geometry &geometry, bool mirrored)
 		a.Zero();
 		double r = 0.0;
 		for(size_t m = 0; m < N; ++m){
-			a +=  sections[ sections.size() - 1].Evaluate(r);
+			a += sections[sections.size() - 1].Evaluate(r);
 			r += dr;
 		}
 		a /= N;
-		a.x = ((double) ( sections.size() - 1) + 0.5) *  dx;
+		a.x = ((double) (sections.size() - 1) + 0.5) * dx;
 		r = 0.0;
-		b =  sections[ sections.size() - 1].Evaluate(0);
-		b.x = ( sections.size() - 1) *  dx;
+		b = sections[sections.size() - 1].Evaluate(0);
+		b.x = (sections.size() - 1) * dx;
 		for(size_t m = 0; m < N; ++m){
 			r += dr;
-			c =  sections[ sections.size() - 1].Evaluate(r);
-			c.x = ( sections.size() - 1) *  dx;
+			c = sections[sections.size() - 1].Evaluate(r);
+			c.x = (sections.size() - 1) * dx;
 			if(mirrored){
 				geometry.AddTriangle(a, c, b);
 			}else{
@@ -289,7 +291,6 @@ void PolyCylinder::GenerateGeometry(Geometry &geometry, bool mirrored)
 		}
 	}
 }
-
 
 void PolyCylinder::Test(void)
 {

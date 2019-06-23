@@ -51,27 +51,27 @@ void FormFinder::AddPolygon(const Polygon3& poly, size_t Nsections)
 	c.resize(N);
 	d.resize(N);
 	for(size_t n = 0; n < N; ++n){
-		a[n].x = pf.FilterA(x, n);
-		a[n].y = pf.FilterA(y, n);
-		a[n].z = pf.FilterA(z, n);
-		b[n].x = pf.FilterB(x, n);
-		b[n].y = pf.FilterB(y, n);
-		b[n].z = pf.FilterB(z, n);
-		c[n].x = pf.FilterC(x, n);
-		c[n].y = pf.FilterC(y, n);
-		c[n].z = pf.FilterC(z, n);
-		d[n].x = pf.FilterD(x, n);
-		d[n].y = pf.FilterD(y, n);
-		d[n].z = pf.FilterD(z, n);
+//		a[n].x = pf.FilterA(x, n);
+//		a[n].y = pf.FilterA(y, n);
+//		a[n].z = pf.FilterA(z, n);
+//		b[n].x = pf.FilterB(x, n);
+//		b[n].y = pf.FilterB(y, n);
+//		b[n].z = pf.FilterB(z, n);
+//		c[n].x = pf.FilterC(x, n);
+//		c[n].y = pf.FilterC(y, n);
+//		c[n].z = pf.FilterC(z, n);
+//		d[n].x = pf.FilterD(x, n);
+//		d[n].y = pf.FilterD(y, n);
+//		d[n].z = pf.FilterD(z, n);
 	}
 
 	double pos;
 	for(size_t n = 0; n < N; n += 1){
-		std::cout << n << ": ("
-				<< pf.GetExtremum(pos, a[n].x, b[n].x, c[n].x, d[n].x) << ") ";
-		std::cout << (double) n + pos << " - (";
-		std::cout << pf.GetExtremum2(pos, a[n].x, b[n].x, c[n].x, d[n].x)
-				<< ") ";
+//		std::cout << n << ": ("
+//				<< pf.GetExtremum(pos, a[n].x, b[n].x, c[n].x, d[n].x) << ") ";
+//		std::cout << (double) n + pos << " - (";
+//		std::cout << pf.GetExtremum2(pos, a[n].x, b[n].x, c[n].x, d[n].x)
+//				<< ") ";
 		std::cout << (double) n + pos << "\n";
 	}
 
@@ -108,11 +108,11 @@ void FormFinder::Paint(void) const
 
 	double pos;
 	for(size_t n = 0; n < N; n += 1){
-		if(pf.GetExtremum(pos, a[n].x, b[n].x, c[n].x, d[n].x)){
-			if(pos < 0 || pos > pf.GetSize()) continue;
-			Vector3 temp = ((a[n] * pos + b[n]) * pos + c[n]) * pos + d[n];
-			glVertex3f(temp.x, temp.y, temp.z);
-		}
+//		if(pf.GetExtremum(pos, a[n].x, b[n].x, c[n].x, d[n].x)){
+//			if(pos < 0 || pos > pf.GetSize()) continue;
+//			Vector3 temp = ((a[n] * pos + b[n]) * pos + c[n]) * pos + d[n];
+//			glVertex3f(temp.x, temp.y, temp.z);
+//		}
 	}
 	glEnd();
 

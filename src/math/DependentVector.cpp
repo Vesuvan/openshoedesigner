@@ -30,12 +30,37 @@
 #include <stddef.h>
 #include <algorithm>
 #include <cmath>
-#include <vector>
+
+#include "MatlabFile.h"
+#include "MatlabMatrix.h"
 
 DependentVector::DependentVector()
 {
 	cyclic = false;
 	cyclelength = 0.0;
+}
+
+void DependentVector::Clear(void)
+{
+	x.clear();
+	y.clear();
+}
+
+void DependentVector::Resize(size_t N)
+{
+	x.resize(N);
+	y.resize(N);
+}
+
+void DependentVector::PushBack(double x, double y)
+{
+	this->x.push_back(x);
+	this->y.push_back(y);
+}
+
+size_t DependentVector::Size(void) const
+{
+	return x.size();
 }
 
 void DependentVector::XLinspace(double t0, double t1, size_t N)
@@ -71,11 +96,6 @@ double DependentVector::CycleLength(void) const
 void DependentVector::YInit(double value)
 {
 	y.assign(x.size(), value);
-}
-
-size_t DependentVector::Size(void) const
-{
-	return x.size();
 }
 
 double& DependentVector::X(size_t index)
@@ -409,12 +429,6 @@ void DependentVector::CumProd(void)
 		y[n] *= y[n - 1];
 }
 
-void DependentVector::Resize(size_t N)
-{
-	x.resize(N);
-	y.resize(N);
-}
-
 void DependentVector::Paint(void) const
 {
 	glBegin(GL_LINE_STRIP);
@@ -430,4 +444,30 @@ void DependentVector::Paint(void) const
 			glVertex2d(x[n], y[n]);
 	}
 	glEnd();
+}
+
+void DependentVector::PaintCircle(double radius)
+{
+	glBegin(GL_LINE_LOOP);
+	for(size_t n = 0; n < 100; ++n){
+		const float co = cos(2 * M_PI / 100 * n);
+		const float si = sin(2 * M_PI / 100 * n);
+		glNormal3f(co, si, 0);
+		glVertex2f(co * radius, si * radius);
+	}
+	glEnd();
+}
+
+void DependentVector::Export(std::string filename) const
+{
+	MatlabMatrix Mx("x", x.size());
+	for(size_t n = 0; n < x.size(); ++n)
+		Mx[n] = x[n];
+	MatlabMatrix My("y", y.size());
+	for(size_t n = 0; n < y.size(); ++n)
+		My[n] = y[n];
+	MatlabFile mf(filename);
+	mf.WriteMatrix(Mx);
+	mf.WriteMatrix(My);
+	mf.Close();
 }

@@ -95,7 +95,7 @@ private:
 	void PaintFloor(void) const;
 
 DECLARE_DYNAMIC_CLASS(ProjectView)
-	;
+
 };
 
 #endif /* PROJECTVIEW_H_ */

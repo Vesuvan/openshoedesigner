@@ -149,8 +149,8 @@ private:
 
 	size_t FindVertex(const Vector3& x);
 	size_t FindEdge(const size_t indexa, const size_t indexb);
-	Vector3 PlaneProjection(const Vector3 &a, const Vector3 &b, Vector3 n,
-			double d) const;
+	static Vector3 PlaneProjection(const Vector3 &a, const Vector3 &b,
+			Vector3 n, double d);
 };
 
 #endif /* HULL_H_ */

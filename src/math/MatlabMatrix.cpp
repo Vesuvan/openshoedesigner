@@ -275,30 +275,6 @@ bool MatlabMatrix::IsFilled(void) const
 	return bufferpos >= size;
 }
 
-double MatlabMatrix::GetValue(const size_t pos) const
-{
-	assert(buffer != NULL);
-	if(pos >= this->size) throw(std::out_of_range(
-			std::string(__FILE__) + ": GetValue(pos): pos >= size."));
-	return buffer[pos];
-}
-
-double MatlabMatrix::GetValue(const size_t p1, const size_t p2, const size_t p3,
-		const size_t p4) const
-{
-	assert(buffer != NULL);
-	if(p1 >= this->Size(1)) throw(std::out_of_range(
-			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p1 >= S1."));
-	if(p2 >= this->Size(2)) throw(std::out_of_range(
-			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p2 >= S2."));
-	if(p3 >= this->Size(3)) throw(std::out_of_range(
-			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p3 >= S3."));
-	if(p4 >= this->Size(4)) throw(std::out_of_range(
-			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p4 >= S4."));
-	const size_t pos = p1 + (p2 + (p3 + p4 * Size(3)) * Size(2)) * Size(1);
-	return buffer[pos];
-}
-
 double& MatlabMatrix::operator[](const size_t& index)
 {
 	if(index >= size) throw(std::out_of_range(
@@ -330,37 +306,6 @@ double& MatlabMatrix::operator ()(const size_t p1, const size_t p2,
 }
 
 double MatlabMatrix::operator ()(const size_t p1, const size_t p2,
-		const size_t p3, const size_t p4) const
-{
-	assert(buffer != NULL);
-	if(p1 >= this->Size(1)) throw(std::out_of_range(
-			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p1 >= S1."));
-	if(p2 >= this->Size(2)) throw(std::out_of_range(
-			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p2 >= S2."));
-	if(p3 >= this->Size(3)) throw(std::out_of_range(
-			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p3 >= S3."));
-	if(p4 >= this->Size(4)) throw(std::out_of_range(
-			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p4 >= S4."));
-	const size_t pos = p1 + (p2 + (p3 + p4 * Size(3)) * Size(2)) * Size(1);
-	return buffer[pos];
-}
-double& MatlabMatrix::At(const size_t p1, const size_t p2, const size_t p3,
-		const size_t p4)
-{
-	assert(buffer != NULL);
-	if(p1 >= this->Size(1)) throw(std::out_of_range(
-			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p1 >= S1."));
-	if(p2 >= this->Size(2)) throw(std::out_of_range(
-			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p2 >= S2."));
-	if(p3 >= this->Size(3)) throw(std::out_of_range(
-			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p3 >= S3."));
-	if(p4 >= this->Size(4)) throw(std::out_of_range(
-			std::string(__FILE__) + ": GetValue(p1,p2,p3,p4): p4 >= S4."));
-	const size_t pos = p1 + (p2 + (p3 + p4 * Size(3)) * Size(2)) * Size(1);
-	return buffer[pos];
-}
-
-const double& MatlabMatrix::At(const size_t p1, const size_t p2,
 		const size_t p3, const size_t p4) const
 {
 	assert(buffer != NULL);

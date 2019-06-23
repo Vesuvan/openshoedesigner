@@ -168,7 +168,7 @@ private:
 	wxCriticalSection CSRight;
 
 DECLARE_DYNAMIC_CLASS(Project)
-	;
+
 };
 
 #endif /* PROJECT_H_ */
