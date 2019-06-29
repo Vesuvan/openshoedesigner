@@ -60,7 +60,7 @@ public:
 		size_t ta, tb;
 		uint_least8_t trianglecount;
 		Vector3 n;
-		size_t OtherTriangle(size_t n);
+		size_t OtherTriangle(size_t n) const;
 	};
 	class Triangle {
 	public:
@@ -68,7 +68,7 @@ public:
 		size_t va, vb, vc;
 		size_t ea, eb, ec;
 		Vector3 n;
-		int Direction(size_t i1, size_t i2); //!< Test the direction of rotation of two indices respective to a triangle.
+		int Direction(size_t i1, size_t i2) const; //!< Test the direction of rotation of two indices respective to a triangle.
 	};
 
 	// Member variables
@@ -129,7 +129,8 @@ public:
 	void AddQuadTransform(const Vector3 &a, const Vector3 &b, const Vector3 &c,
 			const Vector3 &d, const AffineTransformMatrix &transformMatrix);
 
-	Polygon3 IntersectPlane(Vector3 n, double d);
+	Polygon3 IntersectPlane(Vector3 n, double d) const;
+	Vector3 IntersectArrow(Vector3 p0, Vector3 dir) const;
 	Vector3 GetCenter(void) const;
 
 	size_t GetVertexCount(void) const

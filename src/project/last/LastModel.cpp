@@ -57,8 +57,18 @@ LastModel::LastModel()
 	mirrored = false;
 	modified = true;
 
-	Polynom p = Polynom::ByValue(-1, 1, 0, 0, 1, 1);
-	std::cout << p << "\n";
+//	Polynom p = Polynom::ByValue(-1, 1, 0, 0, 1, 1);
+//	std::cout << p << "\n";
+
+//	PolyFilter pf;
+//	pf.Init(0, 40);
+//	pf.Export("/tmp/PF_0.mat");
+//	pf.Init(1, 40);
+//	pf.Export("/tmp/PF_1.mat");
+//	pf.Init(2, 40);
+//	pf.Export("/tmp/PF_2.mat");
+//	pf.Init(3, 40);
+//	pf.Export("/tmp/PF_3.mat");
 
 //	KernelDensityEstimator kde0;
 //	kde0.XLinspace(-5, 5, 301);
@@ -181,6 +191,7 @@ bool LastModel::AnalyseForm(void)
 	BoundingBox bb;
 	for(size_t i = 0; i < hull.GetVertexCount(); ++i)
 		bb.Insert(hull.GetVertex(i));
+	AffineTransformMatrix bbc = bb.GetCoordinateSystem();
 
 	{
 		// Scan Shape for symmetry
@@ -188,22 +199,22 @@ bool LastModel::AnalyseForm(void)
 		symmetry.Init(180);
 		for(double cut = 0.2; cut < 0.81; cut += 0.2){
 			Polygon3 section = hull.IntersectPlane(Vector3(1, 0, 0),
-					bb.xmin + bb.GetSizeX() * cut);
+					bbc.GlobalX(cut));
 
 			Vector3 rot = section.GetRotationalAxis();
 			if(rot.x < 0) rot = -rot;
 
-			coordsys.SetCenter(section.GetCenter());
+			coordsys.SetOrigin(section.GetCenter());
 			coordsys.SetEx(Vector3(0, 1, 0));
-			coordsys.SetEz(rot);
-			coordsys.CalculateEy();
+			coordsys.SetEy(Vector3(0, 0, 1));
+			coordsys.SetEz(Vector3(1, 0, 0));
 
 			FourierTransform ft;
 			ft.TSetSize(section.Size());
 			for(size_t n = 0; n < section.Size(); ++n){
-				ft.t[n] = atan2(coordsys.GetLocalY(section[n]),
-						coordsys.GetLocalX(section[n]));
-				ft.InRe[n] = (section[n] - coordsys.GetCenter()).Abs();
+				ft.t[n] = atan2(coordsys.LocalY(section[n]),
+						coordsys.LocalX(section[n]));
+				ft.InRe[n] = (section[n] - coordsys.GetOrigin()).Abs();
 				ft.InIm[n] = 0.0;
 			}
 			ft.TUnwrap();
@@ -232,7 +243,7 @@ bool LastModel::AnalyseForm(void)
 
 		for(double cut = 0.2; cut < 0.81; cut += 0.2){
 			Polygon3 section = hull.IntersectPlane(Vector3(1, 0, 0),
-					bb.xmin + bb.GetSizeX() * cut);
+					bbc.GlobalX(cut));
 
 			Vector3 rot = section.GetRotationalAxis();
 			if(rot.x > 0) section.Reverse();
@@ -277,7 +288,7 @@ bool LastModel::AnalyseForm(void)
 		std::vector <double> ratio;
 		for(double cut = 0.1; cut < 0.91; cut += 0.1){
 			Polygon3 section = hull.IntersectPlane(Vector3(1, 0, 0),
-					bb.xmin + bb.GetSizeX() * cut);
+					bbc.GlobalX(cut));
 			BoundingBox temp;
 			for(size_t n = 0; n < section.Size(); ++n)
 				temp.Insert(section[n]);
@@ -304,6 +315,7 @@ bool LastModel::AnalyseForm(void)
 			bb.Clear();
 			for(size_t i = 0; i < hull.GetVertexCount(); ++i)
 				bb.Insert(hull.GetVertex(i));
+			bbc = bb.GetCoordinateSystem();
 		}
 
 //		double maxr;
@@ -338,7 +350,7 @@ bool LastModel::AnalyseForm(void)
 	bb.Clear();
 	for(size_t i = 0; i < hull.GetVertexCount(); ++i)
 		bb.Insert(hull.GetVertex(i));
-
+	bbc = bb.GetCoordinateSystem();
 //	return true;
 	{
 		// Scan for left/right
@@ -350,7 +362,7 @@ bool LastModel::AnalyseForm(void)
 //		kde.XSetLinear();
 		for(double cut = 0.1; cut < 0.91; cut += 0.1){
 			Polygon3 section = hull.IntersectPlane(Vector3(1, 0, 0),
-					bb.xmin + bb.GetSizeX() * cut);
+					bbc.GlobalX(cut));
 			loop += section.GetCenter();
 
 //			BoundingBox bb2;
@@ -376,7 +388,7 @@ bool LastModel::AnalyseForm(void)
 		py.ScaleX(1.0 / bb.GetSizeX()); // Normale with lastlength
 		py.ScaleY(1.0 / bb.GetSizeY()); // Normalize with lastwidth
 
-		std::cout << "py = " << py << ";\n";
+//		std::cout << "py = " << py << ";\n";
 
 		double chir = py[0];
 //		if(py[0] > 1.0) std::cout << "Right last\n";
@@ -395,8 +407,7 @@ bool LastModel::AnalyseForm(void)
 		kde.XLinspace(0, 2 * M_PI, 360);
 		kde.XSetCyclic(2 * M_PI);
 
-		loop = hull.IntersectPlane(Vector3(1, 0, 0),
-				bb.xmin + bb.GetSizeX() * 0.5);
+		loop = hull.IntersectPlane(Vector3(1, 0, 0), bbc.GlobalX(0.5));
 
 		Vector3 rot = loop.GetRotationalAxis();
 		if(rot.x > 0) loop.Reverse();
@@ -434,11 +445,12 @@ bool LastModel::AnalyseForm(void)
 			temp.ScaleGlobal(1.0, -1.0, 1.0);
 			hull.ApplyTransformation(temp);
 
-			std::cout << "Flip sides left to right.\n";
+//			std::cout << "Flip sides left to right.\n";
 
 			bb.Clear();
 			for(size_t i = 0; i < hull.GetVertexCount(); ++i)
 				bb.Insert(hull.GetVertex(i));
+			bbc = bb.GetCoordinateSystem();
 		}
 
 //		std::cout << chir << " ";
@@ -449,7 +461,7 @@ bool LastModel::AnalyseForm(void)
 //		if(fabs(chir) < 0.5) std::cout << "(Insole recommended)";
 //		std::cout << "\n";
 
-		coordsys.SetCenter(Vector3());
+		coordsys.SetOrigin(Vector3());
 		coordsys.SetEx(Vector3(0, 1, 0));
 		coordsys.SetEy(Vector3(0, 0, 1));
 		coordsys.CalculateEz();
@@ -468,15 +480,63 @@ bool LastModel::AnalyseForm(void)
 //	cde.Add(CoreDensityEstimator::Epanechnikov, 1, 1, 1);
 //	cde.Add(CoreDensityEstimator::Epanechnikov, 0.5, 2.5, 1);
 	{
-		loop = hull.IntersectPlane(Vector3(0, 1, 0),
-				bb.ymin + bb.GetSizeY() * 0.5);
-//			const size_t N = loop.Size();
-//			size_t Nmin = 0;
-//			size_t Nmax = 0;
-//			for(size_t n = 0; n < N; ++n){
-//				if(loop[n].x < loop[Nmin].x) Nmin = n;
-//				if(loop[n].x > loop[Nmax].x) Nmax = n;
-//			}
+		// Find the outline of the sole
+
+//		loop = hull.IntersectPlane(Vector3(0, 1, 0), bbc.GlobalY(0, 0.5));
+
+		const double param_soleangle = 35 * M_PI / 180;
+
+		left.Clear();
+		right.Clear();
+		bottom.Clear();
+		for(double cut = 0.05; cut < 0.95; cut += 0.025){
+			Polygon3 section = hull.IntersectPlane(Vector3(1, 0, 0),
+					bbc.GlobalX(cut));
+
+			Vector3 r = section.GetRotationalAxis();
+			if(r.x < 0) section.Reverse();
+
+			const size_t N = section.Size();
+			size_t Nmin = 0;
+			for(size_t n = 0; n < N; ++n)
+				if(section[n].z < section[Nmin].z) Nmin = n;
+
+			for(size_t n = 0; n < N; ++n){
+				const Vector3 n0 = section.Normal((Nmin + n) % N);
+				const Vector3 n1 = section.Normal((Nmin + n + 1) % N);
+				const double a0 = atan2(n0.y, -n0.z);
+				const double a1 = atan2(n1.y, -n1.z);
+				if(a0 < param_soleangle && a1 > param_soleangle){
+					const double s = (param_soleangle - a0) / (a1 - a0);
+					const Vector3 v0 = section[(Nmin + n) % N];
+					const Vector3 v1 = section[(Nmin + n + 1) % N];
+					left.InsertPoint((v1 - v0) * s + v0,
+							((n1 - n0) * s + n0).Normal());
+					break;
+				}
+			}
+
+			for(size_t n = 0; n < N; ++n){
+				const Vector3 n0 = section.Normal((Nmin + N - n) % N);
+				const Vector3 n1 = section.Normal((Nmin + N - (n + 1)) % N);
+				const double a0 = atan2(n0.y, -n0.z);
+				const double a1 = atan2(n1.y, -n1.z);
+				if(a0 > -param_soleangle && a1 < -param_soleangle){
+					const double s = (-param_soleangle - a0) / (a1 - a0);
+					const Vector3 v0 = section[(Nmin + N - n) % N];
+					const Vector3 v1 = section[(Nmin + N - (n + 1)) % N];
+					right.InsertPoint((v1 - v0) * s + v0,
+							((n1 - n0) * s + n0).Normal());
+					break;
+				}
+			}
+		}
+
+		for(size_t n = 0; n < right.Size(); ++n){
+			const Vector3 temp = (right[n] + left[n]) / 2;
+			bottom.InsertPoint(hull.IntersectArrow(temp, Vector3(0, 0, -1)));
+		}
+
 //			Polygon3 pmin;
 //			for(size_t n = Nmin; n < (N + Nmin); ++n){
 //				const size_t m = n % N;
@@ -645,7 +705,11 @@ void LastModel::Paint(void) const
 	OpenGLMaterial white(OpenGLMaterial::whiteplastic, 1.0);
 	white.UseMaterial();
 
-	loop.Paint(true, 0.25);
+//	loop.Paint(true, 0.25);
+
+	left.Paint(true);
+	right.Paint(true);
+	bottom.Paint(true);
 
 	OpenGLMaterial green(OpenGLMaterial::whiterubber, 1.0);
 	green.UseMaterial();
@@ -655,21 +719,21 @@ void LastModel::Paint(void) const
 	OpenGLMaterial yellow(OpenGLMaterial::yellowplastic, 1.0);
 	yellow.UseMaterial();
 
-	formfinder.Paint();
+//	formfinder.Paint();
 
 	glPushMatrix();
-	coordsys.MultMatrix();
+	coordsys.GLMultMatrix();
 
 //	symmetry.Paint();
-	kde.Paint();
-	kde.PaintCircle(0.05);
-	kde.PaintCircle(0.1);
-	kde.PaintCircle(0.15);
+//	kde.Paint();
+//	kde.PaintCircle(0.05);
+//	kde.PaintCircle(0.1);
+//	kde.PaintCircle(0.15);
 
 	glPopMatrix();
 
 //	center.Paint();
-	coordsys.Paint(0.3);
+//	coordsys.Paint();
 
 	OpenGLMaterial::EnableColors();
 

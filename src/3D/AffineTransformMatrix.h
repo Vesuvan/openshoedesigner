@@ -68,44 +68,52 @@ class wxTextOutputStream;
 class wxTextInputStream;
 class AffineTransformMatrix {
 public:
-	AffineTransformMatrix();
-	AffineTransformMatrix(const Vector3 &ex, const Vector3 &ey,
-			const Vector3 &ez, const Vector3 &center);
-
-public:
-	double a[16]; //!< The transformation matrix.
 	enum orientation {
 		rhs, //!< Right-handed system
 		lhs  //!< Left-handed system
-	} side;
+	};
+
+	AffineTransformMatrix();
+	AffineTransformMatrix(const Vector3& ex, const Vector3& ey,
+			const Vector3& ez, const Vector3& center);
+
+private:
+	double a[16]; //!< Transformation matrix
+	orientation side; //!< Handedness of the coordinate system
 
 public:
+	void SetOrientation(orientation side); //!< Preset the behavior for future Set and Calculate operations
+	orientation GetOrientation(void) const; //!< Return the orientation flag
+	orientation CheckOrientation(void) const; //!< Calculate the orientations of the coordinate system by analysing the matrix
+	void UpdateOrientation(void); //!< Set the orientation flag according the the matrix values
+
 	void SetIdentity(void); //!< Resets the matrix to the identity matrix.
 	void ResetRotationAndScale(void); //!< Resets the rotation and scale, but keeps the translation
 
 	void Set(AffineTransformMatrix const& b); //!< Copies a matrix by inserting a given matrix into \a a.
-	void SetCenter(const Vector3 &center);
+	void SetOrigin(const Vector3& center);
 
-	void SetEx(const Vector3 &ex);
-	void SetEy(const Vector3 &ey);
-	void SetEz(const Vector3 &ez);
+	void SetEx(const Vector3& ex);
+	void SetEy(const Vector3& ey);
+	void SetEz(const Vector3& ez);
 	void CalculateEx(void);
 	void CalculateEy(void);
 	void CalculateEz(void);
+	AffineTransformMatrix Normal(void) const;
 	void Normalize(void);
 
-	Vector3 GetCenter(void) const; //!< Returns the center point of the matrix.
+	Vector3 GetOrigin(void) const; //!< Returns the center point of the matrix.
 	Vector3 GetEx(void) const;
 	Vector3 GetEy(void) const;
 	Vector3 GetEz(void) const;
 
-	AffineTransformMatrix& operator*=(const AffineTransformMatrix &b); //!< Overloaded operator to allow correct multiplication of two matrices.
+	AffineTransformMatrix& operator*=(const AffineTransformMatrix& b); //!< Overloaded operator to allow correct multiplication of two matrices.
 	const AffineTransformMatrix operator*(const AffineTransformMatrix& b) const; //!< Overloaded operator to allow correct multiplication of two matrices.
 	/*!\brief  Overloaded operator to allow correct division of two matrices.
 	 *
 	 * The division is done by inverting the second matrix and the multiplying both.
 	 */
-	AffineTransformMatrix& operator/=(const AffineTransformMatrix &b);
+	AffineTransformMatrix& operator/=(const AffineTransformMatrix& b);
 	const AffineTransformMatrix operator/(const AffineTransformMatrix& b) const; //!< Overloaded operator to allow correct division of two matrices.
 
 	void Invert(void); //!< Inverts the matrix itself
@@ -188,13 +196,18 @@ public:
 	Vector3 TransformNoShift(const double x, const double y = 0.0,
 			const double z = 0.0) const;
 	Vector3 operator*(const Vector3& v) const;
-	Vector3 operator()(const Vector3 &v) const; //!< Operator reference for Vector3 transformations.
+	double &operator[](unsigned char index);
+	const double operator[](unsigned char index) const;
+	Vector3 operator()(const Vector3& v) const; //!< Operator reference for Vector3 transformations.
 	Vector3 operator()(const double x, const double y = 0.0, const double z =
 			0.0) const;
 
-	double GetLocalX(const Vector3 &v) const;
-	double GetLocalY(const Vector3 &v) const;
-	double GetLocalZ(const Vector3 &v) const;
+	double LocalX(const Vector3& v) const; ///< Maps a global point onto the local coordinate system, returns the local x.
+	double LocalY(const Vector3& v) const; ///< Maps a global point onto the local coordinate system, returns the local y.
+	double LocalZ(const Vector3& v) const; ///< Maps a global point onto the local coordinate system, returns the local z.
+	double GlobalX(double x = 0.0, double y = 0.0, double z = 0.0) const; ///< Calculates the global x, given a local point.
+	double GlobalY(double x = 0.0, double y = 0.0, double z = 0.0) const; ///< Calculates the global y, given a local point.
+	double GlobalZ(double x = 0.0, double y = 0.0, double z = 0.0) const; ///< Calculates the global z, given a local point.
 
 	double Distance(const AffineTransformMatrix &other) const;
 
@@ -210,8 +223,8 @@ public:
 	void ToStream(wxTextOutputStream & stream);
 	void FromStream(wxTextInputStream & stream);
 
-	void MultMatrix(void) const; //!< Multiplay the matrix into OpenGL
-	void Paint(const double scale = 1.0) const; //!< Display the coordinate system on OpenGL
+	void GLMultMatrix(void) const; //!< Multiply the matrix onto the active OpenGL matrix (right multiply)
+	void Paint(const double scale = 1.0) const; //!< Display the coordinate system in OpenGL
 };
 
 #endif /* AFFINETRANSFORMMATRIX_H_ */

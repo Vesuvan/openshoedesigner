@@ -134,7 +134,7 @@ void HeightField::Paint(void) const
 {
 	if(value == NULL) return;
 	glPushMatrix();
-	glMultMatrixd(matrix.a);
+	matrix.GLMultMatrix();
 	glColor4f(color.x, color.y, color.z, 0.8);
 
 	glPointSize(2.0);

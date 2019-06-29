@@ -106,6 +106,7 @@ void Project::StopAllThreads(void)
 
 void Project::Reset(void)
 {
+
 	measurementsSymmetric = true;
 	measurementsource = fromMeasurements;
 	modeltype = lastBased;
@@ -123,6 +124,7 @@ void Project::Reset(void)
 
 //	lastModelR.LoadModel("data/Last_Default_Normalized.stl");
 	lastModelR.LoadModel("data/Last_Flat_FreeStyle_RoundTipWide.stl");
+
 	lastModelL = lastModelR;
 	lastModelL.mirrored = true;
 }
@@ -362,7 +364,12 @@ bool Project::SaveFootModel(wxString fileName)
 
 bool Project::LoadLastModel(wxString fileName)
 {
-	if(!lastModelR.LoadModel(fileName.ToStdString()))return false;
+	try{
+		if(!lastModelR.LoadModel(fileName.ToStdString())) return false;
+	}
+	catch(std::exception &exeption){
+		std::cout << "Exeption caught: " << exeption.what() << "\n";
+	}
 	lastModelL = lastModelR;
 	lastModelL.mirrored = true;
 	return true;

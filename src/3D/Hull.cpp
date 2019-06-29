@@ -43,7 +43,7 @@ Hull::Edge::Edge()
 	trianglecount = 0;
 }
 
-size_t Hull::Edge::OtherTriangle(size_t n)
+size_t Hull::Edge::OtherTriangle(size_t n) const
 {
 	if(ta == n) return tb;
 	return ta;
@@ -59,7 +59,7 @@ Hull::Triangle::Triangle()
 	ec = 0;
 }
 
-int Hull::Triangle::Direction(size_t i1, size_t i2)
+int Hull::Triangle::Direction(size_t i1, size_t i2) const
 {
 	if((i1 == va && i2 == vb) || (i1 == vb && i2 == vc)
 			|| (i1 == vc && i2 == va)) return 1;
@@ -102,7 +102,7 @@ void Hull::SetEpsilon(double newEpsilon)
 void Hull::Paint(void) const
 {
 	::glPushMatrix();
-	::glMultMatrixd(matrix.a);
+	matrix.GLMultMatrix();
 
 	const double normalscale = 0.1;
 
@@ -223,29 +223,25 @@ bool Hull::LoadObj(std::string filename)
 void Hull::ApplyTransformation(const AffineTransformMatrix &matrix)
 {
 	std::transform(v.begin(), v.end(), v.begin(), matrix);
-
-//	for(size_t i = 0; i < v.size(); i++)
-//		v[i] = matrix.Transform(v[i]);
-
 	for(size_t i = 0; i < vn.size(); i++)
 		vn[i] = matrix.TransformNoShift(vn[i]);
 	for(size_t i = 0; i < e.size(); i++)
 		e[i].n = matrix.TransformNoShift(e[i].n);
 	for(size_t i = 0; i < t.size(); i++)
 		t[i].n = matrix.TransformNoShift(t[i].n);
+
+	if(matrix.CheckOrientation() == AffineTransformMatrix::lhs){
+		for(size_t i = 0; i < t.size(); i++){
+			std::swap(t[i].va, t[i].vb);
+			std::swap(t[i].eb, t[i].ec);
+		}
+	}
 }
 
 void Hull::ApplyTransformation(void)
 {
-	std::transform(v.begin(), v.end(), v.begin(), matrix);
-//	for(size_t i = 0; i < v.size(); i++)
-//		v[i] = this->matrix.Transform(v[i]);
-	for(size_t i = 0; i < vn.size(); i++)
-		vn[i] = matrix.TransformNoShift(vn[i]);
-	for(size_t i = 0; i < e.size(); i++)
-		e[i].n = this->matrix.TransformNoShift(e[i].n);
-	for(size_t i = 0; i < t.size(); i++)
-		t[i].n = this->matrix.TransformNoShift(t[i].n);
+	this->ApplyTransformation(this->matrix);
+	this->matrix.SetIdentity();
 }
 
 void Hull::CopyFrom(const Geometry &geometry)
@@ -289,7 +285,7 @@ Vector3 Hull::PlaneProjection(const Vector3& a, const Vector3& b, Vector3 n,
 	return (b * sa - a * sb) / (sa - sb);
 }
 
-Polygon3 Hull::IntersectPlane(Vector3 n, double d)
+Polygon3 Hull::IntersectPlane(Vector3 n, double d) const
 {
 	n.Normalize();
 
@@ -344,42 +340,68 @@ Polygon3 Hull::IntersectPlane(Vector3 n, double d)
 		break;
 	}
 
-//	for(std::set <size_t>::iterator it = edges.begin(); it != edges.end();
-//			++it){
-//
-//	}
+	//TODO: If edges is not yet empty, there is more than a single loop in the cutting plane.
+	// for(std::set <size_t>::iterator it = edges.begin(); it != edges.end(); ++it){
+	//   ...
+	// }
 
 	temp.Close();
 	return temp;
 }
 
+Vector3 Hull::IntersectArrow(Vector3 p0, Vector3 dir) const
+{
+	for(size_t i = 0; i < t.size(); ++i){
+		const Vector3 a = v[t[i].va];
+		const Vector3 b = v[t[i].vb];
+		const Vector3 c = v[t[i].vc];
+		// Check if point of (p0 + x*dir) lies inside the triangle
+		if(((b - a) * (p0 - a)).Dot(dir) < 0) continue;
+		if(((c - b) * (p0 - b)).Dot(dir) < 0) continue;
+		if(((a - c) * (p0 - c)).Dot(dir) < 0) continue;
+		// Find intersection point
+		// solve((p0x+x*dirx)*nx + (p0y+x*diry)*ny + (p0z+x*dirz)*nz = ax*nx + ay*ny + az*nz, x);
+		const double den = t[i].n.Dot(dir);
+		const double x = t[i].n.Dot(a - p0) / den;
+		return p0 + dir * x;
+	}
+	return Vector3();
+}
+
 void Hull::CalcNormals(void)
 {
-	Vector3 temp;
+	// Start with triangle normals
 	for(size_t i = 0; i < t.size(); ++i){
-		temp = (v[t[i].vb] - v[t[i].va]) * (v[t[i].vc] - v[t[i].vb]);
+		Vector3 temp = (v[t[i].vb] - v[t[i].va]) * (v[t[i].vc] - v[t[i].vb]);
 		temp.Normalize();
 		t[i].n = temp;
 	}
+	// Zero vertex normals
 	for(size_t i = 0; i < vn.size(); ++i)
 		vn[i].Zero();
 	for(size_t i = 0; i < e.size(); ++i){
+		// For edges connected to triangles:
 		if(e[i].trianglecount == 0) continue;
-		temp = t[e[i].ta].n;
+		// Average triangle normals to edge normals
+		Vector3 temp = t[e[i].ta].n;
 		if(e[i].trianglecount > 1) temp += t[e[i].tb].n;
 		temp.Normalize();
+		e[i].n = temp;
+		// Propagate edge normals to vertex normals
 		const size_t a = e[i].va;
 		const size_t b = e[i].vb;
-		e[i].n = temp;
 		vn[a] += temp;
 		vn[b] += temp;
 	}
+	// Normalize all vertex normals
 	for(size_t i = 0; i < vn.size(); ++i)
 		vn[i].Normalize();
+	// Use vertex normals for edges not belonging to triangles
 	for(size_t i = 0; i < e.size(); ++i){
 		if(e[i].trianglecount != 0) continue;
-		temp = vn[e[i].va] + vn[e[i].vb];
+		Vector3 temp = vn[e[i].va] + vn[e[i].vb];
 		temp.Normalize();
+		e[i].n = temp;
 	}
 }
 

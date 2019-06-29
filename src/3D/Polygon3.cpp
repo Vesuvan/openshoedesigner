@@ -440,7 +440,7 @@ std::vector <Vector3> Polygon3::pCalculateNormals(void) const
 void Polygon3::Paint(bool withNormals, double normalLength) const
 {
 	::glPushMatrix();
-	::glMultMatrixd(matrix.a);
+	matrix.GLMultMatrix();
 
 	const bool hasNormals = !normals.empty();
 	std::vector <Vector3> normals;

@@ -63,16 +63,17 @@ void PolyFilter::Init(size_t order, size_t size)
 		}
 	case 1:
 		{
-			const double den1 = (N - 1.0) * N * (N + 1.0);
+			const double den = N * (N + 1);
+			const double den2 = (N - 1) * N * (N + 1);
 			{
-				const double a = 12.0 / den1;
-				const double b = (-6.0 * N + 6.0) / den1;
+				const double a = 12 / den2;
+				const double b = -6 / den;
 				for(size_t i = 0; i < size; ++i)
 					filter_c[i] = a * i + b;
 			}
 			{
-				const double a = (-6.0 * N + 6.0) / den1;
-				const double b = ((4.0 * N - 6.0) * N + 2.0) / den1;
+				const double a = -6 / den;
+				const double b = 2 * (2 * N - 1) / den;
 				for(size_t i = 0; i < size; ++i)
 					filter_d[i] = a * i + b;
 			}
@@ -80,29 +81,26 @@ void PolyFilter::Init(size_t order, size_t size)
 		}
 	case 2:
 		{
-			const double den1 = (N - 2.0) * (N - 1.0) * N * (N + 1.0)
-					* (N + 2.0);
+			const double den = N * (N + 1) * (N + 2);
+			const double den2 = (N - 2) * (N - 1) * N * (N + 1) * (N + 2);
 			{
-				const double a = 180.0 / den1;
-				const double b = (-180.0 * N + 180.0) / den1;
-				const double c = ((30.0 * N - 90.0) * N + 60.0) / den1;
+				const double a = 180 / den2;
+				const double b = -180 / ((N - 2) * den);
+				const double c = 30 / den;
 				for(size_t i = 0; i < size; ++i)
 					filter_b[i] = (a * i + b) * i + c;
 			}
 			{
-				const double a = (-180.0 * N + 180.0) / den1;
-				const double b = ((192.0 * N - 360.0) * N + 132.0) / den1;
-				const double c = (((-36.0 * N + 126.0) * N - 126.0) * N + 36.0)
-						/ den1;
+				const double a = -180 / ((N - 2) * den);
+				const double b = 12 * (2 * N - 1) * (8 * N - 11) / den2;
+				const double c = -18 * (2 * N - 1) / den;
 				for(size_t i = 0; i < size; ++i)
 					filter_c[i] = (a * i + b) * i + c;
 			}
 			{
-				const double a = ((30.0 * N - 90.0) * N + 60.0) / den1;
-				const double b = (((-36.0 * N + 126.0) * N - 126.0) * N + 36.0)
-						/ den1;
-				const double c = ((((9.0 * N - 36.0) * N + 51.0) * N - 36.0) * N
-						+ 12.0) / den1;
+				const double a = 30 / den;
+				const double b = -18 * (2 * N - 1) / den;
+				const double c = 3 * (3 * N * N - 3 * N + 2) / den;
 				for(size_t i = 0; i < size; ++i)
 					filter_d[i] = (a * i + b) * i + c;
 			}
@@ -110,48 +108,41 @@ void PolyFilter::Init(size_t order, size_t size)
 		}
 	case 3:
 		{
-			const double den1 = (N - 3.0) * (N - 2.0) * (N - 1.0) * N
-					* (N + 1.0) * (N + 2.0) * (N + 3.0);
-
+			const double den = N * (N + 1) * (N + 2) * (N + 3);
+			const double den2 = (N - 3) * (N - 2) * (N - 1) * N * (N + 1)
+					* (N + 2) * (N + 3);
 			{
-				const double a = 2800.0 / den1;
-				const double b = (-4200.0 * N + 4200.0) / den1;
-				const double c = ((1680.0 * N - 4200.0) * N + 3080.0) / den1;
-				const double d = (((-140.0 * N + 840.0) * N - 1540.0) * N
-						+ 840.0) / den1;
+				const double a = 2800 / den2;
+				const double b = -4200 / ((N - 3) * (N - 2) * den);
+				const double c = 280 * ((6 * N - 15) * N + 11) / den2;
+				const double d = -140 / den;
 				for(size_t i = 0; i < size; ++i)
 					filter_a[i] = ((a * i + b) * i + c) * i + d;
 			}
 			{
-				const double a = (-4200.0 * N + 4200.0) / den1;
-				const double b = ((6480.0 * N - 12600.0) * N + 4680.0) / den1;
-				const double c = (((-2700.0 * N + 9000.0) * N - 9300.0) * N
-						+ 3000.0) / den1;
-				const double d = ((((240.0 * N - 1560.0) * N + 3360.0) * N
-						- 2760.0) * N + 720.0) / den1;
+				const double a = -4200 / ((N - 3) * (N - 2) * den);
+				const double b = 360 * (2 * N - 1) * (9 * N - 13) / den2;
+				const double c = -300 * (3 * N - 5) * (3 * N - 2)
+						/ ((N - 3) * (N - 2) * den);
+				const double d = 120 * (2 * N - 1) / den;
 				for(size_t i = 0; i < size; ++i)
 					filter_b[i] = ((a * i + b) * i + c) * i + d;
 			}
 			{
-				const double a = ((1680.0 * N - 4200.0) * N + 3080.0) / den1;
-				const double b = (((-2700.0 * N + 9000.0) * N - 9300.0) * N
-						+ 3000.0) / den1;
-				const double c = ((((1200.0 * N - 5400.0) * N + 8400.0) * N
-						- 6000.0) * N + 2200.0) / den1;
-				const double d = (((((-120.0 * N + 840.0) * N - 2140.0) * N
-						+ 2640.0) * N - 1820.0) * N + 600.0) / den1;
+				const double a = 280 * ((6 * N - 15) * N + 11) / den2;
+				const double b = -300 * (3 * N - 5) * (3 * N - 2)
+						/ ((N - 3) * (N - 2) * den);
+				const double c = 200
+						* ((((6 * N - 27) * N + 42) * N - 30) * N + 11) / den2;
+				const double d = -20 * ((6 * N - 6) * N + 5) / den;
 				for(size_t i = 0; i < size; ++i)
 					filter_c[i] = ((a * i + b) * i + c) * i + d;
 			}
 			{
-				const double a = (((-140.0 * N + 840.0) * N - 1540.0) * N
-						+ 840.0) / den1;
-				const double b = ((((240.0 * N - 1560.0) * N + 3360.0) * N
-						- 2760.0) * N + 720.0) / den1;
-				const double c = (((((-120.0 * N + 840.0) * N - 2140.0) * N
-						+ 2640.0) * N - 1820.0) * N + 600.0) / den1;
-				const double d = ((((((16.0 * N - 120.0) * N + 376.0) * N
-						- 720.0) * N + 904.0) * N - 600.0) * N + 144.0) / den1;
+				const double a = -140 / den;
+				const double b = 120 * (2 * N - 1) / den;
+				const double c = -20 * ((6 * N - 6) * N + 5) / den;
+				const double d = 8 * (2 * N - 1) * ((N - 1) * N + 3) / den;
 				for(size_t i = 0; i < size; ++i)
 					filter_d[i] = ((a * i + b) * i + c) * i + d;
 			}
@@ -159,7 +150,7 @@ void PolyFilter::Init(size_t order, size_t size)
 		break;
 	default:
 		throw(std::range_error(
-		__FILE__"Init: Only filters of order 0 .. 3 are supported."));
+		__FILE__"::Init(...): Only filters of order 0 .. 3 are supported."));
 	}
 	this->order = order;
 }

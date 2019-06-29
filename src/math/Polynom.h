@@ -105,13 +105,13 @@ public:
 	bool ExtremumNeg(double &x) const; ///< Return the negative extremum, if there is any (up to an order of 3 (4 coefficients))
 	bool InflectionPoint(double &pos) const; ///< Return the inflection point (only working for an order of exactly 3 (4 coefficients))
 
-	void InvertLinear(void); ///< If the polynom is a line (2 coefficients) and not a constant, it is inverted.
+	void InvertLinear(void); ///< If the polynom is a line (2 coefficients) and is not a constant, it is inverted.
 
 	double Evaluate(double x) const;
 
 	/*! \brief Output coefficients
 	 *~~~~~
-	 * Polynom p(-1,1,0,0,1,0);
+	 * Polynom p = Polynom::ByValue(-1,1, 0,0, 1,1);
 	 * std::cout << p << "\n";
 	 *~~~~~
 	 */

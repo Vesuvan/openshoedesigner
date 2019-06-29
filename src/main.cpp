@@ -119,13 +119,19 @@ bool openshoedesigner::OnInit()
 	SetTopWindow(parent);
 	parent->Show(false);
 
-	Project* project;
-	if(cmd_found == 1){
-		project = (Project*) docManager->CreateDocument(parser.GetParam(0),
-				wxDOC_SILENT);
-	}else{
-		project = (Project*) docManager->CreateDocument(wxEmptyString,
-				wxDOC_NEW);
+	try{
+		Project* project;
+		if(cmd_found == 1){
+			project = (Project*) docManager->CreateDocument(parser.GetParam(0),
+					wxDOC_SILENT);
+		}else{
+			project = (Project*) docManager->CreateDocument(wxEmptyString,
+					wxDOC_NEW);
+		}
+	}
+	catch(std::exception &exception){
+		std::cerr << "Exeption caught on first CreateDocument:\n"
+				<< exception.what() << "\n";
 	}
 
 	return true;

@@ -64,6 +64,12 @@ public:
 
 	Polygon3 loop;
 	Polygon3 test;
+
+	Polygon3 left;
+	Polygon3 right;
+	Polygon3 bottom;
+
+
 	Symmetry symmetry;
 	FormFinder formfinder;
 	KernelDensityEstimator kde;

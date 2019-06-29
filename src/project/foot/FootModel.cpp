@@ -127,7 +127,7 @@ FootModel::~FootModel()
 void FootModel::PaintBones(void) const
 {
 	glPushMatrix();
-	glMultMatrixd(origin.a);
+	origin.GLMultMatrix();
 	Skeleton::Render();
 	glPopMatrix();
 }
@@ -135,7 +135,7 @@ void FootModel::PaintBones(void) const
 void FootModel::PaintSkin(void) const
 {
 	glPushMatrix();
-	glMultMatrixd(origin.a);
+	origin.GLMultMatrix();
 	skin.PaintSurface();
 	glPopMatrix();
 }
