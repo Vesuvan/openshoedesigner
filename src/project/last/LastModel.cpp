@@ -132,6 +132,7 @@ bool LastModel::LoadModel(std::string filename)
 		Geometry geometry;
 		pc.GenerateGeometry(geometry, false);
 		hull.CopyFrom(geometry);
+		hull.CalcNormals();
 		if(hull.IsClosed()){
 			std::cout << "Fully closed hull loaded." << "\n";
 		}else{
@@ -461,10 +462,6 @@ bool LastModel::AnalyseForm(void)
 //		if(fabs(chir) < 0.5) std::cout << "(Insole recommended)";
 //		std::cout << "\n";
 
-		coordsys.SetOrigin(Vector3());
-		coordsys.SetEx(Vector3(0, 1, 0));
-		coordsys.SetEy(Vector3(0, 0, 1));
-		coordsys.CalculateEz();
 	}
 
 //	{
@@ -536,6 +533,22 @@ bool LastModel::AnalyseForm(void)
 			const Vector3 temp = (right[n] + left[n]) / 2;
 			bottom.InsertPoint(hull.IntersectArrow(temp, Vector3(0, 0, -1)));
 		}
+
+		coordsys.SetOrigin(Vector3(bb.xmin, (bb.ymax + bb.ymin) / 2, bb.zmin));
+		coordsys.SetEx(Vector3(bb.xmax - bb.xmin, 0, 0));
+		coordsys.SetEy(Vector3(0, 0, 1));
+		coordsys.CalculateEz();
+
+		center.XLinspace(0, 1, 101);
+		center.YInit(1);
+		center.Insert(0.4, -1, 0.3, KernelDensityEstimator::QuarticKernel);
+		center.Insert(0.8, 1, 0.1, KernelDensityEstimator::QuarticKernel);
+		center.Integrate();
+
+//		coordsys.SetOrigin(Vector3());
+//				coordsys.SetEx(Vector3(0, 1, 0));
+//				coordsys.SetEy(Vector3(0, 0, 1));
+//				coordsys.CalculateEz();
 
 //			Polygon3 pmin;
 //			for(size_t n = Nmin; n < (N + Nmin); ++n){
@@ -723,6 +736,7 @@ void LastModel::Paint(void) const
 
 	glPushMatrix();
 	coordsys.GLMultMatrix();
+	center.Paint();
 
 //	symmetry.Paint();
 //	kde.Paint();
@@ -732,7 +746,6 @@ void LastModel::Paint(void) const
 
 	glPopMatrix();
 
-//	center.Paint();
 //	coordsys.Paint();
 
 	OpenGLMaterial::EnableColors();

@@ -122,8 +122,9 @@ void Project::Reset(void)
 
 	footScan.InitExample();
 
-//	lastModelR.LoadModel("data/Last_Default_Normalized.stl");
-	lastModelR.LoadModel("data/Last_Flat_FreeStyle_RoundTipWide.stl");
+	lastModelR.LoadModel("data/Last_Default_Warped.stl");
+
+//	lastModelR.hull.SaveObj("/tmp/hull_export.obj");
 
 	lastModelL = lastModelR;
 	lastModelL.mirrored = true;

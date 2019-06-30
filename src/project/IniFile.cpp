@@ -67,6 +67,7 @@ bool IniFile::ReadFile(wxString filename)
 	section.clear();
 
 	size_t lineCount = 0;
+	// NOTE: When changing to std::istream, check https://stackoverflow.com/questions/5605125/why-is-iostreameof-inside-a-loop-condition-i-e-while-stream-eof-cons
 	while(!input.Eof()){
 		const wxString x = text.ReadLine();
 		lineCount++;

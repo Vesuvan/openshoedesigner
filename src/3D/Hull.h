@@ -61,6 +61,7 @@ public:
 		uint_least8_t trianglecount;
 		Vector3 n;
 		size_t OtherTriangle(size_t n) const;
+		bool AttachTriangle(size_t index);
 	};
 	class Triangle {
 	public:
@@ -114,6 +115,7 @@ public:
 	void CopyTrianglesFrom(const Geometry &geometry);
 
 	bool LoadObj(std::string filename); //!< Load Wavefront OBJ file.
+	void SaveObj(std::string filename) const; //!< Write Wavefront OBJ file.
 
 	size_t AddTriangle(const Vector3 &a, const Vector3 &b, const Vector3 &c);
 	size_t AddTriangleTransform(const Vector3 &a, const Vector3 &b,
