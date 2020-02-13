@@ -24,8 +24,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef _MATH_UNIT_H_
-#define _MATH_UNIT_H_
+#ifndef _UNIT_H_
+#define _UNIT_H_
 
 /*!\class Unit
  * \brief Stores a physical unit
@@ -36,9 +36,9 @@
  * E.g.:
  *  -  1 cm = 0.01 m        --> factor = 1/100
  *  -  1 rpm = 1/60 1/s     --> factor = 1/60
- *	 - 1 mm = 1e-6 m        --> factor = 1e-6
- *	 - 1 g  = 1e-3 kg       --> factor = 1e-3
- *	 - 1 deg = M_PI/180 rad --> factor = M_PI/180
+ *  -  1 mm = 1e-6 m        --> factor = 1e-6
+ *  -  1 g  = 1e-3 kg       --> factor = 1e-3
+ *  -  1 deg = M_PI/180 rad --> factor = M_PI/180
  *
  *
  *  Name: | Power:
@@ -71,12 +71,18 @@
  */
 
 #include "../Config.h"
+
 #ifdef _USE_MATHPARSER
 #include "MathParser.h"
 #endif
-#include <cmath>
+
 #include <string>
-#include <wx/string.h>
+#ifdef _MSC_VER
+#define _USE_MATH_DEFINES
+#endif
+#include <math.h>
+
+#include <wx/string.h> //TODO: Remove usage of wx/string.h
 
 class Unit {
 public:
@@ -119,6 +125,11 @@ public:
 	/*! \brief Setup a unit
 	 *
 	 *	The factor is set so that 1 otherName = factor SIName
+	 *	e.g.
+	 *
+	 *	 - 1 mm = 1e-6 m  --> factor = 1e-6
+	 *	 - 1 g  = 1e-3 kg --> factor = 1e-3
+	 *	 - 1 deg = M_PI/180 rad --> factor = M_PI/180
 	 */
 	void Setup(const wxString SIName, const wxString otherName,
 			const double factor);
@@ -135,7 +146,6 @@ public:
 	wxString TextFromSIWithUnit(const double value, int digitsAfterComma = -1);
 
 	double SIFromString(const wxString &text, bool useEvaluator = true);
-
 	friend inline bool operator==(const Unit &lhs, const Unit &rhs)
 	{
 		return (lhs.m == rhs.m && lhs.s == rhs.s && lhs.kg == rhs.kg
@@ -189,4 +199,4 @@ public:
 
 };
 
-#endif /* _MATH_UNIT_H_ */
+#endif /* _UNIT_H_ */

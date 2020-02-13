@@ -27,14 +27,17 @@
 #include "FrameParent.h"
 
 #include "../StdInclude.h"
-#include <wx/generic/choicdgg.h>
-#include <cstdio>
+#include "IDs.h"
 #include "../languages.h"
 #include "../project/ProjectView.h"
-#include "IDs.h"
 #ifdef _USE_6DOFCONTROLLER
 #include "../controller/DialogSetup6DOFController.h"
 #endif
+
+#include <wx/generic/choicdgg.h>
+#include <wx/stockitem.h>
+#include <wx/aboutdlg.h>
+#include <cstdio>
 
 wxBEGIN_EVENT_TABLE(FrameParent, wxDocParentFrame)
 
@@ -47,13 +50,12 @@ EVT_MENU(ID_SETUPCONTROLLER , FrameParent::OnSetupController)
 #ifdef _USE_MIDI
 EVT_MENU(ID_SETUPMIDI , FrameParent::OnSetupMidi)
 #endif
-EVT_MENU(wxID_ABOUT, FrameParent::OnAbout)
 EVT_MENU(wxID_HELP, FrameParent::OnHelp)
 
 EVT_MENU(ID_REFRESHALL, FrameParent::OnRefreshAll)
-EVT_MENU(ID_REFRESHALL3DVIEW, FrameParent::OnRefreshAll3D)
+EVT_MENU(ID_REFRESHALL3D, FrameParent::OnRefreshAll3D)
 EVT_MENU(ID_REFRESHVIEW, FrameParent::OnRefreshView)
-EVT_MENU(ID_REFRESH3DVIEW, FrameParent::OnRefreshView3D)
+EVT_MENU(ID_REFRESHVIEW3D, FrameParent::OnRefreshView3D)
 wxEND_EVENT_TABLE()
 
 FrameParent::FrameParent(wxDocManager *manager, wxConfig* config,
@@ -64,7 +66,7 @@ FrameParent::FrameParent(wxDocManager *manager, wxConfig* config,
 	settingsStereo3D.Load(config);
 	units.Load(config);
 #ifdef _USE_6DOFCONTROLLER
-	control.GetConfigFrom(config);
+	control.Load(config);
 #endif
 	wxMenu *m_menuFile = new wxMenu;
 	m_menuFile->Append(wxID_NEW);
@@ -88,7 +90,7 @@ FrameParent::FrameParent(wxDocManager *manager, wxConfig* config,
 
 	wxMenu *m_menuHelp = new wxMenu;
 	m_menuHelp->Append(wxID_HELP, _("&Help") + wxT("\tF1"));
-	m_menuHelp->Append(wxID_ABOUT);
+	m_menuHelp->Append(wxID_ABOUT, _("About") + wxT("\tF2"));
 
 	wxMenuBar *menubar = new wxMenuBar;
 	menubar->Append(m_menuFile, wxGetStockLabel(wxID_FILE));
@@ -98,6 +100,12 @@ FrameParent::FrameParent(wxDocManager *manager, wxConfig* config,
 	SetMenuBar(menubar);
 
 	m_helpController = new wxHelpController();
+
+	wxAcceleratorEntry entries[2];
+	entries[0].Set(0, WXK_F1, wxID_HELP);
+	entries[1].Set(0, WXK_F2, wxID_ABOUT);
+	wxAcceleratorTable accel(2, entries);
+	this->SetAcceleratorTable(accel);
 
 	dialogSetupStereo3D = new DialogSetupStereo3D(this, &settingsStereo3D,
 			&units);
@@ -111,10 +119,12 @@ FrameParent::FrameParent(wxDocManager *manager, wxConfig* config,
 	m_helpController->Initialize(_T("doc/help/help.hhp"));
 	wxLog::EnableLogging(true);
 
+	logWindow = new wxLogWindow(this, _("Log Window"), false, false);
+
 	timer.SetOwner(this);
 
 	t = 0.0;
-	dt = 50e-3; // s
+	dt = 500e-3; // s
 	timer.Start(round(dt * 1000.0)); // ms
 
 	this->Connect(wxEVT_TIMER, wxTimerEventHandler(FrameParent::OnTimer), NULL,
@@ -124,10 +134,9 @@ FrameParent::FrameParent(wxDocManager *manager, wxConfig* config,
 FrameParent::~FrameParent()
 {
 	printf("FrameParent: Destructor called\n");
-
 #ifdef _USE_6DOFCONTROLLER
 	// Save the configuration of the 6DOF controller
-	control.WriteConfigTo(config);
+	control.Save(config);
 #endif
 	settingsStereo3D.Save(config);
 	units.Save(config);
@@ -138,12 +147,6 @@ FrameParent::~FrameParent()
 	delete m_helpController;
 }
 
-void FrameParent::OnAbout(wxCommandEvent&)
-{
-	GUIDialogAbout dialog(this);
-	dialog.ShowModal();
-}
-
 void FrameParent::OnHelp(wxCommandEvent&)
 {
 	m_helpController->DisplayContents();
@@ -152,16 +155,11 @@ void FrameParent::OnHelp(wxCommandEvent&)
 void FrameParent::OnTimer(wxTimerEvent& event)
 {
 	t += dt;
-
 //	wxString temp;
 //	temp = wxString::Format(_T("Free RAM: %lu MB"),
 //			GetFreeSystemMemory() / 1024 / 1024);
 //
 //	m_statusBar->SetStatusText(temp, 1);
-
-//	if(project.processToolpath){
-//		if(project.GenerateToolpaths()) TransferDataToWindow();
-//	}
 }
 
 void FrameParent::OnChangeLanguage(wxCommandEvent& event)

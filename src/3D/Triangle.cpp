@@ -27,12 +27,9 @@
 #include "Triangle.h"
 
 #include "AffineTransformMatrix.h"
-
-#include <GL/gl.h>
 #include <wx/tokenzr.h>
-#include <wx/arrimpl.cpp>
-
-WX_DEFINE_OBJARRAY(ArrayOfTriangle)
+#include <math.h>
+#include "OpenGL.h"
 
 Triangle::Triangle()
 {

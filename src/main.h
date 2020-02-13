@@ -48,10 +48,12 @@ protected:
 
 	// Methods
 public:
+	void OnAbout(wxCommandEvent&);
 	virtual bool OnInit();
 	virtual int OnExit();
 	wxFrame* CreateChildFrame(wxView* view, ProjectView::FrameType frametype);
 	wxDECLARE_NO_COPY_CLASS(openshoedesigner);
+	wxDECLARE_EVENT_TABLE();
 };
 DECLARE_APP(openshoedesigner)
 

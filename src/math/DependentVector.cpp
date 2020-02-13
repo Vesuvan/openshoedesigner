@@ -30,6 +30,7 @@
 #include <stddef.h>
 #include <algorithm>
 #include <cmath>
+#include <stdexcept>
 
 #include "MatlabFile.h"
 #include "MatlabMatrix.h"
@@ -38,6 +39,7 @@ DependentVector::DependentVector()
 {
 	cyclic = false;
 	cyclelength = 0.0;
+	searchspeedup = 0;
 }
 
 void DependentVector::Clear(void)
@@ -63,12 +65,16 @@ size_t DependentVector::Size(void) const
 	return x.size();
 }
 
-void DependentVector::XLinspace(double t0, double t1, size_t N)
+void DependentVector::XLinspace(double x0, double x1, size_t N)
 {
-	x.assign(N, 0);
+	if(N == 0){
+		N = x.size();
+	}else{
+		x.assign(N, 0);
+	}
+	y.resize(N, 0.0);
 	for(size_t n = 0; n < N; ++n)
-		x[n] = t0 + (double) n / (double) (N - 1) * (t1 - t0);
-	YInit();
+		x[n] = x0 + (double) n / (double) (N - 1) * (x1 - x0);
 }
 
 void DependentVector::XSetCyclic(double cyclelength)
@@ -98,6 +104,13 @@ void DependentVector::YInit(double value)
 	y.assign(x.size(), value);
 }
 
+void DependentVector::YLinspace(double y0, double y1)
+{
+	const size_t N = x.size();
+	for(size_t n = 0; n < N; ++n)
+		x[n] = y0 + (double) n / (double) (N - 1) * (y1 - y0);
+}
+
 double& DependentVector::X(size_t index)
 {
 	return x[index];
@@ -123,9 +136,26 @@ double& DependentVector::operator [](size_t index)
 	return y[index];
 }
 
-const double& DependentVector::operator [](size_t index) const
+double DependentVector::operator [](size_t index) const
 {
 	return y[index];
+}
+
+double DependentVector::YatX(const double xval) const
+{
+	if(x.size() == 0) return 0.0;
+	if(x.size() == 1) return y[0];
+	if(searchspeedup > x.size()) searchspeedup = 0;
+	if(x[searchspeedup] > xval) searchspeedup = 0;
+	while((searchspeedup + 1) < x.size() && x[searchspeedup + 1] < xval)
+		searchspeedup++;
+
+	if(cyclic) throw(std::logic_error(
+	__FILE__" - YatX : Cyclic lookup not yet implemented!"));
+
+	const double s = (xval - x[searchspeedup])
+			/ (x[searchspeedup + 1] - x[searchspeedup]);
+	return (y[searchspeedup + 1] - y[searchspeedup]) * s + y[searchspeedup];
 }
 
 DependentVector& DependentVector::operator +=(const double val)
@@ -156,6 +186,13 @@ DependentVector& DependentVector::operator /=(const double val)
 	return (*this);
 }
 
+void DependentVector::YLimit(double ymin, double ymax)
+{
+	const size_t N = x.size();
+	for(size_t n = 0; n < N; ++n)
+		y[n] = fmin(fmax(y[n], ymin), ymax);
+}
+
 double DependentVector::Area(void) const
 {
 	const size_t N = x.size();
@@ -167,132 +204,6 @@ double DependentVector::Area(void) const
 		area += (y[0] + y[N - 1]) * (x[0] + cyclelength - x[N - 1]) / 2.0;
 	}
 	return area;
-}
-
-size_t DependentVector::FindPeaks(const double minvalue)
-{
-	resultx.clear();
-	resulty.clear();
-	size_t N = Size();
-// Prevent errors in cases, where the first and last x match up.
-	if(cyclic && fabs(x[N - 1] - x[0] - cyclelength) < 1e-6) N--;
-	for(size_t n = 0; n < N; ++n){
-		const double x0 = x[n];
-		const double x1 = (
-				(n + 1 >= N)? (x[(n + 1) % N] + cyclelength) : x[n + 1]);
-		const double x2 = (
-				(n + 2 >= N)? (x[(n + 2) % N] + cyclelength) : x[n + 2]);
-		const double y0 = y[n];
-		const double y1 = y[(n + 1) % N];
-		const double y2 = y[(n + 2) % N];
-		if(y1 <= minvalue) continue;
-		if(y0 > y1 || y2 > y1) continue;
-
-		// Interpolate peaks with 2nd order polynoms to find the position and value of the maximum.
-		const double dx1 = x1 - x0;
-		const double dx2 = x2 - x0;
-		const double den1 = 2 * (dx1 * y2 - dx2 * y1 + (dx2 - dx1) * y0);
-		const double den2 = -2 * den1 * dx1 * dx2 * (dx2 - dx1);
-		if(den1 == 0.0 || den2 == 0.0) continue;
-		const double pos = (dx1 * (2 * x0 + dx1) * y2
-				- dx2 * (dx2 + 2 * x0) * y1
-				+ (dx2 - dx1) * (2 * x0 + dx2 + dx1) * y0) / den1;
-		const double value = (((dx2 - dx1) * (dx2 - dx1) * (dx2 - dx1)
-				* (dx2 - dx1) * y0 * y0)
-				- (2 * dx2 * dx2 * (dx2 - dx1) * (dx2 - dx1) * y0 * y1)
-				+ (dx2 * dx2 * dx2 * dx2 * y1 * y1)
-				+ (dx1 * dx1 * dx1 * dx1 * y2 * y2)
-				- (2 * dx1 * dx1
-						* (dx1 * dx1 * y0 - 2 * dx1 * dx2 * y0 + dx2 * dx2 * y0
-								+ dx2 * dx2 * y1) * y2)) / den2;
-
-		std::vector <double>::iterator ptpos = resultx.begin();
-		std::vector <double>::iterator ptval = resulty.begin();
-		while(ptpos != resultx.end() && *ptval > value){
-			++ptpos;
-			++ptval;
-		}
-		if(ptpos == resultx.end()){
-			resultx.push_back(pos);
-			resulty.push_back(value);
-
-		}else{
-			resultx.insert(ptpos, pos);
-			resulty.insert(ptval, value);
-		}
-	}
-	return resultx.size();
-}
-
-size_t DependentVector::FindValleys(const double minvalue)
-{
-	resultx.clear();
-	resulty.clear();
-	size_t N = Size();
-// Prevent errors in cases, where the first and last x match up.
-	if(cyclic && fabs(x[N - 1] - x[0] - cyclelength) < 1e-6) N--;
-	for(size_t n = 0; n < N; ++n){
-		const double x0 = x[n];
-		const double x1 = (
-				(n + 1 >= N)? (x[(n + 1) % N] + cyclelength) : x[n + 1]);
-		const double x2 = (
-				(n + 2 >= N)? (x[(n + 2) % N] + cyclelength) : x[n + 2]);
-		const double y0 = y[n];
-		const double y1 = y[(n + 1) % N];
-		const double y2 = y[(n + 2) % N];
-		if(y1 <= minvalue) continue;
-		if(y0 < y1 || y2 < y1) continue;
-
-		// Interpolate peaks with 2nd order polynoms to find the position and value of the maximum.
-		const double dx1 = x1 - x0;
-		const double dx2 = x2 - x0;
-		const double den1 = 2 * (dx1 * y2 - dx2 * y1 + (dx2 - dx1) * y0);
-		const double den2 = -2 * den1 * dx1 * dx2 * (dx2 - dx1);
-		if(den1 == 0.0 || den2 == 0.0) continue;
-		const double pos = (dx1 * (2 * x0 + dx1) * y2
-				- dx2 * (dx2 + 2 * x0) * y1
-				+ (dx2 - dx1) * (2 * x0 + dx2 + dx1) * y0) / den1;
-		const double value = (((dx2 - dx1) * (dx2 - dx1) * (dx2 - dx1)
-				* (dx2 - dx1) * y0 * y0)
-				- (2 * dx2 * dx2 * (dx2 - dx1) * (dx2 - dx1) * y0 * y1)
-				+ (dx2 * dx2 * dx2 * dx2 * y1 * y1)
-				+ (dx1 * dx1 * dx1 * dx1 * y2 * y2)
-				- (2 * dx1 * dx1
-						* (dx1 * dx1 * y0 - 2 * dx1 * dx2 * y0 + dx2 * dx2 * y0
-								+ dx2 * dx2 * y1) * y2)) / den2;
-
-		std::vector <double>::iterator ptpos = resultx.begin();
-		std::vector <double>::iterator ptval = resulty.begin();
-
-		while(ptpos != resultx.end() && *ptval < value){
-			++ptpos;
-			++ptval;
-		}
-		if(ptpos == resultx.end()){
-			resultx.push_back(pos);
-			resulty.push_back(value);
-
-		}else{
-			resultx.insert(ptpos, pos);
-			resulty.insert(ptval, value);
-		}
-	}
-	return resultx.size();
-}
-
-size_t DependentVector::ResultSize(void) const
-{
-	return resultx.size();
-}
-
-double DependentVector::ResultX(size_t index) const
-{
-	return resultx[index];
-}
-
-double DependentVector::ResultY(size_t index) const
-{
-	return resulty[index];
 }
 
 void DependentVector::Sort(void)
@@ -427,6 +338,132 @@ void DependentVector::CumProd(void)
 	const size_t N = y.size();
 	for(size_t n = 1; n < N; ++n)
 		y[n] *= y[n - 1];
+}
+
+size_t DependentVector::FindPeaks(const double minvalue)
+{
+	resultx.clear();
+	resulty.clear();
+	size_t N = Size();
+// Prevent errors in cases, where the first and last x match up.
+	if(cyclic && fabs(x[N - 1] - x[0] - cyclelength) < 1e-6) N--;
+	for(size_t n = 0; n < N; ++n){
+		const double x0 = x[n];
+		const double x1 = (
+				(n + 1 >= N)? (x[(n + 1) % N] + cyclelength) : x[n + 1]);
+		const double x2 = (
+				(n + 2 >= N)? (x[(n + 2) % N] + cyclelength) : x[n + 2]);
+		const double y0 = y[n];
+		const double y1 = y[(n + 1) % N];
+		const double y2 = y[(n + 2) % N];
+		if(y1 <= minvalue) continue;
+		if(y0 > y1 || y2 > y1) continue;
+
+		// Interpolate peaks with 2nd order polynoms to find the position and value of the maximum.
+		const double dx1 = x1 - x0;
+		const double dx2 = x2 - x0;
+		const double den1 = 2 * (dx1 * y2 - dx2 * y1 + (dx2 - dx1) * y0);
+		const double den2 = -2 * den1 * dx1 * dx2 * (dx2 - dx1);
+		if(den1 == 0.0 || den2 == 0.0) continue;
+		const double pos = (dx1 * (2 * x0 + dx1) * y2
+				- dx2 * (dx2 + 2 * x0) * y1
+				+ (dx2 - dx1) * (2 * x0 + dx2 + dx1) * y0) / den1;
+		const double value = (((dx2 - dx1) * (dx2 - dx1) * (dx2 - dx1)
+				* (dx2 - dx1) * y0 * y0)
+				- (2 * dx2 * dx2 * (dx2 - dx1) * (dx2 - dx1) * y0 * y1)
+				+ (dx2 * dx2 * dx2 * dx2 * y1 * y1)
+				+ (dx1 * dx1 * dx1 * dx1 * y2 * y2)
+				- (2 * dx1 * dx1
+						* (dx1 * dx1 * y0 - 2 * dx1 * dx2 * y0 + dx2 * dx2 * y0
+								+ dx2 * dx2 * y1) * y2)) / den2;
+
+		std::vector <double>::iterator ptpos = resultx.begin();
+		std::vector <double>::iterator ptval = resulty.begin();
+		while(ptpos != resultx.end() && *ptval > value){
+			++ptpos;
+			++ptval;
+		}
+		if(ptpos == resultx.end()){
+			resultx.push_back(pos);
+			resulty.push_back(value);
+
+		}else{
+			resultx.insert(ptpos, pos);
+			resulty.insert(ptval, value);
+		}
+	}
+	return resultx.size();
+}
+
+size_t DependentVector::FindValleys(const double minvalue)
+{
+	resultx.clear();
+	resulty.clear();
+	size_t N = Size();
+// Prevent errors in cases, where the first and last x match up.
+	if(cyclic && fabs(x[N - 1] - x[0] - cyclelength) < 1e-6) N--;
+	for(size_t n = 0; n < N; ++n){
+		const double x0 = x[n];
+		const double x1 = (
+				(n + 1 >= N)? (x[(n + 1) % N] + cyclelength) : x[n + 1]);
+		const double x2 = (
+				(n + 2 >= N)? (x[(n + 2) % N] + cyclelength) : x[n + 2]);
+		const double y0 = y[n];
+		const double y1 = y[(n + 1) % N];
+		const double y2 = y[(n + 2) % N];
+		if(y1 <= minvalue) continue;
+		if(y0 < y1 || y2 < y1) continue;
+
+		// Interpolate peaks with 2nd order polynoms to find the position and value of the maximum.
+		const double dx1 = x1 - x0;
+		const double dx2 = x2 - x0;
+		const double den1 = 2 * (dx1 * y2 - dx2 * y1 + (dx2 - dx1) * y0);
+		const double den2 = -2 * den1 * dx1 * dx2 * (dx2 - dx1);
+		if(den1 == 0.0 || den2 == 0.0) continue;
+		const double pos = (dx1 * (2 * x0 + dx1) * y2
+				- dx2 * (dx2 + 2 * x0) * y1
+				+ (dx2 - dx1) * (2 * x0 + dx2 + dx1) * y0) / den1;
+		const double value = (((dx2 - dx1) * (dx2 - dx1) * (dx2 - dx1)
+				* (dx2 - dx1) * y0 * y0)
+				- (2 * dx2 * dx2 * (dx2 - dx1) * (dx2 - dx1) * y0 * y1)
+				+ (dx2 * dx2 * dx2 * dx2 * y1 * y1)
+				+ (dx1 * dx1 * dx1 * dx1 * y2 * y2)
+				- (2 * dx1 * dx1
+						* (dx1 * dx1 * y0 - 2 * dx1 * dx2 * y0 + dx2 * dx2 * y0
+								+ dx2 * dx2 * y1) * y2)) / den2;
+
+		std::vector <double>::iterator ptpos = resultx.begin();
+		std::vector <double>::iterator ptval = resulty.begin();
+
+		while(ptpos != resultx.end() && *ptval < value){
+			++ptpos;
+			++ptval;
+		}
+		if(ptpos == resultx.end()){
+			resultx.push_back(pos);
+			resulty.push_back(value);
+
+		}else{
+			resultx.insert(ptpos, pos);
+			resulty.insert(ptval, value);
+		}
+	}
+	return resultx.size();
+}
+
+size_t DependentVector::ResultSize(void) const
+{
+	return resultx.size();
+}
+
+double DependentVector::ResultX(size_t index) const
+{
+	return resultx[index];
+}
+
+double DependentVector::ResultY(size_t index) const
+{
+	return resulty[index];
 }
 
 void DependentVector::Paint(void) const

@@ -26,7 +26,7 @@
 
 #include "GeometryFileAbstract.h"
 
-#include <GL/gl.h>
+#include "OpenGL.h"
 
 GeometryFileAbstract::GeometryFileAbstract()
 {
@@ -39,12 +39,11 @@ GeometryFileAbstract::~GeometryFileAbstract()
 
 void GeometryFileAbstract::Paint(void) const
 {
-	size_t i;
 	::glPushMatrix();
 	matrix.GLMultMatrix();
-	for(i = 0; i < geometry.Count(); i++){
-		geometry[i].Paint();
-	}
+//	for(size_t i = 0; i < geometry.Count(); i++){
+	geometry.Paint();
+//	}
 	::glPopMatrix();
 }
 

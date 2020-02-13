@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name               : BackgroundImage.h
+// Name               : OpenGL.h
 // Purpose            : 
 // Thread Safe        : Yes
 // Platform dependent : No
 // Compiler Options   :
 // Author             : Tobias Schaefer
-// Created            : 30.01.2017
-// Copyright          : (C) 2017 Tobias Schaefer <tobiassch@users.sourceforge.net>
+// Created            : 01.02.2020
+// Copyright          : (C) 2020 Tobias Schaefer <tobiassch@users.sourceforge.net>
 // Licence            : GNU General Public License version 3.0 (GPLv3)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,34 +24,32 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef BACKGROUNDIMAGE_H_
-#define BACKGROUNDIMAGE_H_
-/*!\class BackgroundImage
- * \brief Image in 3D space for loading reference images
- *
- */
+#ifndef SRC_3D_OPENGL_H_
+#define SRC_3D_OPENGL_H_
 
-#include "OpenGLImage.h"
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__)
+#define __WIN
+#elif defined(linux) || defined(__linux)
+#define __LINUX
+#else
+#error "Neither a Linux nor a Windows system was found!"
+#endif
 
-class BackgroundImage:public OpenGLImage {
-public:
-	enum Orientation {
-		Front, Back, Right, Left, Top, Bottom
-	};
+#ifdef __WIN
+#ifdef _MSC_VER
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <GL/GLU.h>
+#include <GL/GL.h>
+#else
+#include <GL/glu.h>
+#include <GL/gl.h>
+#endif
+#endif
 
-	BackgroundImage();
-	virtual ~BackgroundImage();
+#ifdef __LINUX
+#include <GL/glu.h>
+#include <GL/gl.h>
+#endif
 
-	void Paint(void) const;
-
-	Orientation orientation;
-	bool showBehindGeometry;
-	bool showFront;
-	bool showBack;
-	float scale;
-	float centerx;
-	float centery;
-	float rotate;
-};
-
-#endif /* BACKGROUNDIMAGE_H_ */
+#endif /* SRC_3D_OPENGL_H_ */

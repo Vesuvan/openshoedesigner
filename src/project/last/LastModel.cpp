@@ -43,14 +43,15 @@
 #include "../../math/FourierTransform.h"
 #include "../../math/MatlabFile.h"
 #include "../../math/MatlabMatrix.h"
+#include "../../math/ParameterLimits.h"
 
 LastModel::LastModel()
 {
-	center.XLinspace(0, 1, 101);
-	center.YInit(0);
-	center.Insert(0.3, -1.2, 0.3, BendLine::EpanechnikovKernel);
-	center.Insert(0.75, 1.3, 0.03, BendLine::GaussianKernel);
-	center.Finish(0.0);
+//	center.XLinspace(0, 1, 101);
+//	center.YInit(0);
+//	center.Insert(0.3, -1.2, 0.3, BendLine::EpanechnikovKernel);
+//	center.Insert(0.75, 1.3, 0.03, BendLine::GaussianKernel);
+//	center.AngleToPos();
 
 	sx = sy = sz = 0.01;
 
@@ -144,8 +145,7 @@ bool LastModel::LoadModel(std::string filename)
 	if(extension.compare("stl") == 0){
 		FileSTL stl;
 		if(!stl.ReadFile(filename)) return false;
-		if(stl.geometry.Count() == 0) return false;
-		hull.CopyFrom(stl.geometry[0]);
+		hull.CopyFrom(stl.geometry);
 		if(hull.IsClosed()){
 			std::cout << "Fully closed hull loaded." << "\n";
 		}else{
@@ -539,11 +539,90 @@ bool LastModel::AnalyseForm(void)
 		coordsys.SetEy(Vector3(0, 0, 1));
 		coordsys.CalculateEz();
 
-		center.XLinspace(0, 1, 101);
-		center.YInit(1);
-		center.Insert(0.4, -1, 0.3, KernelDensityEstimator::QuarticKernel);
-		center.Insert(0.8, 1, 0.1, KernelDensityEstimator::QuarticKernel);
-		center.Integrate();
+		PolyFilter pf;
+		pf.Init(3, bottom.Size());
+		Polynom pbo = pf.Filter(bottom.GetZVectorD());
+		center.Clear();
+		for(double n = 0; n < bottom.Size(); n += 0.4){
+			center.PushBack(n/(double)bottom.Size(), pbo.Evaluate(n));
+		}
+
+//		ParameterLimits lim;
+//		NelderMeadOptimizer optim;
+//
+//		optim.param.clear();
+//
+//		optim.param.push_back(0.3);
+//		optim.param.push_back(-1.0);
+//		optim.param.push_back(0.2);
+//
+//		lim.AddLimit(0, -0.5, 0.5);
+//		lim.AddLimit(1, -5, -0.5);
+//		lim.AddLimit(2, 0.1, 0.3);
+//
+//		optim.param.push_back(0.8);
+//		optim.param.push_back(1.0);
+//		optim.param.push_back(0.2);
+//
+//		lim.AddLimit(3, 0.5, 0.9);
+//		lim.AddLimit(4, 0.5, 2);
+//		lim.AddLimit(5, 0.1, 0.3);
+//
+//		optim.param.push_back(-20 * M_PI / 180);
+//		lim.AddLimit(6, -20 * M_PI / 180, 20 * M_PI / 180);
+//
+//		optim.reevalBest = true;
+//		optim.evalLimit = 100;
+//
+//		bottom.Export("/tmp/bot.mat");
+//
+//		Vector3 c = bottom[bottom.Size() / 2];
+//
+//		optim.Start();
+//		while(optim.IsRunning()){
+//
+//			center.XLinspace(0, 1.4, 101);
+//			center.YInit(0);
+//			center.Insert(optim.param[0], optim.param[1], optim.param[2],
+//					KernelDensityEstimator::GaussianKernel);
+//			center.Insert(optim.param[3], optim.param[4], optim.param[5],
+//					KernelDensityEstimator::GaussianKernel);
+//
+//			center.Export("/tmp/cent_0.mat");
+//
+//			center.Integrate();
+//			double off1 = center.YatX(coordsys.LocalX(c));
+//			center += optim.param[6] - off1;
+//			center.YLimit(-1.4, 1.4);
+//
+//			center.Export("/tmp/cent_1.mat");
+//
+//			center.AngleToPos();
+//			center.Export("/tmp/cent_2.mat");
+//
+//			double off2 = center.YatX(coordsys.LocalX(c));
+//			center += coordsys.LocalY(c) - off2;
+//
+//			center.Export("/tmp/cent_3.mat");
+//
+//			double err = 0;
+//			for(size_t n = 0; n < bottom.Size(); ++n){
+//				const double x = coordsys.LocalX(bottom[n]);
+//				const double y = center.YatX(x);
+//				const double y_target = coordsys.LocalY(bottom[n]);
+//				err += (y - y_target) * (y - y_target);
+//			}
+//			optim.SetError(err + lim.Evaluate(optim.param));
+//		}
+//
+//		std::cout << "param = [";
+//		for(size_t n = 0; n < optim.param.size(); ++n){
+//			if(n > 0) std::cout << ", ";
+//			std::cout << optim.param[n];
+//		}
+//		std::cout << "];\n";
+//		std::cout << "res_err = " << optim.ResidualError() << ";\n";
+//		std::cout << "eval_count = " << optim.EvaluationsDone() << ";\n";
 
 //		coordsys.SetOrigin(Vector3());
 //				coordsys.SetEx(Vector3(0, 1, 0));
@@ -746,7 +825,7 @@ void LastModel::Paint(void) const
 
 	glPopMatrix();
 
-//	coordsys.Paint();
+	coordsys.Paint();
 
 	OpenGLMaterial::EnableColors();
 

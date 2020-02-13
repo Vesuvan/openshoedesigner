@@ -32,10 +32,8 @@ BendLine::BendLine()
 {
 }
 
-void BendLine::Finish(double startangle)
+void BendLine::AngleToPos(void)
 {
-	Integrate();
-	operator+=(startangle);
 	const size_t N = Size();
 	X(0) = 0.0;
 	Y(0) = 0.0;

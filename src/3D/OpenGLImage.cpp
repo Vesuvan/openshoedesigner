@@ -26,6 +26,8 @@
 
 #include "OpenGLImage.h"
 
+#include "OpenGL.h"
+
 OpenGLImage::OpenGLImage()
 {
 	refresh = true;
@@ -199,8 +201,8 @@ void OpenGLImage::SetAlphaColor(unsigned char red, unsigned char green,
 		unsigned char blue)
 {
 	if(!HasAlpha()) InitAlpha();
-	for(size_t i = 0; i < GetWidth(); i++){
-		for(size_t j = 0; j < GetHeight(); j++){
+	for(int i = 0; i < GetWidth(); i++){
+		for(int j = 0; j < GetHeight(); j++){
 			if(GetRed(i, j) == red && GetGreen(i, j) == green
 					&& GetBlue(i, j) == blue){
 				SetAlpha(i, j, 0);
@@ -231,8 +233,7 @@ void OpenGLImage::Paint(void) const
 
 	glColor3f(1, 1, 1);
 	glEnable(GL_TEXTURE_2D);
-#ifdef __LINUX
-	//TODO: Check if mingw32 can compile for anything higher than OPENGL_1_1
+#ifdef GL_VERSION_1_2
 	glActiveTexture(GL_TEXTURE0);
 #endif
 	glBindTexture(GL_TEXTURE_2D, textureID);

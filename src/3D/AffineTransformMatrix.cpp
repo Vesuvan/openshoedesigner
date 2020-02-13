@@ -26,16 +26,20 @@
 
 #include "AffineTransformMatrix.h"
 
-#include <GL/gl.h>
-#include <math.h>
-#include <stdint.h>
+#include "OpenGLMaterial.h"
+#include "Vector3.h"
+
 #include <wx/chartype.h>
 #include <wx/string.h>
 #include <wx/tokenzr.h>
 #include <wx/txtstrm.h>
 
-#include "OpenGLMaterial.h"
-#include "Vector3.h"
+#include <stdint.h>
+#ifdef _MSC_VER
+#define _USE_MATH_DEFINES
+#endif
+#include <math.h>
+#include "OpenGL.h"
 
 AffineTransformMatrix::AffineTransformMatrix()
 {
@@ -133,7 +137,7 @@ double& AffineTransformMatrix::operator [](unsigned char index)
 	return a[index];
 }
 
-const double AffineTransformMatrix::operator [](unsigned char index) const
+double AffineTransformMatrix::operator [](unsigned char index) const
 {
 	if(index >= 16) throw(std::range_error(
 	__FILE__ " operator[] - Out of range."));
@@ -524,6 +528,46 @@ AffineTransformMatrix AffineTransformMatrix::RotationTrackball(const double& x1,
 	return AffineTransformMatrix::RotationAroundVector(A, alpha);
 }
 
+AffineTransformMatrix AffineTransformMatrix::RotationQuarternion(
+		const double& w, const double& x, const double& y, const double& z)
+{
+	// Conversion formula from
+	// https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
+
+	const double n = w * w + x * x + y * y + z * z;
+	const double s = (fabs(n) < 1e-9)? (0) : (2.0 / n);
+	const double wx = s * w * x;
+	const double wy = s * w * y;
+	const double wz = s * w * z;
+	const double xx = s * x * x;
+	const double xy = s * x * y;
+	const double xz = s * x * z;
+	const double yy = s * y * y;
+	const double yz = s * y * z;
+	const double zz = s * z * z;
+
+	AffineTransformMatrix m;
+
+	m.a[0] = 1.0 - (yy + zz);
+	m.a[1] = xy + wz;
+	m.a[2] = xz - wy;
+	m.a[3] = 0;
+	m.a[4] = xy - wz;
+	m.a[5] = 1.0 - (xx + zz);
+	m.a[6] = yz + wx;
+	m.a[7] = 0;
+	m.a[8] = xz + wy;
+	m.a[9] = yz - wx;
+	m.a[10] = 1.0 - (xx + yy);
+	m.a[11] = 0;
+	m.a[12] = 0;
+	m.a[13] = 0;
+	m.a[14] = 0;
+	m.a[15] = 1.0;
+
+	return m;
+}
+
 void AffineTransformMatrix::TranslateGlobal(double const& x, double const& y,
 		double const& z)
 {
@@ -655,17 +699,23 @@ Vector3 AffineTransformMatrix::operator ()(const double x, const double y,
 
 double AffineTransformMatrix::LocalX(const Vector3& v) const
 {
-	return (v.x - a[12]) * a[0] + (v.y - a[13]) * a[1] + (v.z - a[14]) * a[2];
+	const double den = (a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
+	return ((v.x - a[12]) * a[0] + (v.y - a[13]) * a[1] + (v.z - a[14]) * a[2])
+			/ den;
 }
 
 double AffineTransformMatrix::LocalY(const Vector3& v) const
 {
-	return (v.x - a[12]) * a[4] + (v.y - a[13]) * a[5] + (v.z - a[14]) * a[6];
+	const double den = (a[4] * a[4] + a[5] * a[5] + a[6] * a[6]);
+	return ((v.x - a[12]) * a[4] + (v.y - a[13]) * a[5] + (v.z - a[14]) * a[6])
+			/ den;
 }
 
 double AffineTransformMatrix::LocalZ(const Vector3& v) const
 {
-	return (v.x - a[12]) * a[8] + (v.y - a[13]) * a[9] + (v.z - a[14]) * a[10];
+	const double den = (a[8] * a[8] + a[9] * a[9] + a[10] * a[10]);
+	return ((v.x - a[12]) * a[8] + (v.y - a[13]) * a[9] + (v.z - a[14]) * a[10])
+			/ den;
 }
 
 double AffineTransformMatrix::GlobalX(double x, double y, double z) const
@@ -700,7 +750,7 @@ double AffineTransformMatrix::Distance(const AffineTransformMatrix& other) const
 	// R:=A*inverse(B)-I
 	// trace(R*transpose(R))
 
-	// Result: No improvements (speedup) when used in Inverse Kinematics. -> Kick
+	// Result: No improvements (speedup) when used in Inverse Kinematics. -> Kicked out
 }
 
 void AffineTransformMatrix::TakeMatrixApart(void)
@@ -853,7 +903,7 @@ void AffineTransformMatrix::FromString(wxString const& string)
 	PutMatrixTogether();
 }
 
-void AffineTransformMatrix::ToStream(wxTextOutputStream& stream)
+void AffineTransformMatrix::ToStream(wxTextOutputStream& stream)const
 {
 	for(uint_fast8_t n = 0; n < 16; n++){
 		if(n > 0) stream << _T(" ");

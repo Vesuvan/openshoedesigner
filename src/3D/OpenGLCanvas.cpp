@@ -24,28 +24,34 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#define GL_GLEXT_PROTOTYPES
-
-#ifdef __WXMAC__
-#include "OpenGL/glu.h"
-//#include "OpenGL/gl.h"
-#include "OpenGL/glext.h"
-#else
-#include <GL/gl.h>
-#include <GL/glext.h>
-#include <GL/glu.h>
-#endif
+//#define GL_GLEXT_PROTOTYPES
 
 #include "OpenGLCanvas.h"
 
 #include "../StdInclude.h"
+#ifdef _USE_6DOFCONTROLLER
+#include "../controller/Control3D.h"
+#endif
 
-static int wx_gl_attribs[] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE,
-		24, 0};
+#include <wx/dcclient.h>
+
+#ifdef _MSC_VER
+#define _USE_MATH_DEFINES
+#endif
+#include <math.h>
+
+#include "OpenGL.h"
+
+//#include <GL/glext.h>
+//#include <GL/glu.h>
+//#include <GL/gl.h>
+
+static int wx_gl_attribs[] =
+	{WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 24, 0};
 
 OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
-		const wxSize& size, long style, const wxString& name)
-		: wxGLCanvas(parent, id, wx_gl_attribs, pos, size,
+		const wxSize& size, long style, const wxString& name) :
+		wxGLCanvas(parent, id, wx_gl_attribs, pos, size,
 				style | wxFULL_REPAINT_ON_RESIZE, name), Light0(GL_LIGHT0)
 {
 
@@ -70,6 +76,12 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	leftEyeB = 0;
 
 	rotationMode = rotateInterwoven;
+
+	Light0.SetAmbient(0.2, 0.2, 0.2);
+	Light0.SetDiffuse(0.6, 0.6, 0.6);
+	Light0.SetSpecular(0.95, 0.95, 0.95);
+	Light0.SetPosition(1, 0.4, 1);
+	Light0.moveWithCamera = true;
 
 	this->Connect(wxEVT_PAINT, wxPaintEventHandler(OpenGLCanvas::OnPaint), NULL,
 			this);
@@ -99,7 +111,7 @@ OpenGLCanvas::~OpenGLCanvas()
 {
 #ifdef _USE_6DOFCONTROLLER
 	this->Disconnect(wxEVT_TIMER, wxTimerEventHandler(OpenGLCanvas::OnTimer),
-			NULL, this);
+	NULL, this);
 #endif
 	this->Disconnect(wxEVT_RIGHT_DCLICK,
 			wxMouseEventHandler(OpenGLCanvas::OnMouseEvent), NULL, this);
@@ -126,8 +138,8 @@ void OpenGLCanvas::SetController(Control3D& control)
 }
 #endif
 
-OpenGLCanvas::Context::Context(wxGLCanvas* canvas)
-		: wxGLContext(canvas)
+OpenGLCanvas::Context::Context(wxGLCanvas* canvas) :
+		wxGLContext(canvas)
 {
 	SetCurrent(*canvas);
 
@@ -189,33 +201,33 @@ void OpenGLCanvas::OnMouseEvent(wxMouseEvent& event)
 	if(event.Dragging() && event.RightIsDown()){
 		switch(rotationMode){
 		case rotateTrackball:
-			{
-				const double r = (double) ((w < h)? w : h) / 2.2;
-				rotmat = AffineTransformMatrix::RotationTrackball(
-						(double) (x - w / 2), (double) (h / 2 - y),
-						(double) (event.m_x - w / 2),
-						(double) (h / 2 - event.m_y), r) * rotmat;
-				break;
-			}
+		{
+			const double r = (double) ((w < h)? w : h) / 2.2;
+			rotmat = AffineTransformMatrix::RotationTrackball(
+					(double) (x - w / 2), (double) (h / 2 - y),
+					(double) (event.m_x - w / 2), (double) (h / 2 - event.m_y),
+					r) * rotmat;
+			break;
+		}
 		case rotateInterwoven:
-			{
-				rotmat = AffineTransformMatrix::RotationXY(event.m_x - x,
-						event.m_y - y, 0.5) * rotmat;
-				break;
-			}
+		{
+			rotmat = AffineTransformMatrix::RotationXY(event.m_x - x,
+					event.m_y - y, 0.5) * rotmat;
+			break;
+		}
 		case rotateTurntable:
-			{
-				rotmat = AffineTransformMatrix::RotationAroundVector(
-						Vector3(1, 0, 0), -M_PI / 2);
-				turntableX += (double) (event.m_x - x) / 100;
-				turntableY += (double) (event.m_y - y) / 100;
-				rotmat = AffineTransformMatrix::RotationAroundVector(
-						Vector3(1, 0, 0), turntableY) * rotmat;
-				rotmat = rotmat
-						* AffineTransformMatrix::RotationAroundVector(
-								Vector3(0, 0, 1), turntableX);
-				break;
-			}
+		{
+			rotmat = AffineTransformMatrix::RotationAroundVector(
+					Vector3(1, 0, 0), -M_PI / 2);
+			turntableX += (double) (event.m_x - x) / 100;
+			turntableY += (double) (event.m_y - y) / 100;
+			rotmat = AffineTransformMatrix::RotationAroundVector(
+					Vector3(1, 0, 0), turntableY) * rotmat;
+			rotmat = rotmat
+					* AffineTransformMatrix::RotationAroundVector(
+							Vector3(0, 0, 1), turntableX);
+			break;
+		}
 		}
 		x = event.m_x;
 		y = event.m_y;
@@ -245,48 +257,6 @@ void OpenGLCanvas::OnMouseEvent(wxMouseEvent& event)
 	if(event.Moving() || event.Dragging()) event.Skip();
 }
 
-void OpenGLCanvas::Init(void)
-{
-	glEnable(GL_BLEND);
-	glEnable(GL_POINT_SMOOTH);
-	glEnable(GL_DEPTH_TEST);
-#if defined (__WIN32__)
-	glEnable(GL_NORMALIZE);
-#else
-	glEnable(GL_RESCALE_NORMAL);
-#endif
-	glFrontFace(GL_CCW);
-	glCullFace(GL_BACK);
-	glEnable(GL_CULL_FACE);
-
-	// Scaling for point clouds
-	//	glMatrixMode(GL_PROJECTION);
-	//	glFrustum( -0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 3.0f);
-	// Is done in OnSize(...)
-	//	GLfloat attenuation[] =
-	//		{1.0f, -0.01f, -.000001f};
-	//glPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, attenuation, 0);
-
-	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-	glEnable(GL_COLOR_MATERIAL);
-
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glBlendFunc(GL_ONE, GL_ZERO); // disable alpha blending
-
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClearDepth(1.0f);
-
-	glEnable(GL_LIGHTING);
-
-	Light0.SetAmbient(0.2, 0.2, 0.2);
-	Light0.SetDiffuse(0.6, 0.6, 0.6);
-	Light0.SetSpecular(0.95, 0.95, 0.95);
-	Light0.SetPosition(1, 0.4, 1);
-	Light0.Enable();
-	Light0.Update();
-	Light0.moveWithCamera = true;
-
-}
 void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
 	if(!IsShown()) return;
@@ -296,57 +266,70 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 //	if(!GetContext()) return;
 //#endif
 
-	if(context == NULL){
-		context = new Context(this);
-		context->SetCurrent(*this); // Link OpenGL to this area
-		Init();
-	}
+	if(context == NULL) context = new Context(this);
 	context->SetCurrent(*this); // Link OpenGL to this area
-
 	// set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
-
 	GetClientSize(&w, &h);
 	glViewport(0, 0, (GLint) w, (GLint) h);
 
-	//	float specReflection[] = { 0.8f, 0.0f, 0.8f, 1.0f };
-	//	glMaterialfv(GL_FRONT, GL_SPECULAR, specReflection);
-	//	glMateriali(GL_FRONT, GL_SHININESS, 96);
+	// Setup OpenGL state machine
 
-	// Clear color and depth buffers
+	glEnable(GL_BLEND);
+	glEnable(GL_POINT_SMOOTH);
+	glEnable(GL_DEPTH_TEST);
+#ifdef GL_VERSION_1_2
+	// Use RESCALE_NORMAL in OpenGL 1.2 or higher
+	glEnable(GL_RESCALE_NORMAL);
+#else
+	// Fallback for OpenGL 1.1
+	glEnable(GL_NORMALIZE);
+#endif
+	glFrontFace(GL_CCW);
+	glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
+
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	glDrawBuffer(GL_BACK);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
-	// Background
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(GL_ONE, GL_ZERO); // disable alpha blending
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearDepth(1.0f);
 
-	if(stereoMode == stereoAnaglyph){
+	{ // Render background
+		glDisable(GL_LIGHTING);
 		glEnable(GL_COLOR_MATERIAL);
-		glColor3ub(backgroundGrayLevel, backgroundGrayLevel,
-				backgroundGrayLevel);
-		glDisable(GL_COLOR_MATERIAL);
+		if(stereoMode == stereoAnaglyph){
+			glColor3ub(backgroundGrayLevel, backgroundGrayLevel,
+					backgroundGrayLevel);
+			glDisable(GL_COLOR_MATERIAL);
+		}
+
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		gluOrtho2D(0, 1, 0, 1);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
+		glNormal3b(0, 0, 1);
+		glBegin(GL_QUADS);
+		glColor3ub(50, 50, 50);
+		glVertex2i(1, 1);
+		glVertex2i(0, 1);
+		glColor3ub(100, 100, 255);
+		glVertex2i(0, 0);
+		glVertex2i(1, 0);
+		glEnd();
+
+		// Clear the depth buffer bit again. Now the rest of the
+		// image is always painted in front of the background.
+		glClear( GL_DEPTH_BUFFER_BIT);
 	}
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluOrtho2D(0, 1, 0, 1);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	glNormal3b(0, 0, 1);
-	glBegin(GL_QUADS);
-	glColor3ub(50, 50, 50);
-	glVertex2i(1, 1);
-	glVertex2i(0, 1);
-	glColor3ub(50, 50, 255);
-	glVertex2i(0, 0);
-	glVertex2i(1, 0);
-	glEnd();
-
-	// Clear the depth buffer bit again. Now the rest of the
-	// image is always painted in front of the background.
-	glClear( GL_DEPTH_BUFFER_BIT);
-//	}
+	glEnable(GL_LIGHTING);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -356,6 +339,8 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 
 	glCullFace(GL_BACK);
 	glLoadIdentity();
+
+	Light0.Update(false);
 
 	if(stereoMode == stereoAnaglyph){
 		glColorMask((leftEyeR == 0)? GL_FALSE : GL_TRUE,
@@ -378,19 +363,21 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	glTranslatef(0.0, 0.0, -focalDistance);
 	glScalef(scale, scale, scale);
 
-	GLint viewport[4];
-	GLdouble modelview[16];
-	GLdouble projection[16];
-	GLdouble winX1, winY1, winZ1;
-	GLdouble winX2, winY2, winZ2;
-	glGetDoublev( GL_MODELVIEW_MATRIX, modelview);
-	glGetDoublev( GL_PROJECTION_MATRIX, projection);
-	glGetIntegerv( GL_VIEWPORT, viewport);
-	gluProject(0, 0, 0, modelview, projection, viewport, &winX1, &winY1,
-			&winZ1);
-	gluProject(1, 0, 0, modelview, projection, viewport, &winX2, &winY2,
-			&winZ2);
-	unitAtOrigin = winX2 - winX1;
+	{ // Determin unit length at origin
+		GLint viewport[4];
+		GLdouble modelview[16];
+		GLdouble projection[16];
+		GLdouble winX1, winY1, winZ1;
+		GLdouble winX2, winY2, winZ2;
+		glGetDoublev( GL_MODELVIEW_MATRIX, modelview);
+		glGetDoublev( GL_PROJECTION_MATRIX, projection);
+		glGetIntegerv( GL_VIEWPORT, viewport);
+		gluProject(0, 0, 0, modelview, projection, viewport, &winX1, &winY1,
+				&winZ1);
+		gluProject(1, 0, 0, modelview, projection, viewport, &winX2, &winY2,
+				&winZ2);
+		unitAtOrigin = winX2 - winX1;
+	}
 
 	rotmat.GLMultMatrix();
 	transmat.GLMultMatrix();
@@ -399,7 +386,9 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	//		m_gllist = glGenLists(1); // Make one (1) empty display list.
 	//		glNewList(m_gllist, GL_COMPILE_AND_EXECUTE);
 
+	Light0.Enable();
 	Light0.Update(true);
+
 	Render();
 
 	//		glEndList();
@@ -475,7 +464,6 @@ bool OpenGLCanvas::OnPick(OpenGLPick &result, wxPoint pos)
 	glSelectBuffer(result.GetBufferSize(), result.GetBuffer());
 	glRenderMode(GL_SELECT);
 	glInitNames();
-	glPushName(0); // This value ends up as the label for the background.
 
 	glMatrixMode(GL_PROJECTION);
 	glCullFace(GL_BACK);
@@ -483,7 +471,7 @@ bool OpenGLCanvas::OnPick(OpenGLPick &result, wxPoint pos)
 
 	GLint viewport[4];
 	glGetIntegerv(GL_VIEWPORT, viewport);
-	gluPickMatrix(pos.x, viewport[3] - pos.y, 1, 1, viewport);
+	gluPickMatrix(pos.x, viewport[3] - pos.y, 10, 10, viewport);
 
 	GLdouble ar = (GLdouble) w / (GLdouble) h; // Calculate perspective
 	gluPerspective(45, ar, 0.01, 10);
@@ -498,6 +486,23 @@ bool OpenGLCanvas::OnPick(OpenGLPick &result, wxPoint pos)
 	RenderPick();
 	glFlush();
 	GLuint hits = glRenderMode(GL_RENDER);
+	GLenum err = glGetError();
+	if(err){
+		if(err == GL_INVALID_OPERATION){
+			printf("OpenGLCanvas::OnPick - GL_INVALID_OPERATION returned %u.\n",
+					err);
+		}else{
+			printf("OpenGLCanvas::OnPick - Error %u.\n", err);
+		}
+		result.SetHits(0);
+		return false;
+	}
+	if(hits == 0xFFFFFFFF){
+		printf(
+				"OpenGLCanvas::OnPick - Buffer Overflow (increase buffer size).\n");
+		result.SetHits(0);
+		return false;
+	}
 	result.SetHits(hits);
 	return (hits > 0);
 }

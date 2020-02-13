@@ -26,6 +26,8 @@
 
 #include "BackgroundImage.h"
 
+#include "OpenGL.h"
+
 BackgroundImage::BackgroundImage()
 {
 	showFront = true;

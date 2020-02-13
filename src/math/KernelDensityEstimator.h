@@ -32,6 +32,22 @@
  *
  * This Class does a (cyclic) kernel density estimation.
  *
+ * Common properties for Kernels are:
+ *
+ *  * %Symmetry: \f$ K(x) = K(-x)  \f$
+ *
+ *  * %Unit area: \f$ \int K(x)\cdot dx = 1 \f$
+ *
+ *  * %Kernel order k: \f$ \int x^n \cdot K(x)\cdot x = 0 \f$ for \f$ 0 < n < k \f$ and \f$ \int x^k \cdot K(x)\cdot x \neq 0\f$
+ *
+ * Common kernels of order k = 2:
+ *  * Uniform
+ *  * Triangle
+ *  * Epanechnikov
+ *  * Quartic
+ *  * Triweight
+ *  * Gaussian
+ *
  * https://en.wikipedia.org/wiki/Kernel_density_estimation
  *
  * https://en.wikipedia.org/wiki/Kernel_(statistics)

@@ -49,13 +49,16 @@ public:
 	void PushBack(double x, double y);
 	size_t Size(void) const; //!< Size of the array
 
-	void XLinspace(double t0, double t1, size_t N);
+	void XLinspace(double x0, double x1, size_t N = 0);
 	void XSetCyclic(double cyclelength);
 	void XSetLinear(void);
 	bool IsCyclic(void) const;
 	double CycleLength(void) const;
 
 	void YInit(double value = 0.0);
+	void YLinspace(double y0, double y1);
+
+	double YatX(const double xval) const;
 
 	double& X(size_t index);
 	const double& X(size_t index) const;
@@ -64,12 +67,14 @@ public:
 	const double& Y(size_t index) const;
 
 	double& operator[](size_t index); //!< Access operator to the Y array
-	const double& operator[](size_t index) const; //!< Read-only access operator to the Y array
+	double operator[](size_t index) const; //!< Read-only access operator to the Y array
 
 	DependentVector& operator +=(const double val);
 	DependentVector& operator -=(const double val);
 	DependentVector& operator *=(const double val);
 	DependentVector& operator /=(const double val);
+
+	void YLimit(double ymin, double ymax);
 
 	void Sort(void);
 	void Reverse(void);
@@ -100,6 +105,9 @@ private:
 	std::vector <double> y;
 	std::vector <double> resultx;
 	std::vector <double> resulty;
+
+private:
+	mutable size_t searchspeedup;
 };
 
 #endif /* SRC_MATH_DEPENDENTVECTOR_H_ */

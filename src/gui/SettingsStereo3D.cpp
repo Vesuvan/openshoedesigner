@@ -26,6 +26,8 @@
 
 #include "SettingsStereo3D.h"
 
+#include "../3D/OpenGLCanvas.h"
+
 SettingsStereo3D::SettingsStereo3D()
 {
 	eyeDistance = 0.1;

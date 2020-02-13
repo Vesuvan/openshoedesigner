@@ -30,12 +30,34 @@
 #include "gui/FrameMain.h"
 
 #include "languages.h"
+#include <wx/aboutdlg.h>
 
 #include <wx/docview.h>
 #include <wx/cmdline.h>
 #include <cstdlib>
 
 IMPLEMENT_APP(openshoedesigner)
+wxBEGIN_EVENT_TABLE(openshoedesigner, wxApp)
+EVT_MENU(wxID_ABOUT, openshoedesigner::OnAbout)
+wxEND_EVENT_TABLE()
+
+void openshoedesigner::OnAbout(wxCommandEvent&)
+{
+	wxAboutDialogInfo aboutInfo;
+
+	aboutInfo.SetName(_T("OpenShoeDesigner"));
+	aboutInfo.SetVersion(_T("0.1"));
+	aboutInfo.SetDescription(_("Design software for Lasts and Shoes"));
+	aboutInfo.SetCopyright(_T("(C) 2018-2020"));
+	aboutInfo.SetWebSite(
+			_T("https://sourceforge.net/projects/openshoedesigner/"));
+	aboutInfo.SetLicence(
+			_T(
+					"GNU General Public License version 3.0 (GPLv3)\n\nThis program comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it under certain conditions.\n\nYou should have received a copy of the GNU General Public License along with this program.\nIf not, see http://www.gnu.org/licenses/."));
+	aboutInfo.AddDeveloper(_T("Tobias Schäfer"));
+
+	wxAboutBox(aboutInfo);
+}
 
 openshoedesigner::openshoedesigner()
 {

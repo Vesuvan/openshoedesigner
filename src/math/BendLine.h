@@ -37,7 +37,7 @@ class BendLine:public KernelDensityEstimator {
 public:
 	BendLine();
 
-	void Finish(double startangle = 0.0);
+	void AngleToPos(void);
 };
 
 #endif /* SRC_3D_BENDLINE_H_ */

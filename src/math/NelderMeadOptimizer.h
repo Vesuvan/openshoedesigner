@@ -67,6 +67,8 @@
  *
  * The main loop hidden in IsRunning and SetError is a really complicated state machine. This orchestrates all
  * evaluations needed to form the simplex and move it around the search-space.
+ *
+ * See also CMAESOptimizer.
  */
 
 #include <cstddef>

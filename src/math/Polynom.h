@@ -72,7 +72,7 @@ public:
 	void Resize(size_t N);
 
 	double& operator[](size_t index); ///< Access the coefficients
-	const double& operator[](size_t index) const; ///< Const access the coefficients
+	double operator[](size_t index) const; ///< Const access the coefficients
 
 	Polynom& operator+=(const double &b);
 	const Polynom operator+(const double& b) const;

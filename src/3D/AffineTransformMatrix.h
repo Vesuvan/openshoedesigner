@@ -59,9 +59,8 @@
  *
  */
 
-// http://www.parashift.com/c++-faq-lite/operator-overloading.html
-// http://courses.cms.caltech.edu/cs11/material/cpp/donnie/cpp-ops.html
-//
+// https://en.cppreference.com/w/cpp/language/operators
+
 class Vector3;
 class wxString;
 class wxTextOutputStream;
@@ -70,7 +69,7 @@ class AffineTransformMatrix {
 public:
 	enum orientation {
 		rhs, //!< Right-handed system
-		lhs  //!< Left-handed system
+		lhs //!< Left-handed system
 	};
 
 	AffineTransformMatrix();
@@ -183,6 +182,14 @@ public:
 			double const& y1, double const& x2, double const& y2,
 			double const& r);
 
+	/*!\brief Construct a rotational matrix from a quarternion
+	 *
+	 * The quarternion is defined as w+i*x+j*y+k*z
+	 * with (1,0,0,0) being the unit rotation (= no rotation at all).
+	 */
+	static AffineTransformMatrix RotationQuarternion(double const& w,
+			double const&x, double const& y, double const& z);
+
 	void TranslateGlobal(double const& x, double const& y, double const& z); //!< Translate matrix in the global coordinate system.
 	void TranslateLocal(double const& x, double const& y, double const& z); //!< Translate matrix in the local, rotated coordinate system.
 
@@ -197,7 +204,7 @@ public:
 			const double z = 0.0) const;
 	Vector3 operator*(const Vector3& v) const;
 	double &operator[](unsigned char index);
-	const double operator[](unsigned char index) const;
+	double operator[](unsigned char index) const;
 	Vector3 operator()(const Vector3& v) const; //!< Operator reference for Vector3 transformations.
 	Vector3 operator()(const double x, const double y = 0.0, const double z =
 			0.0) const;
@@ -220,7 +227,7 @@ public:
 
 	wxString ToString(); //!< Generate a string containing the matrix.
 	void FromString(wxString const& string); //!< Setup the matrix from a string.
-	void ToStream(wxTextOutputStream & stream);
+	void ToStream(wxTextOutputStream & stream) const;
 	void FromStream(wxTextInputStream & stream);
 
 	void GLMultMatrix(void) const; //!< Multiply the matrix onto the active OpenGL matrix (right multiply)

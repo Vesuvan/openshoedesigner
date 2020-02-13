@@ -92,7 +92,7 @@ FrameMain::FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
 
 	m_menuHelp->AppendSeparator();
 	m_menuHelp->Append(wxID_HELP, _("&Help") + wxT("\tF1"));
-	m_menuHelp->Append(wxID_ABOUT);
+	m_menuHelp->Append(wxID_ABOUT, _("&About") + wxT("\tF2"));
 
 	doc->GetCommandProcessor()->SetEditMenu(m_menuEdit);
 	doc->GetCommandProcessor()->Initialize();
@@ -109,7 +109,7 @@ FrameMain::FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
 
 	this->Connect(ID_3DSELECT, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::On3DSelect));
-	this->Connect(ID_REFRESH3DVIEW, wxEVT_COMMAND_MENU_SELECTED,
+	this->Connect(ID_REFRESHVIEW3D, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::RefreshCanvas));
 	this->Connect(ID_REFRESHVIEW, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::RefreshView));
@@ -129,7 +129,7 @@ FrameMain::~FrameMain()
 	printf("FrameMain: Destructor called\n");
 	this->Disconnect(ID_REFRESHVIEW, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::RefreshView));
-	this->Disconnect(ID_REFRESH3DVIEW, wxEVT_COMMAND_MENU_SELECTED,
+	this->Disconnect(ID_REFRESHVIEW3D, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::RefreshCanvas));
 	this->Disconnect(ID_3DSELECT, wxEVT_COMMAND_MENU_SELECTED,
 			wxCommandEventHandler(FrameMain::On3DSelect));
@@ -988,14 +988,12 @@ void FrameMain::OnChangeModel(wxCommandEvent& event)
 		project->GetCommandProcessor()->Submit(
 				new CommandProjectSetParameter(_("Use foot measurements"),
 						project,
-						ID_MEASUREMENTSOURCE,
-						(int) Project::fromMeasurements));
+						ID_MEASUREMENTSOURCE, (int) Project::fromMeasurements));
 		break;
 	case ID_USEFOOTSCAN:
 		project->GetCommandProcessor()->Submit(
 				new CommandProjectSetParameter(_("Use foot scan"), project,
-				ID_MEASUREMENTSOURCE,
-						(int) Project::fromFootScan));
+				ID_MEASUREMENTSOURCE, (int) Project::fromFootScan));
 		break;
 	case ID_USEBONEBASEDMODEL:
 		project->GetCommandProcessor()->Submit(

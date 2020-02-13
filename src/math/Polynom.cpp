@@ -219,7 +219,7 @@ double& Polynom::operator [](size_t index)
 	return c[index];
 }
 
-const double& Polynom::operator [](size_t index) const
+double Polynom::operator [](size_t index) const
 {
 	return c[index];
 }

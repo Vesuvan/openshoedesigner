@@ -41,6 +41,7 @@
 #include <wx/help.h>
 #include <wx/string.h>
 #include <wx/timer.h>
+#include <wx/log.h>
 
 #ifdef _USE_6DOFCONTROLLER
 #include "../controller/Control3D.h"
@@ -79,12 +80,12 @@ public:
 
 	void OnTimer(wxTimerEvent& event);
 
-	void OnAbout(wxCommandEvent& WXUNUSED(event));
 	void OnHelp(wxCommandEvent& WXUNUSED(event));
 
 public:
 	wxConfig* config;
 
+	wxLogWindow* logWindow;
 	wxHelpController* m_helpController;
 	DialogSetupStereo3D * dialogSetupStereo3D;
 	SettingsStereo3D settingsStereo3D;
@@ -94,8 +95,8 @@ public:
 	Control3D control;
 #endif
 #ifdef _USE_MIDI
-	DialogSetupMidi* dialogSetupMidi;
 	MidiPort midi;
+	DialogSetupMidi* dialogSetupMidi;
 #endif
 
 	wxTimer timer; ///> Animation timer

@@ -35,28 +35,21 @@
  * \par Difference between Update and Refresh
  *  - \b Refresh - Refresh of the display without changing the Project itself.
  *  - \b Update - Changing the Project or the Simulation and updating the display afterwards.
- *
- * \par List of IDs
- *  - \b ID_REFRESH3DVIEW - Refresh the main OpenGL drawing area (e.g after a rotation of scene)
- *  - \b ID_REFRESHMAINGUI - Update and refresh the Treeview, the menu items and the main OpenGL view
- *  - \b ID_REFRESHALL - All of the above, also all subwindows as well (e.g. propagation of Units)
- *  - \b ID_UPDATESIMULATION - Update the Simulation system in the Project. Refresh OpenGL afterwards.
- *  - \b ID_UPDATEMACHINESIMULATION - Refresh the Machine Simulator in the DialogMachineDebugger
  */
 
-// Refresh every view of every document:
+//!> Refresh every view of every document:
 #define ID_REFRESHALL					(wxID_HIGHEST+1)
 
-// Refresh every 3D view of every document:
-#define ID_REFRESHALL3DVIEW				(wxID_HIGHEST+2)
+//!> Refresh every 3D view of every document:
+#define ID_REFRESHALL3D					(wxID_HIGHEST+2)
 
-// Refresh all views of current document:
+//!> Refresh all views of current document:
 #define ID_REFRESHVIEW					(wxID_HIGHEST+3)
 
-// Refresh all 3D views of the current document:
-#define ID_REFRESH3DVIEW				(wxID_HIGHEST+4)
+//!> Refresh all 3D views of the current document:
+#define ID_REFRESHVIEW3D				(wxID_HIGHEST+4)
 
-// Refresh the treeview of the current document:
+//!> Refresh the treeview of the current document:
 #define ID_REFRESHTREEVIEW				(wxID_HIGHEST+5)
 
 // Start the recalculation of the current project state:

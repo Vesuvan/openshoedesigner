@@ -31,8 +31,8 @@
  * \brief Polygon in 3D space.
  *
  * Vector of Vector3 objects that form a polygon. The polygon may be closed.
- * The points of teh polygon may have optional normal vectors.
- * Normal vectors can be calculated.
+ * The points of the polygon may have optional normal vectors.
+ * Normal vectors can be (re-)calculated.
  */
 
 #include <stddef.h>
@@ -75,12 +75,12 @@ public:
 	void InsertPoint(const Vector3 &x, const Vector3 &n); ///< Insert a point with normal at the end of the polygon
 
 	Polygon3 & operator+=(const Polygon3 &a); ///< Append another Polygon3 to this one
-		const Polygon3 operator+(const Polygon3 &a) const; ///< Append two Polygon3%s
+	const Polygon3 operator+(const Polygon3 &a) const; ///< Append two Polygon3%s
 
-		Polygon3 & operator+=(const Vector3 &a); ///< Add a Vector3 to this Polygon3
-		const Polygon3 operator+(const Vector3 &a) const; ///< Add a Vector3 to a Polygon3
+	Polygon3 & operator+=(const Vector3 &a); ///< Add a Vector3 to this Polygon3
+	const Polygon3 operator+(const Vector3 &a) const; ///< Add a Vector3 to a Polygon3
 
-	/*! \brief Close (or open) the polygon to a cycle
+	/*! \brief Close (or open) the polygon to a cyclic polygon
 	 * @param close Boolean: true (default) to close the polygon, false to open it.
 	 */
 	void Close(bool close = true);
@@ -104,9 +104,7 @@ public:
 	 */
 	void ApplyTransformation(const AffineTransformMatrix &matrix);
 
-
-
-	Polygon3 & operator/=(const double val); ///<
+	Polygon3 & operator/=(const double val);
 	const Polygon3 operator/(const double val);
 	Polygon3 & operator*=(const double val);
 	const Polygon3 operator*(const double val);
@@ -194,6 +192,8 @@ public:
 	void InitNormals(void); ///< Prepare the normal vector for each vertex.
 	void CalculateNormals(void); ///< Calculate normals once and store them. (InitNormals not needed.)
 	void ClearNormals(void); ///< Clear the normal storage.
+
+	void Export(std::string filename) const; ///< Export as a Matlab/Octave .mat file.
 
 	void Paint(bool withNormals = true, double normalLength = -1) const; ///< Render the Polygon to OpenGL
 private:

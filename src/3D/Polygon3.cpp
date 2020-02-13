@@ -26,9 +26,13 @@
 
 #include "Polygon3.h"
 
+#include "../math/MatlabFile.h"
+#include "../math/MatlabMatrix.h"
+
 #include <algorithm>
 #include <float.h>
-#include <GL/gl.h>
+#include "OpenGL.h"
+
 
 Polygon3::Polygon3()
 {
@@ -404,39 +408,56 @@ std::vector <Vector3> Polygon3::pCalculateNormals(void) const
 
 	switch(method){
 	case byCenter:
-		{
-			Vector3 temp = GetCenter();
-			for(size_t n = 0; n < N; ++n)
-				normals[n] = (elements[n] - temp).Normal();
-			break;
-		}
+	{
+		Vector3 temp = GetCenter();
+		for(size_t n = 0; n < N; ++n)
+			normals[n] = (elements[n] - temp).Normal();
+		break;
+	}
 	case byBends:
-		{
-			std::vector <double> L(N);
-			for(size_t n = 0; n < (N - 1); ++n)
-				L[n] = (elements[n + 1] - elements[n]).Abs();
-			L[N - 1] = (elements[0] - elements[N - 1]).Abs();
-			for(size_t n = 1; n < (N - 1); ++n)
-				normals[n] = ((elements[n] - elements[n - 1]) * L[n]
-						- (elements[n + 1] - elements[n]) * L[n - 1]).Normal();
-			if(isClosed){
-				normals[0] = ((elements[0] - elements[N - 1]) * L[0]
-						- (elements[1] - elements[0]) * L[N - 1]).Normal();
-				normals[N - 1] = ((elements[N - 1] - elements[N - 2]) * L[N - 1]
-						- (elements[0] - elements[N - 1]) * L[N - 2]).Normal();
-			}else{
-				Vector3 temp = elements[1] - elements[0];
-				normals[0] =
-						(normals[1] - (temp * normals[1].Dot(temp))).Normal();
-				temp = elements[N - 1] - elements[N - 2];
-				normals[N - 1] = (normals[N - 2]
-						- (temp * normals[N - 2].Dot(temp))).Normal();
-			}
-			break;
+	{
+		std::vector <double> L(N);
+		for(size_t n = 0; n < (N - 1); ++n)
+			L[n] = (elements[n + 1] - elements[n]).Abs();
+		L[N - 1] = (elements[0] - elements[N - 1]).Abs();
+		for(size_t n = 1; n < (N - 1); ++n)
+			normals[n] = ((elements[n] - elements[n - 1]) * L[n]
+					- (elements[n + 1] - elements[n]) * L[n - 1]).Normal();
+		if(isClosed){
+			normals[0] = ((elements[0] - elements[N - 1]) * L[0]
+					- (elements[1] - elements[0]) * L[N - 1]).Normal();
+			normals[N - 1] = ((elements[N - 1] - elements[N - 2]) * L[N - 1]
+					- (elements[0] - elements[N - 1]) * L[N - 2]).Normal();
+		}else{
+			Vector3 temp = elements[1] - elements[0];
+			normals[0] = (normals[1] - (temp * normals[1].Dot(temp))).Normal();
+			temp = elements[N - 1] - elements[N - 2];
+			normals[N - 1] =
+					(normals[N - 2] - (temp * normals[N - 2].Dot(temp))).Normal();
 		}
+		break;
+	}
 	}
 	return normals;
 }
+
+void Polygon3::Export(std::string filename) const
+{
+	MatlabMatrix Mx("x", elements.size());
+	MatlabMatrix My("y", elements.size());
+	MatlabMatrix Mz("z", elements.size());
+	for(size_t n = 0; n < elements.size(); ++n){
+		Mx[n] = elements[n].x;
+		My[n] = elements[n].y;
+		Mz[n] = elements[n].z;
+	}
+	MatlabFile mf(filename);
+	mf.WriteMatrix(Mx);
+	mf.WriteMatrix(My);
+	mf.WriteMatrix(Mz);
+	mf.Close();
+}
+
 void Polygon3::Paint(bool withNormals, double normalLength) const
 {
 	::glPushMatrix();
