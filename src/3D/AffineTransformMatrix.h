@@ -60,7 +60,6 @@
  */
 
 // https://en.cppreference.com/w/cpp/language/operators
-
 class Vector3;
 class wxString;
 class wxTextOutputStream;
@@ -195,6 +194,9 @@ public:
 
 	void ScaleGlobal(double const& x, double const& y, double const& z); //!< Scale matrix in the global coordinate system.
 	void ScaleLocal(double const& x, double const& y, double const& z); //!< Scale matrix in the local coordinate system.
+	static AffineTransformMatrix Scaling(double const& s);
+	static AffineTransformMatrix Scaling(double const& sx, double const& sy,
+			double const& sz);
 
 	Vector3 Transform(Vector3 const& v) const; //!< Apply the transformation matrix on a given vector.
 	Vector3 Transform(const double x, const double y = 0.0,

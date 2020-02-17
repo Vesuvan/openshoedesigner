@@ -188,7 +188,7 @@ DependentVector& DependentVector::operator /=(const double val)
 
 void DependentVector::YLimit(double ymin, double ymax)
 {
-	const size_t N = x.size();
+	const size_t N = y.size();
 	for(size_t n = 0; n < N; ++n)
 		y[n] = fmin(fmax(y[n], ymin), ymax);
 }

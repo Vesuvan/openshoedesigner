@@ -74,7 +74,7 @@ public:
 
 	void FLinspace(double f0, double f1, size_t N = 0);
 
-	//!\brief Set up an analysis that is similar to a FFT
+	//!\brief Set up an analysis with an output that is similar to a FFT
 	void FLikeFFT(size_t N);
 
 	//!\brief Do the Fourier Transform and store the results in OutRe and OutIm

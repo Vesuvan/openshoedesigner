@@ -378,12 +378,15 @@ bool Project::LoadLastModel(wxString fileName)
 
 bool Project::SaveLast(wxString fileName, bool left, bool right)
 {
-	wxFFileOutputStream outStream(fileName);
-	FileSTL temp;
-//	if(left) temp.WriteStream(outStream, lastModelL.geometry);
-//	if(right) temp.WriteStream(outStream, lastModelR.geometry);
-	return true;
+	if(left) lastModelL.resized.SaveObj(fileName.ToStdString());
+	if(right) lastModelR.resized.SaveObj(fileName.ToStdString());
 
+//	wxFFileOutputStream outStream(fileName);
+//	FileSTL temp;
+//	if(left) temp.WriteStream(outStream, lastModelL.resized);
+//	if(right) temp.WriteStream(outStream, lastModelR.resized);
+
+	return true;
 }
 
 bool Project::SaveSkin(wxString fileName, bool left, bool right)

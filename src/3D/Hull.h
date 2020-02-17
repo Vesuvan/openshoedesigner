@@ -129,7 +129,7 @@ public:
 	void AddTrianglesFrom(const Geometry &geometry);
 
 	bool LoadObj(std::string filename); //!< Load Wavefront OBJ file.
-	friend std::istream& operator>> (std::istream &in, Hull &hull);
+	friend std::istream& operator>>(std::istream &in, Hull &hull);
 	void SaveObj(std::string filename) const; //!< Write Wavefront OBJ file.
 	friend std::ostream& operator<<(std::ostream &out, const Hull &hull);
 
@@ -151,6 +151,7 @@ public:
 	Vector3 IntersectArrow(Vector3 p0, Vector3 dir) const;
 	Vector3 GetCenter(void) const; //!< Mean of all vertices
 
+	size_t Size(void) const;
 	size_t GetVertexCount(void) const
 	{
 		return v.size();
@@ -159,6 +160,9 @@ public:
 	{
 		return v[index];
 	}
+	const Vector3& operator[](size_t index) const;
+	Vector3& operator[](size_t index);
+
 	size_t GetTriangleCount(void) const
 	{
 		return t.size();

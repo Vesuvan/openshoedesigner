@@ -26,13 +26,7 @@
 
 #include "LastModel.h"
 
-#include <GL/gl.h>
-#include <cctype>
-#include <cmath>
-#include <iostream>
-#include <ostream>
-#include <algorithm>
-
+#include "../foot/FootMeasurements.h"
 #include "../../3D/PolyCylinder.h"
 #include "../../3D/BoundingBox.h"
 #include "../../3D/FileSTL.h"
@@ -45,6 +39,16 @@
 #include "../../math/MatlabMatrix.h"
 #include "../../math/ParameterLimits.h"
 
+#include <cctype>
+#include <cmath>
+#include <iostream>
+#include <ostream>
+#include <algorithm>
+
+#include <math.h>
+
+#include "../../3D/OpenGL.h"
+
 LastModel::LastModel()
 {
 //	center.XLinspace(0, 1, 101);
@@ -53,7 +57,8 @@ LastModel::LastModel()
 //	center.Insert(0.75, 1.3, 0.03, BendLine::GaussianKernel);
 //	center.AngleToPos();
 
-	sx = sy = sz = 0.01;
+	resized.paintTriangles = false;
+	resized.paintVertices = true;
 
 	mirrored = false;
 	modified = true;
@@ -532,6 +537,20 @@ bool LastModel::AnalyseForm(void)
 		for(size_t n = 0; n < right.Size(); ++n){
 			const Vector3 temp = (right[n] + left[n]) / 2;
 			bottom.InsertPoint(hull.IntersectArrow(temp, Vector3(0, 0, -1)));
+			top.InsertPoint(hull.IntersectArrow(temp, Vector3(0, 0, 1)));
+		}
+		center.Clear();
+		for(size_t n = 0; n < right.Size(); ++n){
+			center.InsertPoint((top[n] + bottom[n] * 2.0) / 3.0);
+		}
+		{
+			const size_t iEnd = center.Size() - 1;
+			Vector3 temp = hull.IntersectArrow(center[0],
+					center[0] - center[1]);
+			center[0] = temp;
+			temp = hull.IntersectArrow(center[iEnd],
+					center[iEnd] - center[iEnd - 1]);
+			center[iEnd] = temp;
 		}
 
 		coordsys.SetOrigin(Vector3(bb.xmin, (bb.ymax + bb.ymin) / 2, bb.zmin));
@@ -539,13 +558,13 @@ bool LastModel::AnalyseForm(void)
 		coordsys.SetEy(Vector3(0, 0, 1));
 		coordsys.CalculateEz();
 
-		PolyFilter pf;
-		pf.Init(3, bottom.Size());
-		Polynom pbo = pf.Filter(bottom.GetZVectorD());
-		center.Clear();
-		for(double n = 0; n < bottom.Size(); n += 0.4){
-			center.PushBack(n/(double)bottom.Size(), pbo.Evaluate(n));
-		}
+//		PolyFilter pf;
+//		pf.Init(3, bottom.Size());
+//		Polynom pbo = pf.Filter(bottom.GetZVectorD());
+//		center.Clear();
+//		for(double n = 0; n < bottom.Size(); n += 0.4){
+//			center.PushBack(n/(double)bottom.Size(), pbo.Evaluate(n));
+//		}
 
 //		ParameterLimits lim;
 //		NelderMeadOptimizer optim;
@@ -739,14 +758,58 @@ bool LastModel::AnalyseForm(void)
 void LastModel::UpdateForm(const FootMeasurements& measurements)
 {
 
-//	NelderMeadOptimizer optim;
-//	optim.param.push_back(sx);
-//	optim.param.push_back((sy + sz) / 2);
-//	optim.simplexSpread = 1e-3;
-//	optim.errorLimit = 1e-8;
-//	optim.reevalBest = true;
-//	optim.Start();
-//	while(optim.IsRunning()){
+	resized = hull;
+	BoundingBox bb;
+	for(size_t i = 0; i < hull.GetVertexCount(); ++i)
+		bb.Insert(hull.GetVertex(i));
+	AffineTransformMatrix bbc = bb.GetCoordinateSystem();
+
+	scalevalues.resize(3, 0.001);
+
+	NelderMeadOptimizer optim;
+	optim.param.push_back(scalevalues[0]);
+	optim.param.push_back(scalevalues[1]);
+	optim.param.push_back(scalevalues[2]);
+
+	ParameterLimits limits;
+	limits.AddLimit(0, 0.001, 100, 1, 1000);
+	limits.AddLimit(1, 0.001, 100, 1, 1000);
+	limits.AddLimit(2, 0.001, 100, 1, 1000);
+
+	optim.simplexSpread = 1e-3;
+	optim.errorLimit = 1e-8;
+	optim.reevalBest = true;
+	optim.Start();
+	while(optim.IsRunning()){
+		Polynom s = Polynom::ByDerivative(0, optim.param[1], 0, 1,
+				optim.param[2], 0);
+		const double sx = optim.param[0];
+		for(size_t n = 0; n < resized.Size(); ++n){
+			Vector3 temp = hull[n];
+			const double x = bbc.LocalX(temp);
+			const double syz = s.Evaluate(x);
+			resized[n].Set(temp.x * sx, temp.y * syz, temp.z * syz);
+		}
+		double err = limits.Evaluate(optim.param);
+
+		err += pow((center.GetLength() * sx) - measurements.footLength.value,
+				2.0);
+
+		AffineTransformMatrix bbc2 = bbc;
+		bbc2.ScaleGlobal(sx, s[0.5], s[0.5]);
+
+		Polygon3 section = resized.IntersectPlane(Vector3(1, 0, 0),
+				bbc2.GlobalX(0.75));
+		Polygon3 section2 = resized.IntersectPlane(Vector3(1, 0, 0),
+				bbc2.GlobalX(0.5));
+		Polygon3 section3 = resized.IntersectPlane(Vector3(1, 0, -0.5),
+				bbc2.GlobalX(0.4));
+
+		err += pow((section.GetLength() - measurements.ballGirth.value), 2.0);
+		err += pow((section2.GetLength() - measurements.waistGirth.value), 2.0);
+		err += pow((section3.GetLength() - measurements.instepGirth.value),
+				2.0);
+		loop = section3;
 //		if(mirrored){
 //			data.Scale(optim.param[0], -optim.param[1], optim.param[1]);
 //		}else{
@@ -760,12 +823,11 @@ void LastModel::UpdateForm(const FootMeasurements& measurements)
 //								- data.sections[37].GetLength(), 2);
 //		if(optim.param[0] <= 0) err += 1e6 - optim.param[0];
 //		if(optim.param[1] <= 0) err += 1e6 - optim.param[1];
-//		optim.SetError(err);
-//	}
-//	sx = optim.param[0];
-//	sy = optim.param[1];
-//	sz = optim.param[1];
-//	std::cout << "Min. Err: " << optim.ResidualError() << "\n";
+
+		optim.SetError(err);
+	}
+
+	std::cout << "Min. Err: " << optim.ResidualError() << "\n";
 //	std::cout << data.dx * data.sections.size() << " m\n";
 //	std::cout << data.sections[37].GetLength() << " m\n";
 
@@ -792,16 +854,18 @@ void LastModel::UpdatePosition(const Shoe& shoe, double offset)
 
 void LastModel::Paint(void) const
 {
-	hull.Paint();
+	resized.Paint();
 
 	OpenGLMaterial white(OpenGLMaterial::whiteplastic, 1.0);
 	white.UseMaterial();
 
-//	loop.Paint(true, 0.25);
+	loop.Paint(true, 0.25);
 
 	left.Paint(true);
 	right.Paint(true);
 	bottom.Paint(true);
+	top.Paint(true);
+	center.Paint(true);
 
 	OpenGLMaterial green(OpenGLMaterial::whiterubber, 1.0);
 	green.UseMaterial();
@@ -814,8 +878,7 @@ void LastModel::Paint(void) const
 //	formfinder.Paint();
 
 	glPushMatrix();
-	coordsys.GLMultMatrix();
-	center.Paint();
+//	coordsys.GLMultMatrix();
 
 //	symmetry.Paint();
 //	kde.Paint();

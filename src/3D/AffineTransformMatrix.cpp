@@ -903,7 +903,7 @@ void AffineTransformMatrix::FromString(wxString const& string)
 	PutMatrixTogether();
 }
 
-void AffineTransformMatrix::ToStream(wxTextOutputStream& stream)const
+void AffineTransformMatrix::ToStream(wxTextOutputStream& stream) const
 {
 	for(uint_fast8_t n = 0; n < 16; n++){
 		if(n > 0) stream << _T(" ");
@@ -1017,4 +1017,29 @@ void AffineTransformMatrix::Paint(const double scale) const
 		glEnd();
 	}
 	OpenGLMaterial::EnableColors();
+}
+
+AffineTransformMatrix AffineTransformMatrix::Scaling(const double& s)
+{
+	AffineTransformMatrix a;
+	for(uint_fast8_t i = 0; i < 16; i++)
+		a[i] = 0;
+	a[0] = s;
+	a[5] = s;
+	a[10] = (a.side == rhs)? s : -s;
+	a[15] = 1.0;
+	return a;
+}
+
+AffineTransformMatrix AffineTransformMatrix::Scaling(const double& sx,
+		const double& sy, const double& sz)
+{
+	AffineTransformMatrix a;
+	for(uint_fast8_t i = 0; i < 16; i++)
+		a[i] = 0;
+	a[0] = sx;
+	a[5] = sy;
+	a[10] = (a.side == rhs)? sz : -sz;
+	a[15] = 1.0;
+	return a;
 }

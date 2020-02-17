@@ -40,8 +40,6 @@
  * step has already been done on the foot-model.
  */
 
-#include <string>
-
 #include "../../3D/AffineTransformMatrix.h"
 #include "../../3D/Hull.h"
 #include "../../3D/Polygon3.h"
@@ -51,16 +49,19 @@
 #include "../../math/KernelDensityEstimator.h"
 #include "../../math/Symmetry.h"
 
+#include <string>
+
 class FootMeasurements;
 class Shoe;
 class LastModel {
 public:
 	std::string filename;
 
+	std::vector <double> scalevalues;
 
-	double sx;
-	double sy;
-	double sz;
+//	double sx;
+//	double sy;
+//	double sz;
 
 	Polygon3 loop;
 	Polygon3 test;
@@ -68,7 +69,8 @@ public:
 	Polygon3 left;
 	Polygon3 right;
 	Polygon3 bottom;
-
+	Polygon3 top;
+	Polygon3 center;
 
 	Symmetry symmetry;
 	FormFinder formfinder;
@@ -76,7 +78,7 @@ public:
 	AffineTransformMatrix coordsys;
 
 	Hull hull;
-	BendLine center;
+	Hull resized;
 	bool mirrored;
 
 	LastModel();
