@@ -37,8 +37,7 @@
 #include <cstdlib>
 
 IMPLEMENT_APP(openshoedesigner)
-wxBEGIN_EVENT_TABLE(openshoedesigner, wxApp)
-EVT_MENU(wxID_ABOUT, openshoedesigner::OnAbout)
+wxBEGIN_EVENT_TABLE(openshoedesigner, wxApp) EVT_MENU(wxID_ABOUT, openshoedesigner::OnAbout)
 wxEND_EVENT_TABLE()
 
 void openshoedesigner::OnAbout(wxCommandEvent&)
@@ -102,6 +101,26 @@ openshoedesigner::~openshoedesigner()
 	delete config; // config is written back on deletion of object
 }
 
+// The Commandline is parsed before OnInit is called.
+void openshoedesigner::OnInitCmdLine(wxCmdLineParser& parser)
+{
+	parser.AddParam(_("<filepath of document to open>"), wxCMD_LINE_VAL_STRING,
+			wxCMD_LINE_PARAM_OPTIONAL);
+//	parser.AddSwitch("t", "test", "Runs unit tests on some of the classes.");
+	wxApp::OnInitCmdLine(parser);
+}
+
+bool openshoedesigner::OnCmdLineParsed(wxCmdLineParser& parser)
+{
+	int count = parser.GetParamCount();
+	if(count == 1){
+		wxString str = parser.GetParam(0);
+		//		if(_DEBUGMODE) wxLogMessage(_T("cmd line param: ") + str);
+		loadOnStartup = str;
+	}
+	return true;
+}
+
 bool openshoedesigner::OnInit()
 {
 	if(!wxApp::OnInit()) return false;
@@ -109,19 +128,6 @@ bool openshoedesigner::OnInit()
 
 	SetAppName("openshoedesigner");
 	SetAppDisplayName("Open Shoe Designer");
-
-	static const wxCmdLineEntryDesc cmdLineDesc[] = { {wxCMD_LINE_SWITCH, "h",
-			"help", "Show help", wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP}, {
-			wxCMD_LINE_PARAM, NULL, NULL, "input file", wxCMD_LINE_VAL_STRING,
-			wxCMD_LINE_PARAM_OPTIONAL}, {wxCMD_LINE_NONE}};
-
-	wxCmdLineParser parser(cmdLineDesc, argc, argv);
-	int cmd_found = parser.Parse();
-
-	// -h or --help was requested.
-	if(cmd_found == -1){
-		return false;
-	}
 
 	wxDocManager *docManager = new wxDocManager;
 
@@ -143,12 +149,12 @@ bool openshoedesigner::OnInit()
 
 	try{
 		Project* project;
-		if(cmd_found == 1){
-			project = (Project*) docManager->CreateDocument(parser.GetParam(0),
-					wxDOC_SILENT);
-		}else{
+		if(loadOnStartup.IsEmpty()){
 			project = (Project*) docManager->CreateDocument(wxEmptyString,
 					wxDOC_NEW);
+		}else{
+			project = (Project*) docManager->CreateDocument(loadOnStartup,
+					wxDOC_SILENT);
 		}
 	}
 	catch(std::exception &exception){

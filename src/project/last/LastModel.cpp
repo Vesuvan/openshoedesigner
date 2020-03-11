@@ -491,6 +491,7 @@ bool LastModel::AnalyseForm(void)
 		left.Clear();
 		right.Clear();
 		bottom.Clear();
+		top.Clear();
 		for(double cut = 0.05; cut < 0.95; cut += 0.025){
 			Polygon3 section = hull.IntersectPlane(Vector3(1, 0, 0),
 					bbc.GlobalX(cut));
@@ -546,10 +547,10 @@ bool LastModel::AnalyseForm(void)
 		{
 			const size_t iEnd = center.Size() - 1;
 			Vector3 temp = hull.IntersectArrow(center[0],
-					center[0] - center[1]);
+					center[0] - center[3]);
 			center[0] = temp;
 			temp = hull.IntersectArrow(center[iEnd],
-					center[iEnd] - center[iEnd - 1]);
+					center[iEnd] - center[iEnd - 3]);
 			center[iEnd] = temp;
 		}
 
@@ -809,7 +810,7 @@ void LastModel::UpdateForm(const FootMeasurements& measurements)
 		err += pow((section2.GetLength() - measurements.waistGirth.value), 2.0);
 		err += pow((section3.GetLength() - measurements.instepGirth.value),
 				2.0);
-		loop = section3;
+		loop = section2;
 //		if(mirrored){
 //			data.Scale(optim.param[0], -optim.param[1], optim.param[1]);
 //		}else{
@@ -823,6 +824,13 @@ void LastModel::UpdateForm(const FootMeasurements& measurements)
 //								- data.sections[37].GetLength(), 2);
 //		if(optim.param[0] <= 0) err += 1e6 - optim.param[0];
 //		if(optim.param[1] <= 0) err += 1e6 - optim.param[1];
+
+		std::cout << "ballGirth: " << measurements.ballGirth.value << " <== "
+				<< section.GetLength() << "\n";
+		std::cout << "waistGirth: " << measurements.waistGirth.value << " <== "
+				<< section2.GetLength() << "\n";
+		std::cout << "instepGirth: " << measurements.instepGirth.value
+				<< " <== " << section3.GetLength() << "\n";
 
 		optim.SetError(err);
 	}
@@ -854,7 +862,7 @@ void LastModel::UpdatePosition(const Shoe& shoe, double offset)
 
 void LastModel::Paint(void) const
 {
-	resized.Paint();
+//	resized.Paint();
 
 	OpenGLMaterial white(OpenGLMaterial::whiteplastic, 1.0);
 	white.UseMaterial();

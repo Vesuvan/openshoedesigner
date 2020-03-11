@@ -38,20 +38,23 @@ class openshoedesigner:public wxApp {
 public:
 	openshoedesigner();
 	virtual ~openshoedesigner();
-	// Member variables
+
 public:
 //	FrameMain* frame;
 
 protected:
+	wxString loadOnStartup;
 	wxLocale locale;
 	wxConfig* config;
 
-	// Methods
 public:
 	void OnAbout(wxCommandEvent&);
+	virtual void OnInitCmdLine(wxCmdLineParser& parser);
+	virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
 	virtual bool OnInit();
 	virtual int OnExit();
 	wxFrame* CreateChildFrame(wxView* view, ProjectView::FrameType frametype);
+
 	wxDECLARE_NO_COPY_CLASS(openshoedesigner);
 	wxDECLARE_EVENT_TABLE();
 };
