@@ -204,6 +204,49 @@ Polynom Polynom::ByDerivative(double r0, double v0, double dv0, double r1,
 	return temp;
 }
 
+Polynom Polynom::ByBezier(double v0)
+{
+	Polynom temp;
+	temp.c.resize(1);
+	temp.c[0] = v0;
+	return temp;
+}
+
+Polynom Polynom::ByBezier(double v0, double v1)
+{
+	Polynom temp;
+	temp.c.resize(2);
+	temp.c[0] = v1 - v0;
+	temp.c[1] = v0;
+	return temp;
+}
+
+Polynom Polynom::ByBezier(double v0, double v1, double v2)
+{
+	Polynom temp;
+	temp.c.resize(3);
+	temp.c[0] = v0 - 2 * v1 + v2;
+	temp.c[1] = 2 * v1 - 2 * v0;
+	temp.c[2] = v0;
+	return temp;
+}
+
+Polynom Polynom::ByBezier(double v0, double v1, double v2, double v3)
+{
+	Polynom temp;
+	temp.c.resize(4);
+	temp.c[0] = -v0 + 3 * v1 - 3 * v2 + v3;
+	temp.c[1] = 3 * v0 - 6 * v1 + 3 * v2;
+	temp.c[2] = 3 * v1 - 3 * v0;
+	temp.c[3] = v0;
+	return temp;
+}
+
+size_t Polynom::Order(void) const
+{
+	return (c.empty())? 0 : (c.size() - 1);
+}
+
 size_t Polynom::Size(void) const
 {
 	return c.size();
@@ -409,6 +452,12 @@ void Polynom::Derive(size_t order)
 	c.resize(N - order);
 }
 
+double Polynom::Integral(double a, double b) const
+{
+	Polynom temp = this->Integral();
+	return temp(b) - temp(a);
+}
+
 Polynom Polynom::Integral(size_t order) const
 {
 	Polynom temp = *this;
@@ -508,11 +557,268 @@ void Polynom::InvertLinear(void)
 	c[1] = -c[1] * c[0];
 }
 
-double Polynom::Evaluate(double r) const
+double Polynom::operator()(double r) const
 {
 	const size_t N = c.size();
+	if(N == 0) return 0.0;
 	double temp = c[0];
 	for(size_t n = 1; n < N; ++n)
 		temp = temp * r + c[n];
 	return temp;
 }
+
+Polynom Polynom::Reduce(size_t newOrder, double a, double b) const
+{
+	Polynom d;
+	if((c.size()) <= (newOrder + 1)){
+		d = *this;
+		d.c.resize(newOrder + 1, 0.0);
+		return d;
+	}
+	d.c.resize(newOrder + 1, 0.0);
+	switch(c.size() - 1){
+	case 1:
+		{
+			d[0] = ((b + a) * c[0] + 2.0 * c[1]) / 2.0;
+			break;
+		}
+	case 2:
+		{
+			switch(newOrder){
+			case 0:
+				{
+					d[0] = ((2.0 * b * b + 2.0 * a * b + 2.0 * a * a) * c[0]
+							+ (3.0 * b + 3.0 * a) * c[1] + 6.0 * c[2]) / 6.0;
+					break;
+				}
+			case 1:
+				{
+					d[0] = c[1] + (a + b) * c[0];
+					d[1] = ((-b * b - 4.0 * a * b - a * a) * c[0] + 6.0 * c[2])
+							/ 6.0;
+					break;
+				}
+			}
+			break;
+		}
+	case 3:
+		{
+			switch(newOrder){
+			case 0:
+				{
+					d[0] = ((3.0 * b * b * b + 3.0 * a * b * b + 3.0 * a * a * b
+							+ 3.0 * a * a * a) * c[0]
+							+ (4.0 * b * b + 4.0 * a * b + 4.0 * a * a) * c[1]
+							+ (6.0 * b + 6.0 * a) * c[2] + 12.0 * c[3]) / 12.0;
+					break;
+				}
+			case 1:
+				{
+					d[0] = c[2] + (a + b) * c[1]
+							+ (a * a + a * b + b * b) * c[0];
+					d[1] = ((-3 * b * b * b - 9.0 * a * b * b - 9.0 * a * a * b
+							- 3.0 * a * a * a) * c[0]
+							+ (-2 * b * b - 8.0 * a * b - 2.0 * a * a) * c[1]
+							+ 12.0 * c[3]) / 12.0;
+					break;
+				}
+			case 2:
+				{
+					d[0] = ((3.0 * b + 3.0 * a) * c[0] + 2.0 * c[1]) / 2.0;
+					d[1] = ((-b * b - 4.0 * a * b - a * a) * c[0] + 2.0 * c[2])
+							/ 2.0;
+					d[2] = ((a * b * b + a * a * b) * c[0] + 2.0 * c[3]) / 2.0;
+					break;
+				}
+			}
+			break;
+		}
+	case 4:
+		{
+			switch(newOrder){
+			case 0:
+				{
+					d[0] = ((12.0 * b * b * b * b + 12.0 * a * b * b * b
+							+ 12.0 * a * a * b * b + 12.0 * a * a * a * b
+							+ 12.0 * a * a * a * a) * c[0]
+							+ (15.0 * b * b * b + 15.0 * a * b * b
+									+ 15.0 * a * a * b + 15.0 * a * a * a)
+									* c[1]
+							+ (20.0 * b * b + 20.0 * a * b + 20.0 * a * a)
+									* c[2] + (30.0 * b + 30.0 * a) * c[3]
+							+ 60.0 * c[4]) / 60.0;
+					break;
+				}
+			case 1:
+				{
+					d[0] = c[3] + (a + b) * c[2]
+							+ (a * a + a * b + b * b) * c[1]
+							+ (a * a * a + a * a * b + a * b * b + b * b * b)
+									* c[0];
+					d[1] = ((-18 * b * b * b * b - 48.0 * a * b * b * b
+							- 48.0 * a * a * b * b - 48.0 * a * a * a * b
+							- 18.0 * a * a * a * a) * c[0]
+							+ (-15 * b * b * b - 45.0 * a * b * b
+									- 45.0 * a * a * b - 15.0 * a * a * a)
+									* c[1]
+							+ (-10 * b * b - 40.0 * a * b - 10.0 * a * a) * c[2]
+							+ 60.0 * c[4]) / 60.0;
+					break;
+				}
+			case 2:
+				{
+					d[0] = ((4.0 * b * b + 4.0 * a * b + 4.0 * a * a) * c[0]
+							+ (3.0 * b + 3.0 * a) * c[1] + 2.0 * c[2]) / 2.0;
+					d[1] =
+							((-2 * b * b * b - 6.0 * a * b * b - 6.0 * a * a * b
+									- 2.0 * a * a * a) * c[0]
+									+ (-b * b - 4.0 * a * b - a * a) * c[1]
+									+ 2.0 * c[3]) / 2.0;
+					d[2] = ((b * b * b * b + 26.0 * a * b * b * b
+							+ 36.0 * a * a * b * b + 26.0 * a * a * a * b
+							+ a * a * a * a) * c[0]
+							+ (15.0 * a * b * b + 15.0 * a * a * b) * c[1]
+							+ 30.0 * c[4]) / 30.0;
+					break;
+				}
+			case 3:
+				{
+					d[0] = c[1] + (2.0 * a + 2.0 * b) * c[0];
+					d[1] = c[2] + (-a * a - 4.0 * a * b - b * b) * c[0];
+					d[2] = c[3] + (2.0 * a * a * b + 2.0 * a * b * b) * c[0];
+					d[3] = ((b * b * b * b - 4.0 * a * b * b * b
+							- 24.0 * a * a * b * b - 4.0 * a * a * a * b
+							+ a * a * a * a) * c[0] + 30.0 * c[4]) / 30.0;
+					break;
+				}
+			}
+			break;
+		}
+	case 5:
+		{
+			switch(newOrder){
+			case 0:
+				{
+					d[0] = ((10.0 * b * b * b * b * b + 10.0 * a * b * b * b * b
+							+ 10.0 * a * a * b * b * b
+							+ 10.0 * a * a * a * b * b
+							+ 10.0 * a * a * a * a * b
+							+ 10.0 * a * a * a * a * a) * c[0]
+							+ (12.0 * b * b * b * b + 12.0 * a * b * b * b
+									+ 12.0 * a * a * b * b
+									+ 12.0 * a * a * a * b
+									+ 12.0 * a * a * a * a) * c[1]
+							+ (15.0 * b * b * b + 15.0 * a * b * b
+									+ 15.0 * a * a * b + 15.0 * a * a * a)
+									* c[2]
+							+ (20.0 * b * b + 20.0 * a * b + 20.0 * a * a)
+									* c[3] + (30.0 * b + 30.0 * a) * c[4]
+							+ 60.0 * c[5]) / 60.0;
+					break;
+				}
+			case 1:
+				{
+					d[0] = c[4] + (a + b) * c[3]
+							+ (a * a + a * b + b * b) * c[2]
+							+ (a * a * a + a * a * b + a * b * b + b * b * b)
+									* c[1]
+							+ (a * a * a * a + a * a * a * b + a * a * b * b
+									+ a * b * b * b + b * b * b * b) * c[0];
+					d[1] = ((-20 * b * b * b * b * b - 50.0 * a * b * b * b * b
+							- 50.0 * a * a * b * b * b
+							- 50.0 * a * a * a * b * b
+							- 50.0 * a * a * a * a * b
+							- 20.0 * a * a * a * a * a) * c[0]
+							+ (-18 * b * b * b * b - 48.0 * a * b * b * b
+									- 48.0 * a * a * b * b
+									- 48.0 * a * a * a * b
+									- 18.0 * a * a * a * a) * c[1]
+							+ (-15 * b * b * b - 45.0 * a * b * b
+									- 45.0 * a * a * b - 15.0 * a * a * a)
+									* c[2]
+							+ (-10 * b * b - 40.0 * a * b - 10.0 * a * a) * c[3]
+							+ 60.0 * c[5]) / 60.0;
+					break;
+				}
+			case 2:
+				{
+					d[0] = ((5.0 * b * b * b + 5.0 * a * b * b + 5.0 * a * a * b
+							+ 5.0 * a * a * a) * c[0]
+							+ (4.0 * b * b + 4.0 * a * b + 4.0 * a * a) * c[1]
+							+ (3.0 * b + 3.0 * a) * c[2] + 2.0 * c[3]) / 2.0;
+					d[1] =
+							((-3 * b * b * b * b - 8.0 * a * b * b * b
+									- 8.0 * a * a * b * b - 8.0 * a * a * a * b
+									- 3.0 * a * a * a * a) * c[0]
+									+ (-2 * b * b * b - 6.0 * a * b * b
+											- 6.0 * a * a * b - 2.0 * a * a * a)
+											* c[1]
+									+ (-b * b - 4.0 * a * b - a * a) * c[2]
+									+ 2.0 * c[4]) / 2.0;
+					d[2] =
+							((5.0 * b * b * b * b * b + 75.0 * a * b * b * b * b
+									+ 100.0 * a * a * b * b * b
+									+ 100.0 * a * a * a * b * b
+									+ 75.0 * a * a * a * a * b
+									+ 5.0 * a * a * a * a * a) * c[0]
+									+ (2.0 * b * b * b * b
+											+ 52.0 * a * b * b * b
+											+ 72.0 * a * a * b * b
+											+ 52.0 * a * a * a * b
+											+ 2.0 * a * a * a * a) * c[1]
+									+ (30.0 * a * b * b + 30.0 * a * a * b)
+											* c[2] + 60.0 * c[5]) / 60.0;
+					break;
+				}
+			case 3:
+				{
+					d[0] = ((10.0 * b * b + 10.0 * a * b + 10.0 * a * a) * c[0]
+							+ (6.0 * b + 6.0 * a) * c[1] + 3.0 * c[2]) / 3.0;
+					d[1] = ((-5 * b * b * b - 15.0 * a * b * b
+							- 15.0 * a * a * b - 5.0 * a * a * a) * c[0]
+							+ (-2 * b * b - 8.0 * a * b - 2.0 * a * a) * c[1]
+							+ 2.0 * c[3]) / 2.0;
+					d[2] = ((b * b * b * b + 26.0 * a * b * b * b
+							+ 36.0 * a * a * b * b + 26.0 * a * a * a * b
+							+ a * a * a * a) * c[0]
+							+ (12.0 * a * b * b + 12.0 * a * a * b) * c[1]
+							+ 6.0 * c[4]) / 6.0;
+					d[3] =
+							((5.0 * b * b * b * b * b - 25.0 * a * b * b * b * b
+									- 100.0 * a * a * b * b * b
+									- 100.0 * a * a * a * b * b
+									- 25.0 * a * a * a * a * b
+									+ 5.0 * a * a * a * a * a) * c[0]
+									+ (2.0 * b * b * b * b - 8.0 * a * b * b * b
+											- 48.0 * a * a * b * b
+											- 8.0 * a * a * a * b
+											+ 2.0 * a * a * a * a) * c[1]
+									+ 60.0 * c[5]) / 60.0;
+					break;
+				}
+			case 4:
+				{
+					d[0] = ((5 * b + 5 * a) * c[0] + 2 * c[1]) / 2;
+					d[1] = ((-5 * b * b - 20 * a * b - 5 * a * a) * c[0]
+							+ 3 * c[2]) / 3;
+					d[2] = c[3] + (5 * a * a * b + 5 * a * b * b) * c[0];
+					d[3] = ((b * b * b * b - 4 * a * b * b * b
+							- 24 * a * a * b * b - 4 * a * a * a * b
+							+ a * a * a * a) * c[0] + 6 * c[4]) / 6;
+					d[4] = ((-a * b * b * b * b + 4 * a * a * b * b * b
+							+ 4 * a * a * a * b * b - a * a * a * a * b) * c[0]
+							+ 6 * c[5]) / 6;
+					break;
+				}
+
+			}
+			break;
+		}
+	default:
+		throw(std::logic_error(
+		__FILE__ "Polynom::Reduce - Cannot reduce from an order > 5."));
+		break;
+	}
+	return d;
+}
+

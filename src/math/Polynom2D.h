@@ -32,18 +32,19 @@
  *
  * Calculates and stores a polynom in 2 dimenstions. The polynom is defined by
  * four points and four normal vectors.
+ *
+ * For real 3D surfaces defined by Vertex3 with normal vectors refer to NagataPatch.
  */
 
-#include "../3D/Vector3.h"
+struct Vector3;
 
 class Polynom2D {
 public:
 	double a[16];
 
 public:
-
-	Polynom2D();
-	virtual ~Polynom2D();
+	Polynom2D() = default;
+	virtual ~Polynom2D() = default;
 
 	double Evaluate(double x, double y);
 

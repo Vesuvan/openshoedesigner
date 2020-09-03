@@ -28,10 +28,6 @@
 
 #include <cmath>
 
-BendLine::BendLine()
-{
-}
-
 void BendLine::AngleToPos(void)
 {
 	const size_t N = Size();

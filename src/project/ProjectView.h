@@ -44,10 +44,10 @@ class FootMeasurements;
 
 class ProjectView:public wxView {
 public:
-	enum Side {
+	enum class Side {
 		Left, Right, Both
 	};
-	enum FrameType {
+	enum class FrameType {
 		mainframe, patternframe, walkcycleframe
 	};
 	ProjectView();

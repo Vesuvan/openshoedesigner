@@ -27,27 +27,30 @@
 #include "Shoe.h"
 
 #include "../math/MathParser.h"
+#include "../gui/gui.h"
 
 Shoe::Shoe()
-		: heelHeight(_T("heelHeight")), ballHeight(_T("ballHeight")), heelPitch(
-				_T("heelPitch")), toeSpring(_T("toeSpring")), upperLevel(
-				_T("upperLevel")), extraLength(_T("extraLength")), footCompression(
-				_T("footCompression"))
+		: heelHeight("heelHeight"), ballHeight("ballHeight"), heelPitch(
+				"heelPitch"), toeSpring("toeSpring"), bigToeAngle(
+				"bigToeAngle"), littleToeAngle("littleToeAngle"), ballMeasurementAngle(
+				"ballMeasurementAngle"), heelDirectionAngle(
+				"heelDirectionAngle"), upperLevel("upperLevel"), extraLength(
+				"extraLength"), footCompression("footCompression")
 {
-	heelHeight.formula = _T("3 cm");
-	ballHeight.formula = _T("1 cm");
-	heelPitch.formula = _T("5 deg");
-	toeSpring.formula = _T("10 deg");
-	upperLevel.formula = _T("0.8");
-	extraLength.formula = _T("2 cm");
-	footCompression.formula = _T("5/100");
+	heelHeight.formula = "3 cm";
+	ballHeight.formula = "1 cm";
+	heelPitch.formula = "5 deg";
+	toeSpring.formula = "10 deg";
+	upperLevel.formula = "0.8";
+	extraLength.formula = "footLength/15";
+	footCompression.formula = "5/100";
 
-	modified = true;
+	bigToeAngle.formula = "6 deg";
+	littleToeAngle.formula = "2 deg";
+	ballMeasurementAngle.formula = "10 deg";
+	heelDirectionAngle.formula = "10 deg";
+
 	Update();
-}
-
-Shoe::~Shoe()
-{
 }
 
 bool Shoe::IsModified(void) const
@@ -63,29 +66,147 @@ void Shoe::Update(void)
 {
 	MathParser parser;
 	parser.ignorecase = true;
-	parser.AddAllowedUnit(_T("mm"), 1e-3);
-	parser.AddAllowedUnit(_T("cm"), 1e-2);
-	parser.AddAllowedUnit(_T("m"), 1);
-	parser.AddAllowedUnit(_T("in"), 2.54e-2);
-	parser.AddAllowedUnit(_T("ft"), 0.3048);
-	parser.AddAllowedUnit(_T("rad"), 1);
-	parser.AddAllowedUnit(_T("deg"), 0.017453);
-	parser.AddAllowedUnit(_T("gon"), 0.015708);
+	parser.AddAllowedUnit("mm", 1e-3);
+	parser.AddAllowedUnit("cm", 1e-2);
+	parser.AddAllowedUnit("m", 1);
+	parser.AddAllowedUnit("in", 2.54e-2);
+	parser.AddAllowedUnit("ft", 0.3048);
+	parser.AddAllowedUnit("rad", 1);
+	parser.AddAllowedUnit("deg", 0.017453);
+	parser.AddAllowedUnit("gon", 0.015708);
 	Update(parser);
 }
 
 void Shoe::Update(MathParser& parser)
 {
+
+	bigToeAngle.Update(parser);
+	littleToeAngle.Update(parser);
+	ballMeasurementAngle.Update(parser);
+	heelDirectionAngle.Update(parser);
+	extraLength.Update(parser);
+	footCompression.Update(parser);
+
 	heelHeight.Update(parser);
 	ballHeight.Update(parser);
 	heelPitch.Update(parser);
 	toeSpring.Update(parser);
 	upperLevel.Update(parser);
-	extraLength.Update(parser);
-	footCompression.Update(parser);
 
 	modified |= heelHeight.IsModified() | ballHeight.IsModified()
 			| heelPitch.IsModified() | toeSpring.IsModified()
 			| upperLevel.IsModified() | extraLength.IsModified()
 			| footCompression.IsModified();
+}
+
+bool Shoe::IsValidID(int id)
+{
+	switch(id){
+	case ID_BIGTOEANGLE:
+	case ID_LITTLETOEANGLE:
+	case ID_BALLMEASUREMENTANGLE:
+	case ID_HEELDIRECTIONANGLE:
+	case ID_HEELHEIGHT:
+	case ID_BALLHEIGHT:
+	case ID_HEELPITCH:
+	case ID_TOESPRING:
+	case ID_UPPERLEVEL:
+	case ID_EXTRALENGTH:
+	case ID_FOOTCOMPRESSION:
+		return true;
+	}
+	return false;
+}
+
+std::string Shoe::GetName(int id)
+{
+	switch(id){
+	case ID_BIGTOEANGLE:
+		return std::string("BigToeAngle");
+	case ID_LITTLETOEANGLE:
+		return std::string("LittleToeAngle");
+	case ID_BALLMEASUREMENTANGLE:
+		return std::string("BallMeasurementAngle");
+	case ID_HEELDIRECTIONANGLE:
+		return std::string("HeelDirectionAngle");
+	case ID_HEELHEIGHT:
+		return std::string("HeelHeight");
+	case ID_BALLHEIGHT:
+		return std::string("BallHeight");
+	case ID_HEELPITCH:
+		return std::string("HeelPitch");
+	case ID_TOESPRING:
+		return std::string("ToeSpring");
+	case ID_UPPERLEVEL:
+		return std::string("UpperLevel");
+	case ID_EXTRALENGTH:
+		return std::string("ExtraLenght");
+	case ID_FOOTCOMPRESSION:
+		return std::string("FootCompression");
+	default:
+		throw(std::invalid_argument(
+				std::string(__FILE__) + " : GetName : Passed invalid ID."));
+	}
+}
+
+ParameterFormula& Shoe::GetParameter(int id)
+{
+	switch(id){
+	case ID_BIGTOEANGLE:
+		return bigToeAngle;
+	case ID_LITTLETOEANGLE:
+		return littleToeAngle;
+	case ID_BALLMEASUREMENTANGLE:
+		return ballMeasurementAngle;
+	case ID_HEELDIRECTIONANGLE:
+		return heelDirectionAngle;
+	case ID_HEELHEIGHT:
+		return heelHeight;
+	case ID_BALLHEIGHT:
+		return ballHeight;
+	case ID_HEELPITCH:
+		return heelPitch;
+	case ID_TOESPRING:
+		return toeSpring;
+	case ID_UPPERLEVEL:
+		return upperLevel;
+	case ID_EXTRALENGTH:
+		return extraLength;
+	case ID_FOOTCOMPRESSION:
+		return footCompression;
+	default:
+		throw(std::invalid_argument(
+				std::string(__FILE__) + " : GetParameter : Passed invalid ID."));
+	}
+}
+
+const ParameterFormula& Shoe::GetParameter(int id) const
+{
+	switch(id){
+	case ID_BIGTOEANGLE:
+		return bigToeAngle;
+	case ID_LITTLETOEANGLE:
+		return littleToeAngle;
+	case ID_BALLMEASUREMENTANGLE:
+		return ballMeasurementAngle;
+	case ID_HEELDIRECTIONANGLE:
+		return heelDirectionAngle;
+	case ID_HEELHEIGHT:
+		return heelHeight;
+	case ID_BALLHEIGHT:
+		return ballHeight;
+	case ID_HEELPITCH:
+		return heelPitch;
+	case ID_TOESPRING:
+		return toeSpring;
+	case ID_UPPERLEVEL:
+		return upperLevel;
+	case ID_EXTRALENGTH:
+		return extraLength;
+	case ID_FOOTCOMPRESSION:
+		return footCompression;
+	default:
+		throw(std::invalid_argument(
+				std::string(__FILE__) + " : GetParameter : Passed invalid ID."));
+	}
 }

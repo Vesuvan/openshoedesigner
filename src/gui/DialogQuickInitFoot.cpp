@@ -55,7 +55,7 @@ void DialogQuickInitFoot::OnClose(wxCommandEvent& event)
 
 void DialogQuickInitFoot::ParseText(wxString text)
 {
-	parser.SetString(text);
+	parser.SetString(text.ToStdString());
 	const double num = parser.GetNumber();
 	m_textCtrlShoeSize->SetValue(wxString::Format(_T("%g"), num));
 	if(parser.HasUnit()){

@@ -44,19 +44,19 @@ public:
 
 protected:
 	wxString loadOnStartup;
-	wxLocale locale;
-	wxConfig* config;
+	wxLocale locale;wxConfig* config;
 
 public:
 	void OnAbout(wxCommandEvent&);
 	virtual void OnInitCmdLine(wxCmdLineParser& parser);
 	virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
 	virtual bool OnInit();
+	virtual bool OnExceptionInMainLoop();
+	virtual void OnUnhandledException();
 	virtual int OnExit();
 	wxFrame* CreateChildFrame(wxView* view, ProjectView::FrameType frametype);
 
-	wxDECLARE_NO_COPY_CLASS(openshoedesigner);
-	wxDECLARE_EVENT_TABLE();
+wxDECLARE_NO_COPY_CLASS(openshoedesigner);wxDECLARE_EVENT_TABLE();
 };
 DECLARE_APP(openshoedesigner)
 

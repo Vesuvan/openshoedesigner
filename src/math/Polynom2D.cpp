@@ -25,13 +25,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "Polynom2D.h"
 
-Polynom2D::Polynom2D()
-{
-}
-
-Polynom2D::~Polynom2D()
-{
-}
+#include "../3D/Vector3.h"
 
 double Polynom2D::Evaluate(double x, double y)
 {

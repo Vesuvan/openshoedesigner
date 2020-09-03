@@ -27,18 +27,20 @@
 #ifndef _MATH_MEASUREMENT_H_
 #define _MATH_MEASUREMENT_H_
 
+#include "Unit.h"
+
 /*!\class Measurement
  * \brief Number and Unit
  *
  * Class to represent a number with a unit.
  */
 
-#include "Unit.h"
-
-class Measurement:public Unit {
+class Measurement {
 public:
-	Measurement();
-	virtual ~Measurement();
+	Measurement() = default;
+	virtual ~Measurement() = default;
+
+	Unit unit;
 };
 
 #endif /* _MATH_MEASUREMENT_H_ */

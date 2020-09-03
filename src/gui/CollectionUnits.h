@@ -39,16 +39,6 @@
 #include "../math/Unit.h"
 #include "DialogSetupUnits.h"
 
-enum typeUnit {
-	unitNone,
-	unitTime,
-	unitDistance,
-	unitSmallDistance,
-	unitTolerance,
-	unitAngle,
-	unitPercent
-};
-
 class CollectionUnits {
 public:
 	friend class DialogSetupUnits;

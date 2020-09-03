@@ -40,18 +40,22 @@
  * well.
  */
 
-#include <wx/string.h>
 #include "../math/ParameterFormula.h"
 
 class Shoe {
 public:
 	Shoe();
-	virtual ~Shoe();
 
 	bool IsModified(void) const; //!< Returns \b true if the measurements have been modified since last update.
 	void Modify(bool modify = true);
+
 	void Update(void);
 	void Update(MathParser &parser);
+
+	static bool IsValidID(int id);
+	static std::string GetName(int id);
+	ParameterFormula & GetParameter(int id);
+	const ParameterFormula & GetParameter(int id) const;
 
 public:
 	ParameterFormula heelHeight;
@@ -59,12 +63,22 @@ public:
 	ParameterFormula heelPitch;
 	ParameterFormula toeSpring;
 
+	double tipSharpness = 0.0;
+
+	// Parameters for insole construction
+	ParameterFormula bigToeAngle;
+	ParameterFormula littleToeAngle;
+	ParameterFormula ballMeasurementAngle;
+	ParameterFormula heelDirectionAngle;
+
 	ParameterFormula upperLevel;
 	ParameterFormula extraLength;
 	ParameterFormula footCompression;
 
 private:
-	bool modified;
+
+private:
+	bool modified = true;
 };
 
 #endif /* SHOE_H_ */

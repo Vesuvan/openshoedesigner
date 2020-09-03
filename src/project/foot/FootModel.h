@@ -73,6 +73,20 @@
  * \enddot
  *
  * (Talus2 is an extra bone-element to get the form of the Talus right.)
+ *
+ * Translation:
+ * | Latin        | German            |
+ * |--------------|-------------------|
+ * | Tibia        | Schienbein        |
+ * | Fibula       | Wadenbein         |
+ * | Talus        | Sprungbein        |
+ * | Calcaneus    | Fersenbein        |
+ * | Cuboideum    | Wuerfelbein       |
+ * | Naviculare   | Kahnbein          |
+ * | Cuneiforme   | Keilbein          |
+ * | Metatarsalis | Mittelfussknochen |
+ *
+ *
  */
 
 #include <wx/txtstrm.h>
@@ -88,8 +102,10 @@ class Shoe;
 class FootModel:public Skeleton {
 public:
 
-	FootModel();
-	virtual ~FootModel();
+	FootModel() = default;
+	virtual ~FootModel() = default;
+
+	void Mirror(void);
 
 	bool IsModifiedForm(void) const;
 	bool IsModifiedPosition(void) const;
@@ -101,9 +117,8 @@ public:
 	void PaintBones(void) const;
 	void PaintSkin(void) const;
 
-	bool LoadModel(wxTextInputStream* stream);
-	bool SaveModel(wxTextOutputStream* stream);
-	void CopyModel(const FootModel &other);
+//	bool LoadModel(wxTextInputStream* stream);
+//	bool SaveModel(wxTextOutputStream* stream);
 
 	void UpdateForm(const FootMeasurements &measurements);
 	void UpdatePosition(const Shoe &shoe, double offset = 0.0, double mixing =
@@ -119,52 +134,24 @@ public:
 	BoundingBox bounds;
 	Volume skin;
 
+	std::string filename;
+
+	double LRS() const;
+
 private:
-	void InitBones(void);
+//	void InitBones(void);
 
-	bool modifiedForm;
-	bool modifiedPosition;
-	bool modifiedSkin;
+	bool modifiedForm = true;
+	bool modifiedPosition = true;
+	bool modifiedSkin = true;
 
-	// Model parameter, set by optimizer
-	double L;
-	double W;
+	// Model parameter, updated by optimizer
+	double L = 1.0;
+	double R = 1.0;
+	double S = 1.0;
 
 	NelderMeadOptimizer optiForm;
 	NelderMeadOptimizer optiPos;
-
-private:
-	static const unsigned int NBones;
-
-	Bone* Tibia; /// Schienbein
-	Bone* Fibula; /// Wadenbein
-	Bone* Talus; /// Sprungbein
-	Bone* Talus2; /// Sprungbein (Extrabone)
-	Bone* Calcaneus; /// Fersenbein
-	Bone* Cuboideum; /// Wuerfelbein
-	Bone* Naviculare; /// Kahnbein
-	Bone* Cuneiforme1; /// Keilbein 1
-	Bone* Cuneiforme2; /// Keilbein 2
-	Bone* Cuneiforme3; /// Keilbein 3
-	Bone* Metatarsalis1; /// Mittelfussknochen 1
-	Bone* Metatarsalis2; /// Mittelfussknochen 2
-	Bone* Metatarsalis3; /// Mittelfussknochen 3
-	Bone* Metatarsalis4; /// Mittelfussknochen 4
-	Bone* Metatarsalis5; /// Mittelfussknochen 5
-	Bone* PhalanxI1;
-	Bone* PhalanxI2;
-	Bone* PhalanxI3;
-	Bone* PhalanxI4;
-	Bone* PhalanxI5;
-	Bone* PhalanxII1;
-	Bone* PhalanxII2;
-	Bone* PhalanxII3;
-	Bone* PhalanxII4;
-	Bone* PhalanxII5;
-	Bone* PhalanxIII1;
-	Bone* PhalanxIII2;
-	Bone* PhalanxIII3;
-	Bone* PhalanxIII4;
 };
 
 #endif /* FOOTMODEL_H_ */

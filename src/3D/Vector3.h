@@ -35,31 +35,25 @@
 #ifndef _CVECTOR3_H_
 #define _CVECTOR3_H_
 
-#include <wx/string.h>
-
-#include <math.h>
+#include <string>
+#include <cmath>
 #include <ostream>
 
-class Vector3 {
+struct Vector3 {
 	// Constructor / Destructor:
 public:
-	Vector3(float px = 0.0, float py = 0.0, float pz = 0.0)
-			: x(px), y(py), z(pz)
-	{
-	}
-	Vector3(wxString string);
+	Vector3() = default;
+	Vector3(float x, float y, float z);
+	explicit Vector3(const std::string & string);
 
 	// Member variables:
 public:
-	float x;
-	float y;
-	float z;
+	float x = 0.0;
+	float y = 0.0;
+	float z = 0.0;
 
 	// Methods:
 public:
-	wxString ToString(void) const;
-	void FromString(wxString const& string);
-
 	//! Calculate the absolut length of a vector.
 	inline float Abs() const
 	{
@@ -82,11 +76,10 @@ public:
 	}
 
 	//! Overloaded operator for vector addition.
-	const Vector3 operator+(const Vector3& a) const
+	friend Vector3 operator+(Vector3 a, const Vector3& b)
 	{
-		Vector3 temp = *this;
-		temp += a;
-		return temp;
+		a += b;
+		return a;
 	}
 
 	//! Overloaded operator for vector subtraction.
@@ -99,15 +92,14 @@ public:
 	}
 
 	//! Overloaded operator for vector subtraction.
-	const Vector3 operator-(const Vector3& a) const
+	friend Vector3 operator-(Vector3 a, const Vector3& b)
 	{
-		Vector3 temp = *this;
-		temp -= a;
-		return temp;
+		a -= b;
+		return a;
 	}
 
 	//! Overloaded operator for vector negation.
-	const Vector3 operator-() const
+	Vector3 operator-() const
 	{
 		Vector3 temp(-this->x, -this->y, -this->z);
 		return temp;
@@ -126,7 +118,6 @@ public:
 	 * \right\}
 	 * \f].
 	 */
-	//!Overloaded operator for vector product.
 	Vector3& operator*=(const Vector3& b)
 	{
 		Vector3 a = *(this);
@@ -146,25 +137,38 @@ public:
 	}
 
 	//! Overloaded operator for vector product.
-	const Vector3 operator*(const Vector3& b) const
+	friend Vector3 operator*(Vector3 a, const Vector3& b)
 	{
-		Vector3 temp = *this;
-		temp *= b;
-		return temp;
+		a *= b;
+		return a;
 	}
 
 	//! Overloaded operator for scalar product.
-	const Vector3 operator*(const float b) const
+	friend Vector3 operator*(Vector3 a, const float b)
 	{
-		Vector3 temp = *this;
-		temp *= b;
-		return temp;
+		a *= b;
+		return a;
+	}
+	//! Overloaded operator for scalar product.
+	friend Vector3 operator*(const float b, Vector3 a)
+	{
+		a *= b;
+		return a;
 	}
 
 	//! Calculates the dot product (inner product) of two vectors.
 	float Dot(const Vector3& b) const
 	{
 		return (x * b.x + y * b.y + z * b.z);
+	}
+
+	const Vector3 Scale(const Vector3 & b) const
+	{
+		Vector3 temp = *this;
+		temp.x *= b.x;
+		temp.y *= b.y;
+		temp.z *= b.z;
+		return temp;
 	}
 
 	//! Overloaded operator for scalar division.
@@ -177,11 +181,10 @@ public:
 	}
 
 	//! Overloaded operator for scalar division.
-	const Vector3 operator/(const float b) const
+	friend Vector3 operator/(Vector3 a, const float b)
 	{
-		Vector3 temp = *this;
-		temp /= b;
-		return temp;
+		a /= b;
+		return a;
 	}
 
 	//! Comparison operator equality.
@@ -191,12 +194,6 @@ public:
 	bool operator!=(const Vector3& b) const
 	{
 		return !(*this == b);
-	}
-
-	friend std::ostream &operator<<(std::ostream &output, const Vector3 &v)
-	{
-		output << "[" << v.x << ", " << v.y << ", " << v.z << "]";
-		return output;
 	}
 
 	//! Zeros the vector.
@@ -210,9 +207,6 @@ public:
 		this->z = z;
 	}
 
-	//! Swap the vector with a given vector.
-	void Swap(Vector3& b);
-
 	//! Returns a normal length vector (without changing the original vector)
 	Vector3 Normal(void) const;
 
@@ -222,8 +216,20 @@ public:
 	/*! \brief Generate an orthogonal vector
 	 *
 	 * Generates an arbitrary vector that is garanteed orthogonal to this vector.
+	 *
+	 * This may be used to define a coordinate system in a plane, where only
+	 * the normal vector is given.
 	 */
 	Vector3 Orthogonal(void) const;
+
+	std::string ToString(void) const;
+	bool FromString(const std::string & string);
+	friend std::ostream &operator<<(std::ostream &output, const Vector3 &v)
+	{
+		output << "[" << v.x << ", " << v.y << ", " << v.z << "]";
+		return output;
+	}
+
 };
 
 #endif // _CVECTOR3_H_

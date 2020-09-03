@@ -35,23 +35,23 @@
 
 class BackgroundImage:public OpenGLImage {
 public:
-	enum Orientation {
+	enum class Orientation {
 		Front, Back, Right, Left, Top, Bottom
 	};
 
-	BackgroundImage();
-	virtual ~BackgroundImage();
+	BackgroundImage() = default;
+	virtual ~BackgroundImage() = default;
 
 	void Paint(void) const;
 
-	Orientation orientation;
-	bool showBehindGeometry;
-	bool showFront;
-	bool showBack;
-	float scale;
-	float centerx;
-	float centery;
-	float rotate;
+	Orientation orientation = Orientation::Right;
+	bool showBehindGeometry = false;
+	bool showFront = true;
+	bool showBack = true;
+	float scale = 0.35;
+	float centerx = 0.35;
+	float centery = 0.3;
+	float rotate = 0.1;
 };
 
 #endif /* BACKGROUNDIMAGE_H_ */

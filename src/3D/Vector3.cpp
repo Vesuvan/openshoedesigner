@@ -26,61 +26,45 @@
 
 #include "Vector3.h"
 
-#include <wx/tokenzr.h>
+#include <sstream>
+#include <regex>
 
-Vector3::Vector3(wxString string)
+Vector3::Vector3(float x, float y, float z)
+		: x(x), y(y), z(z)
 {
-	x = 0;
-	y = 0;
-	z = 0;
+}
+
+Vector3::Vector3(const std::string & string)
+{
 	this->FromString(string);
 }
 
-wxString Vector3::ToString(void) const
+std::string Vector3::ToString(void) const
 {
-	return wxString::Format(_T("%g#%g#%g"), x, y, z);
+	std::ostringstream os;
+	os << "{x:" << x << ",y:" << y << ",z:" << z << '}';
+	return os.str();
 }
 
-void Vector3::FromString(wxString const& string)
+bool Vector3::FromString(const std::string & string)
 {
-	wxStringTokenizer tkz(string, wxT("#"));
-	double temp;
-	while(tkz.HasMoreTokens()){
-		wxString token = tkz.GetNextToken();
-		token.ToDouble(&temp);
-		switch(tkz.CountTokens()){
-		case 2:
-			x = temp;
-			break;
-		case 1:
-			y = temp;
-			break;
-		case 0:
-			z = temp;
-			break;
-		}
-	}
+	//TODO: Move the regex into a global static variable when it is really used a lot.
+	std::regex e(
+			"^\\s*\\{\\s*x\\s*:\\s*([eEfF0-9\\.\\-\\+]+)\\s*,\\s*y\\s*:\\s*([eEfF0-9\\.\\-\\+]+)\\s*,\\s*z\\s*:\\s*([eEfF0-9\\.\\-\\+]+)\\s*\\}\\s*$");
+	std::smatch sm;
+	std::regex_match(string.begin(), string.end(), sm, e);
+
+	if(sm.size() != 3) return false;
+
+	x = std::stof(sm[0]);
+	y = std::stof(sm[1]);
+	z = std::stof(sm[2]);
+	return true;
 }
 
 void Vector3::Zero(void)
 {
 	x = y = z = 0.0;
-}
-
-void Vector3::Swap(Vector3& b)
-{
-	register float temp;
-	temp = b.x;
-	b.x = this->x;
-	this->x = temp;
-
-	temp = b.y;
-	b.y = this->y;
-	this->y = temp;
-
-	temp = b.z;
-	b.z = this->z;
-	this->z = temp;
 }
 
 void Vector3::Normalize(void)
@@ -104,8 +88,8 @@ Vector3 Vector3::Normal(void) const
 }
 bool Vector3::operator ==(const Vector3& b) const
 {
-	double epsilon = 1e-5;
-	double epsilon2 = epsilon * epsilon;
+	constexpr double epsilon = 1e-5;
+	constexpr double epsilon2 = epsilon * epsilon;
 	return (((this->x - b.x) * (this->x - b.x)
 			+ (this->y - b.y) * (this->y - b.y)
 			+ (this->z - b.z) * (this->z - b.z)) <= epsilon2);
@@ -117,9 +101,9 @@ Vector3 Vector3::Orthogonal(void) const
 	const float ax = fabs(x);
 	const float ay = fabs(y);
 	const float az = fabs(z);
-	if(ax < ay && ax < az) temp.Set(x, z, y);
-	if(ay < az && ay < ax) temp.Set(z, y, x);
-	if(az < ax && az < ay) temp.Set(y, x, z);
+	if(ax <= ay && ax <= az) temp.Set(x, z, y);
+	if(ay <= az && ay <= ax) temp.Set(z, y, x);
+	if(az <= ax && az <= ay) temp.Set(y, x, z);
 	temp *= (*this);
 	return temp.Normal();
 }

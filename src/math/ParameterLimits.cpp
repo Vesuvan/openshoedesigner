@@ -26,25 +26,6 @@
 
 #include "ParameterLimits.h"
 
-#include <cfloat>
-
-ParameterLimits::ParameterLimits()
-{
-}
-
-ParameterLimits::~ParameterLimits()
-{
-}
-
-ParameterLimits::Limit::Limit()
-{
-	index = 0;
-	minval = -DBL_MAX;
-	maxval = +DBL_MAX;
-	a = 1.0;
-	b = 1000.0;
-}
-
 void ParameterLimits::Clear()
 {
 	limits.clear();

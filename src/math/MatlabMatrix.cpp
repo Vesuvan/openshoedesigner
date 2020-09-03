@@ -58,10 +58,9 @@ MatlabMatrix::MatlabMatrix(const std::string& name, const size_t S1,
 }
 
 MatlabMatrix::MatlabMatrix(const MatlabMatrix& other)
+		: variablename(other.variablename), dimension(other.dimension)
 {
-	this->variablename = other.variablename;
 	this->size = other.size;
-	this->dimension = other.dimension;
 	this->bufferpos = other.bufferpos;
 	if(other.buffer == NULL){
 		buffer = NULL;

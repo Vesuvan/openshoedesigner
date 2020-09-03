@@ -66,6 +66,7 @@
 
 #include "foot/FootMeasurements.h"
 #include "foot/FootModel.h"
+#include "Insole.h"
 #include "last/Last.h"
 #include "last/LastModel.h"
 #include "Shoe.h"
@@ -88,17 +89,18 @@ public:
 	// +++ Measurements +++
 	bool measurementsSymmetric;
 
-	enum MeasurementSource {
-		fromMeasurements = 0, fromFootScan
+	enum class MeasurementSource {
+		fromMeasurements, fromFootScan
 	} measurementsource;
+
 	FootMeasurements measL;
 	FootMeasurements measR;
 	ParameterFormula legLengthDifference; // Distance the right leg is shorter than the left.
 
 	PointCloud footScan;
 
-	enum ModelType {
-		boneBased = 0, lastBased
+	enum class ModelType {
+		boneBased, lastBased
 	} modeltype;
 	FootModel footL;
 	FootModel footR;
@@ -108,6 +110,7 @@ public:
 
 	// +++ Shoe +++
 	Shoe shoe;
+	Insole insole;
 
 	// Last to generate
 	Last lastL;
@@ -117,8 +120,8 @@ public:
 	Pattern pattern;
 
 	// +++ Generator +++
-	enum Generator {
-		Experimental = 0, //!< Default generator for development of algorithms
+	enum class Generator {
+		Experimental, //!< Default generator for development of algorithms
 		Welted, //!< Welt sewn shoes: Generates last, insole, sole, upper pattern and cutout
 		Cemented, //!< for cemented soles (simple, glued-together shoes)
 		Molded, //!< for industrial shoes, where the sole is injection-molded to the upper
@@ -137,8 +140,6 @@ public:
 	Project();
 	virtual ~Project();
 	void StopAllThreads(void); //!< Call from OnClose; the event loop has to be running.
-
-	void Reset(void);
 
 	DocumentOstream& SaveObject(DocumentOstream& ostream);
 	DocumentIstream& LoadObject(DocumentIstream& istream);

@@ -49,8 +49,8 @@ double PolyCylinder::CircleSection::Segment::GetLength(void) const
 
 	const double dr = 0.1;
 	for(double r = 0.0; r < (1.000001 - dr); r += dr){
-		const double hdy = dy.Evaluate(r + dr / 2) * dr;
-		const double hdz = dz.Evaluate(r + dr / 2) * dr;
+		const double hdy = dy(r + dr / 2) * dr;
+		const double hdz = dz(r + dr / 2) * dr;
 		d += sqrt(hdy * hdy + hdz * hdz);
 	}
 	return d;
@@ -62,12 +62,12 @@ void PolyCylinder::CircleSection::Segment::Paint(void) const
 
 	const double dr = 0.2;
 
-	glNormal3d(0, dz.Evaluate(0), -dy.Evaluate(0));
-	glVertex3d(0, y.Evaluate(0), z.Evaluate(0));
+	glNormal3d(0, dz(0), -dy(0));
+	glVertex3d(0, y(0), z(0));
 
 	for(double r = 0.0; r <= 1.00001; r += dr){
-		glNormal3d(0, dz.Evaluate(r), -dy.Evaluate(r));
-		glVertex3d(0, y.Evaluate(r), z.Evaluate(r));
+		glNormal3d(0, dz(r), -dy(r));
+		glVertex3d(0, y(r), z(r));
 	}
 
 	glEnd();
@@ -100,7 +100,7 @@ Vector3 PolyCylinder::CircleSection::Evaluate(double r)
 	double q = modf(h, &p);
 	size_t m = (size_t) p;
 	if(m >= M) m -= M;
-	return Vector3(0, segments[m].y.Evaluate(q), segments[m].z.Evaluate(q));
+	return Vector3(0, segments[m].y(q), segments[m].z(q));
 }
 
 void PolyCylinder::CircleSection::Paint(void) const

@@ -38,10 +38,6 @@ Spline3::Spline3()
 	length = 1.0;
 }
 
-Spline3::~Spline3()
-{
-}
-
 void Spline3::Clear(void)
 {
 	points.clear();
@@ -254,8 +250,7 @@ void Spline3::Paint(void) const
 		const float delta = points[n].length / (float) Nd;
 		float r = points[n].r0;
 		for(size_t i = 0; i < Nd; i++){
-			glVertex3f(points[n].px.Evaluate(r), points[n].py.Evaluate(r),
-					points[n].pz.Evaluate(r));
+			glVertex3f(points[n].px(r), points[n].py(r), points[n].pz(r));
 			r += delta;
 		}
 	}

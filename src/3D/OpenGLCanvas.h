@@ -52,21 +52,21 @@ class Control3D;
 
 #include <wx/glcanvas.h>
 
-enum Stereo3DType {
-	stereoOff = 0, //!< No stereo effect
-	stereoAnaglyph, //!< Stereoeffect using colored glasses
-	stereoShutter //!< Stereoeffect using shutter-glasses
-};
-
-enum RotationType {
-	rotateTrackball, //!< Use trackball style mouse control.
-	rotateInterwoven, //!< Rotate around the object using interwoven mouse movements.
-	rotateTurntable //!< Rotate the object like a turntable. X rotates always around the Z axis, while Y rotates around the X axis.
-};
-
 class OpenGLCanvas:public wxGLCanvas {
-	// Constructor / Destructor
 public:
+
+	enum class Stereo3D {
+		Off, //!< No stereo effect
+		Anaglyph, //!< Stereoeffect using colored glasses
+		Shutter //!< Stereoeffect using shutter-glasses
+	};
+
+	enum class Rotation {
+		Trackball, //!< Use trackball style mouse control.
+		Interwoven, //!< Rotate around the object using interwoven mouse movements.
+		Turntable //!< Rotate the object like a turntable. X rotates always around the Z axis, while Y rotates around the X axis.
+	};
+
 	OpenGLCanvas(wxWindow *parent, wxWindowID id = wxID_ANY,
 			const wxPoint& pos = wxDefaultPosition, const wxSize& size =
 					wxDefaultSize, long style = 0,
@@ -80,7 +80,7 @@ public:
 
 	// Member Variables
 public:
-	Stereo3DType stereoMode;
+	Stereo3D stereoMode;
 	float eyeDistance;
 	float focalDistance;
 	unsigned char backgroundGrayLevel;
@@ -91,7 +91,7 @@ public:
 	unsigned char leftEyeG;
 	unsigned char leftEyeB;
 
-	RotationType rotationMode;
+	Rotation rotationMode;
 	AffineTransformMatrix rotmat;
 	AffineTransformMatrix transmat;
 	float scale;

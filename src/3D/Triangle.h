@@ -31,34 +31,32 @@
  * \ingroup Base3D
  * \brief Simple triangle
  *
- * Holds the data for a simple triangle. Three vertices with three normal vectors.
+ * Holds the data for a simple triangle:
+ *   Three vertices with three normal vectors and three colors.
  */
 
 #include "Vector3.h"
 
-#include <wx/string.h>
+#include <string>
 
 class AffineTransformMatrix;
 
-class Triangle {
-	// Constructor/Destructor:
+struct Triangle {
 public:
-	Triangle();
-	Triangle(wxString string);
+	Triangle() = default;
+	explicit Triangle(const std::string & string);
+	virtual ~Triangle() = default;
 
-	//Member variables:
 	Vector3 p[3]; //!< Position of vertices.
 	Vector3 n[3]; //!< Normal vectors.
 	Vector3 c[3]; //!< Color vectors.
 
-	//Methods:
-	wxString ToString(void) const;
-	void FromString(wxString const &string);
+	std::string ToString(void) const;
+	bool FromString(const std::string & string);
 
 	void Paint(bool useNormals = true, bool useColors = false) const;
 	void CalculateNormal();
 	void ApplyTransformation(const AffineTransformMatrix &matrix);
-
 };
 
 #endif /* TRIANGLE_H_ */

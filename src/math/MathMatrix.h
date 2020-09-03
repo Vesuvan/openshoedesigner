@@ -36,15 +36,15 @@
 
 class MathMatrix:public MatlabMatrix {
 public:
-	enum Axis {
+	enum class Axis {
 		X, Y, Z
 	};
-	enum Method {
+	enum class Method {
 		MaxValue, MinValue, MeanValue, Sum
 	};
 public:
-	MathMatrix();
-	virtual ~MathMatrix();
+	MathMatrix() = default;
+	virtual ~MathMatrix() = default;
 
 	double Min(void) const; ///< Minimum value of all elements in the matrix
 	double Max(void) const; ///< Maximum value of all elements in the matrix

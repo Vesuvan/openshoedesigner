@@ -68,6 +68,8 @@
 #define ID_SETUPSTEREO3D				(wxID_HIGHEST+43)
 #define ID_SETUPMIDI					(wxID_HIGHEST+44)
 #define ID_SETUPCONTROLLER				(wxID_HIGHEST+45)
+#define ID_SETUPPATHS					(wxID_HIGHEST+46)
+
 
 //!>\def ID_THREADLASTDONE Worker thread to main thread: Processing of volume ready.
 #define ID_THREADDONE_0			(wxID_HIGHEST+80)

@@ -30,15 +30,51 @@
 
 #include "gui.h"
 
-bool ExtendedTextCtrl::IsKnowID(int id) const
+BEGIN_EVENT_TABLE(ExtendedTextCtrl, wxTextCtrl) EVT_CONTEXT_MENU(ExtendedTextCtrl::OnContextMenu)
+END_EVENT_TABLE()
+
+ExtendedTextCtrl::ExtendedTextCtrl(wxWindow* parent, wxWindowID id,
+		const wxString& value, const wxPoint& pos, const wxSize& size,
+		long style, const wxValidator& validator, const wxString& name)
+		: wxTextCtrl(parent, id, value, pos, size, style, validator, name)
+{
+}
+
+void ExtendedTextCtrl::SetProject(Project* project)
+{
+	this->project = project;
+}
+
+void ExtendedTextCtrl::OnContextMenu(wxContextMenuEvent& event)
+{
+	if(project == NULL || !IsKnowID(event.GetId())){
+		event.Skip();
+		return;
+	}
+
+	wxMenu* menu = new wxMenu;
+	menu->Append(wxID_CUT);
+	menu->Append(wxID_COPY);
+	menu->Append(wxID_PASTE);
+	menu->Append(wxID_CLEAR);
+	menu->AppendSeparator();
+	menu->Append(wxID_SELECTALL);
+
+	// Add any custom items here
+
+	PopupMenu(menu);
+}
+
+bool ExtendedTextCtrl::IsKnowID(int id)
 {
 	switch(id){
 	case ID_MEASUREMENT_FOOTLENGTH:
-	case ID_MEASUREMENT_BALLGIRTH:
+	case ID_MEASUREMENT_BALLWIDTH:
+	case ID_MEASUREMENT_BIGTOEGIRTH:
+	case ID_MEASUREMENT_LITTLETOEGIRTH:
 	case ID_MEASUREMENT_WAISTGIRTH:
-	case ID_MEASUREMENT_INSTEPGIRTH:
-	case ID_MEASUREMENT_LONGHEELGIRTH:
-	case ID_MEASUREMENT_SHORTHEELGIRTH:
+	case ID_MEASUREMENT_HEELGIRTH:
+	case ID_MEASUREMENT_HEELWIDTH:
 	case ID_MEASUREMENT_ANGLEMIXING:
 	case ID_MEASUREMENT_LEGLENGTHDIFFERENCE:
 	case ID_MEASUREMENT_BELOWCRUTCHGIRTH:
@@ -67,44 +103,4 @@ bool ExtendedTextCtrl::IsKnowID(int id) const
 		return true;
 	}
 	return false;
-}
-
-void ExtendedTextCtrl::SetProject(Project* project)
-{
-	this->project = project;
-}
-
-BEGIN_EVENT_TABLE(ExtendedTextCtrl, wxTextCtrl) EVT_CONTEXT_MENU(ExtendedTextCtrl::OnContextMenu)
-END_EVENT_TABLE()
-
-ExtendedTextCtrl::ExtendedTextCtrl(wxWindow* parent, wxWindowID id,
-		const wxString& value, const wxPoint& pos, const wxSize& size,
-		long style, const wxValidator& validator, const wxString& name)
-		: wxTextCtrl(parent, id, value, pos, size, style, validator, name)
-{
-	project = NULL;
-}
-
-ExtendedTextCtrl::~ExtendedTextCtrl()
-{
-}
-
-void ExtendedTextCtrl::OnContextMenu(wxContextMenuEvent& event)
-{
-	if(project == NULL || !IsKnowID(event.GetId())){
-		event.Skip();
-		return;
-	}
-
-	wxMenu* menu = new wxMenu;
-	menu->Append(wxID_CUT);
-	menu->Append(wxID_COPY);
-	menu->Append(wxID_PASTE);
-	menu->Append(wxID_CLEAR);
-	menu->AppendSeparator();
-	menu->Append(wxID_SELECTALL);
-
-	// Add any custom items here
-
-	PopupMenu(menu);
 }

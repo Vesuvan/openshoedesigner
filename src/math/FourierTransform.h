@@ -46,13 +46,14 @@
 
 #include <cstddef>
 #include <vector>
-#include <math.h>
+#include <cmath>
 
 class FourierTransform {
 public:
-	FourierTransform();
+	FourierTransform() = default;
+	virtual ~FourierTransform() = default;
 
-	void TEmpty(void);
+	void TReset(void);
 
 	void TSetSize(size_t N);
 	size_t TGetSize(void) const;
@@ -69,6 +70,8 @@ public:
 	void XAdd(double t, double re, double im = 0.0);
 
 	void TSetLoopLength(double loopLength);
+	// TUnwraping is a special function written for symmetry detection.
+	// (Should probably be moved over into the Symmetry class.
 	void TUnwrap(double tol = M_PI);
 	void TScale(const double scale);
 

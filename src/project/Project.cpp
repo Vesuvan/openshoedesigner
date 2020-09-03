@@ -45,7 +45,7 @@
 IMPLEMENT_DYNAMIC_CLASS(Project, wxDocument)
 
 Project::Project()
-		: wxDocument(), legLengthDifference(_T("legLengthDifference"))
+		: wxDocument(), legLengthDifference("legLengthDifference")
 {
 
 //	vol.SetSize(4, 4, 4, 0.1);
@@ -60,7 +60,32 @@ Project::Project()
 
 	thread0 = NULL;
 	thread1 = NULL;
-	Reset();
+
+	measurementsSymmetric = true;
+	measurementsource = MeasurementSource::fromMeasurements;
+	modeltype = ModelType::lastBased;
+
+	generator = Generator::Experimental;
+	legLengthDifference.formula = "0.0";
+
+//	wxFileInputStream input("data/FootModelDefault.json");
+//	wxTextInputStream text(input);
+	footL.LoadJSON("data/FootModelDefault.json");
+	footL.GetBone("Tibia")->matrixinit.SetOrigin(Vector3(0, 0, 0));
+	footR = footL;
+	footR.Mirror();
+//	footL.LoadModel(&text);
+//	footR.CopyModel(footL);
+//	footR.mirrored = true;
+
+	footScan.InitExample();
+
+	lastModelR.LoadModel("data/Last_Default_Warped.stl");
+
+//	lastModelR.hull.SaveObj("/tmp/hull_export.obj");
+
+	lastModelL = lastModelR;
+	lastModelL.mirrored = true;
 
 	Bind(wxEVT_COMMAND_THREAD_COMPLETED, &Project::OnCalculationDone, this);
 	Bind(wxEVT_COMMAND_THREAD_UPDATE, &Project::OnRefreshViews, this);
@@ -104,46 +129,20 @@ void Project::StopAllThreads(void)
 	}
 }
 
-void Project::Reset(void)
-{
-
-	measurementsSymmetric = true;
-	measurementsource = fromMeasurements;
-	modeltype = lastBased;
-
-	generator = Experimental;
-	legLengthDifference.formula = _T("0.0");
-
-	wxFileInputStream input(_T("data/FootModelDefault.txt"));
-	wxTextInputStream text(input);
-	footL.LoadModel(&text);
-	footR.CopyModel(footL);
-	footR.mirrored = true;
-
-	footScan.InitExample();
-
-	lastModelR.LoadModel("data/Last_Default_Warped.stl");
-
-//	lastModelR.hull.SaveObj("/tmp/hull_export.obj");
-
-	lastModelL = lastModelR;
-	lastModelL.mirrored = true;
-}
-
 void Project::Update(void)
 {
 	{
 		// Update the left foot/shoe
 		MathParser parser;
 		parser.ignorecase = true;
-		parser.AddAllowedUnit(_T("mm"), 1e-3);
-		parser.AddAllowedUnit(_T("cm"), 1e-2);
-		parser.AddAllowedUnit(_T("m"), 1);
-		parser.AddAllowedUnit(_T("in"), 2.54e-2);
-		parser.AddAllowedUnit(_T("ft"), 0.3048);
-		parser.AddAllowedUnit(_T("rad"), 1);
-		parser.AddAllowedUnit(_T("deg"), 0.017453);
-		parser.AddAllowedUnit(_T("gon"), 0.015708);
+		parser.AddAllowedUnit("mm", 1e-3);
+		parser.AddAllowedUnit("cm", 1e-2);
+		parser.AddAllowedUnit("m", 1);
+		parser.AddAllowedUnit("in", 2.54e-2);
+		parser.AddAllowedUnit("ft", 0.3048);
+		parser.AddAllowedUnit("rad", 1);
+		parser.AddAllowedUnit("deg", 0.017453);
+		parser.AddAllowedUnit("gon", 0.015708);
 		measL.Update(parser);
 		legLengthDifference.Update(parser);
 		if(legLengthDifference.IsModified()){
@@ -172,14 +171,14 @@ void Project::Update(void)
 		// Update right foot/shoe
 		MathParser parser;
 		parser.ignorecase = true;
-		parser.AddAllowedUnit(_T("mm"), 1e-3);
-		parser.AddAllowedUnit(_T("cm"), 1e-2);
-		parser.AddAllowedUnit(_T("m"), 1);
-		parser.AddAllowedUnit(_T("in"), 2.54e-2);
-		parser.AddAllowedUnit(_T("ft"), 0.3048);
-		parser.AddAllowedUnit(_T("rad"), 1);
-		parser.AddAllowedUnit(_T("deg"), 0.017453);
-		parser.AddAllowedUnit(_T("gon"), 0.015708);
+		parser.AddAllowedUnit("mm", 1e-3);
+		parser.AddAllowedUnit("cm", 1e-2);
+		parser.AddAllowedUnit("m", 1);
+		parser.AddAllowedUnit("in", 2.54e-2);
+		parser.AddAllowedUnit("ft", 0.3048);
+		parser.AddAllowedUnit("rad", 1);
+		parser.AddAllowedUnit("deg", 0.017453);
+		parser.AddAllowedUnit("gon", 0.015708);
 		measR.Update(parser);
 		if(measR.IsModified()){
 			if(thread1 == NULL){
@@ -226,7 +225,7 @@ bool Project::UpdateLeft(void)
 	if(footL.IsModifiedSkin()){
 		footL.ModifySkin(false);
 		heightfield = footL.skin.SurfaceField();
-		OrientedMatrix temp = heightfield.XRay(Volume::MinValue);
+		OrientedMatrix temp = heightfield.XRay(Volume::Method::MinValue);
 		bow.Clear();
 		for(unsigned int i = 0; i < temp.Numel(); i++){
 			if(temp[i] < DBL_MAX){
@@ -234,7 +233,7 @@ bool Project::UpdateLeft(void)
 						temp[i] + temp.origin.z);
 			}
 		}
-		xray = footL.skin.XRay(Volume::MeanValue);
+		xray = footL.skin.XRay(Volume::Method::MeanValue);
 		bow = footL.GetCenterline();
 		//	bow.elements[0] = lastvol.GetSurface(bow.elements[1],
 		//			(bow.elements[0] - bow.elements[1]) * 2);
@@ -255,9 +254,14 @@ bool Project::UpdateLeft(void)
 bool Project::UpdateRight(void)
 {
 	wxCriticalSectionLocker locker(CSRight);
+	if(shoe.IsModified()){
+		shoe.Modify(false);
+		insole.Modify(true);
+	}
 	if(measR.IsModified()){
 		measR.Modify(false);
 		lastModelR.Modify(true);
+		insole.Modify(true);
 		footR.UpdateForm(measR);
 		return true;
 	}
@@ -277,6 +281,11 @@ bool Project::UpdateRight(void)
 		lastModelR.Modify(false);
 		lastModelR.UpdateForm(measR);
 //		lastModelR.UpdateGeometry();
+		return true;
+	}
+	if(insole.IsModified()){
+		insole.Modify(false);
+		insole.Construct(shoe, measR);
 		return true;
 	}
 
@@ -360,7 +369,7 @@ bool Project::SaveFootModel(wxString fileName)
 {
 	wxFileOutputStream output(fileName);
 	wxTextOutputStream text(output);
-	return footL.SaveModel(&text);
+//	return footL.SaveModel(&text);
 }
 
 bool Project::LoadLastModel(wxString fileName)

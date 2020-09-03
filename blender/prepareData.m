@@ -66,19 +66,37 @@ bone = {...
 
 assert(all((cell2mat(bone(2:end,1))-(2:size(bone,1))')<0),'Linkage of bones contains rings. Please check.');
 
+bonestructure = struct();
+offset = [0,0,0];
+
 % Add data to bones
 for n = 1:length(tI)
+  
   % Name of bone
-	m =	find(strcmp(bone(:,2),tI{n}{2}));
+  name = tI{n}{2};
+  
+	m =	find(strcmp(bone(:,2),name));
 	assert(~isempty(m), 'New bone in x3d file introduced. Adapt bone list.');
 	assert(length(m) < 2, 'Two bones with same name in bone list.');
-	
+	ref = bone{m,1};
+  if isnan(ref)
+    ref = [];
+  else
+    ref = bone{ref,2};
+  end
 	N = str2num(tI{n}{1});
 	pos = sscanf(tI{n}{3},'%f %f %f');
 	pos = [-pos(1),pos(3),pos(2)];
 	radius = sscanf(tI{n}{4},'%f %f %f');
 	radius = mean(abs(radius));
 	bone(m,(1:2)+2*N) = {pos/100,radius/100};
+%  bonestructure.(name).name = name;
+  bonestructure.(name).parent = ref;
+  bonestructure.(name).init.(sprintf('r%u',N)) = radius;
+  bonestructure.(name).init.(sprintf('p%u',N)) = pos;
+  if strcmpi(name, 'tibia')
+    offset = pos;
+  end
 end
 for n = 1:length(tE)
   % Name of bone
@@ -115,6 +133,51 @@ for n = 1:size(bone,1)
 end
 
 
+fn = fieldnames(bonestructure);
+minx = inf;
+maxx = -inf;
+for n = 1:length(fn)
+  if isfield(bonestructure.(fn{n}).init, 'p1')
+    minx = min(minx, bonestructure.(fn{n}).init.p1(1));
+    maxx = max(maxx, bonestructure.(fn{n}).init.p1(1));
+  end
+  if isfield(bonestructure.(fn{n}).init,'p2')
+    minx = min(minx, bonestructure.(fn{n}).init.p2(1));
+    maxx = max(maxx, bonestructure.(fn{n}).init.p2(1));
+  end
+end
+L = maxx - minx;
+
+for n = 1:length(fn)
+  bonestructure.(fn{n}).init.p1 = (bonestructure.(fn{n}).init.p1 - offset) ./ L;
+  bonestructure.(fn{n}).init.r1 = bonestructure.(fn{n}).init.r1 / L;
+  if isfield(bonestructure.(fn{n}).init, 'p2')
+    bonestructure.(fn{n}).init.p2 = (bonestructure.(fn{n}).init.p2 - offset) ./ L;
+    bonestructure.(fn{n}).init.r2 = bonestructure.(fn{n}).init.r2 / L;
+  end
+  bonestructure.(fn{n}).formula = [];
+  if isfield(bonestructure.(fn{n}).init, 'p1') && isfield(bonestructure.(fn{n}).init,'p2')
+    L2 = norm(bonestructure.(fn{n}).init.p2 -  bonestructure.(fn{n}).init.p1);
+    bonestructure.(fn{n}).formula.length = sprintf('L*%g',L2);
+  else
+    L2 = 0;
+    bonestructure.(fn{n}).formula.length = sprintf('0');
+  end
+  if isfield(bonestructure.(fn{n}).init, 'r1')
+    bonestructure.(fn{n}).formula.r1 = sprintf('L*R*%g',bonestructure.(fn{n}).init.r1);
+    bonestructure.(fn{n}).formula.s1 = sprintf('L*R*S*%g',L2);
+  end
+  if isfield(bonestructure.(fn{n}).init, 'r2')
+    bonestructure.(fn{n}).formula.r2 = sprintf('L*R*%g',bonestructure.(fn{n}).init.r2);
+    bonestructure.(fn{n}).formula.s2 = sprintf('L*R*S*%g',L2);
+  end
+end
+
+fhd = fopen('../data/FootModelDefault.json','wt');
+fwrite(fhd, mat2json(bonestructure));
+fclose(fhd);
+
+return;
 
 
 % Print code
@@ -127,6 +190,7 @@ for n = 1:size(bone,1);
 	end
 	fprintf(1,'\t%s->AddChild(%s);\n', bone{m,2}, bone{n,2});
 end
+
 
 
 fhd = fopen('../data/FootModelDefault.txt','wt');

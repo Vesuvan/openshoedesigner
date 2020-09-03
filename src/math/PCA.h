@@ -38,14 +38,18 @@
 class PCA {
 public:
 	PCA();
-	virtual ~PCA();
+	virtual ~PCA() = default;
+
 	void Reset(); //!< Reset all parameters and start a new data collection.
 
-	void SetCenter(const Vector3 center); //!< Calculated middle of all vertices. Has to be provided externally, because this function does not store the passed vertices.
+	void SetCenter(const Vector3 &center); //!< Calculated middle of all vertices. Has to be provided externally, because this function does not store the passed vertices.
 	void Add(const Vector3 &point); //!< Add the points to analyze
 
 	void Calculate(); //!< Calculate the PCA and store the values.
 	void Paint() const;
+
+	double maxError = 1e-6;
+	size_t maxIterations = 100;
 
 	Vector3 X; //!< Dominant eigenvector
 	Vector3 Y; //!< Second eigenvector

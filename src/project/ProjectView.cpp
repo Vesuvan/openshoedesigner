@@ -33,24 +33,29 @@
 #include "../gui/FrameParent.h"
 #include "../main.h"
 
+#include "../math/Polynom2D.h"
+#include "../3D/NagataPatch.h"
+#include "../3D/Surface.h"
+#include "../3D/TestGrid.h"
+
 IMPLEMENT_DYNAMIC_CLASS(ProjectView, wxView)
 
 ProjectView::ProjectView()
 		: wxView()
 {
-	active = Both;
+	active = Side::Both;
 
 	showLeft = false;
 	showRight = true;
 
-	showFootScan = true;
+	showFootScan = false;
 	showBones = false;
-	showSkin = true;
+	showSkin = false;
 	showLeg = false;
 
 	showLastScan = true;
 	showLast = false;
-	showInsole = false;
+	showInsole = true;
 	showSole = false;
 	showUpper = false;
 	showCutaway = false;
@@ -70,7 +75,7 @@ bool ProjectView::OnCreate(wxDocument* doc, long flags)
 	printf("ProjectView::OnCreate(...) called...\n");
 
 	if(!wxView::OnCreate(doc, flags)) return false;
-	wxFrame* frame = wxGetApp().CreateChildFrame(this, mainframe);
+	wxFrame* frame = wxGetApp().CreateChildFrame(this, FrameType::mainframe);
 	wxASSERT(frame == GetFrame());
 
 	BackgroundImage temp;
@@ -91,25 +96,91 @@ void ProjectView::Paint(bool usePicking) const
 	Project* project = wxStaticCast(this->GetDocument(), Project);
 
 //	glColor3f(0.8, 0.5, 0.0);
-	OpenGLMaterial matBones(OpenGLMaterial::pearl);
-	OpenGLMaterial matFoot(OpenGLMaterial::redrubber, 0.3);
+	OpenGLMaterial matBones(OpenGLMaterial::Preset::Pearl);
+	OpenGLMaterial matFoot(OpenGLMaterial::Preset::RedRubber, 0.3);
 	matFoot.SetSimpleColor(0.8, 0.5, 0);
-	OpenGLMaterial matLast(OpenGLMaterial::cyanplastic);
-	OpenGLMaterial matFloor(OpenGLMaterial::whiteplastic);
+	OpenGLMaterial matLast(OpenGLMaterial::Preset::CyanPlastic);
+	OpenGLMaterial matFloor(OpenGLMaterial::Preset::WhitePlastic);
 //	matFloor.SetSimpleColor(0.9, 0.9, 0.9);
 	OpenGLMaterial matLines;
 	matLines.SetSimpleColor(1, 1, 1, 0.6);
 	OpenGLMaterial matScan;
 	matScan.SetSimpleColor(0.4, 0.9, 0.6);
 
+	matBones.UseColor();
+
+//	NagataPatch p0;
+//
+//	Vector3 v1(0, 0, 0);
+//	Vector3 v2(1, 0, 0.3);
+//	Vector3 v3(1, 1, 0);
+//	Vector3 v4(0, 1, 0);
+//
+//	Vector3 n1(-0.5, 0, 1);
+//	Vector3 n2(0, 0.4, 1);
+//	Vector3 n3(0, 0.0, 1);
+//	Vector3 n4(-0.4, 0.4, 1);
+//
+//	n1.Normalize();
+//	n2.Normalize();
+//	n3.Normalize();
+//	n4.Normalize();
+//
+//	p0.Set(v1, n1, v2, n2, v3, n3, v4, n4);
+//	p0.Paint();
+//
+////	std::cout << "(1,0): " << p0(1, 0).ToString() << " - "
+////			<< p0.Normal(1, 0).ToString() << "\n";
+//
+//	Vector3 d(+1, 0, 0);
+//
+//	p0.Set(v2, n2, v1 + d * 2, n1.Scale( {-1, 1, 1}), v4 + d * 2, n4.Scale( {-1,
+//			1, 1}), v3, n3);
+//	p0.Paint();
+//
+////	std::cout << "(0,0): " << p0(0, 0).ToString() << " - "
+////			<< p0.Normal(0, 0).ToString() << "\n";
+//
+//	Vector3 d2(0, -1, 0);
+//	p0.Set(v4 + d2 * 2, n4.Scale( {1, -1, 1}), v3 + d2 * 2,
+//			n3.Scale( {1, -1, 1}), v2, n2, v1, n1);
+//	p0.Paint();
+//
+//	p0.Set(v3 + d2 * 2, n3.Scale( {1, -1, 1}), v4 + (d + d2) * 2, n4.Scale( {-1,
+//			-1, 1}), v1 + d * 2, n1.Scale( {-1, 1, 1}), v2, n2);
+//	p0.Paint();
+
+//	Surface s;
+//	s.SetSize(3, 3);
+//	s.P(0, 0).p.Set(0, 0, 0.1);
+//	s.P(1, 0).p.Set(1, 0, 0.4);
+//	s.P(2, 0).p.Set(2, 0, -0.3);
+//	s.P(0, 1).p.Set(0, 1, 0.3);
+//	s.P(1, 1).p.Set(1, 1, 0.7);
+//	s.P(2, 1).p.Set(2, 1, 0.4);
+//	s.P(0, 2).p.Set(0, 2, 0.1);
+//	s.P(1, 2).p.Set(1, 2, 0.5);
+//	s.P(2, 2).p.Set(2, 2, 0.1);
+//	s.Calculate();
+//	s.Paint();
+//
+//	glPushMatrix();
+//	glTranslatef(0, -2, 0);
+//	s.CalculateDirections();
+//	s.Calculate();
+//	s.Paint();
+//	glPopMatrix();
+
 	if(showLeft){
+
 		glPushMatrix();
-		if(shiftapart) glTranslatef(0, project->measL.ballGirth.value / M_PI,
-				0);
+		if(shiftapart) glTranslatef(0,
+				project->measL.littleToeGirth.value / M_PI, 0);
 
 		glLoadName(0); // Left
 
-		if(project->measurementsource == Project::fromFootScan && showFootScan){
+		if(project->measurementsource
+				== Project::MeasurementSource::fromFootScan && showFootScan){
 			glPushName(0);
 			matScan.UseColor(0.5);
 			glNormal3f(1, 0, 0);
@@ -117,22 +188,23 @@ void ProjectView::Paint(bool usePicking) const
 			glPopName();
 		}
 
-		if(project->measurementsource == Project::fromMeasurements
-				&& showBones){
+		if(project->measurementsource
+				== Project::MeasurementSource::fromMeasurements && showBones){
 			glPushName(1);
 			matBones.UseMaterial();
 			project->footL.PaintBones();
 			glPopName();
 		}
 
-		if(project->modeltype == Project::boneBased && showSkin && !usePicking){
+		if(project->modeltype == Project::ModelType::boneBased && showSkin
+				&& !usePicking){
 			glPushName(2);
 			matFoot.UseMaterial();
 			project->footL.PaintSkin();
 			glPopName();
 		}
 
-		if(project->modeltype == Project::lastBased && showLastScan){
+		if(project->modeltype == Project::ModelType::lastBased && showLastScan){
 			glPushName(3);
 			matScan.UseMaterial();
 			project->lastModelL.Paint();
@@ -177,12 +249,13 @@ void ProjectView::Paint(bool usePicking) const
 	}
 	if(showRight){
 		glPushMatrix();
-		if(shiftapart) glTranslatef(0, -project->measR.ballGirth.value / M_PI,
-				0);
+		if(shiftapart) glTranslatef(0,
+				-project->measR.littleToeGirth.value / M_PI, 0);
 
 		glLoadName(1); // Right
 
-		if(project->measurementsource == Project::fromFootScan && showFootScan){
+		if(project->measurementsource
+				== Project::MeasurementSource::fromFootScan && showFootScan){
 			glPushName(0);
 			matScan.UseColor(0.5);
 			glNormal3f(1, 0, 0);
@@ -190,22 +263,23 @@ void ProjectView::Paint(bool usePicking) const
 			glPopName();
 		}
 
-		if(project->measurementsource == Project::fromMeasurements
-				&& showBones){
+		if(project->measurementsource
+				== Project::MeasurementSource::fromMeasurements && showBones){
 			glPushName(1);
 			matBones.UseMaterial();
 			project->footR.PaintBones();
 			glPopName();
 		}
 
-		if(project->modeltype == Project::boneBased && showSkin && !usePicking){
+		if(project->modeltype == Project::ModelType::boneBased && showSkin
+				&& !usePicking){
 			glPushName(2);
 			matFoot.UseMaterial();
 			project->footR.PaintSkin();
 			glPopName();
 		}
 
-		if(project->modeltype == Project::lastBased && showLastScan){
+		if(project->modeltype == Project::ModelType::lastBased && showLastScan){
 			glPushName(3);
 			matScan.UseMaterial();
 			project->lastModelR.Paint();
@@ -271,6 +345,8 @@ void ProjectView::PaintLast(void) const
 void ProjectView::PaintInsole(void) const
 {
 	Project* project = wxStaticCast(this->GetDocument(), Project);
+
+	project->insole.Paint();
 
 //	project->lastModelL.Paint();
 
@@ -349,10 +425,10 @@ const FootMeasurements* ProjectView::GetActiveFootMeasurements(void) const
 {
 	const Project* project = wxStaticCast(this->GetDocument(), Project);
 	switch(active){
-	case Both:
-	case Left:
+	case Side::Both:
+	case Side::Left:
 		return &(project->measL);
-	case Right:
+	case Side::Right:
 		return &(project->measR);
 	}
 	return NULL;

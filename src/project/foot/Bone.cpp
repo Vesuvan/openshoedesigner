@@ -24,30 +24,107 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "../foot/Bone.h"
+#include "Bone.h"
 
 #include <GL/gl.h>
 
-#include <math.h>
+#include <cmath>
 
-Bone::Bone(const wxString &name)
+void Bone::UpdateHierarchy(void)
 {
-	this->name = name;
-	connectTo = 0;
-	r1 = 0.0;
-	r2 = 0.0;
-	anchorD = 0;
-	length = 0;
-	s1 = 0.01;
-	s2 = 0.01;
-	rotx = 0.0;
-	roty = 0.0;
-	rotxBackup = 0.0;
-	rotyBackup = 0.0;
+	if(parentTo.expired()){
+		hierarchyLevel = 0;
+	}else{
+		std::shared_ptr <Bone> parent = parentTo.lock();
+		if(parent->hierarchyLevel == 0) parent->UpdateHierarchy();
+		hierarchyLevel = parent->hierarchyLevel + 1;
+	}
 }
 
-Bone::~Bone()
+double Bone::CalculateAnchorPoint(const Vector3& p) const
 {
+	if(fabs(r1init - r2init) >= lengthinit || lengthinit < 1e-9){
+		return (r1init >= r2init)? 0.0 : 1.0;
+	}
+	// Calculate relative surface angle:
+	double a = asin((r1init - r2init) / lengthinit);
+	double ar1 = asin(matrixinit.GetEx().Dot((p - p1).Normal()));
+	double ar2 = asin(matrixinit.GetEx().Dot((p - p2).Normal()));
+	if(ar1 < a) return 0.0;
+	if(ar2 > a) return 1.0;
+	return (a - ar1) / (ar2 - ar1);
+}
+
+void Bone::Update(void)
+{
+	if(!initialized){
+//		lengthinit = (p2-p1).Abs();
+//		matrixinit.Normalize();
+		p1 = matrixinit.GetOrigin();
+		p2 = matrixinit.Transform(lengthinit, 0, 0);
+		if(!parentTo.expired()){
+			std::shared_ptr <Bone> parent = parentTo.lock();
+			anchorDinit = parent->CalculateAnchorPoint(matrixinit.GetOrigin());
+			AffineTransformMatrix base = parent->matrixinit;
+			base.TranslateLocal(parent->lengthinit * anchorDinit, 0, 0);
+			link = base.Inverse() * matrixinit;
+			Vector3 move = link.GetOrigin();
+			linkLengthInit = move.Abs();
+			move.Normalize();
+			link.SetOrigin(move);
+			rparentinit = parent->r1init
+					+ (parent->r2init - parent->r1init) * anchorDinit;
+		}
+		matrix = matrixinit;
+		r1 = r1init;
+		r2 = r2init;
+		length = lengthinit;
+		initialized = true;
+	}
+	if(parentTo.expired()){
+		matrix = matrixinit
+				* AffineTransformMatrix::RotationInterwoven(0, roty, rotz);
+		p1 = matrix.GetOrigin();
+		p2 = matrix.Transform(length, 0, 0);
+		return;
+	}
+	std::shared_ptr <Bone> parent = parentTo.lock();
+
+	const double rParent = parent->r1 + (parent->r2 - parent->r1) * anchorDinit;
+
+	const double scaleParent = rParent / rparentinit;
+	const double scaleR = r1 / r1init;
+	mixing = rParent / (r1 + rParent);
+
+	const double interfacethicknessInit = linkLengthInit - rparentinit - r1init;
+	const double interfacethickness = interfacethicknessInit
+			* fmin(scaleParent, scaleR);
+
+	double linkLength = interfacethickness + rParent + r1;
+
+//	r1 = linkLengthInit - rParentInit - interfacethickness;
+//	r1 = r1 / lengthinit * length;
+//	const double linkLength = r1 + rParent + interfacethickness;
+
+//	mixing = rParent / linkLength;
+
+	matrix = parent->matrix;
+	matrix.TranslateLocal(parent->length * anchorDinit, 0, 0);
+	matrix = matrix
+			* AffineTransformMatrix::RotationInterwoven(0,
+					roty * (1.0 - mixing), rotz * (1.0 - mixing));
+
+//	Vector3 linkScaled = link * linkLength;
+//	matrix.TranslateLocal(linkScaled.x, linkScaled.y, linkScaled.z);
+	AffineTransformMatrix m = link;
+	m.SetOrigin(m.GetOrigin() * linkLength);
+	matrix *= m;
+
+	matrix = matrix
+			* AffineTransformMatrix::RotationInterwoven(0, roty * mixing,
+					rotz * mixing);
+	p1 = matrix.GetOrigin();
+	p2 = matrix.Transform(length, 0, 0);
 }
 
 double Bone::GetXMax(void) const
@@ -65,76 +142,94 @@ double Bone::GetZMin(void) const
 	return fmin(p1.z - r1 - s1, p2.z - r1 - s1);
 }
 
-void Bone::Vertex(const Vector3 v) const
+void Bone::PushRotation(void)
 {
-	::glVertex3f(v.x, v.y, v.z);
+	rotyBackup = roty;
+	rotzBackup = rotz;
+	roty = 0.0;
+	rotz = 0.0;
 }
 
-void Bone::Normal(const Vector3 v) const
+void Bone::PopRotation(void)
 {
-	::glNormal3f(v.x, v.y, v.z);
+	roty = rotyBackup;
+	rotz = rotzBackup;
 }
 
-void Bone::Render(void) const
+void Bone::Paint(void) const
 {
-	const int N = 32; // Cap segments
-	const int M = 16; // Segments around the bone
+	const size_t N = 40; // Cap segments
+	const size_t M = 40; // Segments around the bone
 
-	if(r1 == 0.0 && r2 == 0.0) return;
+	if(r1 <= 0.0 && r2 <= 0.0) return;
+	AffineTransformMatrix matrix2 = matrix;
+	matrix2.TranslateLocal(length, 0, 0);
 	const float L = (p2 - p1).Abs(); // Length of the vector between the points.
 	const float dr = fabs(r1 - r2); // Difference between the radii.
 
-	int n, m;
-
 	const float dv = 2.0 * M_PI / N;
-	float v = 0.0;
+//	float v = 0.0;
 	const float dw = 2.0 * M_PI / M;
-	float w = 0.0;
+//	float w = 0.0;
+
+	auto vertex = [](const Vector3 & v){
+		glVertex3f(v.x,v.y,v.z);
+	};
+	auto normal = [](const Vector3 & v){
+		glNormal3f(v.x,v.y,v.z);
+	};
 
 	if(L <= dr){
-		// Only one sphere need to be rendered.
-		// The bigger one is rendered
+		// Only a sphere needs to be rendered. (The bigger one.)
+		auto sphere = [N,M](size_t n,size_t m)->Vector3{
+			const double v = M_PI/(double)N*(double)n;
+			const double w = 2.0*M_PI/(double)M*(double)m;
+			if(n==0)return Vector3(-1,0,0);
+			if(n==N)return Vector3(1,0,0);
+			return Vector3(-cos(v),sin(v) * cos(w),sin(v) * sin(w));
+		};
 		if(r1 > r2){
-			v = 0;
-			for(n = 0; n <= N; n++){
-				::glBegin(GL_TRIANGLE_STRIP);
-				w = 0.0;
-				for(m = 0; m <= M; m++){
-					::glNormal3f(sin(v) * cos(w), -sin(v) * sin(w), -cos(v));
-					::glVertex3f(p1.x + sin(v) * cos(w) * r1,
-							p1.y - sin(v) * sin(w) * r1, p1.z - cos(v) * r1);
-					::glNormal3f(sin(v + dv) * cos(w), -sin(v + dv) * sin(w),
-							-cos(v + dv));
-					::glVertex3f(p1.x + sin(v + dv) * cos(w) * r1,
-							p1.y - sin(v + dv) * sin(w) * r1,
-							p1.z - cos(v + dv) * r1);
-
-					w += dw;
+			for(size_t m = 0; m < M; ++m){
+				glBegin(GL_QUAD_STRIP);
+				for(size_t n = 0; n <= N; ++n){
+					const Vector3 v1 = sphere(n, m + 1);
+					const Vector3 v2 = sphere(n, m);
+					if(matrix.GetOrientation()
+							== AffineTransformMatrix::Orientation::LHS){
+						normal(matrix.TransformNoShift(v1));
+						vertex(matrix.Transform(r1 * v1));
+						normal(matrix.TransformNoShift(v2));
+						vertex(matrix.Transform(r1 * v2));
+					}else{
+						normal(matrix.TransformNoShift(v2));
+						vertex(matrix.Transform(r1 * v2));
+						normal(matrix.TransformNoShift(v1));
+						vertex(matrix.Transform(r1 * v1));
+					}
 				}
-				::glEnd();
-				v += dv;
+				glEnd();
 			}
 		}else{
-			v = 0;
-			for(n = 0; n <= N; n++){
-				::glBegin(GL_TRIANGLE_STRIP);
-				w = 0.0;
-				for(m = 0; m <= M; m++){
-					::glNormal3f(sin(v) * cos(w), -sin(v) * sin(w), -cos(v));
-					::glVertex3f(p2.x + sin(v) * cos(w) * r2,
-							p2.y - sin(v) * sin(w) * r2, p1.z - cos(v) * r2);
-					::glNormal3f(sin(v + dv) * cos(w), -sin(v + dv) * sin(w),
-							-cos(v + dv));
-					::glVertex3f(p2.x + sin(v + dv) * cos(w) * r2,
-							p2.y - sin(v + dv) * sin(w) * r2,
-							p2.z - cos(v + dv) * r2);
-
-					w += dw;
+			for(size_t m = 0; m < M; ++m){
+				glBegin(GL_QUAD_STRIP);
+				for(size_t n = 0; n <= N; ++n){
+					const Vector3 v1 = sphere(n, m + 1);
+					const Vector3 v2 = sphere(n, m);
+					if(matrix.GetOrientation()
+							== AffineTransformMatrix::Orientation::LHS){
+						normal(matrix.TransformNoShift(v1));
+						vertex(matrix.Transform(r2 * v1));
+						normal(matrix.TransformNoShift(v2));
+						vertex(matrix.Transform(r2 * v2));
+					}else{
+						normal(matrix.TransformNoShift(v2));
+						vertex(matrix.Transform(r2 * v2));
+						normal(matrix.TransformNoShift(v1));
+						vertex(matrix.Transform(r2 * v1));
+					}
 				}
-				::glEnd();
-				v += dv;
+				glEnd();
 			}
-
 		}
 		return;
 	}
@@ -156,7 +251,7 @@ void Bone::Render(void) const
 
 	const double h1 = sqrt(r1 * r1 - s1 * s1);
 	const double h2 = sqrt(r2 * r2 - s2 * s2);
-//	double f = s1 / r1;
+	//	double f = s1 / r1;
 
 	Vector3 zyl;
 	zyl.Set(s1, h1, 0);
@@ -164,29 +259,29 @@ void Bone::Render(void) const
 
 	::glBegin(GL_TRIANGLE_STRIP);
 
-	w = 0.0;
-	for(m = 0; m <= M; m++){
-		Normal(s * zyl.x + g * zyl.y * cos(w) + h * zyl.y * sin(w));
-		Vertex(p2 + s * s2 + (g * h2 * cos(w)) + (h * h2 * sin(w)));
-		Vertex(p1 + s * s1 + (g * h1 * cos(w)) + (h * h1 * sin(w)));
+	float w = 0.0;
+	for(size_t m = 0; m <= M; m++){
+		normal(s * zyl.x + g * zyl.y * cos(w) + h * zyl.y * sin(w));
+		vertex(p2 + s * s2 + (g * h2 * cos(w)) + (h * h2 * sin(w)));
+		vertex(p1 + s * s1 + (g * h1 * cos(w)) + (h * h1 * sin(w)));
 		w += dw;
 	}
 	::glEnd();
 
-	v = 0.0;
+	float v = 0.0;
 	float vg = atan2(h1, -s1);
 	float v2;
 	while(v < vg){
 		v2 = fmin(v + dv, vg);
 		::glBegin(GL_TRIANGLE_STRIP);
 		w = 0.0;
-		for(m = 0; m <= M; m++){
-			Normal(-s * cos(v2) + g * cos(w) * sin(v2) + h * sin(w) * sin(v2));
-			Vertex(
+		for(size_t m = 0; m <= M; m++){
+			normal(-s * cos(v2) + g * cos(w) * sin(v2) + h * sin(w) * sin(v2));
+			vertex(
 					p1 - s * r1 * cos(v2) + (g * r1 * cos(w) * sin(v2))
 							+ (h * r1 * sin(w) * sin(v2)));
-			Normal(-s * cos(v) + g * cos(w) * sin(v) + h * sin(w) * sin(v));
-			Vertex(
+			normal(-s * cos(v) + g * cos(w) * sin(v) + h * sin(w) * sin(v));
+			vertex(
 					p1 - s * r1 * cos(v) + (g * r1 * cos(w) * sin(v))
 							+ (h * r1 * sin(w) * sin(v)));
 			w += dw;
@@ -201,13 +296,13 @@ void Bone::Render(void) const
 		v2 = fmin(v + dv, vg);
 		::glBegin(GL_TRIANGLE_STRIP);
 		w = 0.0;
-		for(m = 0; m <= M; m++){
-			Normal(s * cos(v) + g * cos(w) * sin(v) + h * sin(w) * sin(v));
-			Vertex(
+		for(size_t m = 0; m <= M; m++){
+			normal(s * cos(v) + g * cos(w) * sin(v) + h * sin(w) * sin(v));
+			vertex(
 					p2 + s * r2 * cos(v) + (g * r2 * cos(w) * sin(v))
 							+ (h * r2 * sin(w) * sin(v)));
-			Normal(s * cos(v2) + g * cos(w) * sin(v2) + h * sin(w) * sin(v2));
-			Vertex(
+			normal(s * cos(v2) + g * cos(w) * sin(v2) + h * sin(w) * sin(v2));
+			vertex(
 					p2 + s * r2 * cos(v2) + (g * r2 * cos(w) * sin(v2))
 							+ (h * r2 * sin(w) * sin(v2)));
 			w += dw;
@@ -215,121 +310,4 @@ void Bone::Render(void) const
 		::glEnd();
 		v += dv;
 	}
-
-}
-
-bool Bone::Set(wxString text)
-{
-	wxString temp = text.BeforeFirst(_T('|'));
-	if(temp.Cmp(name) != 0) return false;
-	text = text.AfterFirst(_T('|'));
-	anchorNx = text.BeforeFirst(_T('|'));
-	text = text.AfterFirst(_T('|'));
-	anchorNy = text.BeforeFirst(_T('|'));
-	text = text.AfterFirst(_T('|'));
-	anchorNz = text.BeforeFirst(_T('|'));
-	text = text.AfterFirst(_T('|'));
-	linkx = text.BeforeFirst(_T('|'));
-	text = text.AfterFirst(_T('|'));
-	linky = text.BeforeFirst(_T('|'));
-	text = text.AfterFirst(_T('|'));
-	linkz = text.BeforeFirst(_T('|'));
-	text = text.AfterFirst(_T('|'));
-	normalx = text.BeforeFirst(_T('|'));
-	text = text.AfterFirst(_T('|'));
-	normaly = text.BeforeFirst(_T('|'));
-	text = text.AfterFirst(_T('|'));
-	normalz = text.BeforeFirst(_T('|'));
-	text = text.AfterFirst(_T('|'));
-	anchorDv = text.BeforeFirst(_T('|'));
-	text = text.AfterFirst(_T('|'));
-	lengthv = text.BeforeFirst(_T('|'));
-	text = text.AfterFirst(_T('|'));
-	r1v = text.BeforeFirst(_T('|'));
-	text = text.AfterFirst(_T('|'));
-	r2v = text.BeforeFirst(_T('|'));
-	text = text.AfterFirst(_T('|'));
-	s1v = text.BeforeFirst(_T('|'));
-	text = text.AfterFirst(_T('|'));
-	s2v = text;
-	return true;
-}
-
-wxString Bone::Get(void) const
-{
-	wxString temp = name + _T("|");
-	temp += anchorNx + _T("|");
-	temp += anchorNy + _T("|");
-	temp += anchorNz + _T("|");
-	temp += linkx + _T("|");
-	temp += linky + _T("|");
-	temp += linkz + _T("|");
-	temp += normalx + _T("|");
-	temp += normaly + _T("|");
-	temp += normalz + _T("|");
-	temp += anchorDv + _T("|");
-	temp += lengthv + _T("|");
-	temp += r1v + _T("|");
-	temp += r2v + _T("|");
-	temp += s1v + _T("|");
-	temp += s2v + _T("\n");
-	return temp;
-}
-
-void Bone::Setup(Bone *parent)
-{
-	double rLocal;
-
-	if(parent == NULL){
-		matrix = AffineTransformMatrix::Identity();
-		anchor.x = anchorN.x;
-		anchor.y = anchorN.y;
-		anchor.z = anchorD;
-		rLocal = 1.0;
-	}else{
-		matrix = parent->matrix;
-		// Set the base point of the bone.
-		anchor = parent->normal * (parent->length * anchorD);
-
-		// Position of the anchorpoint along the parent bone
-		const double h = fmin(fmax(parent->anchorD, 0.0), 1.0);
-
-		rLocal = parent->r1 + (parent->r2 - parent->r1) * h;
-		anchor += anchorN * rLocal;
-	}
-
-	matrix.TranslateLocal(anchor.x, anchor.y, anchor.z);
-	matrix = matrix
-			* AffineTransformMatrix::RotationAroundVector(Vector3(1, 0, 0),
-					rotx / 2);
-	matrix = matrix
-			* AffineTransformMatrix::RotationAroundVector(Vector3(0, 1, 0),
-					roty / 2);
-
-	Vector3 temp = link * (rLocal + r1);
-	matrix.TranslateLocal(temp.x, temp.y, temp.z);
-
-	matrix = matrix
-			* AffineTransformMatrix::RotationAroundVector(Vector3(1, 0, 0),
-					rotx / 2);
-	matrix = matrix
-			* AffineTransformMatrix::RotationAroundVector(Vector3(0, 1, 0),
-					roty / 2);
-
-	p1 = matrix.Transform(Vector3(0, 0, 0));
-	p2 = matrix.Transform(normal * length);
-}
-
-void Bone::ResetRotation(void)
-{
-	rotxBackup = rotx;
-	rotyBackup = roty;
-	rotx = 0.0;
-	roty = 0.0;
-}
-
-void Bone::RestoreRotation(void)
-{
-	rotx = rotxBackup;
-	roty = rotyBackup;
 }

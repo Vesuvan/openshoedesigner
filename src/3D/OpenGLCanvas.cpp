@@ -46,12 +46,12 @@
 //#include <GL/glu.h>
 //#include <GL/gl.h>
 
-static int wx_gl_attribs[] =
-	{WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 24, 0};
+static int wx_gl_attribs[] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE,
+		24, 0};
 
 OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
-		const wxSize& size, long style, const wxString& name) :
-		wxGLCanvas(parent, id, wx_gl_attribs, pos, size,
+		const wxSize& size, long style, const wxString& name)
+		: wxGLCanvas(parent, id, wx_gl_attribs, pos, size,
 				style | wxFULL_REPAINT_ON_RESIZE, name), Light0(GL_LIGHT0)
 {
 
@@ -64,7 +64,7 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	turntableX = 0;
 	turntableY = M_PI / 2;
 	scale = 1.0;
-	stereoMode = stereoOff;
+	stereoMode = Stereo3D::Off;
 	eyeDistance = 0.1;
 	focalDistance = 1.0;
 	backgroundGrayLevel = 102;
@@ -75,7 +75,7 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
 	leftEyeG = 0;
 	leftEyeB = 0;
 
-	rotationMode = rotateInterwoven;
+	rotationMode = Rotation::Interwoven;
 
 	Light0.SetAmbient(0.2, 0.2, 0.2);
 	Light0.SetDiffuse(0.6, 0.6, 0.6);
@@ -111,7 +111,7 @@ OpenGLCanvas::~OpenGLCanvas()
 {
 #ifdef _USE_6DOFCONTROLLER
 	this->Disconnect(wxEVT_TIMER, wxTimerEventHandler(OpenGLCanvas::OnTimer),
-	NULL, this);
+			NULL, this);
 #endif
 	this->Disconnect(wxEVT_RIGHT_DCLICK,
 			wxMouseEventHandler(OpenGLCanvas::OnMouseEvent), NULL, this);
@@ -138,8 +138,8 @@ void OpenGLCanvas::SetController(Control3D& control)
 }
 #endif
 
-OpenGLCanvas::Context::Context(wxGLCanvas* canvas) :
-		wxGLContext(canvas)
+OpenGLCanvas::Context::Context(wxGLCanvas* canvas)
+		: wxGLContext(canvas)
 {
 	SetCurrent(*canvas);
 
@@ -200,34 +200,34 @@ void OpenGLCanvas::OnMouseEvent(wxMouseEvent& event)
 
 	if(event.Dragging() && event.RightIsDown()){
 		switch(rotationMode){
-		case rotateTrackball:
-		{
-			const double r = (double) ((w < h)? w : h) / 2.2;
-			rotmat = AffineTransformMatrix::RotationTrackball(
-					(double) (x - w / 2), (double) (h / 2 - y),
-					(double) (event.m_x - w / 2), (double) (h / 2 - event.m_y),
-					r) * rotmat;
-			break;
-		}
-		case rotateInterwoven:
-		{
-			rotmat = AffineTransformMatrix::RotationXY(event.m_x - x,
-					event.m_y - y, 0.5) * rotmat;
-			break;
-		}
-		case rotateTurntable:
-		{
-			rotmat = AffineTransformMatrix::RotationAroundVector(
-					Vector3(1, 0, 0), -M_PI / 2);
-			turntableX += (double) (event.m_x - x) / 100;
-			turntableY += (double) (event.m_y - y) / 100;
-			rotmat = AffineTransformMatrix::RotationAroundVector(
-					Vector3(1, 0, 0), turntableY) * rotmat;
-			rotmat = rotmat
-					* AffineTransformMatrix::RotationAroundVector(
-							Vector3(0, 0, 1), turntableX);
-			break;
-		}
+		case Rotation::Trackball:
+			{
+				const double r = (double) ((w < h)? w : h) / 2.2;
+				rotmat = AffineTransformMatrix::RotationTrackball(
+						(double) (x - w / 2), (double) (h / 2 - y),
+						(double) (event.m_x - w / 2),
+						(double) (h / 2 - event.m_y), r) * rotmat;
+				break;
+			}
+		case Rotation::Interwoven:
+			{
+				rotmat = AffineTransformMatrix::RotationXY(event.m_x - x,
+						event.m_y - y, 0.5) * rotmat;
+				break;
+			}
+		case Rotation::Turntable:
+			{
+				rotmat = AffineTransformMatrix::RotationAroundVector(
+						Vector3(1, 0, 0), -M_PI / 2);
+				turntableX += (double) (event.m_x - x) / 100;
+				turntableY += (double) (event.m_y - y) / 100;
+				rotmat = AffineTransformMatrix::RotationAroundVector(
+						Vector3(1, 0, 0), turntableY) * rotmat;
+				rotmat = rotmat
+						* AffineTransformMatrix::RotationAroundVector(
+								Vector3(0, 0, 1), turntableX);
+				break;
+			}
 		}
 		x = event.m_x;
 		y = event.m_y;
@@ -302,7 +302,7 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	{ // Render background
 		glDisable(GL_LIGHTING);
 		glEnable(GL_COLOR_MATERIAL);
-		if(stereoMode == stereoAnaglyph){
+		if(stereoMode == Stereo3D::Anaglyph){
 			glColor3ub(backgroundGrayLevel, backgroundGrayLevel,
 					backgroundGrayLevel);
 			glDisable(GL_COLOR_MATERIAL);
@@ -342,7 +342,7 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 
 	Light0.Update(false);
 
-	if(stereoMode == stereoAnaglyph){
+	if(stereoMode == Stereo3D::Anaglyph){
 		glColorMask((leftEyeR == 0)? GL_FALSE : GL_TRUE,
 				(leftEyeG == 0)? GL_FALSE : GL_TRUE,
 				(leftEyeB == 0)? GL_FALSE : GL_TRUE, GL_TRUE);
@@ -350,11 +350,11 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 		glColor3ub(leftEyeR, leftEyeG, leftEyeB);
 		glDisable(GL_COLOR_MATERIAL);
 	}
-	if(stereoMode == stereoShutter){
+	if(stereoMode == Stereo3D::Shutter){
 		glDrawBuffer(GL_BACK_LEFT);
 	}
 
-	if(stereoMode != stereoOff){
+	if(stereoMode != Stereo3D::Off){
 		glRotatef(atan(eyeDistance / 2 / focalDistance) * 180.0 / M_PI, 0, 1,
 				0);
 		glTranslatef(eyeDistance / 2, 0, 0);
@@ -396,12 +396,12 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	//		glCallList(m_gllist);
 	//	}
 
-	if(stereoMode != stereoOff){
+	if(stereoMode != Stereo3D::Off){
 		glCullFace(GL_BACK);
 		glLoadIdentity();
 	}
 
-	if(stereoMode == stereoAnaglyph){
+	if(stereoMode == Stereo3D::Anaglyph){
 		glColorMask((rightEyeR == 0)? GL_FALSE : GL_TRUE,
 				(rightEyeG == 0)? GL_FALSE : GL_TRUE,
 				(rightEyeB == 0)? GL_FALSE : GL_TRUE, GL_TRUE);
@@ -409,11 +409,11 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 		glColor3ub(rightEyeR, rightEyeG, rightEyeB);
 		glDisable(GL_COLOR_MATERIAL);
 	}
-	if(stereoMode == stereoShutter){
+	if(stereoMode == Stereo3D::Shutter){
 		glDrawBuffer(GL_BACK_RIGHT);
 	}
 
-	if(stereoMode != stereoOff){
+	if(stereoMode != Stereo3D::Off){
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glRotatef(-atan(eyeDistance / 2 / focalDistance) * 180.0 / M_PI, 0, 1,
 				0);

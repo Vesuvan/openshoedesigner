@@ -44,7 +44,7 @@ public:
 			const wxSize& size = wxDefaultSize, long style = 0,
 			const wxValidator& validator = wxDefaultValidator,
 			const wxString& name = wxTextCtrlNameStr);
-	virtual ~ExtendedTextCtrl();
+	virtual ~ExtendedTextCtrl() = default;
 
 	void SetProject(Project * project = NULL);
 
@@ -52,9 +52,9 @@ protected:
 	void OnContextMenu(wxContextMenuEvent& event);
 
 private:
-	bool IsKnowID(int id) const;
+	static bool IsKnowID(int id);
 
-	Project* project;
+	Project* project = NULL;
 
 DECLARE_EVENT_TABLE()
 };

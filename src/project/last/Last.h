@@ -28,27 +28,35 @@
 #define LAST_H_
 
 /*!\class Last
- * \brief Last with NURBS hull
+ * \brief Last (coordinate system)
  *
- * NURBS Hull derived from either the foot model or a prototype last model.
+ * The last is described as a cylindical coordinate system. All modelling takes place in this
+ * Coordinate system.
+ *
+ * The mapping is from U,V,W into X,Y,Z of the normal carthesian 3D space.
+ *
  */
 
-#include "../../3D/NURBS.h"
+#include "../../3D/Surface.h"
+
+class FootModel;
+class LastModel;
 
 class Last {
 public:
 	Last();
-	virtual ~Last();
-
-	void Paint(void) const;
-
-
-
-	NURBS nurbs;
 
 	bool IsModified(void) const;
 	void Modify(bool modified = true);
 	bool modified;
+
+	void Setup(const LastModel & model);
+	void Setup(const FootModel & model);
+
+	void Paint(void) const;
+
+	Surface surface;
+
 };
 
 #endif /* LAST_H_ */

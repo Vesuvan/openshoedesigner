@@ -41,7 +41,7 @@ DialogSetupStereo3D::DialogSetupStereo3D(wxWindow* parent,
 	this->settings = settings;
 	this->units = units;
 
-	m_canvas->stereoMode = stereoAnaglyph;
+	m_canvas->stereoMode = OpenGLCanvas::Stereo3D::Anaglyph;
 	TransferDataToWindow();
 }
 

@@ -29,12 +29,11 @@
 #include <GL/gl.h>
 #include <cmath>
 #include <cstdlib>
-
+#include "Kernel.h"
 #include "FourierTransform.h"
 
 Symmetry::Symmetry()
 {
-	sigma = 0.2;
 	Init(180);
 }
 
@@ -49,7 +48,7 @@ void Symmetry::AddTransform(const FourierTransform& transform)
 {
 	for(size_t n = 0; n < transform.f.size(); ++n){
 		const int f = (int) round(transform.f[n]);
-		const size_t F = abs(f);
+		const size_t F = (size_t)(abs(f));
 		if(f == 0) continue;
 
 		const double d = (transform.OutRe[n] * transform.OutRe[n]
@@ -58,7 +57,7 @@ void Symmetry::AddTransform(const FourierTransform& transform)
 
 		const double da = M_PI / (double) f;
 		for(size_t m = 0; m < F; ++m){
-			Insert(a, d, sigma, EpanechnikovKernel);
+			Insert(a, Kernel::Epanechnikov, d, sigma);
 			a += da;
 		}
 	}
@@ -67,7 +66,7 @@ void Symmetry::AddTransform(const FourierTransform& transform)
 void Symmetry::Normalize(void)
 {
 	KernelDensityEstimator::NormalizeByWeightSum();
-	this->operator/=(KernelDensityEstimator::EpanechnikovFunction(0) / sigma);
+	this->operator/=(Kernel::Epanechnikov(0) / sigma);
 }
 
 void Symmetry::Paint(void) const

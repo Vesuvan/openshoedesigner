@@ -29,14 +29,6 @@
 #include <GL/gl.h>
 #include <iostream>
 
-FormFinder::FormFinder()
-{
-}
-
-FormFinder::~FormFinder()
-{
-}
-
 void FormFinder::AddPolygon(const Polygon3& poly, size_t Nsections)
 {
 	pf.Init(2, Nsections);
@@ -72,7 +64,7 @@ void FormFinder::AddPolygon(const Polygon3& poly, size_t Nsections)
 //		std::cout << (double) n + pos << " - (";
 //		std::cout << pf.GetExtremum2(pos, a[n].x, b[n].x, c[n].x, d[n].x)
 //				<< ") ";
-		std::cout << (double) n + pos << "\n";
+//		std::cout << (double) n + pos << "\n";
 	}
 
 }
@@ -81,7 +73,7 @@ void FormFinder::Paint(void) const
 {
 	const double eps = 1e-9;
 	const size_t N = a.size();
-	for(size_t n = 0; n < N; n += pf.GetSize()){
+	for(size_t n = 0; n < N; n += pf.Size()){
 //	size_t n = 58;
 //		const double x = c[n].x
 //				- ((fabs(a[n].x) < eps)? 0 : ((b[n].x * b[n].x + 1)
@@ -95,7 +87,7 @@ void FormFinder::Paint(void) const
 //		glVertex3f(x, y, z);
 
 		glBegin(GL_LINE_STRIP);
-		for(double r = 0; r <= pf.GetSize(); r += 0.5){
+		for(double r = 0; r <= pf.Size(); r += 0.5){
 			Vector3 temp = ((a[n] * r + b[n]) * r + c[n]) * r + d[n];
 			glVertex3f(temp.x, temp.y, temp.z);
 		}
@@ -117,5 +109,4 @@ void FormFinder::Paint(void) const
 	glEnd();
 
 	glPointSize(1);
-
 }

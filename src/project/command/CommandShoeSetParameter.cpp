@@ -26,12 +26,32 @@
 
 #include "CommandShoeSetParameter.h"
 #include "../../gui/gui.h"
+#include "../../math/ParameterFormula.h"
+#include "../Project.h"
 
 CommandShoeSetParameter::CommandShoeSetParameter(const wxString& name,
-		Project* project, int parameter, wxString value)
-		: wxCommand(true, name), project(project), parameter(parameter), value(
-				value)
+		Project* project)
+		: wxCommand(true, name), project(project)
 {
+}
+
+void CommandShoeSetParameter::AddValue(const int key, const std::string value)
+{
+	newParameter[key] = value;
+}
+bool CommandShoeSetParameter::SetNew(const std::pair <int, std::string> & kv,
+		ParameterFormula & pf)
+{
+	bool changed = pf.formula.compare(kv.second) != 0;
+	oldParameter[kv.first] = pf.formula;
+	pf.formula = kv.second;
+	return changed;
+}
+
+void CommandShoeSetParameter::SetOld(const std::pair <int, std::string> & kv,
+		ParameterFormula & pf)
+{
+	pf.formula = oldParameter[kv.first];
 }
 
 bool CommandShoeSetParameter::Do(void)
@@ -39,13 +59,15 @@ bool CommandShoeSetParameter::Do(void)
 	if(project == NULL) return false;
 	Shoe *shoe = &(project->shoe);
 
-	oldValue = Replace(parameter, value);
-	const bool hasChanged = !value.IsSameAs(oldValue);
+	bool hasChanged = false;
+	for(auto & kv : newParameter){
+		ParameterFormula & p = shoe->GetParameter(kv.first);
+		hasChanged |= SetNew(kv, p);
+	}
 	if(hasChanged){
 		shoe->Modify(true);
 		project->Update();
 	}
-
 	return hasChanged;
 }
 
@@ -53,49 +75,12 @@ bool CommandShoeSetParameter::Undo(void)
 {
 	if(project == NULL) return false;
 	Shoe *shoe = &(project->shoe);
-
-	wxString currentValue;
-	currentValue = Replace(parameter, oldValue);
-	const bool hasChanged = !currentValue.IsSameAs(oldValue);
-	if(hasChanged){
-		shoe->Modify(true);
-		project->Update();
+	for(auto & kv : oldParameter){
+		ParameterFormula & p = shoe->GetParameter(kv.first);
+		SetOld(kv, p);
 	}
-
+	shoe->Modify(true);
+	project->Update();
 	return true;
 }
 
-wxString CommandShoeSetParameter::Replace(int parameter, wxString newValue)
-{
-	wxString lastValue;
-	Shoe *shoe = &(project->shoe);
-	ParameterFormula *param = GetParameterByID(shoe, parameter);
-	lastValue = param->formula;
-	param->formula = newValue;
-	return lastValue;
-}
-
-ParameterFormula* CommandShoeSetParameter::GetParameterByID(Shoe *shoe, int id)
-{
-	switch(id){
-	case ID_HEELHEIGHT:
-		return &(shoe->heelHeight);
-	case ID_BALLHEIGHT:
-		return &(shoe->ballHeight);
-	case ID_HEELPITCH:
-		return &(shoe->heelPitch);
-	case ID_TOESPRING:
-		return &(shoe->toeSpring);
-	case ID_UPPERLEVEL:
-		return &(shoe->upperLevel);
-	case ID_EXTRALENGTH:
-		return &(shoe->extraLength);
-	case ID_FOOTCOMPRESSION:
-		return &(shoe->footCompression);
-	default:
-		throw(std::invalid_argument(
-				std::string(__FILE__)
-						+ " : Replace() : Passed invalid/unhandled ID."));
-	}
-	return NULL;
-}

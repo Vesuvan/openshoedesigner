@@ -24,48 +24,55 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#define _USE_MATH_DEFINES
+
 #include "BoundingBox.h"
 
 #include "Geometry.h"
 #include "AffineTransformMatrix.h"
 #include "Triangle.h"
+#include "Vector3.h"
 
-#include <float.h>
-#include <stdint.h>
-#ifdef _MSC_VER
-#define _USE_MATH_DEFINES
-#endif
-#include <math.h>
+#include <cstdint>
+#include <cmath>
+#include <sstream>
+#include <regex>
 #include "OpenGL.h"
 
-BoundingBox::BoundingBox()
+BoundingBox::BoundingBox(const Vector3 & v1, const Vector3 & v2)
 {
-	xmax = ymax = zmax = -DBL_MAX;
-	xmin = ymin = zmin = DBL_MAX;
-
-	this->Clear();
-}
-
-BoundingBox::BoundingBox(float x1, float y1, float z1, float x2, float y2,
-		float z2)
-{
-	if(x1 > x2) std::swap(x1, x2);
-	if(y1 > y2) std::swap(y1, y2);
-	if(z1 > z2) std::swap(z1, z2);
-
-	xmin = x1;
-	ymin = y1;
-	zmin = z1;
-
-	xmax = x2;
-	ymax = y2;
-	zmax = z2;
+	this->Set(v1, v2);
 }
 
 void BoundingBox::Clear(void)
 {
 	xmax = ymax = zmax = -DBL_MAX;
 	xmin = ymin = zmin = DBL_MAX;
+}
+
+void BoundingBox::Set(const Vector3& v1, const Vector3& v2)
+{
+	if(v1.x < v2.x){
+		xmin = v1.x;
+		xmax = v2.x;
+	}else{
+		xmin = v2.x;
+		xmax = v1.x;
+	}
+	if(v1.y < v2.y){
+		ymin = v1.y;
+		ymax = v2.y;
+	}else{
+		ymin = v2.y;
+		ymax = v1.y;
+	}
+	if(v1.z < v2.z){
+		zmin = v1.z;
+		zmax = v2.z;
+	}else{
+		zmin = v2.z;
+		zmax = v1.z;
+	}
 }
 
 void BoundingBox::Insert(const BoundingBox& bbox)
@@ -90,30 +97,17 @@ void BoundingBox::Insert(const Vector3& point)
 
 void BoundingBox::Insert(const Triangle &tri)
 {
-	for(uint_fast8_t i = 0; i < 3; i++){
-		if(tri.p[i].x > xmax) xmax = tri.p[i].x;
-		if(tri.p[i].x < xmin) xmin = tri.p[i].x;
-		if(tri.p[i].y > ymax) ymax = tri.p[i].y;
-		if(tri.p[i].y < ymin) ymin = tri.p[i].y;
-		if(tri.p[i].z > zmax) zmax = tri.p[i].z;
-		if(tri.p[i].z < zmin) zmin = tri.p[i].z;
+	for(auto & p : tri.p){
+		this->Insert(p);
 	}
 }
 
 void BoundingBox::Insert(const Geometry &geometry,
 		const AffineTransformMatrix &matrix)
 {
-	for(size_t i = 0; i < geometry.triangles.size(); i++){
-		Triangle temp = geometry.triangles[i];
-		temp.ApplyTransformation(matrix * geometry.matrix);
-		for(uint_fast8_t j = 0; j < 3; j++){
-			if(temp.p[j].x > xmax) xmax = temp.p[j].x;
-			if(temp.p[j].x < xmin) xmin = temp.p[j].x;
-			if(temp.p[j].y > ymax) ymax = temp.p[j].y;
-			if(temp.p[j].y < ymin) ymin = temp.p[j].y;
-			if(temp.p[j].z > zmax) zmax = temp.p[j].z;
-			if(temp.p[j].z < zmin) zmin = temp.p[j].z;
-		}
+	for(auto tri : geometry.triangles){
+		tri.ApplyTransformation(matrix * geometry.matrix);
+		this->Insert(tri);
 	}
 }
 
@@ -145,7 +139,7 @@ bool BoundingBox::IsVolumeZero(void) const
 	return false;
 }
 
-void BoundingBox::Transform(const AffineTransformMatrix matrix)
+void BoundingBox::Transform(const AffineTransformMatrix & matrix)
 {
 	const Vector3 p0(this->xmin, this->ymin, this->zmin);
 	const Vector3 p1(this->xmax, this->ymin, this->zmin);
@@ -379,24 +373,29 @@ void BoundingBox::PaintVertices(unsigned int extrapoints,
 	glPointSize(1);
 }
 
-void BoundingBox::ToStream(wxTextOutputStream& stream) const
+std::string BoundingBox::ToString(void) const
 {
-	stream << _T("BoundingBox:") << endl;
-	stream << xmin << _T(" ") << xmax << _T(" ");
-	stream << ymin << _T(" ") << ymax << _T(" ");
-	stream << zmin << _T(" ") << zmax << endl;
+	std::ostringstream os;
+	os << "{x:[" << xmin << ',' << xmax << "],";
+	os << "y:[" << ymin << ',' << ymax << "],";
+	os << "z:[" << zmin << ',' << zmax << "]}";
+	return os.str();
 }
 
-bool BoundingBox::FromStream(wxTextInputStream& stream)
+bool BoundingBox::FromString(const std::string & string)
 {
-	wxString temp = stream.ReadWord();
-	if(temp.Cmp(_T("BoundingBox:")) != 0) return false;
-	stream >> xmin;
-	stream >> xmax;
-	stream >> ymin;
-	stream >> ymax;
-	stream >> zmin;
-	stream >> zmax;
+	//TODO: Move the regex into a global static variable when it is really used a lot.
+	std::regex e(
+			"^\\{x:\\[([^,\\]]+),([^,\\]]+)\\],y:\\[([^,\\]]+),([^,\\]]+)\\],z:\\[([^,\\]]+),([^,\\]]+)\\]\\}");
+	std::smatch sm;
+	std::regex_match(string.begin(), string.end(), sm, e);
+	if(sm.size() != 6) return false;
+	xmin = std::stof(sm[0]);
+	xmax = std::stof(sm[1]);
+	ymin = std::stof(sm[2]);
+	ymax = std::stof(sm[3]);
+	zmin = std::stof(sm[4]);
+	zmax = std::stof(sm[5]);
 	return true;
 }
 

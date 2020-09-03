@@ -44,12 +44,11 @@
 
 #include "../../math/MathParser.h"
 #include "../../math/ParameterFormula.h"
-#include <wx/string.h>
 
 class FootMeasurements {
 
 public:
-	enum sizetype {
+	enum class Type {
 		EU, //!< European shoe size in Paris Point
 		US, //!< US shoe size, Brannok scale
 		CN, //!< Chinese shoe size
@@ -64,28 +63,35 @@ public:
 
 public:
 	FootMeasurements();
-	virtual ~FootMeasurements();
 
 	bool IsModified(void) const; //!< Returns \b true if the measurements have been modified since last update.
 	void Modify(bool modify = true);
+
+	void SetDefaults(void);
+
 	void Update(void);
 	void Update(MathParser &parser);
 
-	void SetDefaults(void);
-	double GetSize(sizetype type) const;
+	static std::string GetName(int id);
+	static bool IsValidID(int id);
+	ParameterFormula & GetParameter(int id);
+	const ParameterFormula & GetParameter(int id) const;
+
+	double GetSize(Type type) const;
 
 private:
-	bool modified;
+	bool modified = true;
 
 public:
 
 	// Measurements for the foot
 	ParameterFormula footLength;
-	ParameterFormula ballGirth;
+	ParameterFormula ballWidth;
+	ParameterFormula bigToeGirth;
+	ParameterFormula littleToeGirth;
 	ParameterFormula waistGirth;
-	ParameterFormula instepGirth;
-	ParameterFormula longHeelGirth;
-	ParameterFormula shortHeelGirth;
+	ParameterFormula heelGirth;
+	ParameterFormula heelWidth;
 	ParameterFormula angleMixing;
 
 	// Measurements for the leg
@@ -105,6 +111,8 @@ public:
 	ParameterFormula aboveAnkleLevel;
 	ParameterFormula overAnkleBoneGirth;
 	ParameterFormula overAnkleBoneLevel;
+
+
 };
 
 #endif /* SRC_PROJECT_FOOT_FOOTMEASUREMENTS_H_ */

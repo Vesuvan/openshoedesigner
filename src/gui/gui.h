@@ -34,10 +34,9 @@
 #include <wx/panel.h>
 #include <wx/filepicker.h>
 #include <wx/choicebk.h>
-#include <wx/choice.h>
 #include <wx/slider.h>
-#include <wx/statline.h>
-#include <wx/checkbox.h>
+#include <wx/choice.h>
+#include <wx/dataview.h>
 #include <wx/treelist.h>
 #include <wx/listbox.h>
 #include <wx/notebook.h>
@@ -45,16 +44,18 @@
 #include "PanelPattern.h"
 #include "PanelSupport.h"
 #include "PanelWalkcycle.h"
+#include <wx/checkbox.h>
 #include "PanelPlotSimple.h"
 #include <wx/splitter.h>
 #include <wx/statusbr.h>
 #include <wx/frame.h>
 #include <wx/grid.h>
+#include "CanvasFootModel.h"
 #include <wx/radiobut.h>
 #include <wx/dialog.h>
-#include <wx/dataview.h>
 #include <wx/listctrl.h>
 #include <wx/spinbutt.h>
+#include "PanelAnisotropy.h"
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -96,54 +97,74 @@
 #define ID_EDITRIGHT 1035
 #define ID_MEASUREMENTSOURCE 1036
 #define ID_MEASUREMENT_FOOTLENGTH 1037
-#define ID_MEASUREMENT_BALLGIRTH 1038
-#define ID_MEASUREMENT_WAISTGIRTH 1039
-#define ID_MEASUREMENT_INSTEPGIRTH 1040
-#define ID_MEASUREMENT_LONGHEELGIRTH 1041
-#define ID_MEASUREMENT_SHORTHEELGIRTH 1042
-#define ID_MEASUREMENT_ANGLEMIXING 1043
-#define ID_MEASUREMENT_LEGLENGTHDIFFERENCE 1044
-#define ID_IMAGEFOOT 1045
-#define ID_FOOTMODEL 1046
-#define ID_MEASUREMENT_BELOWCRUTCHGIRTH 1047
-#define ID_MEASUREMENT_BELOWCRUTCHLEVEL 1048
-#define ID_MEASUREMENT_MIDDLEOFCALFGIRTH 1049
-#define ID_MEASUREMENT_MIDDLEOFCALFLEVEL 1050
-#define ID_MEASUREMENT_ABOVEKNEEGIRTH 1051
-#define ID_MEASUREMENT_ABOVEKNEELEVEL 1052
-#define ID_MEASUREMENT_OVERKNEECAPGIRTH 1053
-#define ID_MEASUREMENT_OVERKNEECAPLEVEL 1054
-#define ID_MEASUREMENT_BELOWKNEEGIRTH 1055
-#define ID_MEASUREMENT_BELOWKNEELEVEL 1056
-#define ID_MEASUREMENT_MIDDLEOFSHANKGIRTH 1057
-#define ID_MEASUREMENT_MIDDLEOFSHANKLEVEL 1058
-#define ID_MEASUREMENT_ABOVEANKLEGIRTH 1059
-#define ID_MEASUREMENT_ABOVEANKLELEVEL 1060
-#define ID_MEASUREMENT_OVERANKLEBONEGIRTH 1061
-#define ID_MEASUREMENT_OVERANKLEBONELEVEL 1062
-#define ID_PRESETSHOETYPE 1063
-#define ID_HEELHEIGHT 1064
-#define ID_BALLHEIGHT 1065
-#define ID_HEELPITCH 1066
-#define ID_TOESPRING 1067
-#define ID_PRESETSHOEHEIGHT 1068
-#define ID_UPPERLEVEL 1069
-#define ID_TIPSYMMETRY 1070
-#define ID_TIPPOINTEDNESS 1071
-#define ID_TIPSHARPNESS 1072
-#define ID_EXTRALENGTH 1073
-#define ID_FOOTCOMPRESSION 1074
-#define ID_SELECTCONSTRUCTION 1075
-#define ID_CHECKSEPARATEDHEEL 1076
-#define ID_SLIDERTOESUPPORTRADIUS 1077
-#define ID_SLIDERTOESUPPORTOFFSET 1078
-#define ID_GRIDLENGTH 1079
-#define ID_GRIDDIAMETER 1080
-#define ID_GRIDSKIN 1081
-#define ID_SPINSCALE 1082
-#define ID_SPINOFFSHOR 1083
-#define ID_SPINOFFSVERT 1084
-#define ID_CLOSE 1085
+#define ID_MEASUREMENT_BALLWIDTH 1038
+#define ID_MEASUREMENT_BIGTOEGIRTH 1039
+#define ID_MEASUREMENT_LITTLETOEGIRTH 1040
+#define ID_MEASUREMENT_WAISTGIRTH 1041
+#define ID_MEASUREMENT_HEELGIRTH 1042
+#define ID_MEASUREMENT_HEELWIDTH 1043
+#define ID_MEASUREMENT_ANGLEMIXING 1044
+#define ID_MEASUREMENT_LEGLENGTHDIFFERENCE 1045
+#define ID_IMAGEFOOT 1046
+#define ID_FOOTMODEL 1047
+#define ID_MEASUREMENT_BELOWCRUTCHGIRTH 1048
+#define ID_MEASUREMENT_BELOWCRUTCHLEVEL 1049
+#define ID_MEASUREMENT_MIDDLEOFCALFGIRTH 1050
+#define ID_MEASUREMENT_MIDDLEOFCALFLEVEL 1051
+#define ID_MEASUREMENT_ABOVEKNEEGIRTH 1052
+#define ID_MEASUREMENT_ABOVEKNEELEVEL 1053
+#define ID_MEASUREMENT_OVERKNEECAPGIRTH 1054
+#define ID_MEASUREMENT_OVERKNEECAPLEVEL 1055
+#define ID_MEASUREMENT_BELOWKNEEGIRTH 1056
+#define ID_MEASUREMENT_BELOWKNEELEVEL 1057
+#define ID_MEASUREMENT_MIDDLEOFSHANKGIRTH 1058
+#define ID_MEASUREMENT_MIDDLEOFSHANKLEVEL 1059
+#define ID_MEASUREMENT_ABOVEANKLEGIRTH 1060
+#define ID_MEASUREMENT_ABOVEANKLELEVEL 1061
+#define ID_MEASUREMENT_OVERANKLEBONEGIRTH 1062
+#define ID_MEASUREMENT_OVERANKLEBONELEVEL 1063
+#define ID_BIGTOEANGLE 1064
+#define ID_LITTLETOEANGLE 1065
+#define ID_BALLMEASUREMENTANGLE 1066
+#define ID_HEELDIRECTIONANGLE 1067
+#define ID_TIPSHARPNESS 1068
+#define ID_EXTRALENGTH 1069
+#define ID_FOOTCOMPRESSION 1070
+#define ID_PRESETSHOETYPE 1071
+#define ID_HEELHEIGHT 1072
+#define ID_BALLHEIGHT 1073
+#define ID_HEELPITCH 1074
+#define ID_TOESPRING 1075
+#define ID_PRESETSHOEHEIGHT 1076
+#define ID_UPPERLEVEL 1077
+#define ID_SLIDERTOESUPPORTRADIUS 1078
+#define ID_SLIDERTOESUPPORTOFFSET 1079
+#define ID_SELECTCONSTRUCTION 1080
+#define ID_EDITHEELSHAPE 1081
+#define ID_EDITPLATFORMSHAPE 1082
+#define ID_EDITSOLESHAPE 1083
+#define ID_EDITWELTEDGE 1084
+#define ID_EDITTHICKNESS 1085
+#define ID_ADDBRIDGE 1086
+#define ID_DELETEBRIDGE 1087
+#define ID_PATTERNADDLINE 1088
+#define ID_PATTERNADDPATCH 1089
+#define ID_PATTERNADDSTITCHING 1090
+#define ID_PATTERNADDPADDING 1091
+#define ID_PATTERNADDCOORDINATESYSTEM 1092
+#define ID_PATTERNADDLACES 1093
+#define ID_PATTERNADDACCESSORY 1094
+#define ID_EXPORTFLATTENING 1095
+#define ID_TESTSTITCH 1096
+#define ID_GRIDLENGTH 1097
+#define ID_GRIDDIAMETER 1098
+#define ID_GRIDSKIN 1099
+#define ID_SPINSCALE 1100
+#define ID_SPINOFFSHOR 1101
+#define ID_SPINOFFSVERT 1102
+#define ID_CLOSE 1103
+#define ID_POINTADD 1104
+#define ID_POINTREMOVE 1105
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class GUIFrameMain
@@ -180,16 +201,18 @@ class GUIFrameMain : public wxDocChildFrame
 		wxPanel* m_panelMeasurementBased;
 		wxStaticText* m_staticTextFootLength;
 		ExtendedTextCtrl* m_textCtrlFootLength;
+		wxStaticText* m_staticTextBallWidth;
+		ExtendedTextCtrl* m_textCtrlBallWidth;
 		wxStaticText* m_staticTextBallGirth;
-		ExtendedTextCtrl* m_textCtrlBallGirth;
+		ExtendedTextCtrl* m_textCtrlBigToeGirth;
 		wxStaticText* m_staticTextWaistGirth;
-		ExtendedTextCtrl* m_textCtrlWaistGirth;
+		ExtendedTextCtrl* m_textCtrlLittleToeGirth;
 		wxStaticText* m_staticTextInsteGirth;
-		ExtendedTextCtrl* m_textCtrlInstepGirth;
+		ExtendedTextCtrl* m_textCtrlWaistGirth;
 		wxStaticText* m_staticTextLongHeelGirth;
-		ExtendedTextCtrl* m_textCtrlLongHeelGirth;
+		ExtendedTextCtrl* m_textCtrlHeelGirth;
 		wxStaticText* m_staticTextShortHeelGirth;
-		ExtendedTextCtrl* m_textCtrlShortHeelGirth;
+		ExtendedTextCtrl* m_textCtrlHeelWidth;
 		wxStaticText* m_staticTextAngleMixing;
 		ExtendedTextCtrl* m_textCtrlAngleMixing;
 		wxStaticText* m_staticTextLegLengthDifference;
@@ -239,6 +262,21 @@ class GUIFrameMain : public wxDocChildFrame
 		ExtendedTextCtrl* m_textCtrlAboveAnkleLevel;
 		ExtendedTextCtrl* m_textCtrlOverAnkleBoneGirth;
 		ExtendedTextCtrl* m_textCtrlOverAnkleBoneLevel;
+		wxPanel* m_panelPageInsole;
+		wxStaticText* m_staticTextTipSymmetry;
+		ExtendedTextCtrl* m_textCtrlBigToeAngle;
+		wxStaticText* m_staticTextTipPointedness;
+		ExtendedTextCtrl* m_textCtrlLittleToeAngle;
+		wxStaticText* m_staticText57;
+		ExtendedTextCtrl* m_textCtrlBallMeasurementAngle;
+		wxStaticText* m_staticText58;
+		ExtendedTextCtrl* m_textCtrlHeelDirectionAngle;
+		wxStaticText* m_staticTextTipSharpness;
+		wxSlider* m_sliderTipSharpness;
+		wxStaticText* m_staticTextExtraLength;
+		ExtendedTextCtrl* m_textCtrlExtraLength;
+		wxStaticText* m_staticTextFootCompression;
+		ExtendedTextCtrl* m_textCtrlFootCompression;
 		wxPanel* m_panelPageShoe;
 		wxChoice* m_choiceShoeType;
 		wxStaticText* m_staticTextHeelHeight;
@@ -252,46 +290,49 @@ class GUIFrameMain : public wxDocChildFrame
 		wxChoice* m_choiceShoeHeight;
 		wxStaticText* m_staticTextUpperLevel;
 		ExtendedTextCtrl* m_textCtrlUpperLevel;
-		wxStaticText* m_staticTextTipSymmetry;
-		wxSlider* m_sliderSymmetry;
-		wxStaticText* m_staticTextTipPointedness;
-		wxSlider* m_sliderTipPointedness;
-		wxStaticText* m_staticTextTipSharpness;
-		wxSlider* m_sliderTipSharpness;
-		wxStaticText* m_staticTextExtraLength;
-		ExtendedTextCtrl* m_textCtrlExtraLength;
-		wxStaticText* m_staticTextFootCompression;
-		ExtendedTextCtrl* m_textCtrlFootCompression;
 		wxPanel* m_panelPageSole;
-		wxStaticText* m_staticTextConstruction;
-		wxChoice* m_choiceConstruction;
-		wxStaticLine* m_staticline1;
-		wxCheckBox* m_checkBoxSeparatedHeel;
-		wxStaticText* m_staticText29;
-		ExtendedTextCtrl* m_textCtrl29;
-		wxStaticText* m_staticText30;
-		ExtendedTextCtrl* m_textCtrl31;
-		wxStaticText* m_staticText31;
-		ExtendedTextCtrl* m_textCtrl35;
-		wxStaticText* m_staticText32;
-		ExtendedTextCtrl* m_textCtrl33;
 		wxSlider* m_sliderSupportHeelRadius;
 		wxSlider* m_sliderSupportHeelOffset;
 		wxSlider* m_sliderSupportToeRadius;
 		wxSlider* m_sliderSupportToeOffset;
+		wxStaticText* m_staticTextConstruction;
+		wxChoicebook* m_choicebookConstruction;
+		wxPanel* m_panelExperimental;
+		wxChoicebook* m_choicebookHeelSeparation;
+		wxPanel* m_panelHeelSeparated;
+		wxButton* m_buttonEditHeelShape;
+		wxButton* m_buttonEditPlatformShape;
+		wxPanel* m_panelSingleSole;
+		wxButton* m_buttonEditSoleShape;
+		wxPanel* m_panelWelted;
+		wxButton* m_buttonEditHeelShape2;
+		wxButton* m_buttonEditWeltEdge;
+		wxPanel* m_panelCemented;
+		wxButton* m_buttonEditSoleShape2;
+		wxPanel* m_panelMolded;
+		wxPanel* m_panelClog;
+		wxButton* m_buttonEditThickness;
+		wxButton* m_buttonEditSoleShape3;
+		wxPanel* m_panelGeta;
+		wxStaticText* m_staticTextBridge;
+		wxButton* m_buttonAddBridge;
+		wxButton* m_buttonDeleteBridge;
+		wxDataViewListCtrl* m_dataViewListCtrlBridges;
+		wxDataViewColumn* m_dataViewListColumnBridgePosition;
+		wxDataViewColumn* m_dataViewListColumnBridgeWidth;
 		wxPanel* m_panelPagePattern;
-		wxTreeListCtrl* m_treeListCtrl1;
-		wxButton* m_button14;
-		wxButton* m_button16;
-		wxButton* m_button11;
-		wxButton* m_button141;
-		wxButton* m_button10;
-		wxButton* m_button12;
-		wxButton* m_button13;
-		wxListBox* m_listBox1;
+		wxTreeListCtrl* m_treeListCtrlPattern;
+		wxButton* m_buttonOnPatternAddLine;
+		wxButton* m_buttonOnPatternAddPatch;
+		wxButton* m_buttonOnPatternAddStitching;
+		wxButton* m_buttonOnPatternAddPadding;
+		wxButton* m_buttonOnPatternAddCoordinateSystem;
+		wxButton* m_buttonOnPatternAddLaces;
+		wxButton* m_buttonOnPatternAddAccessory;
+		wxListBox* m_listBoxFabric;
 		wxPanel* m_panelPageFlattening;
-		wxButton* m_button15;
-		wxButton* m_button17;
+		wxButton* m_buttonExportFlattening;
+		wxButton* m_buttonTestStitch;
 		wxPanel* m_panelCanvas;
 		Canvas3D * m_canvas3D;
 		PanelPattern* m_panelPattern;
@@ -333,9 +374,15 @@ class GUIFrameMain : public wxDocChildFrame
 		virtual void OnSize( wxSizeEvent& event ) = 0;
 		virtual void OnFileChangedScanFile( wxFileDirPickerEvent& event ) = 0;
 		virtual void OnFileChangedLastFile( wxFileDirPickerEvent& event ) = 0;
-		virtual void OnChoice( wxCommandEvent& event ) = 0;
-		virtual void OnCheckBox( wxCommandEvent& event ) = 0;
 		virtual void OnScroll( wxScrollEvent& event ) = 0;
+		virtual void OnChoice( wxCommandEvent& event ) = 0;
+		virtual void OnEditShape( wxCommandEvent& event ) = 0;
+		virtual void OnAddBridge( wxCommandEvent& event ) = 0;
+		virtual void OnDeleteBridge( wxCommandEvent& event ) = 0;
+		virtual void OnListCtrlOnSelectionChanged( wxDataViewEvent& event ) = 0;
+		virtual void OnPatternSelect( wxTreeListEvent& event ) = 0;
+		virtual void OnPatternAdd( wxCommandEvent& event ) = 0;
+		virtual void OnPatternSelectFabric( wxCommandEvent& event ) = 0;
 		virtual void OnToggleAnkleLock( wxCommandEvent& event ) = 0;
 		virtual void OnChoiceDisplay( wxCommandEvent& event ) = 0;
 		
@@ -382,6 +429,36 @@ class GUIFrameBoneModel : public wxFrame
 		GUIFrameBoneModel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Bone Model Setup"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 672,458 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		
 		~GUIFrameBoneModel();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class GUIFrameEditorFootModel
+///////////////////////////////////////////////////////////////////////////////
+class GUIFrameEditorFootModel : public wxFrame 
+{
+	private:
+	
+	protected:
+		CanvasFootModel * m_canvasFootModel;
+		wxDataViewListCtrl* m_dataViewListCtrl2;
+		wxDataViewColumn* m_dataViewListColumn4;
+		wxDataViewColumn* m_dataViewListColumn5;
+		wxDataViewColumn* m_dataViewListColumn6;
+		wxMenuBar* m_menubar;
+		wxMenu* m_menu14;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnLoad( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSave( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnClose( wxCommandEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		
+		GUIFrameEditorFootModel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Foot model editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 715,351 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		
+		~GUIFrameEditorFootModel();
 	
 };
 
@@ -576,6 +653,84 @@ class GUIFrameSetupBackgroundImages : public wxFrame
 		GUIFrameSetupBackgroundImages( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Setup background images"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 582,561 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxSTAY_ON_TOP|wxTAB_TRAVERSAL );
 		
 		~GUIFrameSetupBackgroundImages();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class GUISetupPaths
+///////////////////////////////////////////////////////////////////////////////
+class GUISetupPaths : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_staticTextMeasurementsDirectory;
+		wxDirPickerCtrl* m_dirPickerMeasurementsDirectory;
+		wxStaticText* m_staticTextShoeDesignDirectory;
+		wxDirPickerCtrl* m_dirPickerShoeDesignDirectory;
+		wxStaticText* m_staticTextLastDirectory;
+		wxDirPickerCtrl* m_dirPickerLastDirectory;
+		wxStaticText* m_staticTextOutputDirectory;
+		wxDirPickerCtrl* m_dirPickerOutputDirectory;
+		wxButton* m_buttonClose;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnClose( wxCommandEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		
+		GUISetupPaths( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Path setup"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 547,342 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+		~GUISetupPaths();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class GUIDialogMidiSetup
+///////////////////////////////////////////////////////////////////////////////
+class GUIDialogMidiSetup : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxStaticText* m_staticText;
+		wxChoice* m_choice;
+		wxButton* m_buttonConnectDisconnect;
+		wxButton* m_buttonClose;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnConnectDisconnect( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnClose( wxCommandEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		
+		GUIDialogMidiSetup( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Midi Controller"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 321,175 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+		~GUIDialogMidiSetup();
+	
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class GUIDialogAnisotropy
+///////////////////////////////////////////////////////////////////////////////
+class GUIDialogAnisotropy : public wxDialog 
+{
+	private:
+	
+	protected:
+		wxButton* m_buttonAdd;
+		wxButton* m_buttonRemove;
+		PanelAnisotropy* m_panelAnisotropy;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnAddPoint( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnRemovePoint( wxCommandEvent& event ) { event.Skip(); }
+		
+	
+	public:
+		
+		GUIDialogAnisotropy( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Editor Anisotropy"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 670,719 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+		~GUIDialogAnisotropy();
 	
 };
 

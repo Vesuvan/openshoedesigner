@@ -54,7 +54,7 @@ public:
 	void Paint(void) const;
 
 public:
-	double sigma;
+	double sigma = 0.2;
 };
 
 #endif /* SRC_MATH_SYMMETRY_H_ */

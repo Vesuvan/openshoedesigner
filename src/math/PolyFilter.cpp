@@ -33,18 +33,9 @@
 #include "MatlabMatrix.h"
 #include "Polynom.h"
 
-PolyFilter::PolyFilter()
-{
-	order = 0;
-}
-
 PolyFilter::PolyFilter(size_t order, size_t size)
 {
 	Init(order, size);
-}
-
-PolyFilter::~PolyFilter()
-{
 }
 
 void PolyFilter::Init(size_t order, size_t size)
@@ -155,7 +146,7 @@ void PolyFilter::Init(size_t order, size_t size)
 	this->order = order;
 }
 
-size_t PolyFilter::GetSize(void) const
+size_t PolyFilter::Size(void) const
 {
 	return filter_a.size();
 }

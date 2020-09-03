@@ -37,6 +37,7 @@
 
 #include <stddef.h>
 #include <vector>
+#include <functional>
 
 #include "AffineTransformMatrix.h"
 #include "Vector3.h"
@@ -52,16 +53,16 @@ public:
 	AffineTransformMatrix matrix; ///< Global Transformation of the polygon points
 
 	size_t dotSize; ///< If > 0, dots (GL_POINTS) of this size are shown at the vertices
-	enum normalCalculation {
-		byCenter, ///< Calculate normals with respect to the center of the polygon
-		byBends ///< Calculate normals by examining the bends in the polygon
+	enum class CalculateNormal {
+		ByCenter, ///< Calculate normals with respect to the center of the polygon
+		ByBends ///< Calculate normals by examining the bends in the polygon
 	};
 protected:
 	std::vector <Vector3> elements; ///< Points that make up the polygon
 	bool isClosed; ///< Boolean: Closed or open polygon
 
 	std::vector <Vector3> normals; ///< One normal per vertex
-	normalCalculation method;
+	CalculateNormal method;
 
 	// Methods
 public:
@@ -88,6 +89,7 @@ public:
 
 	void Reverse(void); ///< Reverse the direction of the polygon
 
+	void RotateOrigin(const Vector3 & p); ///< Rotate the first point of the polygon close to the given point.
 	void RemoveZeroLength(void); ///< Remove all segments from the polygon, that have a length of zero
 
 	/*! \brief Apply the transformation matrix to the points in the polygon.
@@ -103,6 +105,7 @@ public:
 	 * @param matrix AffineTransformMatrix with the transform operation
 	 */
 	void ApplyTransformation(const AffineTransformMatrix &matrix);
+	void ApplyTransformation(const std::function <Vector3(Vector3)> transform);
 
 	Polygon3 & operator/=(const double val);
 	const Polygon3 operator/(const double val);
@@ -168,7 +171,7 @@ public:
 	/*! \brief Resample the point in the polygon.
 	 *
 	 * The polygon is resampled into a polygon with N points. This can be an over- or undersampling of the original polygon.
-	 * @param N New number of points
+	 * @param Nnew New number of points
 	 */
 	void Resample(unsigned int Nnew);
 
@@ -181,9 +184,9 @@ public:
 	 *
 	 *\todo: Revisit and check, if everything is implemented according to the description.
 	 *
-	 * @param N length of the MA filter.
+	 * @param width length of the MA filter.
 	 */
-	void Filter(unsigned int N);
+	void Filter(unsigned int width);
 
 	/*! \brief Init the normal vector
 	 * This function is needed, if the normals will be set externally. If CalculateAndStoreNormals is called,

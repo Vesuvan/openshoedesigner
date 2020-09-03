@@ -48,27 +48,20 @@ class Spline3 {
 public:
 	class Point:public Vector3 {
 	public:
-		Point()
-		{
-			corner = false;
-			r0 = 0.0;
-			dvx = 0.0;
-			dvy = 0.0;
-			dvz = 0.0;
-			length = 1.0;
-		}
+		Point() = default;
 		Polynom px;
 		Polynom py;
 		Polynom pz;
-		double r0;
-		double length;
-		double dvx;
-		double dvy;
-		double dvz;
-		bool corner;
+		double r0 = 0.0;
+		double length = 1.0;
+		double dvx = 0.0;
+		double dvy = 0.0;
+		double dvz = 0.0;
+		bool corner = false;
 	};
+
 	Spline3();
-	virtual ~Spline3();
+	virtual ~Spline3() = default;
 
 	std::vector <Point> points;
 

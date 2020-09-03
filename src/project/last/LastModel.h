@@ -40,61 +40,129 @@
  * step has already been done on the foot-model.
  */
 
+#include <stddef.h>
+#include <string>
+#include <vector>
+
 #include "../../3D/AffineTransformMatrix.h"
 #include "../../3D/Hull.h"
 #include "../../3D/Polygon3.h"
+#include "../../3D/TestGrid.h"
 #include "../../3D/Vector3.h"
-#include "../../math/BendLine.h"
 #include "../../math/FormFinder.h"
-#include "../../math/KernelDensityEstimator.h"
 #include "../../math/Symmetry.h"
 
-#include <string>
-
+class OpenGLText;
 class FootMeasurements;
 class Shoe;
+
 class LastModel {
 public:
 	std::string filename;
 
-	std::vector <double> scalevalues;
-
-//	double sx;
-//	double sy;
-//	double sz;
+private:
+	Hull raw;
+	BoundingBox rawBB;
 
 	Polygon3 loop;
-	Polygon3 test;
 
-	Polygon3 left;
-	Polygon3 right;
+	Polygon3 planeXZ;
+	DependentVector angleXZ;
+	Polygon3 bottomleft;
+	Polygon3 bottomright;
+
 	Polygon3 bottom;
 	Polygon3 top;
-	Polygon3 center;
 
+	Polygon3 HeelGirth;
+	Polygon3 WaistGirth;
+	Polygon3 LittleToeGirth;
+	Polygon3 BigToeGirth;
+
+	std::vector <double> scalevalues;
 	Symmetry symmetry;
 	FormFinder formfinder;
-	KernelDensityEstimator kde;
 	AffineTransformMatrix coordsys;
 
-	Hull hull;
-	Hull resized;
-	bool mirrored;
+private:
+	// Class-global for debugging / painting during development
+	KernelDensityEstimator kde;
 
+	size_t idxZero = 0;
+	size_t idxHeel = 0;
+	size_t idxHeelPoint = 0;
+	size_t idxHeelCenter = 0;
+	size_t idxWaistBottom = 0;
+	size_t idxLittleToeBottom = 0;
+	size_t idxBigToeBottom = 0;
+	size_t idxToeCenter = 0;
+	size_t idxToeTip = 0;
+	size_t idxBigToeTop = 0;
+	size_t idxLittleToeTop = 0;
+	size_t idxWaistTop = 0;
+	size_t idxTop = 0;
+
+	double heela = 0.0;
+	double toea = 0.0;
+
+	DependentVector debug0;
+	DependentVector debug1;
+	DependentVector debug2;
+
+	DependentVector debugA;
+	DependentVector debugB;
+	DependentVector debugC;
+
+	TestGrid tg;
+
+public:
+	Hull resized;
+	bool mirrored = false;
+
+private:
+	void PaintMarker(const size_t idx, const OpenGLText &font,
+			const std::string & text) const;
+
+public:
 	LastModel();
-	virtual ~LastModel();
+	virtual ~LastModel() = default;
+
 	bool LoadModel(std::string filename);
 
-	bool AnalyseForm(void);
+	void Transform(std::function <Vector3(Vector3)> func);
 
 	void UpdateForm(const FootMeasurements &measurements);
 	void UpdatePosition(const Shoe &shoe, double offset = 0.0);
+
 	void Paint(void) const;
 
 	bool IsModified(void) const;
 	void Modify(bool modified = true);
-	bool modified;
+
 private:
+	bool modified = true;
+
+	bool AnalyseForm(void);
+
+	void ReorientPCA(void);
+	bool ReorientSymmetry(void);
+	bool ReorientSole(void);
+	void ReorientFrontBack(void);
+	void ReorientLeftRight(void);
+	void FindAndReorientCenterplane(void);
+
+	bool FindMarker(void);
+
+	void FindOutline(void);
+
+	void MarkMeasurements(void);
+
+	void UpdateRawBoundingBox(void);
+	DependentVector OrthogonalPoint(const Vector3 & p) const;
+	size_t FindTopPoint(size_t idx, size_t idxStart, size_t idxEnd) const;
+
+	static double RelValAt(const DependentVector & est, double x);
+
 	static bool Vector3XLess(const Vector3 a, const Vector3 b);
 };
 

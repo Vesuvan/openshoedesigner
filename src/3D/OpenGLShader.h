@@ -50,7 +50,7 @@ public:
 
 	bool SetUniformBool(const std::string &name, const GLboolean x) const;
 	bool SetUniformInt(const std::string &name, const GLint x) const;
-	bool SetUniform(const std::string &name, const Vector3 x) const;
+	bool SetUniform(const std::string &name, const Vector3 & x) const;
 	bool SetUniform(const std::string &name, const GLfloat x) const;
 	bool SetUniform(const std::string &name, const GLfloat x,
 			const GLfloat y) const;

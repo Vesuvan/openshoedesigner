@@ -33,12 +33,14 @@
 #include <float.h>
 #include "OpenGL.h"
 
+static Vector3 nullvector;
+static Vector3 nonnullvector;
 
 Polygon3::Polygon3()
 {
 	isClosed = false;
 	dotSize = 0;
-	method = byCenter;
+	method = CalculateNormal::ByCenter;
 }
 
 void Polygon3::Clear(void)
@@ -220,8 +222,8 @@ const Vector3& Polygon3::operator [](size_t index) const
 
 Polygon3& Polygon3::operator *=(const double val)
 {
-	for(size_t n = 0; n < elements.size(); ++n)
-		elements[n] *= val;
+	for(auto & element : elements)
+		element *= val;
 	return *this;
 }
 
@@ -234,8 +236,8 @@ const Polygon3 Polygon3::operator *(const double val)
 
 Polygon3& Polygon3::operator /=(const double val)
 {
-	for(size_t n = 0; n < elements.size(); ++n)
-		elements[n] /= val;
+	for(auto & element : elements)
+		element /= val;
 	return *this;
 }
 
@@ -248,22 +250,40 @@ const Polygon3 Polygon3::operator /(const double val)
 
 void Polygon3::ApplyTransformation(void)
 {
-	for(size_t i = 0; i < elements.size(); i++)
-		elements[i] = matrix.Transform(elements[i]);
+	for(auto & element : elements)
+		element = matrix.Transform(element);
 	if(!normals.empty()){
-		for(size_t i = 0; i < elements.size(); i++)
-			normals[i] = matrix.TransformNoShift(normals[i]);
+		for(auto & normal : normals)
+			normal = matrix.TransformNoShift(normal);
 	}
 	matrix.SetIdentity();
 }
 
 void Polygon3::ApplyTransformation(const AffineTransformMatrix &matrix)
 {
-	for(size_t i = 0; i < elements.size(); i++)
-		elements[i] = matrix.Transform(elements[i]);
+	for(auto & element : elements)
+		element = matrix.Transform(element);
 	if(!normals.empty()){
-		for(size_t i = 0; i < elements.size(); i++)
-			normals[i] = matrix.TransformNoShift(normals[i]);
+		for(auto & normal : normals)
+			normal = matrix.TransformNoShift(normal);
+	}
+}
+
+void Polygon3::ApplyTransformation(
+		const std::function <Vector3(Vector3)> transform)
+{
+	if(normals.empty()){
+		for(auto & element : elements)
+			element = transform(element);
+	}else{
+		for(size_t i = 0; i < elements.size(); i++){
+			const Vector3 p0 = elements[i];
+			const Vector3 p1 = p0 + normals[i];
+			const Vector3 p2 = transform(p0);
+			const Vector3 p3 = transform(p1);
+			elements[i] = p2;
+			normals[i] = p3 - p2;
+		}
 	}
 }
 
@@ -354,21 +374,46 @@ void Polygon3::Resample(unsigned int Nnew)
 	elements.swap(temp);
 }
 
-void Polygon3::Filter(unsigned int N)
+void Polygon3::Filter(unsigned int width)
 {
+	if(elements.empty()) return;
 	normals.clear();
-	N = (N - N % 2) / 2;
-	const size_t M = elements.size();
-	std::vector <Vector3> newelements(M);
-	for(size_t m = 0; m < M; ++m){
-		size_t q = m;
-		if((M - m - 1) < q) q = M - m - 1;
-		if(q > N) q = N;
+	const int offs = (width - width % 2) / 2;
+	const size_t N = elements.size();
+	std::vector <Vector3> newelements;
+	newelements.resize(N);
+
+	// Calculate the non overlapping potion of the filtering
+	for(size_t n = offs; (n + width) < (N + offs + 1); ++n){
 		Vector3 temp;
-		for(size_t n = m - q; n <= m + q; n++)
-			temp += elements[n];
-		temp /= (q * 2 + 1);
-		newelements.push_back(temp);
+		for(size_t m = n - offs; (m + offs) < (n + width); ++m)
+			temp += elements[m];
+		newelements[n] = temp / width;
+	}
+	if(isClosed){
+		for(size_t n = (N + offs + 1 - width); (n) < (N + offs); ++n){
+			Vector3 temp;
+			for(size_t m = n - offs; (m + offs) < (n + width); ++m)
+				temp += elements[m % N];
+			newelements[n % N] = temp / width;
+		}
+	}else{
+		size_t V = width - offs - 1;
+		for(size_t n = (N + offs + 1 - width); n < N; ++n){
+			Vector3 temp;
+			for(size_t m = n - offs; m < N; ++m)
+				temp += elements[m];
+			newelements[n] = temp / V;
+			--V;
+		}
+		V = width - offs;
+		for(size_t n = 0; n < offs; ++n){
+			Vector3 temp;
+			for(size_t m = 0; (m + offs) < (n + width); ++m)
+				temp += elements[m];
+			newelements[n] = temp / V;
+			++V;
+		}
 	}
 
 	elements.swap(newelements);
@@ -386,17 +431,35 @@ void Polygon3::ClearNormals(void)
 
 Vector3& Polygon3::Normal(size_t index)
 {
+	if(normals.empty()) return nonnullvector;
 	return normals[index];
 }
 
 const Vector3& Polygon3::Normal(size_t index) const
 {
+	if(normals.empty()) return nullvector;
 	return normals[index];
 }
 
 void Polygon3::CalculateNormals(void)
 {
 	normals = pCalculateNormals();
+}
+
+void Polygon3::RotateOrigin(const Vector3& p)
+{
+	const size_t N = elements.size();
+	size_t minimalIndex = 0;
+	double minimalDistance = DBL_MAX;
+	for(size_t n = 0; n < N; ++n){
+		const double distance = (elements[n] - p).Abs2();
+		if(distance < minimalDistance){
+			minimalDistance = distance;
+			minimalIndex = n;
+		}
+	}
+	std::rotate(elements.begin(), elements.begin() + minimalIndex,
+			elements.end());
 }
 
 std::vector <Vector3> Polygon3::pCalculateNormals(void) const
@@ -407,36 +470,37 @@ std::vector <Vector3> Polygon3::pCalculateNormals(void) const
 	normals.resize(N);
 
 	switch(method){
-	case byCenter:
-	{
-		Vector3 temp = GetCenter();
-		for(size_t n = 0; n < N; ++n)
-			normals[n] = (elements[n] - temp).Normal();
-		break;
-	}
-	case byBends:
-	{
-		std::vector <double> L(N);
-		for(size_t n = 0; n < (N - 1); ++n)
-			L[n] = (elements[n + 1] - elements[n]).Abs();
-		L[N - 1] = (elements[0] - elements[N - 1]).Abs();
-		for(size_t n = 1; n < (N - 1); ++n)
-			normals[n] = ((elements[n] - elements[n - 1]) * L[n]
-					- (elements[n + 1] - elements[n]) * L[n - 1]).Normal();
-		if(isClosed){
-			normals[0] = ((elements[0] - elements[N - 1]) * L[0]
-					- (elements[1] - elements[0]) * L[N - 1]).Normal();
-			normals[N - 1] = ((elements[N - 1] - elements[N - 2]) * L[N - 1]
-					- (elements[0] - elements[N - 1]) * L[N - 2]).Normal();
-		}else{
-			Vector3 temp = elements[1] - elements[0];
-			normals[0] = (normals[1] - (temp * normals[1].Dot(temp))).Normal();
-			temp = elements[N - 1] - elements[N - 2];
-			normals[N - 1] =
-					(normals[N - 2] - (temp * normals[N - 2].Dot(temp))).Normal();
+	case CalculateNormal::ByCenter:
+		{
+			Vector3 temp = GetCenter();
+			for(size_t n = 0; n < N; ++n)
+				normals[n] = (elements[n] - temp).Normal();
+			break;
 		}
-		break;
-	}
+	case CalculateNormal::ByBends:
+		{
+			std::vector <double> L(N);
+			for(size_t n = 0; n < (N - 1); ++n)
+				L[n] = (elements[n + 1] - elements[n]).Abs();
+			L[N - 1] = (elements[0] - elements[N - 1]).Abs();
+			for(size_t n = 1; n < (N - 1); ++n)
+				normals[n] = ((elements[n] - elements[n - 1]) * L[n]
+						- (elements[n + 1] - elements[n]) * L[n - 1]).Normal();
+			if(isClosed){
+				normals[0] = ((elements[0] - elements[N - 1]) * L[0]
+						- (elements[1] - elements[0]) * L[N - 1]).Normal();
+				normals[N - 1] = ((elements[N - 1] - elements[N - 2]) * L[N - 1]
+						- (elements[0] - elements[N - 1]) * L[N - 2]).Normal();
+			}else{
+				Vector3 temp = elements[1] - elements[0];
+				normals[0] =
+						(normals[1] - (temp * normals[1].Dot(temp))).Normal();
+				temp = elements[N - 1] - elements[N - 2];
+				normals[N - 1] = (normals[N - 2]
+						- (temp * normals[N - 2].Dot(temp))).Normal();
+			}
+			break;
+		}
 	}
 	return normals;
 }

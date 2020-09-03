@@ -29,21 +29,7 @@
 #include <float.h>
 #include <inttypes.h>
 #include <GL/gl.h>
-
-OrientedMatrix::OrientedMatrix()
-{
-	dx = 1.0;
-	dy = 1.0;
-	dz = 1.0;
-
-	surface = 0.5;
-	display2D = Image;
-	display3D = Points3D;
-}
-
-OrientedMatrix::~OrientedMatrix()
-{
-}
+#include <cassert>
 
 void OrientedMatrix::SetSize(unsigned int nx, unsigned int ny, unsigned int nz,
 		float resolution)
@@ -206,7 +192,7 @@ void OrientedMatrix::Paint(void) const
 
 	if(NDim == 2){
 		switch(display2D){
-		case Points2D:
+		case Display2D::Points2D:
 			{
 				glPointSize(2.0);
 				glBegin(GL_POINTS);
@@ -232,7 +218,7 @@ void OrientedMatrix::Paint(void) const
 				glEnd();
 				break;
 			}
-		case Grid:
+		case Display2D::Grid:
 			{
 				glDisable(GL_CULL_FACE);
 				glBegin(GL_QUADS);
@@ -281,7 +267,7 @@ void OrientedMatrix::Paint(void) const
 				glEnable(GL_CULL_FACE);
 				break;
 			}
-		case Image:
+		case Display2D::Image:
 			{
 				const double min = this->Min();
 				const double max = this->Max();
@@ -352,12 +338,12 @@ void OrientedMatrix::Paint(void) const
 
 	if(NDim == 3){
 		switch(display3D){
-		case Points3D:
+		case Display3D::Points3D:
 			{
 				glPointSize(2.0);
 				glBegin(GL_POINTS);
 				Vector3 p(0, 0, 0);
-				unsigned int c = 0;
+				size_t c = 0;
 				for(size_t k = 0; k < Nz; k++){
 					for(size_t j = 0; j < Ny; j++){
 						for(size_t i = 0; i < Nx; i++){
@@ -394,13 +380,13 @@ void OrientedMatrix::Rotate(Axis a, int quarters)
 	if(quarters == 2) return;
 	assert(quarters == 1 || quarters == 3);
 	switch(a){
-	case X:
+	case Axis::X:
 		std::swap(dy, dz);
 		break;
-	case Y:
+	case Axis::Y:
 		std::swap(dz, dx);
 		break;
-	case Z:
+	case Axis::Z:
 		std::swap(dx, dy);
 		break;
 	}

@@ -47,31 +47,31 @@
 
 class OpenGLMaterial {
 public:
-	enum Material {
-		emerald,
-		jade,
-		obsidian,
-		pearl,
-		ruby,
-		turquoise,
-		brass,
-		bronze,
-		chrome,
-		copper,
-		gold,
-		silver,
-		blackplastic,
-		cyanplastic,
-		greenplastic,
-		redplastic,
-		whiteplastic,
-		yellowplastic,
-		blackrubber,
-		cyanrubber,
-		greenrubber,
-		redrubber,
-		whiterubber,
-		yellowrubber,
+	enum class Preset {
+		Emerald,
+		Jade,
+		Obsidian,
+		Pearl,
+		Ruby,
+		Turquoise,
+		Brass,
+		Bronze,
+		Chrome,
+		Copper,
+		Gold,
+		Silver,
+		BlackPlastic,
+		CyanPlastic,
+		GreenPlastic,
+		RedPlastic,
+		WhitePlastic,
+		YellowPlastic,
+		BlackRubber,
+		CyanRubber,
+		GreenRubber,
+		RedRubber,
+		WhiteRubber,
+		YellowRubber,
 		cRed,
 		cYellow,
 		cGreen,
@@ -91,16 +91,17 @@ public:
 	}; //<! Preset materials
 
 	OpenGLMaterial();
-	OpenGLMaterial(Material preset, float emit = 0.0);
+	OpenGLMaterial(Preset preset, float emit = 0.0);
 	OpenGLMaterial(float r, float g, float b, float emit = 0.0);
+	virtual ~OpenGLMaterial() = default;
 
-	void Preset(Material preset); ///< Set the material to a preset.
-	static std::string GetPresetName(Material preset); ///< Return the name of a preset.
+	void Set(Preset preset); ///< Set the material to a preset.
+	static std::string GetPresetName(Preset preset); ///< Return the name of a preset.
 
 	void SetSimpleColor(float r, float g, float b, float emit = 0.0); ///< Equivalent to using the glColor command.
 	void SetSimpleColor(Vector3 c, float emit = 0.0); ///< Uses x,y,z of a vector as the color components.
 
-	void UseMaterial(void) const; ///< Start using this material. Turns off glColor command.
+	void UseMaterial(float opacity = 1.0) const; ///< Start using this material. Turns off glColor command.
 	void UseColor(void) const; ///< Activates glColor and sets the diffuse color of this material.
 	void UseColor(float emit) const; ///< Activates glColor and sets the diffuse color of this material.
 	static void EnableColors(void); ///< Switch back to using glColor.

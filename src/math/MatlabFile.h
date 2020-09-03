@@ -42,15 +42,15 @@
 
 class MatlabFile {
 public:
-	enum Version {
-		V4 = 4, V6 = 6
+	enum class Version {
+		V4, V6
 	};
 
 public:
-	MatlabFile(); //!< Constructor
+	MatlabFile() = default; //!< Constructor
 	MatlabFile(const MatlabFile& other); //!< Copy constructor
 	MatlabFile& operator=(const MatlabFile& other); //!< Assignment constructor
-	MatlabFile(const std::string& filename, Version version = V4); //!< Constructor with setting filename
+	MatlabFile(const std::string& filename, Version version = Version::V4); //!< Constructor with setting filename
 	virtual ~MatlabFile(); //!< Destructor
 
 	void SetVersion(Version version);
@@ -74,8 +74,8 @@ public:
 	void WriteMatrix(const MatlabMatrix& M);
 
 private:
-	Version version;
-	FILE* fhd;
+	Version version = Version::V6;
+	FILE* fhd = NULL;
 	std::string filename;
 };
 

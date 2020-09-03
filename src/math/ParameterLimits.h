@@ -39,31 +39,31 @@
  */
 
 #include <cstddef>
+#include <cfloat>
 #include <vector>
 
 class ParameterLimits {
 private:
-	class Limit {
+	struct Limit {
 	public:
-		Limit();
-		size_t index;
-		double minval;
-		double maxval;
-		double a;
-		double b;
+		Limit() = default;
+		size_t index = 0;
+		double minval = -DBL_MAX;
+		double maxval = +DBL_MAX;
+		double a = 1.0;
+		double b = 1000.0;
 	};
+
 public:
-	ParameterLimits();
-	virtual ~ParameterLimits();
+	ParameterLimits() = default;
+	virtual ~ParameterLimits() = default;
 
 	void Clear();
 
 	void AddLimit(size_t index, double min, double max, double a = 1.0,
 			double b = 1e3);
-	void AddLimitMin(size_t index, double min, double a = 1.0,
-			double b = 1e3);
-	void AddLimitMax(size_t index, double max, double a = 1.0,
-			double b = 1e3);
+	void AddLimitMin(size_t index, double min, double a = 1.0, double b = 1e3);
+	void AddLimitMax(size_t index, double max, double a = 1.0, double b = 1e3);
 
 	double Evaluate(const std::vector <double> &param) const;
 

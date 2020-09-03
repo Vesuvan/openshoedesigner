@@ -27,6 +27,9 @@
 #include "Geometry.h"
 
 #include <wx/log.h>
+#include <utility>
+
+#include "../system/JSON.h"
 #include "OpenGL.h"
 
 Geometry::Geometry()
@@ -34,7 +37,7 @@ Geometry::Geometry()
 	visible = true;
 	color.Set(0.8, 0.8, 0.8);
 	colorNewObjects.Set(0.8, 0.8, 0.8);
-	useColor = geometryColorGlobal;
+	useColor = Style::Global;
 }
 
 Geometry::~Geometry()
@@ -75,11 +78,11 @@ void Geometry::ApplyTransformation(void)
 		triangles[i].ApplyTransformation(this->matrix);
 }
 
-void Geometry::Paint(GeometryColorStyle style) const
+void Geometry::Paint(Style style) const
 {
 	if(!visible) return;
 
-	if(style == geometryColorDefault) style = useColor;
+	if(style == Style::Default) style = useColor;
 
 	// GL_RESCALE_NORMAL is faster, but doesn't work on non-uniform scaled models
 	// GL_NORMALIZE is slower, but works always
@@ -97,23 +100,23 @@ void Geometry::Paint(GeometryColorStyle style) const
 	size_t i;
 	::glBegin(GL_TRIANGLES);
 	switch(style){
-	case geometryColorNone:
+	case Style::Plain:
 		for(i = 0; i < triangles.size(); i++)
 			triangles[i].Paint(true, false);
 		break;
-	case geometryColorGlobal:
+	case Style::Global:
 		::glColor3f(color.x, color.y, color.z);
 		for(i = 0; i < triangles.size(); i++)
 			triangles[i].Paint(true, false);
 		break;
-	case geometryColorTriangle:
+	case Style::Triangle:
 		for(i = 0; i < triangles.size(); i++){
 			::glColor3f(triangles[i].c[0].x, triangles[i].c[0].y,
 					triangles[i].c[0].z);
 			triangles[i].Paint(true, false);
 		}
 		break;
-	case geometryColorVertex:
+	case Style::Vertex:
 		for(i = 0; i < triangles.size(); i++)
 			triangles[i].Paint(true, true);
 		break;
@@ -279,84 +282,41 @@ void Geometry::FlipNormals(void)
 		triangles[i].n[2] = -triangles[i].n[2];
 		// Switch the order of edges by swaping vertex 1 and 2
 		// 0->1->2->0 becomes 0->2->1->0.
-		triangles[i].p[1].Swap(triangles[i].p[2]);
+		std::swap(triangles[i].p[1], triangles[i].p[2]);
 	}
 }
 
-void Geometry::ToXml(wxXmlNode* parentNode)
+void Geometry::ToJSON(JSON& js) const
 {
-	wxXmlNode *temp, *temp2;
-	wxXmlNode *nodeObject = NULL;
+	js.SetObject(true);
+	js["Name"].SetString(name.ToStdString());
 
-	// Find out, if object already exists in XML tree.
-	temp = parentNode->GetChildren();
-	while(temp != NULL && nodeObject == NULL){
-		if(temp->GetName() == _T("geometry")
-				&& temp->GetAttribute(_T("name"), _T("")) == name) nodeObject =
-				temp;
-		temp = temp->GetNext();
-	}
-	if(nodeObject == NULL){
-		nodeObject = new wxXmlNode(wxXML_ELEMENT_NODE, _T("geometry"));
-		nodeObject->AddAttribute(_T("name"), name);
-		parentNode->InsertChild(nodeObject, NULL);
-	}
+	JSON &m = js["Matrix"];
+	m.SetArray(16);
+	for(size_t n = 0; n < 16; ++n)
+		m[n].SetNumber(matrix[n]);
 
-	// Remove the subelements, that will be updated
-	temp = nodeObject->GetChildren();
-	while(temp != NULL){
-		temp2 = NULL;
-		if(temp->GetName() == _T("matrix")) temp2 = temp;
-		if(temp->GetName() == _T("tri")) temp2 = temp;
-		temp = temp->GetNext();
-		if(temp2 != NULL){
-			nodeObject->RemoveChild(temp2);
-			delete (temp2);
-		}
-	}
-
-	// Insert new matrix
-	temp = new wxXmlNode(wxXML_ELEMENT_NODE, _T("matrix"));
-	nodeObject->InsertChild(temp, NULL);
-	temp2 = new wxXmlNode(wxXML_CDATA_SECTION_NODE, wxEmptyString,
-			matrix.ToString());
-	temp->InsertChild(temp2, NULL);
-
-	// Insert new triangles
-	size_t i;
-	for(i = 0; i < triangles.size(); i++){
-		temp = new wxXmlNode(wxXML_ELEMENT_NODE, _T("tri"));
-		nodeObject->InsertChild(temp, NULL);
-		temp2 = new wxXmlNode(wxXML_CDATA_SECTION_NODE, wxEmptyString,
-				triangles[i].ToString());
-		temp->InsertChild(temp2, NULL);
-	}
+	JSON &t = js["Triangles"];
+	t.SetArray(triangles.size());
+	for(size_t i = 0; i < triangles.size(); ++i)
+		t[i].SetString(triangles[i].ToString());
 }
 
-bool Geometry::FromXml(wxXmlNode* parentNode)
+bool Geometry::FromJSON(const JSON& js)
 {
-	if(parentNode->GetName() != _T("geometry")) return false;
-	name = parentNode->GetAttribute(_T("name"), _T(""));
-	wxXmlNode *temp = parentNode->GetChildren();
+	if(!js.HasKey("Name")) return false;
+	name = js["Name"].GetString();
+	const JSON &m = js["Matrix"];
+	for(size_t n = 0; n < 16; ++n)
+		matrix[n] = m[n].GetNumber();
 
 	triangles.clear();
-	Triangle tri;
 
-	while(temp != NULL){
-		if(temp->GetName() == _T("tri")){
-			tri.FromString(temp->GetNodeContent());
-			//			if(triangles.GetCount() < 20) wxLogMessage(
-			//					_T("Geometry::FromXml: Tri from >")
-			//							+ temp->GetNodeContent() + _T("<."));
+	const JSON &t = js["Triangles"];
+	const size_t N = t.Size();
+	triangles.resize(N);
+	for(size_t n = 0; n < N; ++n)
+		triangles[n].FromString(t[n].GetString());
 
-			triangles.push_back(tri);
-		}
-		if(temp->GetName() == _T("matrix")){
-			matrix.FromString(temp->GetNodeContent());
-			//			wxLogMessage(_T("Geometry::FromXml: Matrix from >")
-			//					+ temp->GetNodeContent() + _T("<."));
-		}
-		temp = temp->GetNext();
-	}
 	return true;
 }

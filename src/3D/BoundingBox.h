@@ -32,10 +32,10 @@
  * Stores the min and max values of Vector3%s, Triangle%s, other BoundingBox%es and Geometry.
  */
 
-#include "Vector3.h"
+#include <string>
+#include <cfloat>
 
-#include <wx/txtstrm.h>
-
+struct Vector3;
 class Triangle;
 class AffineTransformMatrix;
 class Geometry;
@@ -43,14 +43,17 @@ class Geometry;
 class BoundingBox {
 	// Constructor / Destructor
 public:
-	BoundingBox();
-	BoundingBox(float x1, float y1, float z1, float x2, float y2, float z2);
+	BoundingBox() = default;
+	BoundingBox(const Vector3 & v1, const Vector3 & v2);
 
 	// Member variables
 public:
-	double xmin, xmax;
-	double ymin, ymax;
-	double zmin, zmax;
+	double xmin = DBL_MAX;
+	double xmax = -DBL_MAX;
+	double ymin = DBL_MAX;
+	double ymax = -DBL_MAX;
+	double zmin = DBL_MAX;
+	double zmax = -DBL_MAX;
 
 	// Methods
 public:
@@ -80,6 +83,8 @@ public:
 	 * This is not the same as a check for IsEmpty.
 	 */
 	bool IsVolumeZero(void) const;
+
+	void Set(const Vector3 & v1, const Vector3 & v2);
 
 	void SetSize(float sx, float sy, float sz, float origx = 0.0, float origy =
 			0.0, float origz = 0.0);
@@ -120,13 +125,10 @@ public:
 	 *
 	 * @param matrix AffineTransformMatrix
 	 */
-	void Transform(const AffineTransformMatrix matrix);
+	void Transform(const AffineTransformMatrix & matrix);
 
-	//! Put the box into a textstream.
-	void ToStream(wxTextOutputStream & stream) const;
-
-	//! Read a box from a textstream.
-	bool FromStream(wxTextInputStream & stream);
+	std::string ToString(void) const;
+	bool FromString(const std::string & string);
 
 	//! Paint the box in OpenGL.
 	void Paint(double overlap = 0.0) const;

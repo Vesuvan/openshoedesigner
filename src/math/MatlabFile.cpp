@@ -32,12 +32,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-MatlabFile::MatlabFile()
-{
-	fhd = NULL;
-	version = V6;
-}
-
 MatlabFile::MatlabFile(const MatlabFile& other)
 {
 	printf("MatlabFile copy constructor called.\n");
@@ -110,15 +104,15 @@ void MatlabFile::ReadMatrix(MatlabMatrix* M, const std::string& matrixname)
 	res = fread((char *) magic, sizeof(char), 4, fhd);
 	if(res == 0) throw __FILE__ ": File is empty.";
 	if(strncmp(magic, "MATL", 4) == 0)
-		version = V6;
+		version = Version::V6;
 	else
-		version = V4;
+		version = Version::V4;
 	rewind(fhd);
 
 	M->Reset();
 
 	switch(version){
-	case V4:
+	case Version::V4:
 		{
 			// Header lesen:
 			uint32_t zero1;
@@ -174,7 +168,7 @@ void MatlabFile::ReadMatrix(MatlabMatrix* M, const std::string& matrixname)
 			}while(!feof(fhd));
 		}
 		break;
-	case V6:
+	case Version::V6:
 		{
 			char headertext[125];
 			res = fread((char*) headertext, sizeof(char), 124, fhd);
@@ -200,20 +194,20 @@ void MatlabFile::WriteMatrix(const MatlabMatrix& M)
 
 		// Write Header
 		switch(version){
-		case V6:
+		case Version::V6:
 			{
 				char headertext[124];
 				time_t rawtime;
 				struct tm * timeinfo;
-				char bufferTime[80];
+				char bufferTime[75];
 				time(&rawtime);
 				timeinfo = localtime(&rawtime);
-				strftime(bufferTime, 80, "%F %X %Z", timeinfo);
+				strftime(bufferTime, 75, "%F %X %Z", timeinfo);
 				memset(headertext, 32, sizeof(char) * 124);
 				sprintf(headertext,
 						"MATLAB 5.0 MAT-file, written by MatlabFile.cpp, %s",
 						bufferTime);
-				headertext[124] = 0;
+				headertext[123] = 0;
 				fwrite(headertext, sizeof(char), 124, fhd);
 				int16_t matVersion = 0x0100;
 				fwrite(&matVersion, sizeof(int16_t), 1, fhd);
@@ -221,14 +215,14 @@ void MatlabFile::WriteMatrix(const MatlabMatrix& M)
 				fwrite("IM", sizeof(char), 2, fhd); // Little Endian System
 			}
 			break;
-		case V4:
+		case Version::V4:
 			// V4 files have no header
 			break;
 		}
 	}
 
 	switch(version){
-	case V4:
+	case Version::V4:
 		{
 			const uint32_t zero = 0;
 			const uint32_t S1 = M.Size(1);
@@ -253,7 +247,7 @@ void MatlabFile::WriteMatrix(const MatlabMatrix& M)
 
 		}
 		break;
-	case V6:
+	case Version::V6:
 		{
 			size_t NDim;
 			for(NDim = 4; NDim > 1; NDim--)

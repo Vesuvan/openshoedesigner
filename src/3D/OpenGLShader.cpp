@@ -145,7 +145,7 @@ bool OpenGLShader::SetUniformInt(const std::string& name, const GLint x) const
 	return true;
 }
 
-bool OpenGLShader::SetUniform(const std::string& name, const Vector3 x) const
+bool OpenGLShader::SetUniform(const std::string& name, const Vector3  & x) const
 {
 	if(program == 0) return false;
 	GLint location = glGetUniformLocation(program, name.c_str());

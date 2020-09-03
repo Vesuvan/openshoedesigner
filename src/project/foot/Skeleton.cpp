@@ -24,26 +24,49 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "../foot/Skeleton.h"
+#include "Skeleton.h"
 
+#include "../../system/JSON.h"
+#include <algorithm>
 #include <GL/gl.h>
-
-Skeleton::Skeleton()
-{
-	mirrored = false;
-	m_gllist = 0;
-	update = true;
-}
+#include <exception>
+#include <iostream>
 
 Skeleton::~Skeleton()
 {
 	if(m_gllist != 0) glDeleteLists(m_gllist, 1);
 }
 
-Bone* Skeleton::AddBone(wxString name)
+// Support function to enable std::find with std::shared_ptr
+inline bool operator==(const std::shared_ptr <Bone>& bone,
+		const std::string & name)
 {
-	bones.push_back(Bone(name));
-	return &(bones[bones.size() - 1]);
+	return name.compare(bone->name) == 0;
+}
+
+Skeleton& Skeleton::operator =(const Skeleton& other)
+{
+	if(&other == this) return *this;
+	const size_t N = other.bones.size();
+	this->bones.resize(N);
+	for(size_t n = 0; n < N; ++n){
+		this->bones[n] = std::make_shared <Bone>(*(other.bones[n]));
+		if(!other.bones[n]->parentTo.expired()){
+			const std::string parentname = other.bones[n]->parentTo.lock()->name;
+
+			auto it = std::find(bones.begin(), bones.end(), parentname);
+			if(it != bones.end()){
+				bones[n]->parentTo = *it;
+			}
+		}
+	}
+	return *this;
+}
+
+void Skeleton::AddBone(const std::string & name)
+{
+	if(std::find(bones.begin(), bones.end(), name) != bones.end()) return;
+	bones.push_back(std::make_shared <Bone>(name));
 }
 
 size_t Skeleton::GetBoneCount(void) const
@@ -51,35 +74,180 @@ size_t Skeleton::GetBoneCount(void) const
 	return bones.size();
 }
 
-bool Skeleton::Connect(wxString name1, wxString name2)
+std::shared_ptr <Bone> Skeleton::GetBone(const std::string& name)
 {
-	size_t index1, index2;
-	for(index1 = 0; index1 < bones.size(); index1++){
-		if(bones[index1].name.Cmp(name1) == 0) break;
-	}
-	if(index1 == bones.size()) return false;
-	for(index2 = 0; index2 < bones.size(); index2++){
-		if(bones[index2].name.Cmp(name2) == 0) break;
-	}
-	if(index2 == bones.size()) return false;
+	auto it = std::find(bones.begin(), bones.end(), name);
+	if(it == bones.end()) throw std::runtime_error(
+			"std::shared_ptr <Bone> Skeleton::GetBone - Bone not found.");
+	return (*it);
+}
 
-	if(index1 < index2){
-		bones[index2].connectTo = index1;
-	}else{
-		bones[index1].connectTo = index2;
+bool Skeleton::Connect(const std::string & parent, const std::string & child)
+{
+	auto b1 = std::find(bones.begin(), bones.end(), parent);
+	auto b2 = std::find(bones.begin(), bones.end(), child);
+	if(b1 == bones.end()) return false;
+	if(b2 == bones.end()) return false;
+	(*b2)->parentTo = (*b1);
+	return true;
+}
+
+void Skeleton::LoadJSON(std::string filename)
+{
+	JSON js = JSON::Load(filename);
+	bones.clear();
+	for(size_t n = 0; n < js.Size(); ++n){
+		const std::string name = js.GetKey(n);
+		const JSON & bjs = js[name];
+		const JSON & bjsi = bjs["init"];
+		const JSON & bjsf = bjs["formula"];
+		AddBone(name);
+		auto bone = std::find(bones.begin(), bones.end(), name);
+		(*bone)->initialized = false;
+		(*bone)->r1init = bjsi["r1"].GetNumber(0.0);
+		(*bone)->r2init = bjsi["r2"].GetNumber((*bone)->r1init);
+		const JSON p1vec = bjsi["p1"];
+		const JSON p2vec = bjsi["p2"];
+		(*bone)->p1.x = p1vec[0].GetNumber();
+		(*bone)->p1.y = p1vec[1].GetNumber();
+		(*bone)->p1.z = p1vec[2].GetNumber();
+		if(p2vec.IsArray()){
+			(*bone)->p2.x = p2vec[0].GetNumber();
+			(*bone)->p2.y = p2vec[1].GetNumber();
+			(*bone)->p2.z = p2vec[2].GetNumber();
+		}else{
+			(*bone)->p2 = (*bone)->p1;
+		}
+		(*bone)->formulaLength = bjsf["length"].GetString("0");
+		(*bone)->formulaR1 = bjsf["r1"].GetString("0");
+		(*bone)->formulaR2 = bjsf["r2"].GetString("0");
+		(*bone)->formulaS1 = bjsf["s1"].GetString("0");
+		(*bone)->formulaS2 = bjsf["s2"].GetString("0");
+	}
+
+	for(size_t n = 0; n < js.Size(); ++n){
+		const std::string name = js.GetKey(n);
+		const JSON & bjs = js[name];
+		std::string parent = bjs["parent"].GetString();
+		Connect(parent, name);
+	}
+	for(auto & bone : bones)
+		bone->UpdateHierarchy();
+	std::sort(bones.begin(), bones.end(), [](const std::shared_ptr<Bone>& lhs,
+			const std::shared_ptr<Bone>& rhs)
+	{
+		return lhs->hierarchyLevel < rhs->hierarchyLevel;
+	});
+
+	for(auto & bone : bones){
+//		const std::string name = bone->name;
+		bone->lengthinit = (bone->p1 - bone->p2).Abs();
+		if(bone->parentTo.expired()){
+			if(bone->lengthinit > 0.0){
+				bone->matrixinit.SetEx(bone->p2 - bone->p1);
+				bone->matrixinit.SetEy(Vector3(0, 1, 0));
+				bone->matrixinit.CalculateEz();
+				bone->matrixinit.CalculateEy();
+			}
+		}else{
+			std::shared_ptr <Bone> parent = bone->parentTo.lock();
+			bone->matrixinit = parent->matrixinit;
+			if(bone->lengthinit > 0.0){
+				bone->matrixinit.SetEx(bone->p2 - bone->p1);
+				bone->matrixinit.SetEy(Vector3(0, 1, 0));
+				bone->matrixinit.CalculateEz();
+				bone->matrixinit.CalculateEy();
+			}
+		}
+		bone->matrixinit.Normalize();
+		bone->matrixinit.SetOrigin(bone->p1);
+	}
+}
+
+bool Skeleton::SaveJSON(std::string filename)
+{
+	MathParser parser(false);
+	parser.AddAllowedUnit("mm", 1e-3);
+	parser.AddAllowedUnit("cm", 1e-2);
+	parser.AddAllowedUnit("m", 1);
+	parser.AddAllowedUnit("in", 2.54e-2);
+	parser.AddAllowedUnit("ft", 0.3048);
+	parser.AddAllowedUnit("rad", 1);
+	parser.AddAllowedUnit("deg", 0.017453);
+	parser.AddAllowedUnit("gon", 0.015708);
+	parser.SetVariable("L", 1.0);
+	parser.SetVariable("R", 1.0);
+	parser.SetVariable("S", 1.0);
+	Skeleton::UpdateBonesFromFormula(parser);
+	Skeleton::Update();
+
+	try{
+		JSON js;
+		js.SetObject();
+		for(auto & bone : bones){
+			JSON & jsb = js[bone->name];
+			jsb.SetObject();
+			JSON & jsi = jsb["init"];
+			jsi.SetObject();
+			JSON & jsf = jsb["formula"];
+			jsf.SetObject();
+
+			if(bone->parentTo.expired()){
+				jsb["parent"].SetNull();
+			}else{
+				std::shared_ptr <Bone> parent = bone->parentTo.lock();
+				jsb["parent"].SetString(parent->name);
+			}
+
+			jsi["r1"].SetNumber(bone->r1init);
+			jsi["r2"].SetNumber(bone->r2init);
+
+			Vector3 p1 = bone->matrixinit.GetOrigin();
+			Vector3 p2 = bone->matrixinit.Transform(bone->lengthinit, 0, 0);
+
+			JSON & jsp1 = jsi["p1"];
+			jsp1.SetArray(3);
+			JSON & jsp2 = jsi["p2"];
+			jsp2.SetArray(3);
+
+			jsp1[0].SetNumber(p1.x);
+			jsp1[1].SetNumber(p1.y);
+			jsp1[2].SetNumber(p1.z);
+			jsp2[0].SetNumber(p2.x);
+			jsp2[1].SetNumber(p2.y);
+			jsp2[2].SetNumber(p2.z);
+
+			jsf["length"].SetString(bone->formulaLength);
+			jsf["r1"].SetString(bone->formulaR1);
+			jsf["r2"].SetString(bone->formulaR2);
+			jsf["s1"].SetString(bone->formulaS1);
+			jsf["s2"].SetString(bone->formulaS2);
+		}
+		js.Save(filename);
+	}
+	catch(const std::exception & e){
+		std::cout << e.what() << '\n';
+		return false;
 	}
 	return true;
 }
 
-void Skeleton::Setup(void)
+void Skeleton::UpdateBonesFromFormula(MathParser& parser)
 {
-	for(size_t n = 0; n < bones.size(); n++){
-		if(bones[n].connectTo < n){
-			bones[n].Setup(&(bones[bones[n].connectTo]));
-		}else{
-			bones[n].Setup(NULL);
-		}
+	for(auto & bone : bones){
+		bone->length = parser.GetNumber(bone->formulaLength);
+		bone->r1 = parser.GetNumber(bone->formulaR1);
+		bone->r2 = parser.GetNumber(bone->formulaR2);
+		bone->s1 = parser.GetNumber(bone->formulaS1);
+		bone->s2 = parser.GetNumber(bone->formulaS2);
 	}
+	update = true;
+}
+
+void Skeleton::Update(void)
+{
+	for(auto & bone : bones)
+		bone->Update();
 	update = true;
 }
 
@@ -91,9 +259,11 @@ void Skeleton::Render(void) const
 	}
 	if(update){
 		glNewList(m_gllist, GL_COMPILE_AND_EXECUTE);
-		for(size_t n = 0; n < bones.size(); n++){
-			::glPushName(n);
-			bones[n].Render();
+
+		size_t n = 0;
+		for(auto & bone : bones){
+			::glPushName(n++);
+			bone->Paint();
 			::glPopName();
 		}
 		glEndList();
@@ -103,42 +273,15 @@ void Skeleton::Render(void) const
 	}
 }
 
-void Skeleton::UpdateBonesFromFormula(MathParser *parser)
-{
-	for(size_t n = 0; n < bones.size(); n++){
-		bones[n].anchorN.x = parser->GetNumber(bones[n].anchorNx);
-		bones[n].anchorN.y = parser->GetNumber(bones[n].anchorNy);
-		bones[n].anchorN.z = parser->GetNumber(bones[n].anchorNz);
-		bones[n].link.x = parser->GetNumber(bones[n].linkx);
-		bones[n].link.y = parser->GetNumber(bones[n].linky);
-		bones[n].link.z = parser->GetNumber(bones[n].linkz);
-		bones[n].normal.x = parser->GetNumber(bones[n].normalx);
-		bones[n].normal.y = parser->GetNumber(bones[n].normaly);
-		bones[n].normal.z = parser->GetNumber(bones[n].normalz);
-		bones[n].anchorD = parser->GetNumber(bones[n].anchorDv);
-		bones[n].length = parser->GetNumber(bones[n].lengthv);
-		bones[n].r1 = parser->GetNumber(bones[n].r1v);
-		bones[n].r2 = parser->GetNumber(bones[n].r2v);
-		bones[n].s1 = parser->GetNumber(bones[n].s1v);
-		bones[n].s2 = parser->GetNumber(bones[n].s2v);
-
-		if(mirrored){
-			bones[n].anchorN.y = -bones[n].anchorN.y;
-			bones[n].link.y = -bones[n].link.y;
-			bones[n].normal.y = -bones[n].normal.y;
-		}
-	}
-	update = true;
-}
-
 void Skeleton::ResetRotation(void)
 {
-	for(size_t n = 0; n < bones.size(); n++)
-		bones[n].ResetRotation();
+	for(auto & bone : bones)
+		bone->PushRotation();
 }
 
 void Skeleton::RestoreRotation(void)
 {
-	for(size_t n = 0; n < bones.size(); n++)
-		bones[n].RestoreRotation();
+	for(auto & bone : bones)
+		bone->PopRotation();
 }
+

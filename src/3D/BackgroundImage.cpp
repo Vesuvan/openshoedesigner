@@ -28,22 +28,6 @@
 
 #include "OpenGL.h"
 
-BackgroundImage::BackgroundImage()
-{
-	showFront = true;
-	showBack = true;
-	showBehindGeometry = false;
-	orientation = Right;
-	scale = 0.35;
-	centerx = 0.35;
-	centery = 0.3;
-	rotate = 0.1;
-}
-
-BackgroundImage::~BackgroundImage()
-{
-}
-
 void BackgroundImage::Paint(void) const
 {
 	if(showFront && showBack) glDisable(GL_CULL_FACE);
@@ -53,23 +37,23 @@ void BackgroundImage::Paint(void) const
 
 	glPushMatrix();
 	switch(orientation){
-	case Top:
+	case Orientation::Top:
 		break;
-	case Bottom:
+	case Orientation::Bottom:
 		glRotatef(180, 1, 0, 0);
 		break;
-	case Right:
+	case Orientation::Right:
 		glRotatef(90, 1, 0, 0);
 		break;
-	case Left:
+	case Orientation::Left:
 		glRotatef(90, 1, 0, 0);
 		glRotatef(180, 0, 0, 1);
 		break;
-	case Front:
+	case Orientation::Front:
 		glRotatef(90, 1, 0, 0);
 		glRotatef(90, 0, 0, 1);
 		break;
-	case Back:
+	case Orientation::Back:
 		glRotatef(90, 1, 0, 0);
 		glRotatef(-90, 0, 0, 1);
 		break;

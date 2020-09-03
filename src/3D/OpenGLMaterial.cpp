@@ -36,9 +36,9 @@ OpenGLMaterial::OpenGLMaterial()
 	shininess = 32;
 }
 
-OpenGLMaterial::OpenGLMaterial(Material preset, float emit)
+OpenGLMaterial::OpenGLMaterial(Preset preset, float emit)
 {
-	Preset(preset);
+	Set(preset);
 	emission = diffuse * emit;
 }
 
@@ -47,246 +47,246 @@ OpenGLMaterial::OpenGLMaterial(float r, float g, float b, float emit)
 	SetSimpleColor(r, g, b, emit);
 }
 
-void OpenGLMaterial::Preset(Material preset)
+void OpenGLMaterial::Set(Preset preset)
 {
 	// Preset-materials from http://devernay.free.fr/cours/opengl/materials.html
 	switch(preset){
-	case emerald:
+	case Preset::Emerald:
 		ambient.Set(0.0215, 0.1745, 0.0215);
 		diffuse.Set(0.07568, 0.61424, 0.07568);
 		specular.Set(0.633, 0.727811, 0.633);
 		shininess = 38.4;
 		break;
-	case jade:
+	case Preset::Jade:
 		ambient.Set(0.135, 0.2225, 0.1575);
 		diffuse.Set(0.54, 0.89, 0.63);
 		specular.Set(0.316228, 0.316228, 0.316228);
 		shininess = 6.4;
 		break;
-	case obsidian:
+	case Preset::Obsidian:
 		ambient.Set(0.05375, 0.05, 0.06625);
 		diffuse.Set(0.18275, 0.17, 0.22525);
 		specular.Set(0.332741, 0.328634, 0.346435);
 		shininess = 19.2;
 		break;
-	case pearl:
+	case Preset::Pearl:
 		ambient.Set(0.25, 0.20725, 0.20725);
 		diffuse.Set(1, 0.829, 0.829);
 		specular.Set(0.296648, 0.296648, 0.296648);
 		shininess = 5.632;
 		break;
-	case ruby:
+	case Preset::Ruby:
 		ambient.Set(0.1745, 0.01175, 0.01175);
 		diffuse.Set(0.61424, 0.04136, 0.04136);
 		specular.Set(0.727811, 0.626959, 0.626959);
 		shininess = 38.4;
 		break;
-	case turquoise:
+	case Preset::Turquoise:
 		ambient.Set(0.1, 0.18725, 0.1745);
 		diffuse.Set(0.396, 0.74151, 0.69102);
 		specular.Set(0.297254, 0.30829, 0.306678);
 		shininess = 6.4;
 		break;
-	case brass:
+	case Preset::Brass:
 		ambient.Set(0.329412, 0.223529, 0.027451);
 		diffuse.Set(0.780392, 0.568627, 0.113725);
 		specular.Set(0.992157, 0.941176, 0.807843);
 		shininess = 13.9487;
 		break;
-	case bronze:
+	case Preset::Bronze:
 		ambient.Set(0.2125, 0.1275, 0.054);
 		diffuse.Set(0.714, 0.4284, 0.18144);
 		specular.Set(0.393548, 0.271906, 0.166721);
 		shininess = 12.8;
 		break;
-	case chrome:
+	case Preset::Chrome:
 		ambient.Set(0.25, 0.25, 0.25);
 		diffuse.Set(0.4, 0.4, 0.4);
 		specular.Set(0.774597, 0.774597, 0.774597);
 		shininess = 38.4;
 		break;
-	case copper:
+	case Preset::Copper:
 		ambient.Set(0.19125, 0.0735, 0.0225);
 		diffuse.Set(0.7038, 0.27048, 0.0828);
 		specular.Set(0.256777, 0.137622, 0.086014);
 		shininess = 6.4;
 		break;
-	case gold:
+	case Preset::Gold:
 		ambient.Set(0.24725, 0.1995, 0.0745);
 		diffuse.Set(0.75164, 0.60648, 0.22648);
 		specular.Set(0.628281, 0.555802, 0.366065);
 		shininess = 25.6;
 		break;
-	case silver:
+	case Preset::Silver:
 		ambient.Set(0.19225, 0.19225, 0.19225);
 		diffuse.Set(0.50754, 0.50754, 0.50754);
 		specular.Set(0.508273, 0.508273, 0.508273);
 		shininess = 25.6;
 		break;
-	case blackplastic:
+	case Preset::BlackPlastic:
 		ambient.Set(0.0, 0.0, 0.0);
 		diffuse.Set(0.01, 0.01, 0.01);
 		specular.Set(0.50, 0.50, 0.50);
 		shininess = 16;
 		break;
-	case cyanplastic:
+	case Preset::CyanPlastic:
 		ambient.Set(0.0, 0.1, 0.06);
 		diffuse.Set(0.0, 0.50980392, 0.50980392);
 		specular.Set(0.50196078, 0.50196078, 0.50196078);
 		shininess = 16;
 		break;
-	case greenplastic:
+	case Preset::GreenPlastic:
 		ambient.Set(0.0, 0.0, 0.0);
 		diffuse.Set(0.1, 0.35, 0.1);
 		specular.Set(0.45, 0.55, 0.45);
 		shininess = 16;
 		break;
-	case redplastic:
+	case Preset::RedPlastic:
 		ambient.Set(0.0, 0.0, 0.0);
 		diffuse.Set(0.5, 0.0, 0.0);
 		specular.Set(0.7, 0.6, 0.6);
 		shininess = 16;
 		break;
-	case whiteplastic:
+	case Preset::WhitePlastic:
 		ambient.Set(0.0, 0.0, 0.0);
 		diffuse.Set(0.55, 0.55, 0.55);
 		specular.Set(0.70, 0.70, 0.70);
 		shininess = 16;
 		break;
-	case yellowplastic:
+	case Preset::YellowPlastic:
 		ambient.Set(0.0, 0.0, 0.0);
 		diffuse.Set(0.5, 0.5, 0.0);
 		specular.Set(0.60, 0.60, 0.50);
 		shininess = 16;
 		break;
-	case blackrubber:
+	case Preset::BlackRubber:
 		ambient.Set(0.02, 0.02, 0.02);
 		diffuse.Set(0.01, 0.01, 0.01);
 		specular.Set(0.4, 0.4, 0.4);
 		shininess = 5;
 		break;
-	case cyanrubber:
+	case Preset::CyanRubber:
 		ambient.Set(0.0, 0.05, 0.05);
 		diffuse.Set(0.4, 0.5, 0.5);
 		specular.Set(0.04, 0.7, 0.7);
 		shininess = 5;
 		break;
-	case greenrubber:
+	case Preset::GreenRubber:
 		ambient.Set(0.0, 0.05, 0.0);
 		diffuse.Set(0.4, 0.5, 0.4);
 		specular.Set(0.04, 0.7, 0.04);
 		shininess = 5;
 		break;
-	case redrubber:
+	case Preset::RedRubber:
 		ambient.Set(0.05, 0.0, 0.0);
 		diffuse.Set(0.5, 0.4, 0.4);
 		specular.Set(0.7, 0.04, 0.04);
 		shininess = 5;
 		break;
-	case whiterubber:
+	case Preset::WhiteRubber:
 		ambient.Set(0.05, 0.05, 0.05);
 		diffuse.Set(0.5, 0.5, 0.5);
 		specular.Set(0.7, 0.7, 0.7);
 		shininess = 5;
 		break;
-	case yellowrubber:
+	case Preset::YellowRubber:
 		ambient.Set(0.05, 0.05, 0.0);
 		diffuse.Set(0.5, 0.5, 0.4);
 		specular.Set(0.7, 0.7, 0.04);
 		shininess = 5;
 		break;
-	case cRed: //Color Red
+	case Preset::cRed: //Color Red
 		ambient.Set(1.0, 0.0, 0.0);
 		diffuse = ambient;
 		specular.Zero();
 		shininess = 0;
 		break;
 
-	case cYellow: //Color Yellow
+	case Preset::cYellow: //Color Yellow
 		ambient.Set(1.0, 1.0, 0.0);
 		diffuse = ambient;
 		specular.Zero();
 		shininess = 0;
 		break;
-	case cGreen: //Color Green
+	case Preset::cGreen: //Color Green
 		ambient.Set(0.0, 0.5, 0.0);
 		diffuse = ambient;
 		specular.Zero();
 		shininess = 0;
 		break;
-	case cLime: //Color Lime
+	case Preset::cLime: //Color Lime
 		ambient.Set(0.0, 1.0, 0.0);
 		diffuse = ambient;
 		specular.Zero();
 		shininess = 0;
 		break;
-	case cTeal: //Color Teal
+	case Preset::cTeal: //Color Teal
 		ambient.Set(0.0, 0.5, 0.5);
 		diffuse = ambient;
 		specular.Zero();
 		shininess = 0;
 		break;
-	case cOlive: //Color Olive
+	case Preset::cOlive: //Color Olive
 		ambient.Set(0.5, 0.5, 0.0);
 		diffuse = ambient;
 		specular.Zero();
 		shininess = 0;
 		break;
-	case cBlue: //Color Blue
+	case Preset::cBlue: //Color Blue
 		ambient.Set(0.0, 0.0, 1.0);
 		diffuse = ambient;
 		specular.Zero();
 		shininess = 0;
 		break;
-	case cAqua: //Color Aqua
+	case Preset::cAqua: //Color Aqua
 		ambient.Set(0.0, 1.0, 1.0);
 		diffuse = ambient;
 		specular.Zero();
 		shininess = 0;
 		break;
-	case cNavy: //Color Navy
+	case Preset::cNavy: //Color Navy
 		ambient.Set(0.0, 0.0, 0.5);
 		diffuse = ambient;
 		specular.Zero();
 		shininess = 0;
 		break;
-	case cPurple: //Color Purple
+	case Preset::cPurple: //Color Purple
 		ambient.Set(0.5, 0.0, 0.5);
 		diffuse = ambient;
 		specular.Zero();
 		shininess = 0;
 		break;
-	case cFuchsia: //Color Fuchsia
+	case Preset::cFuchsia: //Color Fuchsia
 		ambient.Set(1.0, 0.0, 1.0);
 		diffuse = ambient;
 		specular.Zero();
 		shininess = 0;
 		break;
-	case cMaroon: //Color Maroon
+	case Preset::cMaroon: //Color Maroon
 		ambient.Set(0.5, 0.0, 0.0);
 		diffuse = ambient;
 		specular.Zero();
 		shininess = 0;
 		break;
-	case cGray: //Color Gray
+	case Preset::cGray: //Color Gray
 		ambient.Set(0.75, 0.75, 0.75);
 		diffuse = ambient;
 		specular.Zero();
 		shininess = 0;
 		break;
-	case cSilver: //Color Silver
+	case Preset::cSilver: //Color Silver
 		ambient.Set(0.5, 0.5, 0.5);
 		diffuse = ambient;
 		specular.Zero();
 		shininess = 0;
 		break;
-	case cBlack: //Color Black
+	case Preset::cBlack: //Color Black
 		ambient.Set(0.0, 0.0, 0.0);
 		diffuse = ambient;
 		specular.Zero();
 		shininess = 0;
 		break;
-	case cWhite: //Color White
+	case Preset::cWhite: //Color White
 		ambient.Set(1.0, 1.0, 1.0);
 		diffuse = ambient;
 		specular.Zero();
@@ -297,88 +297,88 @@ void OpenGLMaterial::Preset(Material preset)
 	emission.Zero();
 }
 
-std::string OpenGLMaterial::GetPresetName(Material preset)
+std::string OpenGLMaterial::GetPresetName(OpenGLMaterial::Preset preset)
 {
 	switch(preset){
-	case emerald:
+	case Preset::Emerald:
 		return ("Emerald");
-	case jade:
+	case Preset::Jade:
 		return ("Jade");
-	case obsidian:
+	case Preset::Obsidian:
 		return ("Obsidian");
-	case pearl:
+	case Preset::Pearl:
 		return ("Pearl");
-	case ruby:
+	case Preset::Ruby:
 		return ("Ruby");
-	case turquoise:
+	case Preset::Turquoise:
 		return ("Turquoise");
-	case brass:
+	case Preset::Brass:
 		return ("Brass");
-	case bronze:
+	case Preset::Bronze:
 		return ("Bronze");
-	case chrome:
+	case Preset::Chrome:
 		return ("Chrome");
-	case copper:
+	case Preset::Copper:
 		return ("Copper");
-	case gold:
+	case Preset::Gold:
 		return ("Gold");
-	case silver:
+	case Preset::Silver:
 		return ("Silver");
-	case blackplastic:
+	case Preset::BlackPlastic:
 		return ("Black plastic");
-	case cyanplastic:
+	case Preset::CyanPlastic:
 		return ("Cyan plastic");
-	case greenplastic:
+	case Preset::GreenPlastic:
 		return ("Green plastic");
-	case redplastic:
+	case Preset::RedPlastic:
 		return ("Red plastic");
-	case whiteplastic:
+	case Preset::WhitePlastic:
 		return ("White plastic");
-	case yellowplastic:
+	case Preset::YellowPlastic:
 		return ("Yellow plastic");
-	case blackrubber:
+	case Preset::BlackRubber:
 		return ("Black rubber");
-	case cyanrubber:
+	case Preset::CyanRubber:
 		return ("Cyan rubber");
-	case greenrubber:
+	case Preset::GreenRubber:
 		return ("Green rubber");
-	case redrubber:
+	case Preset::RedRubber:
 		return ("Red rubber");
-	case whiterubber:
+	case Preset::WhiteRubber:
 		return ("White rubber");
-	case yellowrubber:
+	case Preset::YellowRubber:
 		return ("Yellow rubber");
-	case cRed:
+	case Preset::cRed:
 		return ("Red");
-	case cYellow:
+	case Preset::cYellow:
 		return ("Yellow");
-	case cGreen:
+	case Preset::cGreen:
 		return ("Green");
-	case cLime:
+	case Preset::cLime:
 		return ("Lime");
-	case cTeal:
+	case Preset::cTeal:
 		return ("Teal");
-	case cOlive:
+	case Preset::cOlive:
 		return ("Olive");
-	case cBlue:
+	case Preset::cBlue:
 		return ("Blue");
-	case cAqua:
+	case Preset::cAqua:
 		return ("Aqua");
-	case cNavy:
+	case Preset::cNavy:
 		return ("Navy");
-	case cPurple:
+	case Preset::cPurple:
 		return ("Purple");
-	case cFuchsia:
+	case Preset::cFuchsia:
 		return ("Fuchsia");
-	case cMaroon:
+	case Preset::cMaroon:
 		return ("Maroon");
-	case cGray:
+	case Preset::cGray:
 		return ("Gray");
-	case cSilver:
+	case Preset::cSilver:
 		return ("Silver");
-	case cBlack:
+	case Preset::cBlack:
 		return ("Black");
-	case cWhite:
+	case Preset::cWhite:
 		return ("White");
 	}
 	return ("");
@@ -405,7 +405,7 @@ bool OpenGLMaterial::ColorsAllowed(void)
 	return (colormask[0] && colormask[1] && colormask[2] && colormask[3]);
 }
 
-void OpenGLMaterial::UseMaterial(void) const
+void OpenGLMaterial::UseMaterial(float opacity) const
 {
 	if(!ColorsAllowed()) return;
 	glDisable(GL_COLOR_MATERIAL);
@@ -413,22 +413,22 @@ void OpenGLMaterial::UseMaterial(void) const
 	buffer[0] = ambient.x;
 	buffer[1] = ambient.y;
 	buffer[2] = ambient.z;
-	buffer[3] = 1.0;
+	buffer[3] = opacity;
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, buffer);
 	buffer[0] = diffuse.x;
 	buffer[1] = diffuse.y;
 	buffer[2] = diffuse.z;
-	buffer[3] = 1.0;
+	buffer[3] = opacity;
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, buffer);
 	buffer[0] = specular.x;
 	buffer[1] = specular.y;
 	buffer[2] = specular.z;
-	buffer[3] = 1.0;
+	buffer[3] = opacity;
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, buffer);
 	buffer[0] = emission.x;
 	buffer[1] = emission.y;
 	buffer[2] = emission.z;
-	buffer[3] = 1.0;
+	buffer[3] = opacity;
 	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, buffer);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
 }
@@ -437,8 +437,7 @@ void OpenGLMaterial::UseColor(float emit) const
 {
 	if(!ColorsAllowed()) return;
 	glEnable(GL_COLOR_MATERIAL);
-	GLfloat buffer[] =
-		{0, 0, 0, 1};
+	GLfloat buffer[] = {0, 0, 0, 1};
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, buffer);
 	buffer[0] = diffuse.x * emit;
 	buffer[1] = diffuse.y * emit;
@@ -452,8 +451,7 @@ void OpenGLMaterial::UseColor(void) const
 {
 	if(!ColorsAllowed()) return;
 	glEnable(GL_COLOR_MATERIAL);
-	GLfloat buffer[] =
-		{0, 0, 0, 1};
+	GLfloat buffer[] = {0, 0, 0, 1};
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, buffer);
 	buffer[0] = emission.x;
 	buffer[1] = emission.y;
@@ -467,8 +465,7 @@ void OpenGLMaterial::EnableColors(void)
 {
 	if(!ColorsAllowed()) return;
 	glEnable(GL_COLOR_MATERIAL);
-	GLfloat buffer[] =
-		{0, 0, 0, 1};
+	GLfloat buffer[] = {0, 0, 0, 1};
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, buffer);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, buffer);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0);

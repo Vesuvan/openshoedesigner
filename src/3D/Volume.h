@@ -31,6 +31,7 @@
 #include "AffineTransformMatrix.h"
 #include "Geometry.h"
 #include "Vector3.h"
+
 #include <GL/gl.h>
 
 /*!\class Volume
@@ -70,6 +71,8 @@ class Volume:public OrientedMatrix {
 
 public:
 	Volume();
+	Volume(const Volume &) = delete;
+	Volume & operator=(const Volume & other);
 	virtual ~Volume();
 
 	void AddHalfplane(const Vector3 &p1, float d0, float k0);
@@ -103,7 +106,7 @@ public:
 	 * @param n
 	 * @return
 	 */
-	Vector3 GetSurface(Vector3 p0, Vector3 n) const;
+	Vector3 GetSurface(const Vector3 & p0, const Vector3 & n) const;
 
 public:
 	Vector3 color; ///< Color of the volume

@@ -34,14 +34,17 @@
  * be intersected by a plane to return closed polygons.
  */
 
+#define _USE_MATH_DEFINES
+
+#include "AffineTransformMatrix.h"
+#include "Vector3.h"
+
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <set>
 #include <string>
 #include <vector>
-
-#include "AffineTransformMatrix.h"
-#include "Vector3.h"
 
 class Geometry;
 class Polygon3;
@@ -50,39 +53,46 @@ class Hull {
 	// Constructor/ Destructor
 public:
 	Hull();
-	virtual ~Hull();
+	virtual ~Hull() = default;
 
-	class Edge {
+	struct Edge {
 	public:
-		Edge();
-		bool sharp;
-		size_t group;
-		size_t va, vb;
-		size_t ta, tb;
-		uint_least8_t trianglecount;
+		Edge() = default;
+		bool sharp = false;
+		size_t group = 0;
+		size_t va = 0;
+		size_t vb = 0;
+		size_t ta = 0;
+		size_t tb = 0;
+		uint_least8_t trianglecount = 0;
 		Vector3 n;
 		size_t OtherVertex(size_t n) const; //!< Return the index of the other vertex connected to the other end of the edge given the vertex n.
 		size_t OtherTriangle(size_t n) const; //!< Return the index of the other triangle connected to an edge given the triangle n.
 		bool AttachTriangle(size_t index); //!< Attach a triangle to the Edge. Returns true is there is one more free slot for a triangle.
 	};
-	class Triangle {
+	struct Triangle {
 	public:
-		Triangle();
-		size_t group;
-		size_t va, vb, vc;
-		size_t ea, eb, ec;
+		Triangle() = default;
+		size_t group = 0;
+		size_t va = 0;
+		size_t vb = 0;
+		size_t vc = 0;
+		size_t ea = 0;
+		size_t eb = 0;
+		size_t ec = 0;
 		Vector3 n;
 		int Direction(size_t i1, size_t i2) const; //!< Test the direction of rotation of two indices respective to a triangle.
 	};
 
 	// Member variables
 public:
-	bool smooth;
-	bool paintEdges;
-	bool paintTriangles;
-	bool paintVertices;
-	bool paintNormals;
-	bool paintSelected;
+
+	bool smooth = false;
+	bool paintEdges = true;
+	bool paintTriangles = true;
+	bool paintVertices = false;
+	bool paintNormals = false;
+	bool paintSelected = false;
 
 	AffineTransformMatrix matrix; //!< Transformation of the data.
 
@@ -110,7 +120,8 @@ public:
 	bool IsEmpty(void) const;
 
 	void CalcNormals(void);
-	void CalcGroups(void); //!< Group triangles and edges by assigning labels
+	void CalcGroups(double angle = 25.0 / 180.0 * M_PI); //!< Group triangles and edges by assigning labels
+	void ResetGroups(void);
 	void FlipNormals(void);
 
 	size_t Select(std::set <size_t> &select);
@@ -162,7 +173,6 @@ public:
 	}
 	const Vector3& operator[](size_t index) const;
 	Vector3& operator[](size_t index);
-
 	size_t GetTriangleCount(void) const
 	{
 		return t.size();
@@ -171,6 +181,7 @@ public:
 	{
 		return t[index];
 	}
+
 	bool GetTriangle(const size_t index, Vector3 & a, Vector3 & b,
 			Vector3 & c) const
 	{
@@ -191,12 +202,6 @@ private:
 	size_t FindEdge(const size_t indexa, const size_t indexb);
 	static Vector3 PlaneProjection(const Vector3 &a, const Vector3 &b,
 			Vector3 n, double d);
-
-//	mutable size_t count;
-//	size_t Sequence() const
-//	{
-//		return ++count;
-//	}
 };
 
 #endif /* HULL_H_ */

@@ -53,13 +53,13 @@ class Polynom;
 
 class PolyFilter {
 public:
-	PolyFilter();
+	PolyFilter() = default;
 	PolyFilter(size_t order, size_t size);
-	virtual ~PolyFilter();
+	virtual ~PolyFilter() = default;
 
 	void Init(size_t order, size_t N);
 
-	size_t GetSize(void) const;
+	size_t Size(void) const;
 	size_t GetOrder(void) const;
 
 	Polynom Filter(const std::vector <double> &vec, size_t pos = 0) const;
@@ -67,7 +67,7 @@ public:
 	void Export(std::string filename) const;
 
 private:
-	size_t order;
+	size_t order = 0;
 	std::vector <double> filter_a;
 	std::vector <double> filter_b;
 	std::vector <double> filter_c;

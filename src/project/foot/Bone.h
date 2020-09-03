@@ -52,92 +52,78 @@
  *
  */
 
-#include <wx/string.h>
+#include <memory>
+#include <string>
 
 #include "../../3D/AffineTransformMatrix.h"
 #include "../../3D/Vector3.h"
 
 class Bone {
+	friend class Skeleton;
 public:
-	Bone(const wxString &name);
-	virtual ~Bone();
+	Bone() = default;
+	explicit Bone(const std::string & name)
+			: name(name)
+	{
+	}
 
-	enum stringIdentifier {
-		stringAnchorD, stringLength, stringR1, stringR2, stringS1, stringS2
-	};
-
-	wxString name;
-
-	size_t connectTo;
+	std::string name;
+	std::weak_ptr <Bone> parentTo;
+	size_t hierarchyLevel = 0;
 
 	// Formulas:
-	wxString anchorNx;
-	wxString anchorNy;
-	wxString anchorNz;
-	wxString linkx;
-	wxString linky;
-	wxString linkz;
-	wxString normalx;
-	wxString normaly;
-	wxString normalz;
-	wxString anchorDv;
-	wxString lengthv;
-	wxString r1v;
-	wxString r2v;
-	wxString s1v;
-	wxString s2v;
+	std::string formulaLength;
+	std::string formulaR1;
+	std::string formulaR2;
+	std::string formulaS1;
+	std::string formulaS2;
 
-	// Parent bone provides an anchor, a bone normal and a length.
-	// First calculate the normal intersection from link and parent bond.
-	Vector3 anchor;
-	// p1Parent + normalParent*lengthParent*linkD
-	double anchorD; ///< Relative position of link in parent bone.
-	// add the offset vector linkN times the radius of the parent bone at this spot.
-	// + linkN*rLocalParent
-	Vector3 anchorN; ///< Point from the parent bone
+	bool initialized = false;
 
-	Vector3 normal;
-	double length;
+	AffineTransformMatrix matrixinit; //!< Describing the basic coordinate system of the bone.
+	AffineTransformMatrix matrix; //!< Rotated coordinate-system
+	double lengthinit = 0.0; //!< Length from p1 to p2
+	double length = 0.0;
 
-	double r1; //!< Radius of 1st sphere
-	double r2; //!< Radius of 2nd sphere
+	double r1init = 0.0; //!< Radius of 1st sphere
+	double r2init = 0.0; //!< Radius of 2nd sphere. If the bone has an parent, this is calculated automatically
+	double r1 = 0.0; //!< Radius of 1st sphere
+	double r2 = 0.0; //!< Radius of 2nd sphere. If the bone has an parent, this is calculated automatically
 
-	double s1; //!< Skin thickness on 1st sphere
-	double s2; //!< Skin thickness on 2nd sphere
+	double rparentinit = 0.0;
 
-	double rotx; //!< Rotation along the x axis
-	double roty; //!< Rotation along the y axis
+	double s1 = 0.01; //!< Skin thickness on 1st sphere
+	double s2 = 0.01; //!< Skin thickness on 2nd sphere
 
-	double rotxBackup; //!< Rotation along the x axis
-	double rotyBackup; //!< Rotation along the y axis
+	// Calculated values
+	Vector3 p1; //!< Second point
+	Vector3 p2; //!< Second point
 
-	// Second calculate p1. It is the link-point + anchor*(rLocalParent+r1)
-	Vector3 p1; //!< First point of bone.
-	Vector3 link;
+	double anchorDinit = 1.0; ///< Relative position of link in parent bone along the vector p1 .. p2. Value range from 0..1
+	double mixing = 0.5;
+	AffineTransformMatrix link;
+	double linkLengthInit = 0.0;
 
-	// Third calculate p2 by adding p1 + normal*length
-	Vector3 p2; //!< Second point of bone.
-
-	AffineTransformMatrix matrix;
-
-	bool Set(wxString text);
-	wxString Get(void) const;
+	// Changeable values
+	double roty = 0.0; //!< Rotation around (up x normal) axis
+	double rotz = 0.0; //!< Rotation around up axis
 
 	double GetXMax(void) const;
 	double GetXMin(void) const;
 	double GetZMin(void) const;
 
+	void Update(void);
 
-	void Setup(Bone *parent);
+	double rotyBackup = 0.0; //!< Rotation along the x axis
+	double rotzBackup = 0.0; //!< Rotation along the y axis
+	void PushRotation(void);
+	void PopRotation(void);
 
-	void ResetRotation(void);
-	void RestoreRotation(void);
+	void Paint(void) const;
 
-	void Render(void) const;
-
+	void UpdateHierarchy(void);
 private:
-	void Normal(const Vector3 v) const;
-	void Vertex(const Vector3 v) const;
+	double CalculateAnchorPoint(const Vector3 & p) const;
 };
 
 #endif /* BONE_H_ */

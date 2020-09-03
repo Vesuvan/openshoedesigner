@@ -51,7 +51,6 @@ public:
 protected:
 
 	wxString Replace(FootMeasurements *meas,int parameter, wxString newValue);
-	ParameterFormula* GetParameterByID(FootMeasurements *meas, int id);
 
 	Project* project;
 	ProjectView::Side active;

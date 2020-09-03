@@ -26,10 +26,6 @@
 
 #ifndef MATHPARSER_H_
 #define MATHPARSER_H_
-
-#include <wx/string.h>
-#include <stdint.h>
-
 /*!\class MathParser
  * \brief Simple single-line math parser
  *
@@ -47,9 +43,9 @@
  *  - e and pi (both lowercase)
  */
 
-#include <wx/hashmap.h>
-
-WX_DECLARE_STRING_HASH_MAP(double, Variables);
+#include <string>
+#include <cstdint>
+#include <map>
 
 class MathParser {
 public:
@@ -57,33 +53,33 @@ public:
 
 	// Member functions
 public:
-	void SetString(const wxString& expression);
-	wxString GetString(void) const;
-	wxString GetString(const double& number);
+	void SetString(const std::string & expression);
+	std::string GetString(void) const;
+	std::string GetString(const double& number);
 
 	void SetNumber(const double& number);
 	double GetNumber(void) const;
-	double GetNumber(const wxString& expression);
+	double GetNumber(const std::string & expression);
 
-	void SetUnit(const wxString& unit);
-	wxString GetUnit(void) const;
+	void SetUnit(const std::string & unit);
+	std::string GetUnit(void) const;
 	inline bool HasUnit(void) const
 	{
-		return !unit.IsEmpty();
+		return !unit.empty();
 	}
 
-	wxString GetError(void) const;
+	std::string GetError(void) const;
 	inline bool HasError(void) const
 	{
-		return !error.IsEmpty();
+		return !error.empty();
 	}
 
 	void ResetVariables(bool setStandard = true);
-	void SetVariable(const wxString& variable, double value);
-	double GetVariable(const wxString& variable);
+	void SetVariable(const std::string & variable, double value);
+	double GetVariable(const std::string & variable) const;
 
 	void ResetAllowedUnits(void);
-	void AddAllowedUnit(const wxString& unit, double factor);
+	void AddAllowedUnit(const std::string & unit, double factor);
 
 	bool Evaluate(void);
 
@@ -101,37 +97,32 @@ public:
 	bool addUnit; ///< Boolean: Add a unit to generated string?
 	bool ignorecase; ///< Boolean: Ignore the case for variables.
 
-
-	Variables globals;
-	Variables allowedUnits;
+	std::map <std::string, double> globals;
+	std::map <std::string, double> allowedUnits;
 
 private:
-	wxString text;
+	std::string text;
 	double number;
-	wxString unit;
-	wxString error;
+	std::string unit;
+	std::string error;
 
 	// Variables for parser:
 	unsigned int strLength;
 
-	enum expressionType {
-		expressionNone,
-		expressionText,
-		expressionNumber,
-		expressionOperation,
-		expressionBracketOpen,
-		expressionBracketClose,
-		expressionEnd
+	enum class Expr {
+		Empty, Text, Number, Operation, BracketOpen, BracketClose, End
 	};
 
 	static const unsigned int maxStackDepth = 64;
 	unsigned int stackStartPos[maxStackDepth];
 	unsigned int stackCharCount[maxStackDepth];
-	expressionType stackType[maxStackDepth];
+	Expr stackType[maxStackDepth];
 	double stackNumber[maxStackDepth];
 
 	unsigned int posStack;
 	unsigned int posText;
+	static std::string Lower(const std::string & s);
+
 };
 
 #endif /* MATHPARSER_H_ */

@@ -24,26 +24,27 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "AffineTransformMatrix.h"
+#define _USE_MATH_DEFINES
 
-#include "OpenGLMaterial.h"
+#include <cmath>
+#include <sstream>
+#include <cstdint>
+
+#include "AffineTransformMatrix.h"
 #include "Vector3.h"
 
-#include <wx/chartype.h>
-#include <wx/string.h>
-#include <wx/tokenzr.h>
-#include <wx/txtstrm.h>
-
-#include <stdint.h>
-#ifdef _MSC_VER
-#define _USE_MATH_DEFINES
+#ifdef USE_OPENGLMATERIAL_H
+#include "OpenGLMaterial.h"
 #endif
-#include <math.h>
+#ifdef USE_OPENGL_H
 #include "OpenGL.h"
+#else
+#include <GL/gl.h>
+#endif
 
-AffineTransformMatrix::AffineTransformMatrix()
+AffineTransformMatrix::AffineTransformMatrix(Orientation orientation)
+		: side(orientation)
 {
-	side = rhs;
 	SetIdentity();
 }
 
@@ -62,34 +63,32 @@ AffineTransformMatrix::AffineTransformMatrix(const Vector3& ex,
 	a[9] = ez.y;
 	a[10] = ez.z;
 	a[11] = 0.0;
-	a[12] = tx = origin.x;
-	a[13] = ty = origin.y;
-	a[14] = tz = origin.z;
+	a[12] = origin.x;
+	a[13] = origin.y;
+	a[14] = origin.z;
 	a[15] = 1.0;
-	rx = ry = rz = 0.0;
-	sx = sy = sz = 1.0;
-	side = ((ex * ey).Dot(ez) > 0)? rhs : lhs;
+	side = ((ex * ey).Dot(ez) > 0)? Orientation::RHS : Orientation::LHS;
 }
 
-void AffineTransformMatrix::SetOrientation(orientation side)
+void AffineTransformMatrix::SetOrientation(Orientation side)
 {
 	this->side = side;
 }
 
-AffineTransformMatrix::orientation AffineTransformMatrix::GetOrientation(
+AffineTransformMatrix::Orientation AffineTransformMatrix::GetOrientation(
 		void) const
 {
 	return side;
 }
 
-AffineTransformMatrix::orientation AffineTransformMatrix::CheckOrientation(
+AffineTransformMatrix::Orientation AffineTransformMatrix::CheckOrientation(
 		void) const
 {
 	const double x = a[1] * a[6] - a[2] * a[5];
 	const double y = a[2] * a[4] - a[0] * a[6];
 	const double z = a[0] * a[5] - a[1] * a[4];
 	const double c = x * a[8] + y * a[9] + z * a[10];
-	return (c >= 0.0)? rhs : lhs;
+	return (c >= 0.0)? Orientation::RHS : Orientation::LHS;
 }
 
 void AffineTransformMatrix::UpdateOrientation(void)
@@ -99,35 +98,22 @@ void AffineTransformMatrix::UpdateOrientation(void)
 
 void AffineTransformMatrix::SetIdentity()
 {
-	rx = ry = rz = 0.0;
-	tx = ty = tz = 0.0;
-	sx = sy = sz = 1.0;
-	for(uint_fast8_t i = 0; i < 16; i++)
+	for(uint_fast8_t i = 0; i < 16; ++i)
 		a[i] = 0;
 	a[0] = 1.0;
 	a[5] = 1.0;
-	a[10] = (side == rhs)? 1.0 : -1.0;
+	a[10] = (side == Orientation::RHS)? 1.0 : -1.0;
 	a[15] = 1.0;
 }
 
 void AffineTransformMatrix::ResetRotationAndScale(void)
 {
-	rx = ry = rz = 0.0;
-	sx = sy = sz = 1.0;
 	for(uint_fast8_t i = 0; i < 12; ++i)
 		a[i] = 0;
 	a[0] = 1.0;
 	a[5] = 1.0;
-	a[10] = (side == rhs)? 1.0 : -1.0;
+	a[10] = (side == Orientation::RHS)? 1.0 : -1.0;
 	a[15] = 1.0;
-}
-
-void AffineTransformMatrix::Set(AffineTransformMatrix const& b)
-{
-	if(this == &b) return;
-	for(uint_fast8_t i = 0; i < 16; i++)
-		a[i] = b.a[i];
-	TakeMatrixApart();
 }
 
 double& AffineTransformMatrix::operator [](unsigned char index)
@@ -146,9 +132,9 @@ double AffineTransformMatrix::operator [](unsigned char index) const
 
 void AffineTransformMatrix::SetOrigin(const Vector3& origin)
 {
-	a[12] = tx = origin.x;
-	a[13] = ty = origin.y;
-	a[14] = tz = origin.z;
+	a[12] = origin.x;
+	a[13] = origin.y;
+	a[14] = origin.z;
 }
 
 void AffineTransformMatrix::SetEx(const Vector3& ex)
@@ -174,7 +160,7 @@ void AffineTransformMatrix::SetEz(const Vector3& ez)
 
 void AffineTransformMatrix::CalculateEx(void)
 {
-	if(side == rhs){
+	if(side == Orientation::RHS){
 		a[0] = a[5] * a[10] - a[6] * a[9];
 		a[1] = a[6] * a[8] - a[4] * a[10];
 		a[2] = a[4] * a[9] - a[5] * a[8];
@@ -187,7 +173,7 @@ void AffineTransformMatrix::CalculateEx(void)
 
 void AffineTransformMatrix::CalculateEy(void)
 {
-	if(side == rhs){
+	if(side == Orientation::RHS){
 		a[4] = a[9] * a[2] - a[10] * a[1];
 		a[5] = a[10] * a[0] - a[8] * a[2];
 		a[6] = a[8] * a[1] - a[9] * a[0];
@@ -200,7 +186,7 @@ void AffineTransformMatrix::CalculateEy(void)
 
 void AffineTransformMatrix::CalculateEz(void)
 {
-	if(side == rhs){
+	if(side == Orientation::RHS){
 		a[8] = a[1] * a[6] - a[2] * a[5];
 		a[9] = a[2] * a[4] - a[0] * a[6];
 		a[10] = a[0] * a[5] - a[1] * a[4];
@@ -262,6 +248,7 @@ Vector3 AffineTransformMatrix::GetEz(void) const
 {
 	return Vector3(a[8], a[9], a[10]);
 }
+
 
 AffineTransformMatrix& AffineTransformMatrix::operator*=(
 		const AffineTransformMatrix& b)
@@ -528,46 +515,6 @@ AffineTransformMatrix AffineTransformMatrix::RotationTrackball(const double& x1,
 	return AffineTransformMatrix::RotationAroundVector(A, alpha);
 }
 
-AffineTransformMatrix AffineTransformMatrix::RotationQuarternion(
-		const double& w, const double& x, const double& y, const double& z)
-{
-	// Conversion formula from
-	// https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
-
-	const double n = w * w + x * x + y * y + z * z;
-	const double s = (fabs(n) < 1e-9)? (0) : (2.0 / n);
-	const double wx = s * w * x;
-	const double wy = s * w * y;
-	const double wz = s * w * z;
-	const double xx = s * x * x;
-	const double xy = s * x * y;
-	const double xz = s * x * z;
-	const double yy = s * y * y;
-	const double yz = s * y * z;
-	const double zz = s * z * z;
-
-	AffineTransformMatrix m;
-
-	m.a[0] = 1.0 - (yy + zz);
-	m.a[1] = xy + wz;
-	m.a[2] = xz - wy;
-	m.a[3] = 0;
-	m.a[4] = xy - wz;
-	m.a[5] = 1.0 - (xx + zz);
-	m.a[6] = yz + wx;
-	m.a[7] = 0;
-	m.a[8] = xz + wy;
-	m.a[9] = yz - wx;
-	m.a[10] = 1.0 - (xx + yy);
-	m.a[11] = 0;
-	m.a[12] = 0;
-	m.a[13] = 0;
-	m.a[14] = 0;
-	m.a[15] = 1.0;
-
-	return m;
-}
-
 void AffineTransformMatrix::TranslateGlobal(double const& x, double const& y,
 		double const& z)
 {
@@ -631,6 +578,19 @@ void AffineTransformMatrix::ScaleLocal(const double& x, const double& y,
 	a[8] *= z;
 	a[9] *= z;
 	a[10] *= z;
+}
+
+void AffineTransformMatrix::ShiftTransformPosition(const Vector3& p)
+{
+	// Axiom code:
+	// this:=matrix([[a[0],a[4],a[8],a[12]],[a[1],a[5],a[9],a[13]],[a[2],a[6],a[10],a[14]],[0,0,0,1]]);
+	// T:=matrix([[1,0,0,x],[0,1,0,y],[0,0,1,z],[0,0,0,1]]);
+	// U:=matrix([[1,0,0,-x],[0,1,0,-y],[0,0,1,-z],[0,0,0,1]]);
+	// T*this*U
+
+	a[12] = (-a[8] * p.z) + (-a[4] * p.y) + (-a[0] + 1) * p.x + a[12];
+	a[13] = (-a[9] * p.z) + (-a[5] + 1) * p.y + (-a[1] * p.x) + a[13];
+	a[14] = (-a[10] + 1) * p.z + (-a[6] * p.y) + (-a[2] * p.x) + a[14];
 }
 
 Vector3 AffineTransformMatrix::Transform(Vector3 const& v) const
@@ -753,40 +713,188 @@ double AffineTransformMatrix::Distance(const AffineTransformMatrix& other) const
 	// Result: No improvements (speedup) when used in Inverse Kinematics. -> Kicked out
 }
 
-void AffineTransformMatrix::TakeMatrixApart(void)
+std::string AffineTransformMatrix::ToString()
+{
+	std::ostringstream out;
+	out << '[';
+	out << a[0];
+	for(uint_fast8_t n = 1; n < 16; ++n){
+		out << ',';
+		out << a[n];
+	}
+	out << ']';
+	return out.str();
+}
+
+void AffineTransformMatrix::GLMultMatrix(void) const
+{
+	glMultMatrixd(a);
+}
+
+void AffineTransformMatrix::Paint(const double scale) const
+{
+#ifdef USE_OPENGLMATERIAL_H
+	OpenGLMaterial matX(0.8, 0.0, 0.0, 0.8);
+	OpenGLMaterial matY(0.0, 0.8, 0.0, 0.8);
+	OpenGLMaterial matZ(0.0, 0.0, 0.8, 0.8);
+#endif
+	const double len = scale;
+	const double rad = 0.133 * scale;
+	const uint_fast8_t N = 4;
+	{
+#ifdef USE_OPENGLMATERIAL_H
+		matX.UseMaterial();
+#else
+		glColor3f(1.0, 0.0, 0.0);
+#endif
+		const Vector3 v = this->TransformNoShift(len, 0, 0);
+		const Vector3 n = this->TransformNoShift(1, 0, 0);
+		glBegin(GL_LINES);
+		glNormal3f(-n.x, -n.y, -n.z);
+		glVertex3f(a[12] - v.x, a[13] - v.y, a[14] - v.z);
+		glNormal3f(n.x, n.y, n.z);
+		glVertex3f(a[12] + v.x, a[13] + v.y, a[14] + v.z);
+		glEnd();
+	}
+	{
+#ifdef USE_OPENGLMATERIAL_H
+		matY.UseMaterial();
+#else
+		glColor3f(0.0, 1.0, 0.0);
+#endif
+		const Vector3 v = this->TransformNoShift(0, len, 0);
+		const Vector3 n = this->TransformNoShift(0, 1, 0);
+		glBegin(GL_LINES);
+		glNormal3f(-n.x, -n.y, -n.z);
+		glVertex3f(a[12] - v.x, a[13] - v.y, a[14] - v.z);
+		glNormal3f(n.x, n.y, n.z);
+		glVertex3f(a[12] + v.x, a[13] + v.y, a[14] + v.z);
+		glEnd();
+	}
+	{
+#ifdef USE_OPENGLMATERIAL_H
+		matZ.UseMaterial();
+#else
+		glColor3f(0.0, 0.0, 1.0);
+#endif
+		const Vector3 v = this->TransformNoShift(0, 0, len);
+		const Vector3 n = this->TransformNoShift(0, 0, 1);
+		glBegin(GL_LINES);
+		glNormal3f(-n.x, -n.y, -n.z);
+		glVertex3f(a[12] - v.x, a[13] - v.y, a[14] - v.z);
+		glNormal3f(n.x, n.y, n.z);
+		glVertex3f(a[12] + v.x, a[13] + v.y, a[14] + v.z);
+		glEnd();
+	}
+
+	const double n0 = cos(M_PI_4);
+	const double n1 = sin(M_PI_4);
+	{
+#ifdef USE_OPENGLMATERIAL_H
+		matX.UseMaterial();
+#else
+		glColor3f(1.0, 0.0, 0.0);
+#endif
+		glBegin(GL_LINES);
+		const Vector3 p0 = this->Transform(len, 0, 0);
+		for(uint_fast8_t i = 0; i < N; ++i){
+			const double a = 2 * M_PI / N * (double) i;
+			const double c = cos(a);
+			const double s = sin(a);
+			const Vector3 p = this->Transform(len - rad, rad * c, rad * s);
+			const Vector3 n = this->TransformNoShift(n0, c * n1, s * n1);
+			glNormal3d(n.x, n.y, n.z);
+			glVertex3d(p0.x, p0.y, p0.z);
+			glVertex3d(p.x, p.y, p.z);
+		}
+		glEnd();
+	}
+	{
+#ifdef USE_OPENGLMATERIAL_H
+		matY.UseMaterial();
+#else
+		glColor3f(0.0, 1.0, 0.0);
+#endif
+		glBegin(GL_LINES);
+		const Vector3 p0 = this->Transform(0, len, 0);
+		for(uint_fast8_t i = 0; i < N; ++i){
+			const double a = 2 * M_PI / N * (double) i;
+			const double c = cos(a);
+			const double s = sin(a);
+			const Vector3 p = this->Transform(rad * s, len - rad, rad * c);
+			const Vector3 n = this->TransformNoShift(s * n1, n0, c * n1);
+			glNormal3d(n.x, n.y, n.z);
+			glVertex3d(p0.x, p0.y, p0.z);
+			glVertex3d(p.x, p.y, p.z);
+		}
+		glEnd();
+	}
+	{
+#ifdef USE_OPENGLMATERIAL_H
+		matZ.UseMaterial();
+#else
+		glColor3f(0.0, 0.0, 1.0);
+#endif
+		glBegin(GL_LINES);
+		const Vector3 p0 = this->Transform(0, 0, len);
+		for(uint_fast8_t i = 0; i < N; ++i){
+			const double a = 2 * M_PI / N * (double) i;
+			const double c = cos(a);
+			const double s = sin(a);
+			const Vector3 p = this->Transform(rad * c, rad * s, len - rad);
+			const Vector3 n = this->TransformNoShift(c * n1, s * n1, n0);
+			glNormal3d(n.x, n.y, n.z);
+			glVertex3d(p0.x, p0.y, p0.z);
+			glVertex3d(p.x, p.y, p.z);
+		}
+		glEnd();
+	}
+#ifdef USE_OPENGLMATERIAL_H
+	OpenGLMaterial::EnableColors();
+#endif
+}
+
+AffineTransformMatrixComponents & AffineTransformMatrixComponents::operator =(
+		const AffineTransformMatrix& matrix)
 {
 	double b[16];
 
-	tx = a[12];
-	ty = a[13];
-	tz = a[14];
+	tx = matrix[12];
+	ty = matrix[13];
+	tz = matrix[14];
 
-	sx = sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
-	sy = sqrt(a[4] * a[4] + a[5] * a[5] + a[6] * a[6]);
-	sz = sqrt(a[8] * a[8] + a[9] * a[9] + a[10] * a[10]);
+	sx = sqrt(
+			matrix[0] * matrix[0] + matrix[1] * matrix[1]
+					+ matrix[2] * matrix[2]);
+	sy = sqrt(
+			matrix[4] * matrix[4] + matrix[5] * matrix[5]
+					+ matrix[6] * matrix[6]);
+	sz = sqrt(
+			matrix[8] * matrix[8] + matrix[9] * matrix[9]
+					+ matrix[10] * matrix[10]);
 
 	if(fabs(sx) > 0.0){
-		b[0] = a[0] / sx;
-		b[1] = a[1] / sx;
-		b[2] = a[2] / sx;
+		b[0] = matrix[0] / sx;
+		b[1] = matrix[1] / sx;
+		b[2] = matrix[2] / sx;
 	}else{
 		b[0] = 0.0;
 		b[1] = 0.0;
 		b[2] = 0.0;
 	}
 	if(fabs(sy) > 0.0){
-		b[4] = a[4] / sy;
-		b[5] = a[5] / sy;
-		b[6] = a[6] / sy;
+		b[4] = matrix[4] / sy;
+		b[5] = matrix[5] / sy;
+		b[6] = matrix[6] / sy;
 	}else{
 		b[4] = 0.0;
 		b[5] = 0.0;
 		b[6] = 0.0;
 	}
 	if(fabs(sz) > 0.0){
-		b[8] = a[8] / sz;
-		b[9] = a[9] / sz;
-		b[10] = a[10] / sz;
+		b[8] = matrix[8] / sz;
+		b[9] = matrix[9] / sz;
+		b[10] = matrix[10] / sz;
 	}else{
 		b[8] = 0.0;
 		b[9] = 0.0;
@@ -818,10 +926,12 @@ void AffineTransformMatrix::TakeMatrixApart(void)
 	}else{
 		rx = 0.0;
 	}
+	return *this;
 }
 
-void AffineTransformMatrix::PutMatrixTogether(void)
+AffineTransformMatrix AffineTransformMatrixComponents::GetMatrix(void) const
 {
+	AffineTransformMatrix matrix;
 	const double cox = cos(rx);
 	const double six = sin(rx);
 	const double coy = cos(ry);
@@ -837,209 +947,21 @@ void AffineTransformMatrix::PutMatrixTogether(void)
 	// S := matrix[[sx,0,0],[0,sy,0],[0,0,sz]]
 	// Rz*Ry*Rx*S
 
-	a[0] = coy * coz * sx;
-	a[1] = coy * siz * sx;
-	a[2] = -siy * sx;
-	a[3] = 0.0;
-	a[4] = (-cox * siz + coz * six * siy) * sy;
-	a[5] = (six * siy * siz + cox * coz) * sy;
-	a[6] = coy * six * sy;
-	a[7] = 0.0;
-	a[8] = (six * siz + cox * coz * siy) * sz;
-	a[9] = (cox * siy * siz - coz * six) * sz;
-	a[10] = cox * coy * sz;
-	a[11] = 0.0;
-	a[12] = tx;
-	a[13] = ty;
-	a[14] = tz;
-	a[15] = 1.0;
-}
-
-wxString AffineTransformMatrix::ToString()
-{
-	TakeMatrixApart();
-	wxString temp;
-	temp += wxString::Format(_T("%f#%f#%f#"), tx, ty, tz);
-	temp += wxString::Format(_T("%f#%f#%f#"), rx, ry, rz);
-	temp += wxString::Format(_T("%f#%f#%f"), sx, sy, sz);
-	return temp;
-}
-
-void AffineTransformMatrix::FromString(wxString const& string)
-{
-	wxStringTokenizer tkz(string, wxT("#"));
-	while(tkz.HasMoreTokens()){
-		wxString token = tkz.GetNextToken();
-		switch(tkz.CountTokens()){
-		case 8:
-			token.ToDouble(&tx);
-			break;
-		case 7:
-			token.ToDouble(&ty);
-			break;
-		case 6:
-			token.ToDouble(&tz);
-			break;
-		case 5:
-			token.ToDouble(&rx);
-			break;
-		case 4:
-			token.ToDouble(&ry);
-			break;
-		case 3:
-			token.ToDouble(&rz);
-			break;
-		case 2:
-			token.ToDouble(&sx);
-			break;
-		case 1:
-			token.ToDouble(&sy);
-			break;
-		case 0:
-			token.ToDouble(&sz);
-			break;
-		}
-	}
-	PutMatrixTogether();
-}
-
-void AffineTransformMatrix::ToStream(wxTextOutputStream& stream) const
-{
-	for(uint_fast8_t n = 0; n < 16; n++){
-		if(n > 0) stream << _T(" ");
-		stream.WriteDouble(a[n]);
-	}
-}
-
-void AffineTransformMatrix::FromStream(wxTextInputStream& stream)
-{
-	for(uint_fast8_t n = 0; n < 16; n++)
-		stream >> a[n];
-	TakeMatrixApart();
-}
-
-void AffineTransformMatrix::GLMultMatrix(void) const
-{
-	glMultMatrixd(a);
-}
-
-void AffineTransformMatrix::Paint(const double scale) const
-{
-	OpenGLMaterial matX(0.8, 0.0, 0.0, 0.8);
-	OpenGLMaterial matY(0.0, 0.8, 0.0, 0.8);
-	OpenGLMaterial matZ(0.0, 0.0, 0.8, 0.8);
-
-	const double len = scale;
-	const double rad = 0.133 * scale;
-	const uint_fast8_t N = 4;
-	{
-		matX.UseMaterial();
-		const Vector3 v = this->TransformNoShift(len, 0, 0);
-		const Vector3 n = this->TransformNoShift(1, 0, 0);
-		glBegin(GL_LINES);
-		glNormal3f(-n.x, -n.y, -n.z);
-		glVertex3f(a[12] - v.x, a[13] - v.y, a[14] - v.z);
-		glNormal3f(n.x, n.y, n.z);
-		glVertex3f(a[12] + v.x, a[13] + v.y, a[14] + v.z);
-		glEnd();
-	}
-	{
-		matY.UseMaterial();
-		const Vector3 v = this->TransformNoShift(0, len, 0);
-		const Vector3 n = this->TransformNoShift(0, 1, 0);
-		glBegin(GL_LINES);
-		glNormal3f(-n.x, -n.y, -n.z);
-		glVertex3f(a[12] - v.x, a[13] - v.y, a[14] - v.z);
-		glNormal3f(n.x, n.y, n.z);
-		glVertex3f(a[12] + v.x, a[13] + v.y, a[14] + v.z);
-		glEnd();
-	}
-	{
-		matZ.UseMaterial();
-		const Vector3 v = this->TransformNoShift(0, 0, len);
-		const Vector3 n = this->TransformNoShift(0, 0, 1);
-		glBegin(GL_LINES);
-		glNormal3f(-n.x, -n.y, -n.z);
-		glVertex3f(a[12] - v.x, a[13] - v.y, a[14] - v.z);
-		glNormal3f(n.x, n.y, n.z);
-		glVertex3f(a[12] + v.x, a[13] + v.y, a[14] + v.z);
-		glEnd();
-	}
-
-	const double n0 = cos(M_PI_4);
-	const double n1 = sin(M_PI_4);
-	{
-		matX.UseMaterial();
-		glBegin(GL_LINES);
-		const Vector3 p0 = this->Transform(len, 0, 0);
-		for(uint_fast8_t i = 0; i < N; ++i){
-			const double a = 2 * M_PI / N * (double) i;
-			const double c = cos(a);
-			const double s = sin(a);
-			const Vector3 p = this->Transform(len - rad, rad * c, rad * s);
-			const Vector3 n = this->TransformNoShift(n0, c * n1, s * n1);
-			glNormal3d(n.x, n.y, n.z);
-			glVertex3d(p0.x, p0.y, p0.z);
-			glVertex3d(p.x, p.y, p.z);
-		}
-		glEnd();
-	}
-	{
-		matY.UseMaterial();
-		glBegin(GL_LINES);
-		const Vector3 p0 = this->Transform(0, len, 0);
-		for(uint_fast8_t i = 0; i < N; ++i){
-			const double a = 2 * M_PI / N * (double) i;
-			const double c = cos(a);
-			const double s = sin(a);
-			const Vector3 p = this->Transform(rad * s, len - rad, rad * c);
-			const Vector3 n = this->TransformNoShift(s * n1, n0, c * n1);
-			glNormal3d(n.x, n.y, n.z);
-			glVertex3d(p0.x, p0.y, p0.z);
-			glVertex3d(p.x, p.y, p.z);
-		}
-		glEnd();
-	}
-	{
-		matZ.UseMaterial();
-		glBegin(GL_LINES);
-		const Vector3 p0 = this->Transform(0, 0, len);
-		for(uint_fast8_t i = 0; i < N; ++i){
-			const double a = 2 * M_PI / N * (double) i;
-			const double c = cos(a);
-			const double s = sin(a);
-			const Vector3 p = this->Transform(rad * c, rad * s, len - rad);
-			const Vector3 n = this->TransformNoShift(c * n1, s * n1, n0);
-			glNormal3d(n.x, n.y, n.z);
-			glVertex3d(p0.x, p0.y, p0.z);
-			glVertex3d(p.x, p.y, p.z);
-		}
-		glEnd();
-	}
-	OpenGLMaterial::EnableColors();
-}
-
-AffineTransformMatrix AffineTransformMatrix::Scaling(const double& s)
-{
-	AffineTransformMatrix a;
-	for(uint_fast8_t i = 0; i < 16; i++)
-		a[i] = 0;
-	a[0] = s;
-	a[5] = s;
-	a[10] = (a.side == rhs)? s : -s;
-	a[15] = 1.0;
-	return a;
-}
-
-AffineTransformMatrix AffineTransformMatrix::Scaling(const double& sx,
-		const double& sy, const double& sz)
-{
-	AffineTransformMatrix a;
-	for(uint_fast8_t i = 0; i < 16; i++)
-		a[i] = 0;
-	a[0] = sx;
-	a[5] = sy;
-	a[10] = (a.side == rhs)? sz : -sz;
-	a[15] = 1.0;
-	return a;
+	matrix[0] = coy * coz * sx;
+	matrix[1] = coy * siz * sx;
+	matrix[2] = -siy * sx;
+	matrix[3] = 0.0;
+	matrix[4] = (-cox * siz + coz * six * siy) * sy;
+	matrix[5] = (six * siy * siz + cox * coz) * sy;
+	matrix[6] = coy * six * sy;
+	matrix[7] = 0.0;
+	matrix[8] = (six * siz + cox * coz * siy) * sz;
+	matrix[9] = (cox * siy * siz - coz * six) * sz;
+	matrix[10] = cox * coy * sz;
+	matrix[11] = 0.0;
+	matrix[12] = tx;
+	matrix[13] = ty;
+	matrix[14] = tz;
+	matrix[15] = 1.0;
+	return matrix;
 }

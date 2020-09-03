@@ -27,69 +27,49 @@
 #include "Triangle.h"
 
 #include "AffineTransformMatrix.h"
-#include <wx/tokenzr.h>
-#include <math.h>
+#include <sstream>
+#include <regex>
+#include <cmath>
 #include "OpenGL.h"
 
-Triangle::Triangle()
-{
-}
-
-Triangle::Triangle(wxString string)
+Triangle::Triangle(const std::string & string)
 {
 	this->FromString(string);
 }
 
-wxString Triangle::ToString(void) const
+std::string Triangle::ToString(void) const
 {
-	wxString temp;
-	temp = p[0].ToString() + _T(";");
-	temp += p[1].ToString() + _T(";");
-	temp += p[2].ToString() + _T(";");
-	temp += n[0].ToString() + _T(";");
-	temp += n[1].ToString() + _T(";");
-	temp += n[2].ToString() + _T(";");
-	temp += c[0].ToString() + _T(";");
-	temp += c[1].ToString() + _T(";");
-	temp += c[2].ToString();
-	return temp;
+	std::ostringstream os;
+	os << "{p:[";
+	os << p[0].ToString() << ',' << p[1].ToString() << ',' << p[2].ToString();
+	os << "],n:[";
+	os << n[0].ToString() << ',' << n[1].ToString() << ',' << n[2].ToString();
+	os << "],c:[";
+	os << c[0].ToString() << ',' << c[1].ToString() << ',' << c[2].ToString();
+	os << "]}";
+	return os.str();
 }
 
-void Triangle::FromString(wxString const &string)
+bool Triangle::FromString(const std::string & string)
 {
-	wxStringTokenizer tkz(string, wxT(";"));
-	while(tkz.HasMoreTokens()){
-		wxString token = tkz.GetNextToken();
-		switch(tkz.CountTokens()){
-		case 8:
-			p[0].FromString(token);
-			break;
-		case 7:
-			p[1].FromString(token);
-			break;
-		case 6:
-			p[2].FromString(token);
-			break;
-		case 5:
-			n[0].FromString(token);
-			break;
-		case 4:
-			n[1].FromString(token);
-			break;
-		case 3:
-			n[2].FromString(token);
-			break;
-		case 2:
-			c[0].FromString(token);
-			break;
-		case 1:
-			c[1].FromString(token);
-			break;
-		case 0:
-			c[2].FromString(token);
-			break;
-		}
-	}
+	//TODO: Move the regex into a global static variable when it is really used a lot.
+	// Regex for a Vector3: (\\{[^\\{]+\\})
+	std::regex e(
+			"^\\{p:\\[(\\{[^\\{]+\\}),(\\{[^\\{]+\\}),(\\{[^\\{]+\\})\\],n:\\[(\\{[^\\{]+\\}),(\\{[^\\{]+\\}),(\\{[^\\{]+\\})\\],c:\\[(\\{[^\\{]+\\}),(\\{[^\\{]+\\}),(\\{[^\\{]+\\})\\]\\}$");
+	std::smatch sm;
+	std::regex_match(string.begin(), string.end(), sm, e);
+
+	if(sm.size() != 9) return false;
+	p[0] = Vector3(sm[0]);
+	p[1] = Vector3(sm[1]);
+	p[2] = Vector3(sm[2]);
+	n[0] = Vector3(sm[3]);
+	n[1] = Vector3(sm[4]);
+	n[2] = Vector3(sm[5]);
+	c[0] = Vector3(sm[6]);
+	c[1] = Vector3(sm[7]);
+	c[2] = Vector3(sm[8]);
+	return true;
 }
 
 /*!\brief Puts a triangle in the OpenGL queue.
@@ -100,13 +80,13 @@ void Triangle::FromString(wxString const &string)
  */
 void Triangle::Paint(bool useNormals, bool useColors) const
 {
-	unsigned char i;
-	for(i = 0; i < 3; i++){
+	for(uint_fast8_t i = 0; i < 3; ++i){
 		if(useNormals) ::glNormal3f(n[i].x, n[i].y, n[i].z);
 		if(useColors) ::glColor3f(c[i].x, c[i].y, c[i].z);
 		::glVertex3f(p[i].x, p[i].y, p[i].z);
 	}
 }
+
 /*!\brief Calculates normals for the corners of a triangle.
  *
  *  If no normals can be provided from elsewhere, this function

@@ -11,8 +11,8 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="166mm"
-   height="78mm"
-   viewBox="0 0 588.18885 276.37779"
+   height="71mm"
+   viewBox="0 0 588.18885 251.57466"
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
@@ -79,22 +79,6 @@
          id="path4748"
          inkscape:connector-curvature="0" />
     </marker>
-    <marker
-       inkscape:stockid="TriangleOutL"
-       orient="auto"
-       refY="0"
-       refX="0"
-       id="TriangleOutL"
-       style="overflow:visible"
-       inkscape:isstock="true"
-       inkscape:collect="always">
-      <path
-         id="path4388"
-         d="m 5.77,0 -8.65,5 0,-10 8.65,5 z"
-         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1"
-         transform="scale(0.8,0.8)"
-         inkscape:connector-curvature="0" />
-    </marker>
     <linearGradient
        inkscape:collect="always"
        id="linearGradient4200">
@@ -116,7 +100,7 @@
        fx="478.87918"
        fy="1018.9613"
        r="285.53287"
-       gradientTransform="matrix(1.283088,-0.21858828,0.04512633,0.26488617,-301.47828,759.73968)"
+       gradientTransform="matrix(1.283088,-0.21858828,0.04512633,0.26488617,-300.32835,769.51408)"
        gradientUnits="userSpaceOnUse" />
   </defs>
   <sodipodi:namedview
@@ -132,10 +116,10 @@
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1615"
-     inkscape:window-height="1026"
+     inkscape:window-width="2495"
+     inkscape:window-height="1416"
      inkscape:window-x="65"
-     inkscape:window-y="24"
+     inkscape:window-y="308"
      inkscape:window-maximized="1"
      showguides="false"
      borderlayer="true" />
@@ -147,7 +131,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -155,119 +139,107 @@
      inkscape:label="Ebene 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-775.98481)">
+     transform="translate(0,-800.78798)">
     <path
        style="opacity:1;fill:url(#radialGradient4210);fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:2.50000024;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 12.865125,995.81745 C 1.1781479,982.62536 4.671171,957.3496 26.694951,941.94929 48.718732,926.54898 132.2931,940.21438 180.18749,917.14865 c 60.4441,-31.00247 102.20526,-75.5346 157.56407,-113.52744 6.90646,-4.6043 10.62851,-8.81433 22.49013,-3.57901 11.86162,5.23532 27.54566,11.57096 42.1504,13.99167 44.69269,7.40775 129.22514,1.51866 135.90299,1.08838 13.3557,-0.86055 14.89709,0.41421 18.40976,10.74842 3.51267,10.33422 21.89871,59.80796 25.47785,117.45983 1.82261,29.35821 4.52957,39.68721 -13.92185,54.55015 -18.45142,14.86295 -135.02637,-5.2358 -192.03296,-2.10987 -57.00659,3.12593 -72.54663,7.51252 -161.99982,9.32482 -89.45319,1.8122 -189.675958,3.9139 -201.362935,-9.27815 z"
+       d="M 14.015054,1005.5918 C 2.3280772,992.39976 5.8211003,967.124 27.84488,951.72369 c 22.023781,-15.40031 105.59815,-1.73491 153.49254,-24.80064 60.4441,-31.00247 102.20526,-75.5346 157.56407,-113.52744 6.90646,-4.6043 10.62851,-8.81433 22.49013,-3.57901 11.86162,5.23532 27.54566,11.57096 42.1504,13.99167 44.69269,7.40775 129.22514,1.51866 135.90299,1.08838 13.3557,-0.86055 14.89709,0.41421 18.40976,10.74842 3.51267,10.33422 21.89871,59.80796 25.47785,117.45983 1.82261,29.35821 4.52957,39.68721 -13.92185,54.5501 -18.45142,14.863 -135.02637,-5.2358 -192.03296,-2.1098 -57.00659,3.1259 -72.54663,7.5125 -161.99982,9.3248 -89.45319,1.8122 -189.675959,3.9139 -201.362936,-9.2782 z"
        id="path4198"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="zzcczaszszzzz" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#1400ff;stroke-width:2.00000024;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 158.36668,925.26471 18.75805,80.55939"
+       d="m 159.51661,935.03911 18.75805,80.55939"
        id="path4212"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#1400ff;stroke-width:2.00000024;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 223.47261,890.63011 72.8723,111.66109"
+       d="M 259.12042,873.95614 360.16599,1006.8909"
        id="path4214"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#1400ff;stroke-width:2.00000024;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 342.8752,998.15562 266.31527,859.40282 574.39401,991.9461 321.13952,816.0331"
+       d="M 575.54394,1001.7205 322.28945,825.8075"
        id="path4216"
        inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cccc" />
+       sodipodi:nodetypes="cc" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:19.99999428px;line-height:125%;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="13.769171"
-       y="1036.7745"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:19.99999428px;line-height:125%;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans Bold';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="65.589455"
+       y="1043.0992"
        id="text4220"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan4222"
-         x="13.769171"
-         y="1036.7745"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:19.99999428px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans Bold'">Ball girth</tspan></text>
+         x="65.589455"
+         y="1043.0992"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:19.99999428px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans Bold';text-align:center;text-anchor:middle">Big toe girth</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:20px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="24.731148"
-       y="885.30182"
+       style="font-style:normal;font-weight:normal;font-size:20px;line-height:125%;font-family:sans-serif;text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="170.92603"
+       y="896.22614"
        id="text4224"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan4226"
-         x="24.731148"
-         y="885.30182"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:19.99999428px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans Bold'">Waist girth</tspan></text>
+         x="170.92603"
+         y="896.22614"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:19.99999428px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans Bold';text-align:end;text-anchor:end">Waist girth</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:20px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="103.93661"
-       y="847.46313"
+       style="font-style:normal;font-weight:normal;font-size:20px;line-height:125%;font-family:sans-serif;text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="228.69287"
+       y="842.8634"
        id="text4228"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan4230"
-         x="103.93661"
-         y="847.46313"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:19.99999428px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans Bold'">Instep girth</tspan></text>
+         x="228.69287"
+         y="842.8634"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:19.99999428px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans Bold';text-align:end;text-anchor:end">Heel girth</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:20px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="309.18002"
-       y="1044.3212"
+       x="239.6093"
+       y="1037.9966"
        id="text4232"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan4234"
-         x="309.18002"
-         y="1044.3212"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:19.99999428px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans Bold'">Long heel girth</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:20px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="369.00681"
-       y="792.75562"
-       id="text4236"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan4238"
-         x="369.00681"
-         y="792.75562"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:19.99999428px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans Bold'">Short heel girth</tspan></text>
+         x="239.6093"
+         y="1037.9966"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:19.99999428px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans Bold'">Small toe girth</tspan></text>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.50000012;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker4856)"
-       d="M 57.935548,1018.3401 157.81416,974.09806"
+       d="M 59.085477,1028.1145 131.36579,988.47218"
        id="path4240"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.50000012;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker4798)"
-       d="m 109.00731,894.16011 118.5495,18.15462"
+       d="M 232.62471,1029.2768 181.55964,995.10965"
        id="path4522"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.50000012;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker4746)"
-       d="m 170.75428,854.04666 98.32582,29.46182"
+       d="m 178.22882,891.41937 91.42624,17.38756"
        id="path4524"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.50000012;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#TriangleOutL)"
-       d="m 407.79006,799.68733 -16.80142,48.69836"
-       id="path4526"
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.50000012;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker4920)"
+       d="m 234.18862,834.69379 97.27309,12.58444"
+       id="path4528"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.50000012;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker4920)"
-       d="m 365.85553,1025.0071 44.9513,-90.33424"
-       id="path4528"
+       style="fill:none;fill-rule:evenodd;stroke:#1400ff;stroke-width:2.00000024;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 132.06229,940.78734 17.60811,74.80976"
+       id="path4212-3"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
   </g>

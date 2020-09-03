@@ -35,6 +35,7 @@
  */
 
 #include "../Config.h"
+
 #if !(defined(linux) || defined(__linux))
 #undef _USE_MIDI
 #endif
@@ -44,55 +45,92 @@
 #endif
 #include <cstddef>
 #include <string>
-#include <stdint.h>
+#include <cstdint>
 
+#include <memory>
 #include <vector>
+#include <array>
+#include <set>
+
+class MidiDevice {
+	friend class MidiPort;
+public:
+	MidiDevice(const std::string & name);
+	virtual ~MidiDevice();
+
+	void Close(void);
+
+	inline bool operator==(const std::string & name);
+
+	bool IsOpen(void) const; //!< Has this instance an open connection to a device?
+	bool IsInput(void) const;
+	bool IsOutput(void) const;
+	bool IsBidirectional(void) const;
+	std::string GetName(void) const;
+
+	void Send(size_t from = 0, size_t to = 255);
+	void Flush(void);
+	bool Poll(void);
+	bool PollEvent(uint8_t *data0, uint8_t *data1, uint8_t *data2);
+
+	std::array <uint8_t, 256> cc; // MIDI CC values
+private:
+	std::string name;
+	std::array <uint8_t, 256> ccold; // Old MIDI CC values to determin changes to send out
+
+#ifdef _USE_MIDI
+	PmEvent buffer[1];
+	PortMidiStream *input = NULL;
+	PortMidiStream *output = NULL;
+#endif
+};
 
 class MidiPort {
 public:
-	MidiPort();
-	MidiPort(const MidiPort& other); //!< Copy constructor
-	MidiPort& operator=(const MidiPort& other); ///< Assignment operator
+	enum class Direction {
+		Input, Output, Bidirectional
+	};
 
+	MidiPort();
+	MidiPort(const MidiPort& other) = delete;
+	MidiPort& operator=(const MidiPort& other) = delete;
 	virtual ~MidiPort();
-	void CycleLibrary(void); //!< Closes all open connections and cycles the portmidi library. Needed when a new device is connected, while the software is running.
+
+//	void CycleLibrary(void); //!< Closes all open connections and cycles the portmidi library. Needed when a new device is connected, while the software is running.
+
+	std::set <std::string> GetDeviceNames(void) const;
+	int GetDeviceCount(void) const;
 
 	int GetDefaultInputDevice(void) const;
 	int GetDefaultOutputDevice(void) const;
-	int GetDeviceCount(void) const;
+
 	std::string GetDeviceName(int nr) const;
 	std::string GetDeviceInterfaceName(int nr) const;
+
 	bool IsDeviceInput(int nr) const;
 	bool IsDeviceOutput(int nr) const;
 	bool IsDeviceAvailable(int nr) const; //!< i.e. not used by this class or somebody else.
 
-	bool Open(int nr);
-	bool IsOpen(void) const; //!< Has this instance an open connection to a device?
-	void Close(void);
+	std::shared_ptr <MidiDevice> Open(const std::string & name,
+			Direction direction);
 
-	bool IsInput(void) const;
-	bool IsOutput(void) const;
-	std::string GetName(void) const;
-	std::string GetInterfaceName(void) const;
-	int GetOpenDevice(void) const;
+	void Close(const std::string & name);
+	void Close(size_t idx);
+	void CloseAll(void);
 
-	bool Poll(void);
-	bool PollEvent(uint8_t *data0, uint8_t *data1, uint8_t *data2);
-	uint8_t cc[256]; // Returned CC values
+	std::shared_ptr <MidiDevice> GetFirstOpenDevice(Direction direction);
 
-	std::string error;
 	bool IsLastInstance(void) const;
 
+	std::string error;
+
 private:
+	std::vector <std::shared_ptr <MidiDevice>> devices;
 #ifdef _USE_MIDI
-	PortMidiStream *midi;
-	const PmDeviceInfo* info;
-	int opendevice;
 	PmError status;
 	PmError length;
-	PmEvent buffer[1];
+	static std::string DecodeError(PmError err);
 #endif
-
 private:
 	// The instance counter is needed, because the Pm_Initialize() and Pm_Terminate() functions are global.
 	static size_t instancecounter;

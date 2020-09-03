@@ -35,26 +35,30 @@
  */
 
 #include <wx/cmdproc.h>
-#include "gui.h"
-
-#include "DialogSetupStereo3D.h"
-#include "../project/Project.h"
-
 #include <wx/intl.h>
 #include <wx/config.h>
 
-#include "../project/IniFile.h"
-#include "MidiPort.h"
+#include "gui.h"
 
-#include "SettingsStereo3D.h"
+#include "../project/Project.h"
+#include "../system/JSON.h"
+#include "../system/MidiPort.h"
+
 #include "CollectionUnits.h"
 #include "CollectionFilepaths.h"
+#include "SettingsStereo3D.h"
+
+#include "DialogSetupStereo3D.h"
 
 class ProjectView;
 
 class FrameMain:public GUIFrameMain {
 	friend class ProjectView;
 public:
+	enum class UnitType {
+		Without, Time, Distance, SmallDistance, Tolerance, Angle, Percent
+	};
+
 	FrameMain(wxDocument* doc, wxView* view, wxConfig* config,
 			wxDocParentFrame* parent);
 	virtual ~FrameMain();
@@ -62,25 +66,27 @@ public:
 	wxConfig *config;
 	CollectionFilepaths filepaths;
 
-	IniFile presets; //TODO: Check, if this can be moved elsewhere
+	JSON presets;
 
 protected:
 	const wxBitmap bm0;
 	const wxBitmap bm1;
 	bool loopGuard;
-public:
 
+	wxTimer timer;
+
+public:
 	bool TransferDataToWindow();
 	bool TransferDataFromWindow();
 
 	void On3DSelect(wxCommandEvent& event);
 	void RefreshCanvas(wxCommandEvent& event);
 	void RefreshView(wxCommandEvent& event);
+	void OnTimer(wxTimerEvent& event);
 
-	wxString GetNameByID(int id);
 	wxTextCtrl* GetTextCtrlByID(int id);
 	void TransferParameterToTextCtrl(ParameterFormula const parameter,
-			wxTextCtrl *ctrl, typeUnit type);
+			wxTextCtrl *ctrl, UnitType type);
 
 	void OnClose(wxCloseEvent& event);
 	void OnQuickSetupMeasurements(wxCommandEvent& event);
@@ -115,6 +121,15 @@ public:
 	void OnChoice(wxCommandEvent& event);
 	void OnCheckBox(wxCommandEvent& event);
 	void OnScroll(wxScrollEvent& event);
+
+	void OnEditShape(wxCommandEvent& event);
+	void OnAddBridge(wxCommandEvent& event);
+	void OnDeleteBridge(wxCommandEvent& event);
+	void OnListCtrlOnSelectionChanged(wxDataViewEvent& event);
+	void OnPatternSelect(wxTreeListEvent& event);
+	void OnPatternAdd(wxCommandEvent& event);
+	void OnPatternSelectFabric(wxCommandEvent& event);
+
 	void OnToggleAnkleLock(wxCommandEvent& event);
 	void OnChoiceDisplay(wxCommandEvent& event);
 

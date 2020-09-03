@@ -26,6 +26,7 @@
 
 #ifndef AFFINETRANSFORMMATRIX_H_
 #define AFFINETRANSFORMMATRIX_H_
+
 /** \class AffineTransformMatrix
  * 	\code #include "AffineTransformMatrix.h"\endcode
  * 	\ingroup Base3D
@@ -60,35 +61,34 @@
  */
 
 // https://en.cppreference.com/w/cpp/language/operators
+#include <string>
+
 class Vector3;
-class wxString;
-class wxTextOutputStream;
-class wxTextInputStream;
+
 class AffineTransformMatrix {
 public:
-	enum orientation {
-		rhs, //!< Right-handed system
-		lhs //!< Left-handed system
+	enum class Orientation {
+		RHS, //!< Right-handed system
+		LHS //!< Left-handed system
 	};
 
-	AffineTransformMatrix();
+	AffineTransformMatrix(Orientation orientation = Orientation::RHS);
 	AffineTransformMatrix(const Vector3& ex, const Vector3& ey,
 			const Vector3& ez, const Vector3& center);
 
 private:
 	double a[16]; //!< Transformation matrix
-	orientation side; //!< Handedness of the coordinate system
+	Orientation side; //!< Handedness of the coordinate system
 
 public:
-	void SetOrientation(orientation side); //!< Preset the behavior for future Set and Calculate operations
-	orientation GetOrientation(void) const; //!< Return the orientation flag
-	orientation CheckOrientation(void) const; //!< Calculate the orientations of the coordinate system by analysing the matrix
+	void SetOrientation(Orientation side); //!< Preset the behavior for future Set and Calculate operations
+	Orientation GetOrientation(void) const; //!< Return the orientation flag
+	Orientation CheckOrientation(void) const; //!< Calculate the orientations of the coordinate system by analysing the matrix
 	void UpdateOrientation(void); //!< Set the orientation flag according the the matrix values
 
 	void SetIdentity(void); //!< Resets the matrix to the identity matrix.
 	void ResetRotationAndScale(void); //!< Resets the rotation and scale, but keeps the translation
 
-	void Set(AffineTransformMatrix const& b); //!< Copies a matrix by inserting a given matrix into \a a.
 	void SetOrigin(const Vector3& center);
 
 	void SetEx(const Vector3& ex);
@@ -181,22 +181,13 @@ public:
 			double const& y1, double const& x2, double const& y2,
 			double const& r);
 
-	/*!\brief Construct a rotational matrix from a quarternion
-	 *
-	 * The quarternion is defined as w+i*x+j*y+k*z
-	 * with (1,0,0,0) being the unit rotation (= no rotation at all).
-	 */
-	static AffineTransformMatrix RotationQuarternion(double const& w,
-			double const&x, double const& y, double const& z);
-
 	void TranslateGlobal(double const& x, double const& y, double const& z); //!< Translate matrix in the global coordinate system.
 	void TranslateLocal(double const& x, double const& y, double const& z); //!< Translate matrix in the local, rotated coordinate system.
 
 	void ScaleGlobal(double const& x, double const& y, double const& z); //!< Scale matrix in the global coordinate system.
 	void ScaleLocal(double const& x, double const& y, double const& z); //!< Scale matrix in the local coordinate system.
-	static AffineTransformMatrix Scaling(double const& s);
-	static AffineTransformMatrix Scaling(double const& sx, double const& sy,
-			double const& sz);
+
+	void ShiftTransformPosition(const Vector3 & p); //!< Previous rotations and scalings will be transform around the given point p.
 
 	Vector3 Transform(Vector3 const& v) const; //!< Apply the transformation matrix on a given vector.
 	Vector3 Transform(const double x, const double y = 0.0,
@@ -220,20 +211,28 @@ public:
 
 	double Distance(const AffineTransformMatrix &other) const;
 
-public:
-	void TakeMatrixApart(void); //!< Calculate rx,ry,rz,tx,ty,tz and sx,sy,sz from the matrix.
-	double rx, ry, rz; //!< Rotation after taking the matrix apart.
-	double tx, ty, tz; //!< Translation after taking the matrix apart.
-	double sx, sy, sz; //!< Scaling after taking the matrix apart.
-	void PutMatrixTogether(void); //!< Calculate the matrix from rx,ry,rz,tx,ty,tz and sx,sy,sz.
-
-	wxString ToString(); //!< Generate a string containing the matrix.
-	void FromString(wxString const& string); //!< Setup the matrix from a string.
-	void ToStream(wxTextOutputStream & stream) const;
-	void FromStream(wxTextInputStream & stream);
+	std::string ToString(); //!< Generate a string containing the matrix.
 
 	void GLMultMatrix(void) const; //!< Multiply the matrix onto the active OpenGL matrix (right multiply)
 	void Paint(const double scale = 1.0) const; //!< Display the coordinate system in OpenGL
+};
+
+struct AffineTransformMatrixComponents {
+	AffineTransformMatrixComponents() = default;
+
+	double rx = 0.0; //!< Rotation in rad
+	double ry = 0.0; //!< Rotation in rad
+	double rz = 0.0; //!< Rotation in rad
+	double tx = 0.0; //!< Translation
+	double ty = 0.0; //!< Translation
+	double tz = 0.0; //!< Translation
+	double sx = 1.0; //!< Scaling
+	double sy = 1.0; //!< Scaling
+	double sz = 1.0; //!< Scaling
+
+	AffineTransformMatrixComponents & operator=(
+			const AffineTransformMatrix & matrix); //!< Calculate rx,ry,rz,tx,ty,tz and sx,sy,sz from the matrix.
+	AffineTransformMatrix GetMatrix(void) const; //!< Calculate the matrix from rx,ry,rz,tx,ty,tz and sx,sy,sz.
 };
 
 #endif /* AFFINETRANSFORMMATRIX_H_ */

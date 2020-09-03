@@ -30,7 +30,7 @@
 //#include "../../gui/IDs.h"
 
 CommandFootModelSetParameter::CommandFootModelSetParameter(const wxString& name,
-		Project* project, size_t boneNr, Bone::stringIdentifier field,
+		Project* project, size_t boneNr,Type field,
 		wxString newFormula)
 		: wxCommand(true, name)
 {

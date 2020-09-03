@@ -53,8 +53,8 @@
 
 class Polynom {
 public:
-	Polynom(size_t N = 0);
-	Polynom(const std::vector <double> &vec);
+	explicit Polynom(size_t N = 0);
+	explicit Polynom(const std::vector <double> &vec);
 	static Polynom ByValue(double r0, double v0); ///< Initialize by 1 point with position and value (actually only the value is used, because it is a constant)
 	static Polynom ByValue(double r0, double v0, double r1, double v1); ///< Initialize by 2 points with position and value
 	static Polynom ByValue(double r0, double v0, double r1, double v1,
@@ -68,7 +68,13 @@ public:
 	static Polynom ByDerivative(double r0, double v0, double dv0, double r1,
 			double v1, double dv1); ///< Initialize by 2 points with position, value and derivative
 
+	static Polynom ByBezier(double v0);
+	static Polynom ByBezier(double v0, double v1);
+	static Polynom ByBezier(double v0, double v1, double v2);
+	static Polynom ByBezier(double v0, double v1, double v2, double v3);
+
 	size_t Size(void) const;
+	size_t Order(void) const;
 	void Resize(size_t N);
 
 	double& operator[](size_t index); ///< Access the coefficients
@@ -98,6 +104,7 @@ public:
 	Polynom Derivative(size_t order = 1) const; ///< Return the derivative without changing the polynom
 	void Derive(size_t order = 1); ///< Derive the polynom itself
 
+	double Integral(double a, double b) const; ///< Evaluate the integral of the polynom between a and b
 	Polynom Integral(size_t order = 1) const; ///< Return the integral of the polynom without changing it itself
 	void Integrate(size_t order = 1); ///< Integrate the polynom. (The integration constant has to be added simply by the operator+
 
@@ -107,7 +114,9 @@ public:
 
 	void InvertLinear(void); ///< If the polynom is a line (2 coefficients) and is not a constant, it is inverted.
 
-	double Evaluate(double x) const;
+	Polynom Reduce(size_t newOrder, double a, double b) const; // Generate a Polynom of reduced order, that fits the original one as close as possible in the range from a to b.
+
+	double operator()(double x) const;
 
 	/*! \brief Output coefficients
 	 *~~~~~

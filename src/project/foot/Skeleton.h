@@ -34,38 +34,44 @@
  * in the end more difficult to use.
  */
 
-#include "../../math/MathParser.h"
-#include <wx/string.h>
 #include <GL/gl.h>
+#include <cstddef>
+#include <string>
 #include <vector>
+#include <memory>
 
-#include "../foot/Bone.h"
+#include "Bone.h"
+#include "../../math/MathParser.h"
 
 class Skeleton {
 public:
-	Skeleton();
+	Skeleton() = default;
 	virtual ~Skeleton();
+	Skeleton(const Skeleton& other) = delete;
+	Skeleton& operator=(const Skeleton& other);
 
-	Bone* AddBone(wxString name);
+	void LoadJSON(std::string filename);
+	bool SaveJSON(std::string filename);
 
-	bool Connect(wxString name1, wxString name2);
+	void AddBone(const std::string & name);
+	bool Connect(const std::string & parent, const std::string & child);
 
-	void Setup(void);
+	void Update(void);
 	void Render(void) const;
+
+	std::shared_ptr <Bone> GetBone(const std::string & name);
 
 	size_t GetBoneCount(void) const;
 
-	void UpdateBonesFromFormula(MathParser* parser);
+	void UpdateBonesFromFormula(MathParser & parser);
 
 	void ResetRotation(void);
 	void RestoreRotation(void);
 
-	bool mirrored;
-
-	std::vector <Bone> bones;
+	std::vector <std::shared_ptr <Bone>> bones;
 private:
-	mutable GLuint m_gllist;
-	mutable bool update;
+	mutable GLuint m_gllist = 0;
+	mutable bool update = true;
 };
 
 #endif /* SRC_PROJECT_FOOT_SKELETON_H_ */

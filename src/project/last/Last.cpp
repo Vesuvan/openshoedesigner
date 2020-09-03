@@ -28,38 +28,15 @@
 
 #include <GL/gl.h>
 
+#include "../foot/FootModel.h"
+#include "LastModel.h"
+
 Last::Last()
 {
-	nurbs.Initialize(5, 3, true, false, true, false);
-	nurbs.InsertData(Vector3(-0.05, -0.05, 0.2), 1);
-	nurbs.InsertData(Vector3(0.1, -0.05, 0.2), 1);
-	nurbs.InsertData(Vector3(0.15, 0, 0.2), 1);
-	nurbs.InsertData(Vector3(0.1, 0.05, 0.2), 1);
-	nurbs.InsertData(Vector3(-0.05, 0.05, 0.2), 1);
-
-	nurbs.InsertData(Vector3(-0.05, -0.05, 0.3), 1);
-	nurbs.InsertData(Vector3(0.1, -0.05, 0.25), 1);
-	nurbs.InsertData(Vector3(0.15, 0, 0.22), 1);
-	nurbs.InsertData(Vector3(0.1, 0.05, 0.25), 1);
-	nurbs.InsertData(Vector3(-0.05, 0.05, 0.3), 1);
-
-	nurbs.InsertData(Vector3(-0.05, -0.05, 0.4), 1);
-	nurbs.InsertData(Vector3(0.05, -0.05, 0.4), 1);
-	nurbs.InsertData(Vector3(0.05, 0, 0.4), 1);
-	nurbs.InsertData(Vector3(0.05, 0.05, 0.4), 1);
-	nurbs.InsertData(Vector3(-0.05, 0.05, 0.4), 1);
-
 	modified = true;
-}
 
-Last::~Last()
-{
-}
 
-void Last::Paint(void) const
-{
-	glColor3f(0.6, 0, 0.3);
-	nurbs.Paint();
+
 }
 
 bool Last::IsModified(void) const
@@ -71,3 +48,19 @@ void Last::Modify(bool modified)
 {
 	this->modified = modified;
 }
+
+void Last::Setup(const LastModel& model)
+{
+
+}
+
+void Last::Setup(const FootModel& model)
+{
+}
+
+void Last::Paint(void) const
+{
+	glColor3f(0.6, 0, 0.3);
+	surface.Paint();
+}
+

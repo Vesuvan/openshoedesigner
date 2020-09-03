@@ -24,17 +24,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#define _USE_MATH_DEFINES
+
 #include "MathParser.h"
 
-#include <wx/debug.h>
-#ifdef _MSC_VER
-#define _USE_MATH_DEFINES
-#endif
-#include <math.h>
+#include <cassert>
+#include <cmath>
 
 MathParser::MathParser(bool autoEvaluate)
 {
-	wxASSERT(maxStackDepth > 5);
+	assert(maxStackDepth > 5);
 
 	this->autoEvaluate = autoEvaluate;
 	addUnit = false;
@@ -43,29 +42,37 @@ MathParser::MathParser(bool autoEvaluate)
 	ResetVariables(true);
 }
 
-void MathParser::SetString(const wxString& expression)
+std::string MathParser::Lower(const std::string& s)
+{
+	std::string temp(s);
+	for(auto & c : temp)
+		if(c >= 'A' && c <= 'Z') c += ('a' - 'A');
+	return temp;
+}
+
+void MathParser::SetString(const std::string & expression)
 {
 	text = expression;
 	if(autoEvaluate) Evaluate();
 }
 
-wxString MathParser::GetString(void) const
+std::string MathParser::GetString(void) const
 {
 	return text;
 }
 
-wxString MathParser::GetString(const double& number)
+std::string MathParser::GetString(const double& number)
 {
 	this->number = number;
-	text = wxString::Format(_T("%g"), number);
+	text = std::to_string(number);
 	return text;
 }
 
 void MathParser::SetNumber(const double& number)
 {
 	this->number = number;
-	text = wxString::Format(_T("%g"), this->number);
-	if(addUnit && !unit.IsEmpty()) text = text + _T(" ") + unit;
+	text = std::to_string(this->number);
+	if(addUnit && !unit.empty()) text = text + " " + unit;
 }
 
 double MathParser::GetNumber(void) const
@@ -73,24 +80,24 @@ double MathParser::GetNumber(void) const
 	return number;
 }
 
-double MathParser::GetNumber(const wxString& expression)
+double MathParser::GetNumber(const std::string& expression)
 {
 	text = expression;
 	Evaluate();
 	return number;
 }
 
-wxString MathParser::GetError(void) const
+std::string MathParser::GetError(void) const
 {
 	return error;
 }
 
-void MathParser::SetUnit(const wxString& unit)
+void MathParser::SetUnit(const std::string& unit)
 {
 	this->unit = unit;
 }
 
-wxString MathParser::GetUnit(void) const
+std::string MathParser::GetUnit(void) const
 {
 	return unit;
 }
@@ -99,26 +106,26 @@ void MathParser::ResetVariables(bool setStandard)
 {
 	globals.clear();
 	if(setStandard){
-		globals[_T("pi")] = M_PI;
-		globals[_T("e")] = M_E;
+		globals["pi"] = M_PI;
+		globals["e"] = M_E;
 	}
 }
 
-void MathParser::SetVariable(const wxString& variable, double value)
+void MathParser::SetVariable(const std::string& variable, double value)
 {
 	if(ignorecase)
-		globals[variable.Lower()] = value;
+		globals[Lower(variable)] = value;
 	else
 		globals[variable] = value;
 }
 
-double MathParser::GetVariable(const wxString& variable)
+double MathParser::GetVariable(const std::string & variable) const
 {
 	double x;
 	if(ignorecase)
-		x = globals[variable.Lower()];
+		x = globals.at(Lower(variable));
 	else
-		x = globals[variable];
+		x = globals.at(variable);
 	return x;
 }
 
@@ -127,7 +134,7 @@ void MathParser::ResetAllowedUnits(void)
 	allowedUnits.clear();
 }
 
-void MathParser::AddAllowedUnit(const wxString& unit, double factor)
+void MathParser::AddAllowedUnit(const std::string& unit, double factor)
 {
 	allowedUnits[unit] = factor;
 }
@@ -135,7 +142,7 @@ void MathParser::AddAllowedUnit(const wxString& unit, double factor)
 bool MathParser::GetNextToken(void)
 {
 	if(posStack >= maxStackDepth){
-		error = _T("Stack full.");
+		error = "Stack full.";
 		return false;
 	}
 
@@ -143,22 +150,21 @@ bool MathParser::GetNextToken(void)
 	while(posText < strLength && text[posText] == ' ')
 		posText++;
 
-	// If nothing is left of the string, add expressionEnd and return.
+	// If nothing is left of the string, add expressionType::expressionType::expressionEnd and return.
 	if(posText >= strLength){
-		if(posStack > 0 && stackType[posStack - 1] == expressionEnd) return false;
+		if(posStack > 0 && stackType[posStack - 1] == Expr::End) return false;
 		stackStartPos[posStack] = 0;
 		stackCharCount[posStack] = 0;
-		stackType[posStack] = expressionEnd;
+		stackType[posStack] = Expr::End;
 		stackNumber[posStack] = 0.0;
 		posStack++;
 		return true;
 	}
 
 	// TODO: Put in counters to keep the numberparser from overflowing. Otherwise it may return wrong numbers.
-	expressionType type = expressionNone;
-	expressionType newType = expressionNone;
-	wxChar c;
-	int64_t num = 0;
+	Expr type = Expr::Empty;
+	Expr newType = Expr::Empty;
+	size_t num = 0;
 	int exp = 0;
 	int shift = 0;
 	bool negativeExponent = false;
@@ -167,43 +173,43 @@ bool MathParser::GetNextToken(void)
 	stackStartPos[posStack] = posText;
 
 	while(posText < strLength){
-		c = text[posText];
+		auto c = text[posText];
 
-		if(c == ' ') newType = expressionEnd;
-		if(c == '(') newType = expressionBracketOpen;
-		if(c == ')') newType = expressionBracketClose;
+		if(c == ' ') newType = Expr::End;
+		if(c == '(') newType = Expr::BracketOpen;
+		if(c == ')') newType = Expr::BracketClose;
 		if((c >= '0' && c <= '9') || c == '.' || c == ',') newType =
-				expressionNumber;
+				Expr::Number;
 		if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_'
-				|| c == '%') newType = expressionText;
+				|| c == '%') newType = Expr::Text;
 		if(c == '+' || c == '-' || c == '*' || c == '/' || c == '^') newType =
-				expressionOperation;
+				Expr::Operation;
 
-		if(type == expressionNumber && state < 2 && (c == 'e' || c == 'E')) newType =
-				expressionNumber;
-		if(type == expressionNumber && state == 2 && (c == '-' || c == '+')) newType =
-				expressionNumber;
+		if(type == Expr::Number && state < 2 && (c == 'e' || c == 'E')) newType =
+				Expr::Number;
+		if(type == Expr::Number && state == 2 && (c == '-' || c == '+')) newType =
+				Expr::Number;
 
-		if(newType == expressionNone){
-			error = _T("Unknown characters in string.");
+		if(newType == Expr::Empty){
+			error = "Unknown characters in string.";
 			return false;
 		}
 
-		if(type == expressionNone){
+		if(type == Expr::Empty){
 			type = newType;
 		}else{
 			if(type != newType){
 				break;
 			}
 		}
-		if(type == expressionNumber){
+		if(type == Expr::Number){
 
 			if(state == 1 && (c == '.' || c == ',')){
-				error = _T("Multiple '.' or ',' in a number.");
+				error = "Multiple '.' or ',' in a number.";
 				return false;
 			}
 			if(state > 1 && (c == '.' || c == ',')){
-				error = _T("'.' or ',' inside the exponent of a number.");
+				error = "'.' or ',' inside the exponent of a number.";
 				return false;
 			}
 
@@ -242,14 +248,14 @@ bool MathParser::GetNextToken(void)
 
 		}
 		posText++;
-		if(type == expressionBracketOpen || type == expressionBracketClose
-				|| type == expressionOperation) break;
+		if(type == Expr::BracketOpen || type == Expr::BracketClose
+				|| type == Expr::Operation) break;
 	}
 
-	if(type != expressionNone){
+	if(type != Expr::Empty){
 		stackCharCount[posStack] = posText - stackStartPos[posStack];
 		stackType[posStack] = type;
-		if(type == expressionNumber){
+		if(type == Expr::Number){
 			if(negativeExponent) exp = -exp;
 			stackNumber[posStack] = (double) num
 					* pow(10, double(exp) + (double) shift);
@@ -264,13 +270,13 @@ bool MathParser::GetNextToken(void)
 
 bool MathParser::Evaluate(void)
 {
-	error.Empty();
-	if(text.IsEmpty()){
-		error = _T("Expression empty.");
+	error.clear();
+	if(text.empty()){
+		error = "Expression empty.";
 		return false;
 	}
 
-	strLength = text.Length();
+	strLength = text.size();
 	posText = 0;
 	posStack = 0;
 	number = 0;
@@ -282,31 +288,31 @@ bool MathParser::Evaluate(void)
 			flag = false;
 
 			// Replace variables
-			if(posStack >= 2 && stackType[posStack - 2] == expressionText){
-				wxString variable = text.Mid(stackStartPos[posStack - 2],
+			if(posStack >= 2 && stackType[posStack - 2] == Expr::Text){
+				std::string variable = text.substr(stackStartPos[posStack - 2],
 						stackCharCount[posStack - 2]);
 				if(ignorecase){
-					if(globals.count(variable.Lower()) == 1){
-						stackNumber[posStack - 2] = globals[variable.Lower()];
-						stackType[posStack - 2] = expressionNumber;
+					if(globals.find(Lower(variable)) != globals.end()){
+						stackNumber[posStack - 2] = globals[Lower(variable)];
+						stackType[posStack - 2] = Expr::Number;
 						flag = true;
 					}
 				}else{
 					if(globals.count(variable) == 1){
 						stackNumber[posStack - 2] = globals[variable];
-						stackType[posStack - 2] = expressionNumber;
+						stackType[posStack - 2] = Expr::Number;
 						flag = true;
 					}
 				}
 			}
 
 			// Replace units
-			if(posStack >= 2 && stackType[posStack - 1] == expressionText
+			if(posStack >= 2 && stackType[posStack - 1] == Expr::Text
 					&& !allowedUnits.empty()){
-				wxString temp = text.Mid(stackStartPos[posStack - 1],
+				std::string temp = text.substr(stackStartPos[posStack - 1],
 						stackCharCount[posStack - 1]);
 				if(allowedUnits.count(temp) == 1
-						&& stackType[posStack - 2] == expressionNumber){
+						&& stackType[posStack - 2] == Expr::Number){
 					stackNumber[posStack - 2] *= allowedUnits[temp];
 					posStack--;
 					flag = true;
@@ -314,10 +320,9 @@ bool MathParser::Evaluate(void)
 			}
 
 			// Remove Brackets.
-			if(posStack >= 4
-					&& stackType[posStack - 2] == expressionBracketClose
-					&& stackType[posStack - 3] == expressionNumber
-					&& stackType[posStack - 4] == expressionBracketOpen){
+			if(posStack >= 4 && stackType[posStack - 2] == Expr::BracketClose
+					&& stackType[posStack - 3] == Expr::Number
+					&& stackType[posStack - 4] == Expr::BracketOpen){
 				stackType[posStack - 4] = stackType[posStack - 3];
 				stackNumber[posStack - 4] = stackNumber[posStack - 3];
 				stackStartPos[posStack - 4] = stackStartPos[posStack - 3];
@@ -331,80 +336,81 @@ bool MathParser::Evaluate(void)
 			}
 
 			// Process functions.
-			if(posStack >= 3 && stackType[posStack - 2] == expressionNumber
-					&& stackType[posStack - 3] == expressionText){
-				wxString command = text.Mid(stackStartPos[posStack - 3],
+			if(posStack >= 3 && stackType[posStack - 2] == Expr::Number
+					&& stackType[posStack - 3] == Expr::Text){
+				std::string command = text.substr(stackStartPos[posStack - 3],
 						stackCharCount[posStack - 3]);
+				const std::string cmdL = Lower(command);
 				bool foundcommand = false;
-				if(command.CmpNoCase(_T("cos")) == 0){
+				if(cmdL.compare("cos") == 0){
 					stackNumber[posStack - 3] = cos(stackNumber[posStack - 2]);
 					foundcommand = true;
 				}
-				if(command.CmpNoCase(_T("sin")) == 0){
+				if(cmdL.compare("sin") == 0){
 					stackNumber[posStack - 3] = sin(stackNumber[posStack - 2]);
 					foundcommand = true;
 				}
-				if(command.CmpNoCase(_T("tan")) == 0){
+				if(cmdL.compare("tan") == 0){
 					stackNumber[posStack - 3] = tan(stackNumber[posStack - 2]);
 					foundcommand = true;
 				}
-				if(command.CmpNoCase(_T("acos")) == 0){
+				if(cmdL.compare("acos") == 0){
 					stackNumber[posStack - 3] = acos(stackNumber[posStack - 2]);
 					foundcommand = true;
 				}
-				if(command.CmpNoCase(_T("asin")) == 0){
+				if(cmdL.compare("asin") == 0){
 					stackNumber[posStack - 3] = asin(stackNumber[posStack - 2]);
 					foundcommand = true;
 				}
-				if(command.CmpNoCase(_T("atan")) == 0){
+				if(cmdL.compare("atan") == 0){
 					stackNumber[posStack - 3] = atan(stackNumber[posStack - 2]);
 					foundcommand = true;
 				}
-				if(command.CmpNoCase(_T("exp")) == 0){
+				if(cmdL.compare("exp") == 0){
 					stackNumber[posStack - 3] = exp(stackNumber[posStack - 2]);
 					foundcommand = true;
 				}
-				if(command.CmpNoCase(_T("log")) == 0){
+				if(cmdL.compare("log") == 0){
 					if(stackNumber[posStack - 2] <= 0.0){
-						error = _T("log of a negative number.");
+						error = "log of a negative number.";
 						return false;
 					}
 					stackNumber[posStack - 3] = log(stackNumber[posStack - 2]);
 					foundcommand = true;
 				}
-				if(command.CmpNoCase(_T("sqrt")) == 0){
+				if(cmdL.compare("sqrt") == 0){
 					if(stackNumber[posStack - 2] < 0.0){
-						error = _T("sqrt of a negative number.");
+						error = "sqrt of a negative number.";
 						return false;
 					}
 					stackNumber[posStack - 3] = sqrt(stackNumber[posStack - 2]);
 					foundcommand = true;
 				}
-				if(command.CmpNoCase(_T("cbrt")) == 0){
+				if(cmdL.compare("cbrt") == 0){
 					stackNumber[posStack - 3] = cbrt(stackNumber[posStack - 2]);
 					foundcommand = true;
 				}
-				if(command.CmpNoCase(_T("ceil")) == 0){
+				if(cmdL.compare("ceil") == 0){
 					stackNumber[posStack - 3] = ceil(stackNumber[posStack - 2]);
 					foundcommand = true;
 				}
-				if(command.CmpNoCase(_T("floor")) == 0){
+				if(cmdL.compare("floor") == 0){
 					stackNumber[posStack - 3] = floor(
 							stackNumber[posStack - 2]);
 					foundcommand = true;
 				}
-				if(command.CmpNoCase(_T("round")) == 0){
+				if(cmdL.compare("round") == 0){
 					stackNumber[posStack - 3] = round(
 							stackNumber[posStack - 2]);
 					foundcommand = true;
 				}
-				if(command.CmpNoCase(_T("abs")) == 0){
+				if(cmdL.compare("abs") == 0){
 					stackNumber[posStack - 3] = fabs(stackNumber[posStack - 2]);
 					foundcommand = true;
 				}
 
 				if(foundcommand){
-					stackType[posStack - 3] = expressionNumber;
+					stackType[posStack - 3] = Expr::Number;
 					stackType[posStack - 2] = stackType[posStack - 1];
 					stackNumber[posStack - 2] = stackNumber[posStack - 1];
 					stackStartPos[posStack - 2] = stackStartPos[posStack - 1];
@@ -415,17 +421,16 @@ bool MathParser::Evaluate(void)
 			}
 
 			// Negative numbers.
-			if((posStack == 3 && stackType[posStack - 2] == expressionNumber
-					&& stackType[posStack - 3] == expressionOperation)
-					|| (posStack >= 4
-							&& stackType[posStack - 2] == expressionNumber
-							&& stackType[posStack - 3] == expressionOperation
-							&& stackType[posStack - 4] != expressionNumber)){
+			if((posStack == 3 && stackType[posStack - 2] == Expr::Number
+					&& stackType[posStack - 3] == Expr::Operation)
+					|| (posStack >= 4 && stackType[posStack - 2] == Expr::Number
+							&& stackType[posStack - 3] == Expr::Operation
+							&& stackType[posStack - 4] != Expr::Number)){
 
-				wxChar op = text.at(stackStartPos[posStack - 3]);
+				auto op = text.at(stackStartPos[posStack - 3]);
 				if(op == '-'){
 					stackNumber[posStack - 3] = -stackNumber[posStack - 2];
-					stackType[posStack - 3] = expressionNumber;
+					stackType[posStack - 3] = Expr::Number;
 					stackType[posStack - 2] = stackType[posStack - 1];
 					stackNumber[posStack - 2] = stackNumber[posStack - 1];
 					stackStartPos[posStack - 2] = stackStartPos[posStack - 1];
@@ -436,14 +441,14 @@ bool MathParser::Evaluate(void)
 			}
 
 			// Add, Sub, Mult, Div, Power. (also '^' before '*', '/' before '+', '-')
-			if(posStack >= 4 && stackType[posStack - 2] == expressionNumber
-					&& stackType[posStack - 3] == expressionOperation
-					&& stackType[posStack - 4] == expressionNumber){
+			if(posStack >= 4 && stackType[posStack - 2] == Expr::Number
+					&& stackType[posStack - 3] == Expr::Operation
+					&& stackType[posStack - 4] == Expr::Number){
 				// Current operation is in op, the next one is in op2. op2 is used to decide, if an
 				// operation can be done right away or we have to do op2 first.
-				wxChar op = text.at(stackStartPos[posStack - 3]);
-				wxChar op2 = text.at(stackStartPos[posStack - 1]);
-				if(stackType[posStack - 1] != expressionOperation || (op == '^')
+				auto op = text.at(stackStartPos[posStack - 3]);
+				auto op2 = text.at(stackStartPos[posStack - 1]);
+				if(stackType[posStack - 1] != Expr::Operation || (op == '^')
 						|| ((op == '*' || op == '/') && (op2 != '^'))
 						|| ((op == '+' || op == '-')
 								&& (op2 != '*' && op2 != '/' && op2 != '^'))){
@@ -458,7 +463,7 @@ bool MathParser::Evaluate(void)
 									* stackNumber[posStack - 2];
 					if(op == '/'){
 						if(stackNumber[posStack - 2] == 0.0){
-							error = _T("Division by 0.");
+							error = "Division by 0.";
 							return false;
 						}
 						stackNumber[posStack - 4] = stackNumber[posStack - 4]
@@ -484,31 +489,30 @@ bool MathParser::Evaluate(void)
 
 	switch(posStack){
 	case 0:
-		error = _T("This should not be possible.");
+		error = "This should not be possible.";
 		break;
 	case 1:
-		error = _T("Expression empty.");
+		error = "Expression empty.";
 		break;
 	case 2:
-		if(stackType[1] == expressionEnd && stackType[0] == expressionNumber){
+		if(stackType[1] == Expr::End && stackType[0] == Expr::Number){
 			number = stackNumber[0];
-			unit.Empty();
+			unit.clear();
 		}else{
-			error = _T("Cannot be reduced to a number.");
+			error = "Cannot be reduced to a number.";
 		}
 		break;
 	case 3:
-		if(allowedUnits.empty() && stackType[2] == expressionEnd
-				&& stackType[1] == expressionText
-				&& stackType[0] == expressionNumber){
+		if(allowedUnits.empty() && stackType[2] == Expr::End
+				&& stackType[1] == Expr::Text && stackType[0] == Expr::Number){
 			number = stackNumber[0];
-			unit = text.Mid(stackStartPos[1], stackCharCount[1]);
+			unit = text.substr(stackStartPos[1], stackCharCount[1]);
 		}else{
-			error = _T("Cannot be reduced to a number.");
+			error = "Cannot be reduced to a number.";
 		}
 		break;
 	default:
-		error = _T("Could not parse expression completely.");
+		error = "Could not parse expression completely.";
 		break;
 	}
 

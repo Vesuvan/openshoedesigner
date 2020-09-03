@@ -27,27 +27,28 @@
 #ifndef _PARAMETERFORMULA_H_
 #define _PARAMETERFORMULA_H_
 /*!\class ParameterFormula
- * \brief Parameter with the cpability of keeping a separate formula and value.
+ * \brief Parameter with the capability of keeping a separate formula and value.
  *
  */
 
-#include <wx/string.h>
 #include "MathParser.h"
+
+#include <string>
 
 class ParameterFormula {
 public:
-	ParameterFormula(const wxString name, const wxString formula = _T(""));
+	ParameterFormula(const std::string & name, const std::string & formula = std::string(""));
 	virtual ~ParameterFormula();
 
-	// Copy assignment, because of const-name. (Copy constructor has no problems with the const.)
-	ParameterFormula& operator=(const ParameterFormula &other);
+	// Copy assignment, because of const-name. (Copy constructors have no problems with the const.)
+	ParameterFormula& operator=(const ParameterFormula & other);
 
-	const wxString name;
-	wxString formula;
+	const std::string name;
+	std::string formula;
 	double value; //!< Calculated value
 	bool modified; //!< True if the value has changed by more than FLT_EPSILON in the last call to Update.
 	bool errorFlag; //!< \b True if an error occured during evaluation of the formula.
-	wxString errorStr; //!< Errorstring if an error occured otherwise empty.
+	std::string errorStr; //!< Errorstring if an error occured otherwise empty.
 
 	/*! \brief Calculates the value from the formula
 	 *
@@ -57,7 +58,7 @@ public:
 	 * \param parser Pointer to a Mathparser
 	 * \return Calculated value
 	 */
-	double Update(MathParser &parser);
+	double Update(MathParser & parser);
 	void Modify(bool modify = true);
 	bool IsModified(void) const;
 };

@@ -34,27 +34,32 @@
  */
 
 #include <wx/cmdproc.h>
-#include <wx/string.h>
+#include <map>
+#include <string>
 
-#include "../../math/ParameterFormula.h"
-#include "../Project.h"
+class ParameterFormula;
+class Project;
+class Shoe;
 
 class CommandShoeSetParameter:public wxCommand {
 public:
-	CommandShoeSetParameter(const wxString& name, Project* project,
-			int parameter, wxString value);
+	CommandShoeSetParameter(const wxString& name, Project* project);
+
+	void AddValue(const int key, const std::string value);
 
 	bool Do(void);
 	bool Undo(void);
 
 protected:
-	wxString Replace(int parameter, wxString newValue);
-	ParameterFormula* GetParameterByID(Shoe *shoe, int id);
+	bool SetNew(const std::pair <int, std::string> & kv, ParameterFormula & pf);
+	void SetOld(const std::pair <int, std::string> & kv, ParameterFormula & pf);
+
+//	ParameterFormula* GetParameterByID(Shoe *shoe, int id);
 
 	Project* project;
-	int parameter;
-	wxString value;
-	wxString oldValue;
+
+	std::map <int, std::string> newParameter;
+	std::map <int, std::string> oldParameter;
 };
 
 #endif /* __COMMANDSHOESETPARAMETER_H__ */

@@ -27,27 +27,27 @@
 #ifndef ORIENTEDMATRIX_H_
 #define ORIENTEDMATRIX_H_
 
-#include "../math/MathMatrix.h"
-#include "Vector3.h"
 /*!\class OrientedMatrix
  * \brief Field in 3D-space
  *
  * This matrix has an origin and a size.
  */
 
+#include "../math/MathMatrix.h"
+#include "Vector3.h"
+
 class OrientedMatrix:public MathMatrix {
 public:
-
-	enum Display3D {
+	enum class Display3D {
 		Points3D
 	};
-	enum Display2D {
+	enum class Display2D {
 		Points2D, Grid, Image
 	};
 
 public:
-	OrientedMatrix();
-	virtual ~OrientedMatrix();
+	OrientedMatrix() = default;
+	virtual ~OrientedMatrix() = default;
 
 	/*! \brief Set the Origin
 	 *
@@ -120,14 +120,14 @@ public:
 
 public:
 	Vector3 origin; ///< Origin of the volume
-	float dx;
-	float dy;
-	float dz;
+	float dx = 1.0;
+	float dy = 1.0;
+	float dz = 1.0;
 
-	Display2D display2D;
-	Display3D display3D;
+	Display2D display2D = Display2D::Image;
+	Display3D display3D = Display3D::Points3D;
 
-	double surface; ///< Value of the surface: values greater than surface are inside the Volume
+	double surface = 0.5; ///< Value of the surface: values greater than surface are inside the Volume
 };
 
 #endif /* ORIENTEDMATRIX_H_ */

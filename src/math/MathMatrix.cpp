@@ -32,17 +32,6 @@
 #include <string.h>
 #include <float.h>
 
-MathMatrix::MathMatrix()
-{
-	// TODO Auto-generated constructor stub
-
-}
-
-MathMatrix::~MathMatrix()
-{
-	// TODO Auto-generated destructor stub
-}
-
 double MathMatrix::Min(void) const
 {
 	double m = DBL_MAX;
@@ -118,7 +107,7 @@ void MathMatrix::Mirror(Axis a)
 	const size_t Nz = Size(3);
 
 	switch(a){
-	case X:
+	case Axis::X:
 		for(size_t i = 0; i < (Nx / 2); i++){
 			for(size_t j = 0; j < Ny; j++){
 				for(size_t k = 0; k < Nz; k++){
@@ -129,7 +118,7 @@ void MathMatrix::Mirror(Axis a)
 			}
 		}
 		break;
-	case Y:
+	case Axis::Y:
 		for(size_t i = 0; i < Nx; i++){
 			for(size_t j = 0; j < (Ny / 2); j++){
 				for(size_t k = 0; k < Nz; k++){
@@ -140,7 +129,7 @@ void MathMatrix::Mirror(Axis a)
 			}
 		}
 		break;
-	case Z:
+	case Axis::Z:
 		for(size_t i = 0; i < Nx; i++){
 			for(size_t j = 0; j < Ny; j++){
 				for(size_t k = 0; k < (Nz / 2); k++){
@@ -165,14 +154,14 @@ void MathMatrix::Rotate(Axis a, int quarters)
 	if(quarters == 0) return;
 	if(quarters == 2){
 		switch(a){
-		case X:
+		case Axis::X:
 			for(size_t i = 0; i < Nx; i++){
 				for(size_t n = i; n < (size / 2); n += Nx){
 					std::swap(buffer[n], buffer[(size - Nx) - n + 2 * i]);
 				}
 			}
 			break;
-		case Y:
+		case Axis::Y:
 			for(size_t j = 0; j < Ny; j++){
 				size_t n = j * Nx;
 				size_t m = size - 1 - (Ny - 1) * Nx + j * Nx;
@@ -183,7 +172,7 @@ void MathMatrix::Rotate(Axis a, int quarters)
 				}
 			}
 			break;
-		case Z:
+		case Axis::Z:
 			const size_t m = Nx * Ny;
 			for(size_t k = 0; k < Nz; k++){
 				for(size_t n = 0; n < (m / 2); n++){
@@ -200,7 +189,7 @@ void MathMatrix::Rotate(Axis a, int quarters)
 	if(temp == NULL) throw("Out of memory!");
 
 	switch(a){
-	case X:
+	case Axis::X:
 		{
 			if(quarters == 1){
 				const size_t mo = size + Nx;
@@ -229,7 +218,7 @@ void MathMatrix::Rotate(Axis a, int quarters)
 			MatlabMatrix::Reshape(Nx, Nz, Ny);
 			break;
 		}
-	case Y:
+	case Axis::Y:
 		{
 			if(quarters == 1){
 //			Nx = 4;
@@ -269,7 +258,7 @@ void MathMatrix::Rotate(Axis a, int quarters)
 //		std::swap(Nz, Nx);
 			break;
 		}
-	case Z:
+	case Axis::Z:
 		{
 			const size_t mo = Nx * Ny + 1;
 			size_t ad;
@@ -302,12 +291,10 @@ MathMatrix MathMatrix::XRay(Method method) const
 	temp.SetSize(Nx, 1, Nz);
 	temp.SetInsertPosition(0);
 
-
-
 	for(size_t z = 0; z < Nz; z++){
 		for(size_t x = 0; x < Nx; x++){
 			switch(method){
-			case MaxValue:
+			case Method::MaxValue:
 				{
 					double vm = -DBL_MAX;
 					for(size_t y = 0; y < Ny; y++){
@@ -317,7 +304,7 @@ MathMatrix MathMatrix::XRay(Method method) const
 					temp.Insert(vm);
 					break;
 				}
-			case MinValue:
+			case Method::MinValue:
 				{
 					double vm = DBL_MAX;
 					for(size_t y = 0; y < Ny; y++){
@@ -327,7 +314,7 @@ MathMatrix MathMatrix::XRay(Method method) const
 					temp.Insert(vm);
 					break;
 				}
-			case MeanValue:
+			case Method::MeanValue:
 				{
 					double vm = 0;
 					for(size_t y = 0; y < Ny; y++){
@@ -337,7 +324,7 @@ MathMatrix MathMatrix::XRay(Method method) const
 					temp.Insert(vm / (double) Ny);
 					break;
 				}
-			case Sum:
+			case Method::Sum:
 				{
 					double vm = 0;
 					for(size_t y = 0; y < Ny; y++){
@@ -345,7 +332,6 @@ MathMatrix MathMatrix::XRay(Method method) const
 						vm += v;
 					}
 					temp.Insert(vm);
-					break;
 					break;
 				}
 			}

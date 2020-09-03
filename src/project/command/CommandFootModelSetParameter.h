@@ -41,8 +41,12 @@
 
 class CommandFootModelSetParameter:public wxCommand {
 public:
+	enum class Type {
+		Length, R1, R2, S1, S2
+	};
+
 	CommandFootModelSetParameter(const wxString& name, Project* project,
-			size_t boneNr, Bone::stringIdentifier field, wxString newFormula);
+			size_t boneNr, Type field, wxString newFormula);
 
 	bool Do(void);
 	bool Undo(void);
@@ -51,7 +55,7 @@ protected:
 	Project* project;
 	ProjectView::Side activeSide;
 	size_t boneNr;
-	Bone::stringIdentifier field;
+	Type field;
 	wxString newFormula;
 	wxString oldFormulaL;
 	wxString oldFormulaR;

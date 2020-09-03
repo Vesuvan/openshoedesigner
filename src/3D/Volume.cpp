@@ -27,19 +27,29 @@
 #include "Volume.h"
 
 #include "../StdInclude.h"
-//#include <wx/textfile.h>
-//#include <wx/string.h>
+
 #include <GL/gl.h>
-#include <assert.h>
-#include <math.h>
-#include <float.h>
-#include <stdint.h>
+#include <cassert>
+#include <cmath>
+#include <cfloat>
+#include <cstdint>
 
 Volume::Volume()
 {
 	color.Set(0.5, 0.5, 0.5);
 	m_gllist = 0;
 	update = true;
+}
+
+Volume& Volume::operator =(const Volume& other)
+{
+	if(&other == this) return *this;
+	OrientedMatrix::operator=(other);
+	color = other.color;
+	geometry = other.geometry;
+	m_gllist = 0;
+	update = true;
+	return *this;
 }
 
 Volume::~Volume()
@@ -540,9 +550,9 @@ void Volume::CalcSurface(void)
 	Vector3 p11;
 	Triangle t;
 	unsigned int c = 0;
-	for(size_t k = 0; k < Nz - 1; k++){
-		for(size_t j = 0; j < Ny - 1; j++){
-			for(size_t i = 0; i < Nx - 1; i++){
+	for(size_t k = 0; k < Nz - 1; ++k){
+		for(size_t j = 0; j < Ny - 1; ++j){
+			for(size_t i = 0; i < Nx - 1; ++i){
 //				if(k == 60) temp.AddLine(
 //						wxString::Format(_T("%.3f,..."), buffer[c]));
 
@@ -701,271 +711,271 @@ void Volume::CalcSurface(void)
 						h2++;
 					}
 				}
-/*
-				if(i == 0){
-					uint8_t v = 0;
-					if(v0 > surface) v |= 1;
-					if(v2 > surface) v |= 2;
-					if(v6 > surface) v |= 4;
-					if(v4 > surface) v |= 8;
-					if(v > 0){
-						uint8_t h = v * 9;
-						for(uint_fast8_t n = 0; n < 9; n++){
-							if(cap[h] == -1) break;
-							switch(cap[h]){
-							case 0:
-								t.p[n % 3] = p;
-								break;
-							case 1:
-								t.p[n % 3] = p3;
-								break;
-							case 2:
-								t.p[n % 3].Set(p.x, p.y + dy, p.z);
-								break;
-							case 3:
-								t.p[n % 3] = p11;
-								break;
-							case 4:
-								t.p[n % 3].Set(p.x, p.y + dy, p.z + dz);
-								break;
-							case 5:
-								t.p[n % 3] = p7;
-								break;
-							case 6:
-								t.p[n % 3].Set(p.x, p.y, p.z + dz);
-								break;
-							case 7:
-								t.p[n % 3] = p8;
-								break;
-							}
-							if(n % 3 == 2) geometry.AddTriangle(t, false);
-							h++;
-						}
+				/*
+				 if(i == 0){
+				 uint8_t v = 0;
+				 if(v0 > surface) v |= 1;
+				 if(v2 > surface) v |= 2;
+				 if(v6 > surface) v |= 4;
+				 if(v4 > surface) v |= 8;
+				 if(v > 0){
+				 uint8_t h = v * 9;
+				 for(uint_fast8_t n = 0; n < 9; n++){
+				 if(cap[h] == -1) break;
+				 switch(cap[h]){
+				 case 0:
+				 t.p[n % 3] = p;
+				 break;
+				 case 1:
+				 t.p[n % 3] = p3;
+				 break;
+				 case 2:
+				 t.p[n % 3].Set(p.x, p.y + dy, p.z);
+				 break;
+				 case 3:
+				 t.p[n % 3] = p11;
+				 break;
+				 case 4:
+				 t.p[n % 3].Set(p.x, p.y + dy, p.z + dz);
+				 break;
+				 case 5:
+				 t.p[n % 3] = p7;
+				 break;
+				 case 6:
+				 t.p[n % 3].Set(p.x, p.y, p.z + dz);
+				 break;
+				 case 7:
+				 t.p[n % 3] = p8;
+				 break;
+				 }
+				 if(n % 3 == 2) geometry.AddTriangle(t, false);
+				 h++;
+				 }
 
-					}
+				 }
 
-				}
+				 }
 
-				if(i + 2 == Nx){
-					uint8_t v = 0;
-					if(v1 > surface) v |= 1;
-					if(v5 > surface) v |= 2;
-					if(v7 > surface) v |= 4;
-					if(v3 > surface) v |= 8;
-					if(v > 0){
-						uint8_t h = v * 9;
-						for(uint_fast8_t n = 0; n < 9; n++){
-							if(cap[h] == -1) break;
-							switch(cap[h]){
-							case 0:
-								t.p[n % 3].Set(p.x + dx, p.y, p.z);
-								break;
-							case 1:
-								t.p[n % 3] = p9;
-								break;
-							case 2:
-								t.p[n % 3].Set(p.x + dx, p.y, p.z + dz);
-								break;
-							case 3:
-								t.p[n % 3] = p5;
-								break;
-							case 4:
-								t.p[n % 3].Set(p.x + dx, p.y + dy, p.z + dz);
-								break;
-							case 5:
-								t.p[n % 3] = p10;
-								break;
-							case 6:
-								t.p[n % 3].Set(p.x + dx, p.y + dy, p.z);
-								break;
-							case 7:
-								t.p[n % 3] = p1;
-								break;
-							}
-							if(n % 3 == 2) geometry.AddTriangle(t, false);
-							h++;
-						}
+				 if(i + 2 == Nx){
+				 uint8_t v = 0;
+				 if(v1 > surface) v |= 1;
+				 if(v5 > surface) v |= 2;
+				 if(v7 > surface) v |= 4;
+				 if(v3 > surface) v |= 8;
+				 if(v > 0){
+				 uint8_t h = v * 9;
+				 for(uint_fast8_t n = 0; n < 9; n++){
+				 if(cap[h] == -1) break;
+				 switch(cap[h]){
+				 case 0:
+				 t.p[n % 3].Set(p.x + dx, p.y, p.z);
+				 break;
+				 case 1:
+				 t.p[n % 3] = p9;
+				 break;
+				 case 2:
+				 t.p[n % 3].Set(p.x + dx, p.y, p.z + dz);
+				 break;
+				 case 3:
+				 t.p[n % 3] = p5;
+				 break;
+				 case 4:
+				 t.p[n % 3].Set(p.x + dx, p.y + dy, p.z + dz);
+				 break;
+				 case 5:
+				 t.p[n % 3] = p10;
+				 break;
+				 case 6:
+				 t.p[n % 3].Set(p.x + dx, p.y + dy, p.z);
+				 break;
+				 case 7:
+				 t.p[n % 3] = p1;
+				 break;
+				 }
+				 if(n % 3 == 2) geometry.AddTriangle(t, false);
+				 h++;
+				 }
 
-					}
+				 }
 
-				}
+				 }
 
-				if(j == 0){
-					uint8_t v = 0;
-					if(v0 > surface) v |= 1;
-					if(v4 > surface) v |= 2;
-					if(v5 > surface) v |= 4;
-					if(v1 > surface) v |= 8;
-					if(v > 0){
-						uint8_t h = v * 9;
-						for(uint_fast8_t n = 0; n < 9; n++){
-							if(cap[h] == -1) break;
-							switch(cap[h]){
-							case 0:
-								t.p[n % 3] = p;
-								break;
-							case 1:
-								t.p[n % 3] = p8;
-								break;
-							case 2:
-								t.p[n % 3].Set(p.x, p.y, p.z + dz);
-								break;
-							case 3:
-								t.p[n % 3] = p4;
-								break;
-							case 4:
-								t.p[n % 3].Set(p.x + dx, p.y, p.z + dz);
-								break;
-							case 5:
-								t.p[n % 3] = p9;
-								break;
-							case 6:
-								t.p[n % 3].Set(p.x + dx, p.y, p.z);
-								break;
-							case 7:
-								t.p[n % 3] = p0;
-								break;
-							}
-							if(n % 3 == 2) geometry.AddTriangle(t, false);
-							h++;
-						}
+				 if(j == 0){
+				 uint8_t v = 0;
+				 if(v0 > surface) v |= 1;
+				 if(v4 > surface) v |= 2;
+				 if(v5 > surface) v |= 4;
+				 if(v1 > surface) v |= 8;
+				 if(v > 0){
+				 uint8_t h = v * 9;
+				 for(uint_fast8_t n = 0; n < 9; n++){
+				 if(cap[h] == -1) break;
+				 switch(cap[h]){
+				 case 0:
+				 t.p[n % 3] = p;
+				 break;
+				 case 1:
+				 t.p[n % 3] = p8;
+				 break;
+				 case 2:
+				 t.p[n % 3].Set(p.x, p.y, p.z + dz);
+				 break;
+				 case 3:
+				 t.p[n % 3] = p4;
+				 break;
+				 case 4:
+				 t.p[n % 3].Set(p.x + dx, p.y, p.z + dz);
+				 break;
+				 case 5:
+				 t.p[n % 3] = p9;
+				 break;
+				 case 6:
+				 t.p[n % 3].Set(p.x + dx, p.y, p.z);
+				 break;
+				 case 7:
+				 t.p[n % 3] = p0;
+				 break;
+				 }
+				 if(n % 3 == 2) geometry.AddTriangle(t, false);
+				 h++;
+				 }
 
-					}
+				 }
 
-				}
+				 }
 
-				if(j + 2 == Ny){
-					uint8_t v = 0;
-					if(v2 > surface) v |= 1;
-					if(v3 > surface) v |= 2;
-					if(v7 > surface) v |= 4;
-					if(v6 > surface) v |= 8;
-					if(v > 0){
-						uint8_t h = v * 9;
-						for(uint_fast8_t n = 0; n < 9; n++){
-							if(cap[h] == -1) break;
-							switch(cap[h]){
-							case 0:
-								t.p[n % 3].Set(p.x, p.y + dy, p.z);
-								break;
-							case 1:
-								t.p[n % 3] = p2;
-								break;
-							case 2:
-								t.p[n % 3].Set(p.x + dx, p.y + dy, p.z);
-								break;
-							case 3:
-								t.p[n % 3] = p10;
-								break;
-							case 4:
-								t.p[n % 3].Set(p.x + dx, p.y + dy, p.z + dz);
-								break;
-							case 5:
-								t.p[n % 3] = p6;
-								break;
-							case 6:
-								t.p[n % 3].Set(p.x, p.y + dy, p.z + dz);
-								break;
-							case 7:
-								t.p[n % 3] = p11;
-								break;
-							}
-							if(n % 3 == 2) geometry.AddTriangle(t, false);
-							h++;
-						}
+				 if(j + 2 == Ny){
+				 uint8_t v = 0;
+				 if(v2 > surface) v |= 1;
+				 if(v3 > surface) v |= 2;
+				 if(v7 > surface) v |= 4;
+				 if(v6 > surface) v |= 8;
+				 if(v > 0){
+				 uint8_t h = v * 9;
+				 for(uint_fast8_t n = 0; n < 9; n++){
+				 if(cap[h] == -1) break;
+				 switch(cap[h]){
+				 case 0:
+				 t.p[n % 3].Set(p.x, p.y + dy, p.z);
+				 break;
+				 case 1:
+				 t.p[n % 3] = p2;
+				 break;
+				 case 2:
+				 t.p[n % 3].Set(p.x + dx, p.y + dy, p.z);
+				 break;
+				 case 3:
+				 t.p[n % 3] = p10;
+				 break;
+				 case 4:
+				 t.p[n % 3].Set(p.x + dx, p.y + dy, p.z + dz);
+				 break;
+				 case 5:
+				 t.p[n % 3] = p6;
+				 break;
+				 case 6:
+				 t.p[n % 3].Set(p.x, p.y + dy, p.z + dz);
+				 break;
+				 case 7:
+				 t.p[n % 3] = p11;
+				 break;
+				 }
+				 if(n % 3 == 2) geometry.AddTriangle(t, false);
+				 h++;
+				 }
 
-					}
+				 }
 
-				}
+				 }
 
-				if(k == 0){
-					uint8_t v = 0;
-					if(v0 > surface) v |= 1;
-					if(v1 > surface) v |= 2;
-					if(v3 > surface) v |= 4;
-					if(v2 > surface) v |= 8;
-					if(v > 0){
-						uint8_t h = v * 9;
-						for(uint_fast8_t n = 0; n < 9; n++){
-							if(cap[h] == -1) break;
-							switch(cap[h]){
-							case 0:
-								t.p[n % 3] = p;
-								break;
-							case 1:
-								t.p[n % 3] = p0;
-								break;
-							case 2:
-								t.p[n % 3].Set(p.x + dx, p.y, p.z);
-								break;
-							case 3:
-								t.p[n % 3] = p1;
-								break;
-							case 4:
-								t.p[n % 3].Set(p.x + dx, p.y + dy, p.z);
-								break;
-							case 5:
-								t.p[n % 3] = p2;
-								break;
-							case 6:
-								t.p[n % 3].Set(p.x, p.y + dy, p.z);
-								break;
-							case 7:
-								t.p[n % 3] = p3;
-								break;
-							}
-							if(n % 3 == 2) geometry.AddTriangle(t, false);
-							h++;
-						}
+				 if(k == 0){
+				 uint8_t v = 0;
+				 if(v0 > surface) v |= 1;
+				 if(v1 > surface) v |= 2;
+				 if(v3 > surface) v |= 4;
+				 if(v2 > surface) v |= 8;
+				 if(v > 0){
+				 uint8_t h = v * 9;
+				 for(uint_fast8_t n = 0; n < 9; n++){
+				 if(cap[h] == -1) break;
+				 switch(cap[h]){
+				 case 0:
+				 t.p[n % 3] = p;
+				 break;
+				 case 1:
+				 t.p[n % 3] = p0;
+				 break;
+				 case 2:
+				 t.p[n % 3].Set(p.x + dx, p.y, p.z);
+				 break;
+				 case 3:
+				 t.p[n % 3] = p1;
+				 break;
+				 case 4:
+				 t.p[n % 3].Set(p.x + dx, p.y + dy, p.z);
+				 break;
+				 case 5:
+				 t.p[n % 3] = p2;
+				 break;
+				 case 6:
+				 t.p[n % 3].Set(p.x, p.y + dy, p.z);
+				 break;
+				 case 7:
+				 t.p[n % 3] = p3;
+				 break;
+				 }
+				 if(n % 3 == 2) geometry.AddTriangle(t, false);
+				 h++;
+				 }
 
-					}
+				 }
 
-				}
+				 }
 
-				if(k + 2 == Nz){
-					uint8_t v = 0;
-					if(v4 > surface) v |= 1;
-					if(v6 > surface) v |= 2;
-					if(v7 > surface) v |= 4;
-					if(v5 > surface) v |= 8;
-					if(v > 0){
-						uint8_t h = v * 9;
-						for(uint_fast8_t n = 0; n < 9; n++){
-							if(cap[h] == -1) break;
-							switch(cap[h]){
-							case 0:
-								t.p[n % 3].Set(p.x, p.y, p.z + dz);
-								break;
-							case 1:
-								t.p[n % 3] = p7;
-								break;
-							case 2:
-								t.p[n % 3].Set(p.x, p.y + dy, p.z + dz);
-								break;
-							case 3:
-								t.p[n % 3] = p6;
-								break;
-							case 4:
-								t.p[n % 3].Set(p.x + dx, p.y + dy, p.z + dz);
-								break;
-							case 5:
-								t.p[n % 3] = p5;
-								break;
-							case 6:
-								t.p[n % 3].Set(p.x + dx, p.y, p.z + dz);
-								break;
-							case 7:
-								t.p[n % 3] = p4;
-								break;
-							}
-							if(n % 3 == 2) geometry.AddTriangle(t, false);
-							h++;
-						}
+				 if(k + 2 == Nz){
+				 uint8_t v = 0;
+				 if(v4 > surface) v |= 1;
+				 if(v6 > surface) v |= 2;
+				 if(v7 > surface) v |= 4;
+				 if(v5 > surface) v |= 8;
+				 if(v > 0){
+				 uint8_t h = v * 9;
+				 for(uint_fast8_t n = 0; n < 9; n++){
+				 if(cap[h] == -1) break;
+				 switch(cap[h]){
+				 case 0:
+				 t.p[n % 3].Set(p.x, p.y, p.z + dz);
+				 break;
+				 case 1:
+				 t.p[n % 3] = p7;
+				 break;
+				 case 2:
+				 t.p[n % 3].Set(p.x, p.y + dy, p.z + dz);
+				 break;
+				 case 3:
+				 t.p[n % 3] = p6;
+				 break;
+				 case 4:
+				 t.p[n % 3].Set(p.x + dx, p.y + dy, p.z + dz);
+				 break;
+				 case 5:
+				 t.p[n % 3] = p5;
+				 break;
+				 case 6:
+				 t.p[n % 3].Set(p.x + dx, p.y, p.z + dz);
+				 break;
+				 case 7:
+				 t.p[n % 3] = p4;
+				 break;
+				 }
+				 if(n % 3 == 2) geometry.AddTriangle(t, false);
+				 h++;
+				 }
 
-					}
+				 }
 
-				}
-*/
+				 }
+				 */
 				p.x += dx;
 				c++;
 			}
@@ -1002,7 +1012,7 @@ void Volume::PaintSurface(void) const
 	}
 	if(update){
 		glNewList(m_gllist, GL_COMPILE_AND_EXECUTE);
-		geometry.Paint(geometryColorNone);
+		geometry.Paint(Geometry::Style::Plain);
 		glEndList();
 		update = false;
 	}else{
@@ -1011,7 +1021,7 @@ void Volume::PaintSurface(void) const
 	glPopMatrix();
 }
 
-Vector3 Volume::GetSurface(Vector3 p0, Vector3 n) const
+Vector3 Volume::GetSurface(const Vector3 & p0, const Vector3 & n) const
 {
 	double d0 = 0;
 	double d1 = 1;

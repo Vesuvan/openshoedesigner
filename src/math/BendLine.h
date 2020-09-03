@@ -35,7 +35,7 @@
 
 class BendLine:public KernelDensityEstimator {
 public:
-	BendLine();
+	BendLine() = default;
 
 	void AngleToPos(void);
 };

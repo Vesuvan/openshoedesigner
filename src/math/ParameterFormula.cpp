@@ -29,7 +29,8 @@
 #include <cfloat>
 #include <cmath>
 
-ParameterFormula::ParameterFormula(const wxString name, const wxString formula)
+ParameterFormula::ParameterFormula(const std::string & name,
+		const std::string & formula)
 		: name(name), formula(formula)
 {
 	value = 0.0;
@@ -41,7 +42,7 @@ ParameterFormula::~ParameterFormula()
 {
 }
 
-ParameterFormula& ParameterFormula::operator=(const ParameterFormula& other)
+ParameterFormula& ParameterFormula::operator=(const ParameterFormula & other)
 {
 	formula = other.formula;
 	value = other.value;
@@ -55,18 +56,17 @@ void ParameterFormula::Modify(bool modify)
 {
 	this->modified = modify;
 }
-
 bool ParameterFormula::IsModified(void) const
 {
 	return modified;
 }
 
-double ParameterFormula::Update(MathParser& parser)
+double ParameterFormula::Update(MathParser & parser)
 {
 	const double oldValue = value;
 	value = parser.GetNumber(formula);
 	errorStr = parser.GetError();
-	errorFlag = !errorStr.IsEmpty();
+	errorFlag = !errorStr.empty();
 	if(errorFlag){
 		value = oldValue;
 		modified = false;

@@ -39,8 +39,8 @@
 
 class FormFinder {
 public:
-	FormFinder();
-	virtual ~FormFinder();
+	FormFinder() = default;
+	virtual ~FormFinder() = default;
 
 	void AddPolygon(const Polygon3 &poly, size_t Nsections);
 

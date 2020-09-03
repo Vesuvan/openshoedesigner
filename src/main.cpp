@@ -37,6 +37,7 @@
 #include <cstdlib>
 
 IMPLEMENT_APP(openshoedesigner)
+
 wxBEGIN_EVENT_TABLE(openshoedesigner, wxApp) EVT_MENU(wxID_ABOUT, openshoedesigner::OnAbout)
 wxEND_EVENT_TABLE()
 
@@ -165,6 +166,28 @@ bool openshoedesigner::OnInit()
 	return true;
 }
 
+bool openshoedesigner::OnExceptionInMainLoop()
+{
+	std::string error;
+	try{
+		throw; // Rethrow the current exception.
+	}
+	catch(const std::exception& e){
+		error = e.what();
+	}
+	catch(...){
+		error = "unknown error.";
+	}
+	std::cout << "Unexpected exception has occurred: " << error
+			<< ", the program will terminate.\n";
+	return false;
+}
+
+void openshoedesigner::OnUnhandledException()
+{
+	std::cout << "Unhandled Exception.\n";
+}
+
 int openshoedesigner::OnExit()
 {
 	wxDocManager* const docManager = wxDocManager::GetDocumentManager();
@@ -181,7 +204,7 @@ wxFrame* openshoedesigner::CreateChildFrame(wxView* view,
 	wxDocument *doc = view->GetDocument();
 
 	switch(frametype){
-	case ProjectView::mainframe:
+	case ProjectView::FrameType::mainframe:
 		subframe = new FrameMain(doc, view, config,
 				wxStaticCast(GetTopWindow(), wxDocParentFrame));
 		break;

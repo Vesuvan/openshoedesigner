@@ -27,11 +27,8 @@
 #include "FourierTransform.h"
 
 #include <stdexcept>
-FourierTransform::FourierTransform()
-{
-}
 
-void FourierTransform::TEmpty(void)
+void FourierTransform::TReset(void)
 {
 	t.clear();
 	InRe.clear();
@@ -98,7 +95,7 @@ void FourierTransform::TSetLoopLength(double loopLength)
 void FourierTransform::TUnwrap(double tol)
 {
 	if(tol <= 0.0) throw(std::domain_error(
-	__FILE__"FourierTransform::TUnwrap: tol should be a positive number."));
+	__FILE__"FourierTransform::TUnwrap: 'tol' should be a positive number."));
 	for(size_t n = 1; n < t.size(); ++n){
 		while(t[n] < t[n - 1] - tol)
 			t[n] += 2 * tol;
