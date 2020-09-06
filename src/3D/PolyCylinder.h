@@ -31,10 +31,10 @@
  * \brief DEPRECATED: Stores sections of polygonwise defined shapes
  *
  * Useless file format, that should not be used. Use stl instead.
- * Good idea, but is easier to model a last based on some imaged from the
- * internet in blender from scratch.
+ * Was a good idea back then, but it is easier to model a last based
+ * on some imaged from the internet in Blender from scratch.
  *
- * Maybe there is some last-scanning system the produces a format, that can be
+ * Maybe there is some last-scanning system the produces a format that can be
  * interpreted by this class...
  */
 
@@ -79,7 +79,7 @@ public:
 
 	void Paint(void) const;
 	void GenerateGeometry(Geometry &geometry, bool mirrored = false);
-	// TODO: Write this function, if theis class is really used.
+	// TODO: Write this function, if this class is really used.
 	// void GenerateHull(Hull &hull, bool mirrored = false);
 	void Test(void);
 };

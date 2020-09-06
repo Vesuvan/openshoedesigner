@@ -55,14 +55,16 @@ public:
 	size_t dotSize; ///< If > 0, dots (GL_POINTS) of this size are shown at the vertices
 	enum class CalculateNormal {
 		ByCenter, ///< Calculate normals with respect to the center of the polygon
-		ByBends ///< Calculate normals by examining the bends in the polygon
+		ByBends, ///< Calculate normals by examining the bends in the polygon
+		InPlayXY, ///< ...
+		InPlayYZ, ///< ...
+		InPlayZX ///< ...
 	};
+	CalculateNormal method;
 protected:
 	std::vector <Vector3> elements; ///< Points that make up the polygon
 	bool isClosed; ///< Boolean: Closed or open polygon
-
 	std::vector <Vector3> normals; ///< One normal per vertex
-	CalculateNormal method;
 
 	// Methods
 public:

@@ -501,6 +501,55 @@ std::vector <Vector3> Polygon3::pCalculateNormals(void) const
 			}
 			break;
 		}
+	case CalculateNormal::InPlayXY:
+	case CalculateNormal::InPlayYZ:
+	case CalculateNormal::InPlayZX:
+		{
+			std::vector <double> L(N);
+			for(size_t n = 0; n < (N - 1); ++n)
+				L[n] = (elements[n + 1] - elements[n]).Abs();
+			L[N - 1] = (elements[0] - elements[N - 1]).Abs();
+			for(size_t n = 1; n < (N - 1); ++n)
+				normals[n] = (elements[n] - elements[n - 1]) * L[n - 1]
+						+ (elements[n + 1] - elements[n]) * L[n];
+			if(isClosed){
+				normals[0] = (elements[0] - elements[N - 1]) * L[N - 1]
+						+ (elements[1] - elements[0]) * L[0];
+				normals[N - 1] = (elements[N - 1] - elements[N - 2]) * L[N - 2]
+						+ (elements[0] - elements[N - 1]) * L[N - 1];
+			}else{
+				normals[0] = elements[1] - elements[0];
+				normals[N - 1] = elements[N - 1] - elements[N - 2];
+			}
+			if(method == CalculateNormal::InPlayXY){
+				for(size_t n = 0; n < N; ++n){
+					normals[n].z = 0;
+					const double h = normals[n].x;
+					normals[n].x = normals[n].y;
+					normals[n].y = -h;
+					normals[n].Normalize();
+				}
+			}
+			if(method == CalculateNormal::InPlayYZ){
+				for(size_t n = 0; n < N; ++n){
+					normals[n].x = 0;
+					const double h = normals[n].y;
+					normals[n].y = normals[n].z;
+					normals[n].z = -h;
+					normals[n].Normalize();
+				}
+			}
+			if(method == CalculateNormal::InPlayZX){
+				for(size_t n = 0; n < N; ++n){
+					normals[n].y = 0;
+					const double h = normals[n].z;
+					normals[n].z = normals[n].x;
+					normals[n].x = -h;
+					normals[n].Normalize();
+				}
+			}
+			break;
+		}
 	}
 	return normals;
 }

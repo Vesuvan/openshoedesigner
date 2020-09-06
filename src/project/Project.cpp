@@ -286,6 +286,7 @@ bool Project::UpdateRight(void)
 	if(insole.IsModified()){
 		insole.Modify(false);
 		insole.Construct(shoe, measR);
+		insole.Shape(shoe);
 		return true;
 	}
 

@@ -60,7 +60,7 @@ public:
 
 	void Close(void);
 
-	inline bool operator==(const std::string & name);
+	bool operator==(const std::string & name) const;
 
 	bool IsOpen(void) const; //!< Has this instance an open connection to a device?
 	bool IsInput(void) const;
@@ -68,7 +68,7 @@ public:
 	bool IsBidirectional(void) const;
 	std::string GetName(void) const;
 
-	void Send(size_t from = 0, size_t to = 255);
+	void Send(uint8_t from = 0, uint8_t to = 255);
 	void Flush(void);
 	bool Poll(void);
 	bool PollEvent(uint8_t *data0, uint8_t *data1, uint8_t *data2);

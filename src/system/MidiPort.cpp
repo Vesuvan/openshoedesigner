@@ -54,7 +54,7 @@ void MidiDevice::Close(void)
 #endif
 }
 
-inline bool MidiDevice::operator ==(const std::string& name)
+bool MidiDevice::operator ==(const std::string& name)const
 {
 	return name.compare(this->name) == 0;
 }
@@ -100,7 +100,7 @@ std::string MidiDevice::GetName(void) const
 	return name;
 }
 
-void MidiDevice::Send(size_t from, size_t to)
+void MidiDevice::Send(uint8_t from, uint8_t to)
 {
 	for(size_t n = from; n < to; ++n)
 		ccold[n] = cc[n] + 1;

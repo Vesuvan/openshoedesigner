@@ -33,6 +33,10 @@
  * ...
  */
 
+#include <vector>
+#include <functional>
+
+#include "../3D/Polygon3.h"
 #include "../3D/Vector3.h"
 #include "../math/Polynom.h"
 
@@ -42,10 +46,17 @@ class Shoe;
 class Insole {
 public:
 	void Construct(const Shoe & shoe, const FootMeasurements & measurements);
+	void FinishConstruction(const double dx);
 	void Paint(void) const;
+
+	void Transform(std::function <Vector3(Vector3)> func);
+	void Shape(const Shoe & shoe);
 
 	bool IsModified(void) const;
 	void Modify(bool modify = true);
+
+	Polygon3 inside;
+	Polygon3 outside;
 
 private:
 	struct Point {
@@ -53,6 +64,7 @@ private:
 		Vector3 p;
 		Vector3 n;
 		void SetNormal(const Point & p0, const Point & p1);
+		void Transform(std::function <Vector3(Vector3)> func);
 	};
 	struct Line {
 	public:
@@ -65,10 +77,10 @@ private:
 		Polynom z;
 	};
 
-	std::vector <Line> inside;
-	std::vector <Line> outside;
+	Point A, B, C, D, E, F, G, H, J, K, L, N, Z;
 
 private:
+	std::vector <Line> lines;
 	bool modified = true;
 };
 

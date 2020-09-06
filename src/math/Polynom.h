@@ -68,13 +68,23 @@ public:
 	static Polynom ByDerivative(double r0, double v0, double dv0, double r1,
 			double v1, double dv1); ///< Initialize by 2 points with position, value and derivative
 
-	static Polynom ByBezier(double v0);
-	static Polynom ByBezier(double v0, double v1);
-	static Polynom ByBezier(double v0, double v1, double v2);
-	static Polynom ByBezier(double v0, double v1, double v2, double v3);
+	static Polynom ByBezier(double v0); ///< Bezier interpolation with constant value
+	static Polynom ByBezier(double v0, double v1); ///< Bezier interpolation with start- and endvalue
+	static Polynom ByBezier(double v0, double v1, double v2); ///< Bezier interpolation with start-, support- and end-value
+	static Polynom ByBezier(double v0, double v1, double v2, double v3); ///< Bezier interpolation with two support values
 
-	size_t Size(void) const;
-	size_t Order(void) const;
+	size_t Size(void) const; ///< Number of coefficients
+	size_t Order(void) const; ///< Order of the polynom (= number of coefficients - 1)
+	/*! \brief Change the number of coefficients
+	 *
+	 * If the number of coefficients is increased, zeros are appended to the vector of
+	 * coefficients. On a decrease of the number, the extra coefficients are simply cut
+	 * off. The form of the polygon may change a lot during theis operation. If a
+	 * reduction is necessary while keeping the polygon fit to the original one, use
+	 * the Reduce function.
+	 *
+	 *	\param N New coefficient count
+	 */
 	void Resize(size_t N);
 
 	double& operator[](size_t index); ///< Access the coefficients
@@ -106,19 +116,21 @@ public:
 
 	double Integral(double a, double b) const; ///< Evaluate the integral of the polynom between a and b
 	Polynom Integral(size_t order = 1) const; ///< Return the integral of the polynom without changing it itself
-	void Integrate(size_t order = 1); ///< Integrate the polynom. (The integration constant has to be added simply by the operator+
+	void Integrate(size_t order = 1); ///< Integrate the polynom. (The integration constant has to be added simply by the operator+.)
 
 	bool ExtremumPos(double &x) const; ///< Return the positive extremum, if there is any (up to an order of 3 (4 coefficients))
 	bool ExtremumNeg(double &x) const; ///< Return the negative extremum, if there is any (up to an order of 3 (4 coefficients))
 	bool InflectionPoint(double &pos) const; ///< Return the inflection point (only working for an order of exactly 3 (4 coefficients))
-
 	void InvertLinear(void); ///< If the polynom is a line (2 coefficients) and is not a constant, it is inverted.
 
-	Polynom Reduce(size_t newOrder, double a, double b) const; // Generate a Polynom of reduced order, that fits the original one as close as possible in the range from a to b.
+	std::vector <double> GetBezier(void) const; ///< Returns the bezier values for a polynom of up to order 3 (= 4 coefficients)
+	Polynom Reduce(size_t newOrder, double a, double b) const; ///< Generate a Polynom of reduced order, that fits the original one as close as possible in the range from a to b.
+	double FindZero(const double xStart = 0.0) const; ///< From a given starting-point the function searches for the value where the Polygon evaluates to 0.
 
-	double operator()(double x) const;
+	double operator()(double x) const; ///< Evaluation of polygon
 
-	/*! \brief Output coefficients
+	/*! \brief Output coefficients in Matlab/Octave format
+	 *
 	 *~~~~~
 	 * Polynom p = Polynom::ByValue(-1,1, 0,0, 1,1);
 	 * std::cout << p << "\n";

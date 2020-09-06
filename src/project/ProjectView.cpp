@@ -101,6 +101,7 @@ void ProjectView::Paint(bool usePicking) const
 	matFoot.SetSimpleColor(0.8, 0.5, 0);
 	OpenGLMaterial matLast(OpenGLMaterial::Preset::CyanPlastic);
 	OpenGLMaterial matFloor(OpenGLMaterial::Preset::WhitePlastic);
+	OpenGLMaterial matInsole(OpenGLMaterial::Preset::YellowPlastic, 0.3);
 //	matFloor.SetSimpleColor(0.9, 0.9, 0.9);
 	OpenGLMaterial matLines;
 	matLines.SetSimpleColor(1, 1, 1, 0.6);
@@ -222,7 +223,7 @@ void ProjectView::Paint(bool usePicking) const
 			glPushName(4);
 			matLines.UseMaterial();
 			project->bow.Paint();
-			matLines.UseMaterial();
+			matInsole.UseMaterial();
 			PaintInsole();
 			glPopName();
 		}
@@ -297,7 +298,7 @@ void ProjectView::Paint(bool usePicking) const
 			glPushName(4);
 			matLines.UseMaterial();
 			project->bow.Paint();
-			matLines.UseMaterial();
+			matInsole.UseMaterial();
 			PaintInsole();
 			glPopName();
 		}
