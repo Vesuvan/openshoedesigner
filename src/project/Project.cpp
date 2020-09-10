@@ -151,11 +151,12 @@ void Project::Update(void)
 		}
 		shoe.Update(parser);
 		if(shoe.IsModified()){
+			shoe.Modify(false);
 			measL.Modify(true);
 			measR.Modify(true);
-			shoe.Modify(false);
 		}
 		if(measL.IsModified()){
+			insoleL.Modify(true);
 			if(thread0 == NULL){
 				thread0 = new WorkerThread(this, 0);
 				if(thread0->Run() != wxTHREAD_NO_ERROR){
@@ -181,6 +182,7 @@ void Project::Update(void)
 		parser.AddAllowedUnit("gon", 0.015708);
 		measR.Update(parser);
 		if(measR.IsModified()){
+			insoleR.Modify(true);
 			if(thread1 == NULL){
 				thread1 = new WorkerThread(this, 1);
 				if(thread1->Run() != wxTHREAD_NO_ERROR){
@@ -215,10 +217,19 @@ bool Project::UpdateLeft(void)
 		footL.CalculateSkin();
 		return true;
 	}
+	if(insoleL.IsModified()){
+		insoleL.Modify(false);
+		insoleL.Mirror(false);
+		insoleL.Construct(shoe, measR);
+		insoleL.Shape(shoe, fmax(legLengthDifference.value, 0));
+		insoleL.Mirror(true);
+		lastModelL.Modify(true);
+		return true;
+	}
 	if(lastModelL.IsModified()){
 		lastModelL.Modify(false);
-		lastModelL.UpdateForm(measL);
-//		lastModelL.UpdateGeometry();
+		lastModelL.UpdateForm(insoleL, measL);
+		lastModelL.Mirror();
 		return true;
 	}
 
@@ -254,14 +265,10 @@ bool Project::UpdateLeft(void)
 bool Project::UpdateRight(void)
 {
 	wxCriticalSectionLocker locker(CSRight);
-	if(shoe.IsModified()){
-		shoe.Modify(false);
-		insole.Modify(true);
-	}
 	if(measR.IsModified()){
 		measR.Modify(false);
 		lastModelR.Modify(true);
-		insole.Modify(true);
+		insoleR.Modify(true);
 		footR.UpdateForm(measR);
 		return true;
 	}
@@ -276,17 +283,16 @@ bool Project::UpdateRight(void)
 		footR.CalculateSkin();
 		return true;
 	}
-
-	if(lastModelR.IsModified()){
-		lastModelR.Modify(false);
-		lastModelR.UpdateForm(measR);
-//		lastModelR.UpdateGeometry();
+	if(insoleR.IsModified()){
+		insoleR.Modify(false);
+		insoleR.Construct(shoe, measR);
+		insoleR.Shape(shoe, fmax(-legLengthDifference.value, 0));
+		lastModelR.Modify(true);
 		return true;
 	}
-	if(insole.IsModified()){
-		insole.Modify(false);
-		insole.Construct(shoe, measR);
-		insole.Shape(shoe);
+	if(lastModelR.IsModified()){
+		lastModelR.Modify(false);
+		lastModelR.UpdateForm(insoleR, measR);
 		return true;
 	}
 

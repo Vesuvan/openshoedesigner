@@ -259,7 +259,7 @@ void Polygon3::ApplyTransformation(void)
 	matrix.SetIdentity();
 }
 
-void Polygon3::ApplyTransformation(const AffineTransformMatrix &matrix)
+void Polygon3::Transform(const AffineTransformMatrix &matrix)
 {
 	for(auto & element : elements)
 		element = matrix.Transform(element);
@@ -446,7 +446,7 @@ void Polygon3::CalculateNormals(void)
 	normals = pCalculateNormals();
 }
 
-void Polygon3::RotateOrigin(const Vector3& p)
+size_t Polygon3::ClosestPoint(const Vector3& p) const
 {
 	const size_t N = elements.size();
 	size_t minimalIndex = 0;
@@ -458,8 +458,61 @@ void Polygon3::RotateOrigin(const Vector3& p)
 			minimalIndex = n;
 		}
 	}
+	return minimalIndex;
+}
+
+void Polygon3::RotateOrigin(const Vector3& p)
+{
+	const size_t minimalIndex = ClosestPoint(p);
 	std::rotate(elements.begin(), elements.begin() + minimalIndex,
 			elements.end());
+}
+
+Vector3 Polygon3::Direction(size_t index) const
+{
+	const size_t N = elements.size();
+	if(!isClosed && index == 0){
+		return (elements[1] - elements[0]).Normal();
+	}
+	if(!isClosed && index + 1 == N){
+		return (elements[N - 1] - elements[N - 2]).Normal();
+	}
+	const Vector3 p0 = elements[(N + index - 1) % N];
+	const Vector3 p1 = elements[index];
+	const Vector3 p2 = elements[(index + 1) % N];
+	const double d0 = (p1 - p0).Abs();
+	const double d1 = (p2 - p1).Abs();
+	return ((p1 - p0) * d0 + (p2 - p1) * d1).Normal();
+}
+
+Polygon3::Point Polygon3::At(double L) const
+{
+	Point temp;
+	const size_t N = elements.size();
+	if(N == 0) return temp;
+	if(N == 1){
+		temp.p = elements[0];
+		if(!normals.empty()) temp.n = normals[0];
+		return temp;
+	}
+	size_t n = 0;
+	double sL = 0.0;
+	double dL = (elements[1] - elements[0]).Abs();
+	while(n < (N - 2) && (sL + dL) < L){
+		++n;
+		sL += dL;
+		dL = (elements[n + 1] - elements[n]).Abs();
+	}
+	const double m = (L - sL) / dL;
+	temp.idx = n;
+	temp.rel = m;
+	temp.d = elements[n + 1] - elements[n];
+	temp.p = elements[n] + temp.d * m;
+	temp.d.Normalize();
+	if(!normals.empty()){
+		temp.n = normals[n] + (normals[n + 1] - normals[n]) * m;
+	}
+	return temp;
 }
 
 std::vector <Vector3> Polygon3::pCalculateNormals(void) const

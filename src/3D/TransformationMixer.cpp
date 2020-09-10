@@ -28,6 +28,12 @@
 
 #include <numeric>
 
+void TransformationMixer::SetBackground(double strength,
+		AffineTransformMatrix matrix)
+{
+	this->background = strength;
+	this->backgroundmatrix = matrix;
+}
 size_t TransformationMixer::AddSphere(Vector3 center,
 		std::function <double(double)> kernel, AffineTransformMatrix matrix)
 {
@@ -53,7 +59,7 @@ size_t TransformationMixer::AddCylinder(Vector3 center, Vector3 normal,
 	return elements.size() - 1;
 }
 
-size_t TransformationMixer::AddPlane(double distance,Vector3 normal,
+size_t TransformationMixer::AddPlane(double distance, Vector3 normal,
 		std::function <double(double)> kernel, AffineTransformMatrix matrix)
 {
 	auto temp = elements.emplace(elements.end());
@@ -66,7 +72,7 @@ size_t TransformationMixer::AddPlane(double distance,Vector3 normal,
 	return elements.size() - 1;
 }
 
-size_t TransformationMixer::AddPlane(Vector3 pointonplane,Vector3 normal,
+size_t TransformationMixer::AddPlane(Vector3 pointonplane, Vector3 normal,
 		std::function <double(double)> kernel, AffineTransformMatrix matrix)
 {
 	auto temp = elements.emplace(elements.end());
@@ -96,6 +102,7 @@ const AffineTransformMatrix& TransformationMixer::operator [](size_t idx) const
 
 Vector3 TransformationMixer::operator ()(const Vector3& v) const
 {
+	if(elements.empty()) return backgroundmatrix(v);
 	size_t n = 0;
 	for(auto & e : elements){
 		switch(e.type){
@@ -123,18 +130,14 @@ Vector3 TransformationMixer::operator ()(const Vector3& v) const
 	}
 
 	double sum = mixing.sum();
+	double back = background - sum;
+	if(back < 0.0) back = 0.0;
+	sum += back;
 	if(fabs(sum) <= 1e-9) return v;
 
-	Vector3 temp;
-	if(useNullFeld){
-		if(sum > 1.0)
-			mixing /= sum;
-		else
-			temp += v * (1.0 - sum);
-	}else{
-		mixing /= sum;
-	}
-
+	mixing /= sum;
+	back /= sum;
+	Vector3 temp = backgroundmatrix(v) * back;
 	n = 0;
 	for(auto & e : elements){
 		if(fabs(mixing[n]) < 1e-9) continue;
@@ -143,3 +146,4 @@ Vector3 TransformationMixer::operator ()(const Vector3& v) const
 	}
 	return temp;
 }
+

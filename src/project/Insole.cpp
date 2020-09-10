@@ -65,6 +65,14 @@ void Insole::Transform(std::function <Vector3(Vector3)> func)
 	Z.Transform(func);
 }
 
+void Insole::Mirror(bool isleft)
+{
+	if(leftside == isleft) return;
+	AffineTransformMatrix m;
+	m.ScaleGlobal(1, -1, 1);
+	Transform(m);
+	leftside = isleft;
+}
 void Insole::Point::SetNormal(const Point& p0, const Point& p1)
 {
 	n = (p1.p - p0.p).Normal();
@@ -108,12 +116,21 @@ void Insole::Paint(void) const
 
 	glBegin(GL_QUAD_STRIP);
 	for(size_t n = 0; n < N; ++n){
-//		glNormal3f(0, 0, 1);
-		glNormal3f(outside.Normal(n).x, outside.Normal(n).y,
-				outside.Normal(n).z);
-		glVertex3f(outside[n].x, outside[n].y, outside[n].z);
-		glNormal3f(inside.Normal(n).x, inside.Normal(n).y, inside.Normal(n).z);
-		glVertex3f(inside[n].x, inside[n].y, inside[n].z);
+		if(leftside){
+			glNormal3f(inside.Normal(n).x, inside.Normal(n).y,
+					inside.Normal(n).z);
+			glVertex3f(inside[n].x, inside[n].y, inside[n].z);
+			glNormal3f(outside.Normal(n).x, outside.Normal(n).y,
+					outside.Normal(n).z);
+			glVertex3f(outside[n].x, outside[n].y, outside[n].z);
+		}else{
+			glNormal3f(outside.Normal(n).x, outside.Normal(n).y,
+					outside.Normal(n).z);
+			glVertex3f(outside[n].x, outside[n].y, outside[n].z);
+			glNormal3f(inside.Normal(n).x, inside.Normal(n).y,
+					inside.Normal(n).z);
+			glVertex3f(inside[n].x, inside[n].y, inside[n].z);
+		}
 	}
 	glEnd();
 	inside.Paint(true);
@@ -158,14 +175,15 @@ void Insole::FinishConstruction(const double dx)
 	outside.InsertPoint(x1, 0, 0);
 }
 
-void Insole::Shape(const Shoe& shoe)
+void Insole::Shape(const Shoe& shoe, double legLengthDifference)
 {
 	// Calculate gamma0 and gamma1
 	const double alpha0 = shoe.heelPitch.value;
 	const double alpha1 = shoe.toeSpring.value;
 	const double s0 = F.p.x - J.p.x;
 	const double s1 = Z.p.x - F.p.x;
-	const double dt = shoe.heelHeight.value - shoe.ballHeight.value;
+	const double dt = shoe.heelHeight.value - shoe.ballHeight.value
+			+ legLengthDifference;
 
 	const size_t NSample = 100;
 	Polynom gammasample = Polynom::ByValue(0, 0, 100,
@@ -240,7 +258,7 @@ void Insole::Shape(const Shoe& shoe)
 	{
 		// Set heel/platform height
 		AffineTransformMatrix m;
-		m.TranslateGlobal(0, 0, shoe.heelHeight.value);
+		m.TranslateGlobal(0, 0, shoe.heelHeight.value + legLengthDifference);
 		Transform(m);
 
 	}

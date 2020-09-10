@@ -50,7 +50,9 @@
 #include "../../3D/OpenGL.h"
 #include "../../3D/OpenGLText.h"
 #include "../../3D/TransformationMixer.h"
+#include "../../3D/TransformationMixerVector.h"
 #include "../../math/MEstimator.h"
+#include "../Insole.h"
 
 LastModel::LastModel()
 {
@@ -174,9 +176,373 @@ bool LastModel::LoadModel(std::string filename)
 	return false;
 }
 
-void LastModel::UpdateForm(const FootMeasurements& measurements)
+void LastModel::UpdateForm(const Insole & insole,
+		const FootMeasurements & measurements)
 {
 	resized = raw;
+//	resized.smooth = true;
+
+	Polygon3 lastPlane = planeXZ;
+	Polygon3 lastLeft = bottomleft;
+	Polygon3 lastRight = bottomright;
+	Polygon3 insoleCenter = insole.inside;
+	for(size_t n = 0; n < insoleCenter.Size(); ++n)
+		insoleCenter[n].y = 0.0;
+	Polygon3 lastCenter;
+	for(size_t n = idxHeelPoint; n <= idxToePoint; ++n)
+		lastCenter.InsertPoint(lastPlane[n]);
+
+	Polynom centerHeight;
+	{
+		const double L0 = lastCenter.GetLength();
+//			const double v0 =
+//					(lastPlane[idxHeelPoint] - lastPlane[idxZero]).Abs() / 2;
+//			const double v1 = (lastPlane[idxWaistBottom]
+//					- lastPlane[idxWaistTop]).Abs() / 2;
+//			const double v2 = (lastPlane[idxLittleToeBottom]
+//					- lastPlane[idxLittleToeTop]).Abs() / 2;
+//			const double v3 = (lastPlane[idxBigToeBottom]
+//					- lastPlane[idxBigToeTop]).Abs() / 2;
+//			centerHeight = Polynom::ByBezier(v0, v1, v2, v3);
+		centerHeight = Polynom::ByBezier(L0 / 5, L0 / 5, L0 / 10, L0 / 10);
+	}
+
+	{
+		// Resize last to fit the length of the insole.
+		const double scale = insoleCenter.GetLength() / lastCenter.GetLength();
+		AffineTransformMatrix m;
+		m.ScaleGlobal(scale, scale, scale);
+		m *= AffineTransformMatrix::RotationXYZ(0, heela, 0);
+
+		// Move heelpoint to insole
+		Vector3 shift = insoleCenter[0] - m(lastCenter[0]);
+		m.TranslateGlobal(shift.x, shift.y, shift.z);
+
+		resized.Transform(m);
+		lastLeft.Transform(m);
+		lastRight.Transform(m);
+		lastPlane.Transform(m);
+		lastCenter.Transform(m);
+	}
+
+	{
+		// Adjust last angles
+
+		Polynom pDistance = Polynom::ByValue(0, 0, 1, insoleCenter.GetLength());
+
+		Bender b;
+
+		Vector3 c0 = (lastPlane[idxHeelPoint] + lastPlane[idxTop]) / 2;
+		b.from0.SetOrigin(c0);
+		b.from0.SetEz((lastPlane[idxTop] - lastPlane[idxHeelCenter]).Normal());
+		b.from0.SetEy(Vector3(0, 1, 0));
+		b.from0.CalculateEx();
+
+		Vector3 c1 = (lastPlane[idxWaistBottom] + lastPlane[idxWaistTop]) / 2;
+		b.from1.SetOrigin(c1);
+		b.from1.SetEz(
+				(lastPlane[idxWaistTop] - lastPlane[idxWaistBottom]).Normal());
+		b.from1.SetEy(Vector3(0, 1, 0));
+		b.from1.CalculateEx();
+
+		auto I0 = insoleCenter.At(0.05);
+		auto I1 = insoleCenter.At(0.4);
+		auto A0 = lastCenter.At(0.05);
+		auto A1 = lastCenter.At(0.4);
+
+		double I0a = atan2(I0.d.z, I0.d.x);
+		double I1a = atan2(I1.d.z, I1.d.x);
+		double A0a = atan2(A0.d.z, A0.d.x);
+		double A1a = atan2(A1.d.z, A1.d.x);
+
+		double da0 = A0a - I0a;
+		double da = (A1a - A0a) - (I1a - I0a);
+
+		AffineTransformMatrix d = b.from1 / b.from0;
+
+		b.to0 = b.from0;
+		b.to0 = b.to0 * AffineTransformMatrix::RotationXYZ(0, da0, 0);
+
+//		d = AffineTransformMatrix::RotationXYZ(0, da0 / 2, 0) * d
+//				* AffineTransformMatrix::RotationXYZ(0, da0 / 2, 0);
+		b.to1 = b.to0 * d;
+//		b.to1 = b.to1 * AffineTransformMatrix::RotationXYZ(0, da0, 0);
+		b.Calculate();
+//		resized.Transform(b);
+//		lastLeft.ApplyTransformation(b);
+//		lastRight.ApplyTransformation(b);
+//		lastPlane.ApplyTransformation(b);
+//		lastCenter.ApplyTransformation(b);
+	}
+
+	{
+		// Align last along the center of the insole
+		const double L0 = lastCenter.GetLength();
+		const size_t N = 9;
+		centerHeight = Polynom::ByBezier(L0 / 5, L0 / 10, L0 / 10, L0 / 10);
+		centerHeight.ScaleX(N + 2);
+		centerHeight.ShiftX(-1);
+		Polynom pDistance = Polynom::ByValue(-1, 0, N + 1,
+				insoleCenter.GetLength());
+//		std::cout<< centerHeight << "\n";
+		for(size_t n = 0; n < N; ++n){
+			const double L0 = pDistance(n);
+			const double L1 = pDistance(n + 1);
+			auto I0 = insoleCenter.At(L0);
+			auto I1 = insoleCenter.At(L1);
+			auto A0 = lastCenter.At(L0);
+			auto A1 = lastCenter.At(L1);
+			const double h0 = 0; //centerHeight(n);
+			const double h1 = 0; //centerHeight(n + 1);
+
+			Bender b;
+			b.from0.SetEx(A0.d);
+			b.from0.SetEy(Vector3(0, 1, 0));
+			b.from0.CalculateEz();
+			b.from0.SetOrigin(A0.p + b.from0.GetEz() * h0);
+			b.from1.SetEx(A1.d);
+			b.from1.SetEy(Vector3(0, 1, 0));
+			b.from1.CalculateEz();
+			b.from1.SetOrigin(A1.p + b.from0.GetEz() * h1);
+			b.to0.SetEx(I0.d);
+			b.to0.SetEy(Vector3(0, 1, 0));
+			b.to0.CalculateEz();
+			b.to0.SetOrigin(I0.p);
+			b.to1.SetEx(I1.d);
+			b.to1.SetEy(Vector3(0, 1, 0));
+			b.to1.CalculateEz();
+			b.to1.SetOrigin(I1.p);
+			b.Calculate();
+
+//			resized.Transform(b);
+//			lastLeft.ApplyTransformation(b);
+//			lastRight.ApplyTransformation(b);
+//			lastPlane.ApplyTransformation(b);
+//			lastCenter.ApplyTransformation(b);
+
+		}
+
+	}
+
+	{
+		// Align centerlines
+
+		TransformationMixer m;
+		const size_t N = 20;
+		Polynom pDistance = Polynom::ByValue(0, -0.5, N - 1, 0.5);
+		pDistance.ScaleY(0.95);
+		pDistance.ShiftY(0.5);
+		pDistance.ScaleY(insoleCenter.GetLength());
+		Polynom dDistance = pDistance.Derivative();
+		const double width = dDistance(0);
+
+		for(size_t n = 0; n < N; ++n){
+			const double L0 = pDistance(n);
+			auto I0 = insoleCenter.At(L0);
+			auto A0 = lastCenter.At(L0);
+
+			Vector3 translate = I0.p - A0.p;
+			AffineTransformMatrix tr;
+			tr.TranslateGlobal(translate.x, translate.y, translate.z);
+//			m.AddPlane(A0.p, A0.d, Kernel::Scale(Kernel::Cauchy, width/10), tr);
+			m.AddCylinder(A0.p, Vector3(0, 1, 0),
+					Kernel::Scale(Kernel::Cauchy, width / 5), tr);
+		}
+		resized.Transform(m);
+		lastLeft.ApplyTransformation(m);
+		lastRight.ApplyTransformation(m);
+		lastPlane.ApplyTransformation(m);
+		lastCenter.ApplyTransformation(m);
+	}
+
+	{
+		// Scale width of the last
+
+		TransformationMixer m;
+		const size_t N = 6;
+		Polynom pDistance = Polynom::ByValue(0, -0.5, N - 1, 0.5);
+		pDistance.ScaleY(0.95);
+		pDistance.ShiftY(0.5);
+		pDistance.ScaleY(insoleCenter.GetLength());
+		Polynom dDistance = pDistance.Derivative();
+		const double width = dDistance(0);
+
+		Polygon3 sideCenter = lastLeft;
+		for(size_t n = 0; n < sideCenter.Size(); ++n)
+			sideCenter[n] += lastRight[n];
+		sideCenter /= 2;
+
+		for(size_t n = 0; n < N; ++n){
+			const double L0 = pDistance(n);
+
+			auto I0 = insoleCenter.At(L0);
+			size_t idx = I0.idx;
+			if(I0.rel > 0.5) ++idx;
+			Vector3 insoleR = insole.inside[idx];
+			Vector3 insoleL = insole.outside[idx];
+
+			auto A0 = lastCenter.At(L0);
+			size_t lastIdx = sideCenter.ClosestPoint(A0.p);
+
+			Vector3 lastR = lastRight[lastIdx];
+			Vector3 lastL = lastLeft[lastIdx];
+
+			AffineTransformMatrix tr;
+			const double sc = (insoleR.y - insoleL.y) / (lastR.y - lastL.y);
+			tr.ScaleGlobal(1, sc, 1);
+			tr.TranslateGlobal(0, (insoleR.y - lastR.y * sc), 0);
+
+//						m.AddPlane(A0.p, A0.d, Kernel::Scale(Kernel::Cauchy, width/10), tr);
+			m.AddCylinder(A0.p, Vector3(0, 1, 0),
+					Kernel::Scale(Kernel::Cauchy, width / 3), tr);
+		}
+		resized.Transform(m);
+		lastLeft.ApplyTransformation(m);
+		lastRight.ApplyTransformation(m);
+		lastPlane.ApplyTransformation(m);
+		lastCenter.ApplyTransformation(m);
+
+	}
+
+	{
+		// Scale girth of the last
+		TransformationMixer m;
+
+		const double width = insoleCenter.GetLength() / 20;
+
+		{
+			Vector3 n = (lastPlane[idxTop] - lastPlane[idxHeelPoint]).Normal();
+			Vector3 n2(-n.z, 0, n.x);
+			Polygon3 resizedHeelGirth = resized.IntersectPlane(n2,
+					n2.Dot(lastPlane[idxHeelPoint]));
+
+			const double a = atan2(n.z, n.x);
+			const Vector3 origin = lastPlane[idxHeelPoint];
+			AffineTransformMatrix tr;
+			const double scale = measurements.heelGirth.value
+					/ resizedHeelGirth.GetLength();
+			tr.ScaleGlobal(scale, 1, 1);
+
+			tr = AffineTransformMatrix::RotationXYZ(0, -a, 0) * tr
+					* AffineTransformMatrix::RotationXYZ(0, a, 0);
+
+			tr.TranslateGlobal(-origin.x, -origin.y, -origin.z);
+			tr.TranslateLocal(origin.x, origin.y, origin.z);
+
+			m.AddPlane(origin, n2, Kernel::Scale(Kernel::Cauchy, width), tr);
+		}
+		{
+			Vector3 n =
+					(lastPlane[idxWaistTop] - lastPlane[idxWaistBottom]).Normal();
+			Vector3 n2(-n.z, 0, n.x);
+			Polygon3 resizedWaistGirth = resized.IntersectPlane(n2,
+					n2.Dot(lastPlane[idxWaistBottom]));
+
+			const double a = atan2(n.z, n.x);
+			const Vector3 origin = lastPlane[idxWaistBottom];
+			AffineTransformMatrix tr;
+			const double scale = measurements.waistGirth.value
+					/ resizedWaistGirth.GetLength();
+			tr.ScaleGlobal(scale, 1, 1);
+
+			tr = AffineTransformMatrix::RotationXYZ(0, -a, 0) * tr
+					* AffineTransformMatrix::RotationXYZ(0, a, 0);
+
+			tr.TranslateGlobal(-origin.x, -origin.y, -origin.z);
+			tr.TranslateLocal(origin.x, origin.y, origin.z);
+
+			m.AddPlane(origin, n2, Kernel::Scale(Kernel::Cauchy, width), tr);
+
+		}
+		{
+			Vector3 n = (lastPlane[idxLittleToeTop]
+					- lastPlane[idxLittleToeBottom]).Normal();
+			Vector3 n2(-n.z, 0, n.x);
+			Polygon3 resizedLittleToeGirth = resized.IntersectPlane(n2,
+					n2.Dot(lastPlane[idxLittleToeBottom]));
+
+			const double a = atan2(n.z, n.x);
+			const Vector3 origin = lastPlane[idxLittleToeBottom];
+			AffineTransformMatrix tr;
+			const double scale = measurements.littleToeGirth.value
+					/ resizedLittleToeGirth.GetLength();
+			tr.ScaleGlobal(scale, 1, 1);
+
+			tr = AffineTransformMatrix::RotationXYZ(0, -a, 0) * tr
+					* AffineTransformMatrix::RotationXYZ(0, a, 0);
+
+			tr.TranslateGlobal(-origin.x, -origin.y, -origin.z);
+			tr.TranslateLocal(origin.x, origin.y, origin.z);
+
+			m.AddPlane(origin, n2, Kernel::Scale(Kernel::Cauchy, width), tr);
+
+		}
+		{
+			Vector3 n =
+					(lastPlane[idxBigToeTop] - lastPlane[idxBigToeBottom]).Normal();
+			Vector3 n2(-n.z, 0, n.x);
+			Polygon3 resizedBigToeGirth = resized.IntersectPlane(n2,
+					n2.Dot(lastPlane[idxBigToeBottom]));
+
+			const double a = atan2(n.z, n.x);
+			const Vector3 origin = lastPlane[idxBigToeBottom];
+			AffineTransformMatrix tr;
+			const double scale = measurements.bigToeGirth.value
+					/ resizedBigToeGirth.GetLength();
+			tr.ScaleGlobal(scale, 1, 1);
+
+			tr = AffineTransformMatrix::RotationXYZ(0, -a, 0) * tr
+					* AffineTransformMatrix::RotationXYZ(0, a, 0);
+
+			tr.TranslateGlobal(-origin.x, -origin.y, -origin.z);
+			tr.TranslateLocal(origin.x, origin.y, origin.z);
+
+			m.AddPlane(origin, n2, Kernel::Scale(Kernel::Cauchy, width), tr);
+		}
+
+		resized.Transform(m);
+		lastLeft.ApplyTransformation(m);
+		lastRight.ApplyTransformation(m);
+		lastPlane.ApplyTransformation(m);
+		lastCenter.ApplyTransformation(m);
+	}
+
+	{
+		// Align centerlines (again)
+
+		TransformationMixer m;
+		const size_t N = 20;
+		Polynom pDistance = Polynom::ByValue(0, -0.5, N - 1, 0.5);
+		pDistance.ScaleY(0.95);
+		pDistance.ShiftY(0.5);
+		pDistance.ScaleY(insoleCenter.GetLength());
+		Polynom dDistance = pDistance.Derivative();
+		const double width = dDistance(0);
+		const double scale = insoleCenter.GetLength() / lastCenter.GetLength();
+
+		for(size_t n = 0; n < N; ++n){
+			const double L0 = pDistance(n);
+			auto I0 = insoleCenter.At(L0);
+			auto A0 = lastCenter.At(L0 / scale);
+
+			Vector3 translate = I0.p - A0.p;
+			AffineTransformMatrix tr;
+			tr.TranslateGlobal(translate.x, translate.y, translate.z);
+			//			m.AddPlane(A0.p, A0.d, Kernel::Scale(Kernel::Cauchy, width/10), tr);
+			m.AddCylinder(A0.p, Vector3(0, 1, 0),
+					Kernel::Scale(Kernel::Cauchy, width / 5), tr);
+		}
+		resized.Transform(m);
+		lastLeft.ApplyTransformation(m);
+		lastRight.ApplyTransformation(m);
+		lastPlane.ApplyTransformation(m);
+		lastCenter.ApplyTransformation(m);
+	}
+
+//	TransformationMixerVector mixervector;
+//	TransformationMixer mixer;
+//	resized.Transform(mixervector);
+	return;
 	/*
 	 BoundingBox bb;
 	 for(size_t i = 0; i < hull.GetVertexCount(); ++i)
@@ -337,10 +703,6 @@ void LastModel::UpdateForm(const FootMeasurements& measurements)
 		Transform(b);
 	}
 
-}
-
-void LastModel::UpdatePosition(const Shoe& shoe, double offset)
-{
 //	NelderMeadOptimizer optim;
 //	optim.simplexSpread = 1e-3;
 //	optim.errorLimit = 1e-8;
@@ -355,7 +717,6 @@ void LastModel::UpdatePosition(const Shoe& shoe, double offset)
 //		center.SetBend(1.3, 0.75, 0.03, BendLine::Gauss);
 //		center.Finish();
 //	}
-
 }
 
 void LastModel::PaintMarker(const size_t idx, const OpenGLText &font,
@@ -379,7 +740,7 @@ void LastModel::PaintMarker(const size_t idx, const OpenGLText &font,
 
 }
 
-void LastModel::Paint(void) const
+void LastModel::PaintAnalysis(void) const
 {
 
 	OpenGLMaterial white(OpenGLMaterial::Preset::WhitePlastic, 1.0);
@@ -518,9 +879,13 @@ void LastModel::Paint(void) const
 //	tg.PaintLines();
 
 	OpenGLMaterial(OpenGLMaterial::Preset::cGray).UseMaterial(0.5);
-//	resized.Paint();
 	raw.Paint();
 //	rawBB.Paint();
+}
+
+void LastModel::Paint(void) const
+{
+	resized.Paint();
 }
 
 DependentVector LastModel::OrthogonalPoint(const Vector3 & p) const
@@ -569,6 +934,15 @@ void LastModel::Transform(std::function <Vector3(Vector3)> func)
 
 }
 
+void LastModel::Mirror(void)
+{
+	AffineTransformMatrix m;
+	m.ScaleGlobal(1, -1, 1);
+	for(size_t n = 0; n < resized.Size(); ++n)
+		resized[n] = m(resized[n]);
+	resized.FlipNormals();
+}
+
 bool LastModel::Vector3XLess(const Vector3 a, const Vector3 b)
 {
 	return a.x < b.x;
@@ -589,23 +963,23 @@ void LastModel::ReorientPCA(void)
 	for(size_t i = 0; i < raw.GetVertexCount(); ++i)
 		pca.Add(raw.GetVertex(i));
 	pca.Calculate();
-	// Make coordinate system right handed
+// Make coordinate system right handed
 	if((pca.X * pca.Y).Dot(pca.Z) > 0) pca.Y = -pca.Y;
-	// Remove orientation
+// Remove orientation
 	AffineTransformMatrix temp(pca.X, pca.Y, pca.Z, pca.center);
 	temp.Invert();
-	raw.ApplyTransformation(temp);
+	raw.Transform(temp);
 	UpdateRawBoundingBox();
 }
 
 bool LastModel::ReorientSymmetry(void)
 {
-	// Scan Shape for symmetry
+// Scan Shape for symmetry
 	{
 //		AffineTransformMatrix comp;
 //		comp *= AffineTransformMatrix::RotationAroundVector(Vector3(1, 0, 0),
 //				1.0);
-//		raw.ApplyTransformation(comp);
+//		raw.Transform(comp);
 //		UpdateRawBoundingBox();
 	}
 
@@ -650,14 +1024,14 @@ bool LastModel::ReorientSymmetry(void)
 //	std::cout << "Rotate by: " << (M_PI_2 - results[0].x) * 180.0 / M_PI
 //			<< " degrees.\n";
 
-	raw.ApplyTransformation(comp);
+	raw.Transform(comp);
 	UpdateRawBoundingBox();
 	return true;
 }
 
 bool LastModel::ReorientSole(void)
 {
-	// Find sole
+// Find sole
 	kde.Clear();
 	kde.XLinspace(0, 2 * M_PI, 360);
 	kde.XSetCyclic(2 * M_PI);
@@ -689,7 +1063,7 @@ bool LastModel::ReorientSole(void)
 	AffineTransformMatrix comp;
 	comp *= AffineTransformMatrix::RotationAroundVector(Vector3(1, 0, 0),
 			3 * M_PI_2 - results[0].x);
-	raw.ApplyTransformation(comp);
+	raw.Transform(comp);
 	UpdateRawBoundingBox();
 	return true;
 }
@@ -722,7 +1096,7 @@ void LastModel::ReorientFrontBack(void)
 	if(pr(0.5) > 0.0){
 		// Reverse last
 //		std::cout << "Reverse last.\n";
-		raw.ApplyTransformation(
+		raw.Transform(
 				AffineTransformMatrix::RotationAroundVector(Vector3(0, 0, 1),
 				M_PI));
 		UpdateRawBoundingBox();
@@ -749,7 +1123,7 @@ void LastModel::ReorientFrontBack(void)
 //			if(pp > pn && pp < 1.0 && pn > 0.0){
 //				// Revert last
 //				std::cout << "Rotate last by 180.\n";
-//				hull.ApplyTransformation(
+//				hull.Transform(
 //						AffineTransformMatrix::RotationAroundVector(
 //								Vector3(0, 0, 1),
 //								M_PI));
@@ -760,13 +1134,13 @@ void LastModel::ReorientFrontBack(void)
 void LastModel::ReorientLeftRight(void)
 {
 
-	// Scan for left/right
+// Scan for left/right
 
-	//		double ip = 0.5;
+//		double ip = 0.5;
 	loop.Clear();
 
-	//		kde.XLinspace(0, 1, 100);
-	//		kde.XSetLinear();
+//		kde.XLinspace(0, 1, 100);
+//		kde.XSetLinear();
 	AffineTransformMatrix bbc = rawBB.GetCoordinateSystem();
 	for(double cut = 0.1; cut < 0.91; cut += 0.1){
 		Polygon3 section = raw.IntersectPlane(Vector3(1, 0, 0),
@@ -780,7 +1154,7 @@ void LastModel::ReorientLeftRight(void)
 		//			kde.Insert(cut, bb2.GetSizeZ() / bb2.GetSizeY(), 0.3,
 		//					KernelDensityEstimator::TriweightKernel);
 	}
-	//		kde.NormalizeByWeightSum();
+//		kde.NormalizeByWeightSum();
 
 	std::vector <double> temp = loop.GetYVectorD();
 	PolyFilter pf(2, loop.Size());
@@ -789,9 +1163,9 @@ void LastModel::ReorientLeftRight(void)
 
 	py.ScaleX(0.1);
 
-	//		test.Clear();
-	//		for(double r = 0; r <= 1; r += 0.01)
-	//			test += Vector3(bb.xmin + bb.GetSizeX() * r, py.Evaluate(r), 0.0);
+//		test.Clear();
+//		for(double r = 0; r <= 1; r += 0.01)
+//			test += Vector3(bb.xmin + bb.GetSizeX() * r, py.Evaluate(r), 0.0);
 
 	py.ScaleX(1.0 / rawBB.GetSizeX()); // Normale with lastlength
 	py.ScaleY(1.0 / rawBB.GetSizeY()); // Normalize with lastwidth
@@ -799,18 +1173,18 @@ void LastModel::ReorientLeftRight(void)
 			//		std::cout << "py = " << py << ";\n";
 
 	double chir = py[0];
-	//		if(py[0] > 1.0) std::cout << "Right last\n";
-	//		if(py[0] < -1.0) std::cout << "Left last\n";
+//		if(py[0] > 1.0) std::cout << "Right last\n";
+//		if(py[0] < -1.0) std::cout << "Left last\n";
 
-	//		pf.Export("/tmp/pf.mat");
+//		pf.Export("/tmp/pf.mat");
 
-	//		if(pz.InflectionPoint(ip)) std::cout << "Inflection point: " << ip
-	//				<< "\n";
+//		if(pz.InflectionPoint(ip)) std::cout << "Inflection point: " << ip
+//				<< "\n";
 
-	//		coordsys.SetCenter(Vector3(bb.xmin, 0, 0));
-	//		coordsys.SetEx(Vector3(bb.GetSizeX(), 0, 0));
-	//		coordsys.SetEy(Vector3(0, 0, 1));
-	//		coordsys.CalculateEz();
+//		coordsys.SetCenter(Vector3(bb.xmin, 0, 0));
+//		coordsys.SetEx(Vector3(bb.GetSizeX(), 0, 0));
+//		coordsys.SetEy(Vector3(0, 0, 1));
+//		coordsys.CalculateEz();
 	kde.Clear();
 	kde.XLinspace(0, 2 * M_PI, 360);
 	kde.XSetCyclic(2 * M_PI);
@@ -829,8 +1203,8 @@ void LastModel::ReorientLeftRight(void)
 
 	kde.Normalize();
 
-	//		kde.Attenuate(0, 0.75, 0.5, KernelDensityEstimator::CauchyKernel);
-	//		kde.Attenuate(M_PI, 0.75, 0.5, KernelDensityEstimator::CauchyKernel);
+//		kde.Attenuate(0, 0.75, 0.5, KernelDensityEstimator::CauchyKernel);
+//		kde.Attenuate(M_PI, 0.75, 0.5, KernelDensityEstimator::CauchyKernel);
 
 	double minRight = 1e9;
 	double minLeft = 1e9;
@@ -842,28 +1216,28 @@ void LastModel::ReorientLeftRight(void)
 
 	}
 
-	//		std::cout << "minLeft = " << minLeft << ";\n";
-	//		std::cout << "minRight = " << minRight << ";\n";
+//		std::cout << "minLeft = " << minLeft << ";\n";
+//		std::cout << "minRight = " << minRight << ";\n";
 
 	chir += 4.0 * (minLeft - minRight) / (minLeft + minRight);
 
 	if(chir < -0.5){
 		AffineTransformMatrix temp;
 		temp.ScaleGlobal(1.0, -1.0, 1.0);
-		raw.ApplyTransformation(temp);
+		raw.Transform(temp);
 
 		//			std::cout << "Flip sides left to right.\n";
 
 		UpdateRawBoundingBox();
 	}
 
-	//		std::cout << chir << " ";
-	//		if(chir > 0.0)
-	//			std::cout << " = Right last ";
-	//		else
-	//			std::cout << " = Left last ";
-	//		if(fabs(chir) < 0.5) std::cout << "(Insole recommended)";
-	//		std::cout << "\n";
+//		std::cout << chir << " ";
+//		if(chir > 0.0)
+//			std::cout << " = Right last ";
+//		else
+//			std::cout << " = Left last ";
+//		if(fabs(chir) < 0.5) std::cout << "(Insole recommended)";
+//		std::cout << "\n";
 
 }
 
@@ -929,15 +1303,15 @@ void LastModel::FindAndReorientCenterplane(void)
 
 		AffineTransformMatrix temp = AffineTransformMatrix::RotationXYZ(0,
 				topangle - M_PI_2, 0);
-		raw.ApplyTransformation(temp);
+		raw.Transform(temp);
 
-		planeXZ.ApplyTransformation(temp);
+		planeXZ.Transform(temp);
 		UpdateRawBoundingBox();
 		bbc = rawBB.GetCoordinateSystem();
 		planeXZ.RotateOrigin(bbc.Transform(Vector3(0, 0.5, 3)));
 	}
 
-	// Calculate the angles on the the shape
+// Calculate the angles on the the shape
 	{
 		planeXZ.Filter(11);
 		const size_t N = planeXZ.Size();
@@ -962,7 +1336,7 @@ bool LastModel::FindMarker(void)
 
 	const size_t N = planeXZ.Size();
 
-	// Temporary markerpoints for the top of the last
+// Temporary markerpoints for the top of the last
 	{
 		idxZero = angleXZ.IatY(toRad(-160),
 				DependentVector::Direction::first_risingabove);
@@ -971,7 +1345,7 @@ bool LastModel::FindMarker(void)
 				DependentVector::Direction::last_risingabove);
 	}
 
-	// Temporary markerpoints for toes and heel
+// Temporary markerpoints for toes and heel
 	{
 		idxHeel = angleXZ.IatY(toRad(-90),
 				DependentVector::Direction::first_risingabove);
@@ -983,7 +1357,7 @@ bool LastModel::FindMarker(void)
 		if(idxToeTip > angleXZ.Size()) return false;
 	}
 
-	// Estimate the angles for the heel and ball area of the sole
+// Estimate the angles for the heel and ball area of the sole
 	{
 		MEstimator estheel;
 		estheel.XLinspace(toRad(-90), toRad(90), 301);
@@ -1016,11 +1390,13 @@ bool LastModel::FindMarker(void)
 		}
 	}
 
-	// Recalculate toe & heel and support points.
+// Recalculate toe & heel and support points.
 	{
-		idxHeelPoint = angleXZ.IatY(heela - toRad(30),
+		idxHeelPoint = angleXZ.IatY(heela - param_soleangle,
 				DependentVector::Direction::first_risingabove);
 		idxToeTip = angleXZ.IatY(toea + toRad(90),
+				DependentVector::Direction::first_risingabove);
+		idxToePoint = angleXZ.IatY(toea + param_soleangle,
 				DependentVector::Direction::first_risingabove);
 
 		const double xheel = angleXZ.X(idxHeelPoint);
@@ -1035,10 +1411,10 @@ bool LastModel::FindMarker(void)
 				DependentVector::Direction::last_risingabove, 0, idxHeelCenter);
 	}
 
-	// Mark left and right outside lines
+// Mark left and right outside lines
 	FindOutline();
 
-	// Find the ball measurement angle
+// Find the ball measurement angle
 	{
 		const Vector3 p = planeXZ[idxLittleToeBottom];
 		Vector3 a, b;
@@ -1064,7 +1440,7 @@ bool LastModel::FindMarker(void)
 		idxBigToeBottom = angleXZ.IatX(xBigToe);
 	}
 
-	// Recalculate heel point
+// Recalculate heel point
 	{
 		const double xfront = angleXZ.X(idxTop);
 		const double xend = angleXZ.X(idxZero) + 1.0;
@@ -1076,9 +1452,9 @@ bool LastModel::FindMarker(void)
 		if(temp < idxHeelCenter) idxHeelCenter = temp;
 	}
 
-	// Place the marker on top of the last
-	// The markers are place so that a measurement tape wrapped around
-	// the last would be shortest.
+// Place the marker on top of the last
+// The markers are place so that a measurement tape wrapped around
+// the last would be shortest.
 	{
 		size_t idx0 = angleXZ.IatY(toea + toRad(135),
 				DependentVector::Direction::first_risingabove);
@@ -1106,7 +1482,7 @@ bool LastModel::FindMarker(void)
 //		debugA = est;
 //	}
 
-	// Estimate the position of the foot arch
+// Estimate the position of the foot arch
 //	bool hasArchArea = false;
 //	{
 //		auto valleys = angleXZ.FindValleys(M_PI, idxHeelCenter, idxToeCenter);
@@ -1180,7 +1556,7 @@ bool LastModel::FindMarker(void)
 //		}
 //		debug2 = est;
 //	}
-	// Estimate angle and position of heel-area
+// Estimate angle and position of heel-area
 //	{
 //		MEstimator est;
 //		est.XLinspace(toRad(-90), toRad(90), 301);
@@ -1245,7 +1621,7 @@ bool LastModel::FindMarker(void)
 //	for(size_t n = 0; n < debug2.Size(); ++n)
 //		debug2.Y(n) = e.Rho(debug2.X(n) / 0.05);
 
-	// Statistics for magic numbers
+// Statistics for magic numbers
 //	{
 //		const double A0 = test.X(idxToeTip) - test.X(idxHeelPoint);
 //		for(size_t n = 3; n < 9; ++n){
@@ -1253,7 +1629,7 @@ bool LastModel::FindMarker(void)
 //			std::cout << (char) ('@' + n) << " - " << 100 * A1 / A0 << "%\n";
 //		}
 //	}
-	// Extramarkers for heel and toeangle
+// Extramarkers for heel and toeangle
 
 //	est.XLinspace(-M_PI, M_PI, 301);
 //	auto f = MEstimator::AndrewWave();
@@ -1262,8 +1638,8 @@ bool LastModel::FindMarker(void)
 //	est *= 2;
 //	est.XLinspace(0, 1, 301);
 
-	// Rescale test for displaying.
-	//	angleXZ /= M_PI;
+// Rescale test for displaying.
+//	angleXZ /= M_PI;
 	return true;
 }
 
@@ -1295,11 +1671,9 @@ void LastModel::MarkMeasurements(void)
 
 void LastModel::FindOutline(void)
 {
-	// Find the outline of the sole
+// Find the outline of the sole
 
 //		loop = hull.IntersectPlane(Vector3(0, 1, 0), bbc.GlobalY(0, 0.5));
-
-	const double param_soleangle = 35 * M_PI / 180;
 
 	const size_t Ncut = 50;
 
@@ -1412,7 +1786,7 @@ bool LastModel::AnalyseForm(void)
 
 //	FindOutline();
 
-	// For Testing purposes change front and back.
+// For Testing purposes change front and back.
 //	{
 //		hull.ApplyTransformation(
 //				AffineTransformMatrix::RotationAroundVector(Vector3(0, 0, 1),

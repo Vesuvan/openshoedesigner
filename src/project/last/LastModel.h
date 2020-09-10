@@ -41,6 +41,7 @@
  */
 
 #include <stddef.h>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -52,6 +53,7 @@
 #include "../../math/FormFinder.h"
 #include "../../math/Symmetry.h"
 
+class Insole;
 class OpenGLText;
 class FootMeasurements;
 class Shoe;
@@ -96,6 +98,7 @@ private:
 	size_t idxLittleToeBottom = 0;
 	size_t idxBigToeBottom = 0;
 	size_t idxToeCenter = 0;
+	size_t idxToePoint = 0;
 	size_t idxToeTip = 0;
 	size_t idxBigToeTop = 0;
 	size_t idxLittleToeTop = 0;
@@ -116,6 +119,9 @@ private:
 	TestGrid tg;
 
 public:
+
+	double param_soleangle = 35 * M_PI / 180;
+
 	Hull resized;
 	bool mirrored = false;
 
@@ -131,10 +137,12 @@ public:
 
 	void Transform(std::function <Vector3(Vector3)> func);
 
-	void UpdateForm(const FootMeasurements &measurements);
-	void UpdatePosition(const Shoe &shoe, double offset = 0.0);
+	void UpdateForm(const Insole & insole, const FootMeasurements & measurements);
 
 	void Paint(void) const;
+	void PaintAnalysis(void) const;
+
+	void Mirror(void);
 
 	bool IsModified(void) const;
 	void Modify(bool modified = true);

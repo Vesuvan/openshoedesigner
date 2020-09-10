@@ -126,7 +126,7 @@ Polygon3 HeightField::GetUnderline(void) const
 		p.x += dx;
 	}
 
-	temp.ApplyTransformation(this->matrix);
+	temp.Transform(this->matrix);
 	return temp;
 }
 

@@ -47,6 +47,14 @@ class Polygon3 {
 public:
 	Polygon3();
 
+	struct Point {
+		size_t idx = 0;
+		double rel = 0.0;
+		Vector3 p;
+		Vector3 n;
+		Vector3 d;
+	};
+
 	// Member variables
 public:
 
@@ -91,6 +99,7 @@ public:
 
 	void Reverse(void); ///< Reverse the direction of the polygon
 
+	size_t ClosestPoint(const Vector3 & p) const; ///< Returns the closest index for the given point.
 	void RotateOrigin(const Vector3 & p); ///< Rotate the first point of the polygon close to the given point.
 	void RemoveZeroLength(void); ///< Remove all segments from the polygon, that have a length of zero
 
@@ -106,7 +115,7 @@ public:
 	 * The matrix belonging to the polygon itself stays unchanged.
 	 * @param matrix AffineTransformMatrix with the transform operation
 	 */
-	void ApplyTransformation(const AffineTransformMatrix &matrix);
+	void Transform(const AffineTransformMatrix &matrix);
 	void ApplyTransformation(const std::function <Vector3(Vector3)> transform);
 
 	Polygon3 & operator/=(const double val);
@@ -126,6 +135,9 @@ public:
 	const Vector3& operator[](size_t index) const;
 	Vector3& Normal(size_t index);
 	const Vector3& Normal(size_t index) const;
+	Vector3 Direction(size_t index) const;
+
+	Point At(double L) const;
 
 	/*! \brief Get the center of the Polygon.
 	 *

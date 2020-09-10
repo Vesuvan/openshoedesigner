@@ -688,21 +688,21 @@ Vector3 Hull::GetCenter(void) const
 	return (temp / v.size());
 }
 
-void Hull::ApplyTransformation(void)
+void Hull::ApplyTransformationMatrix(void)
 {
-	this->ApplyTransformation(this->matrix);
+	this->Transform(this->matrix);
 	this->matrix.SetIdentity();
 }
 
-void Hull::ApplyTransformation(const AffineTransformMatrix &matrix)
+void Hull::Transform(const AffineTransformMatrix &matrix)
 {
 	std::transform(v.begin(), v.end(), v.begin(), matrix);
 	for(size_t i = 0; i < vn.size(); i++)
-		vn[i] = matrix.TransformNoShift(vn[i]);
+		vn[i] = matrix.TransformNoShift(vn[i]).Normal();
 	for(size_t i = 0; i < e.size(); i++)
-		e[i].n = matrix.TransformNoShift(e[i].n);
+		e[i].n = matrix.TransformNoShift(e[i].n).Normal();
 	for(size_t i = 0; i < t.size(); i++)
-		t[i].n = matrix.TransformNoShift(t[i].n);
+		t[i].n = matrix.TransformNoShift(t[i].n).Normal();
 
 	if(matrix.CheckOrientation() == AffineTransformMatrix::Orientation::LHS){
 		for(size_t i = 0; i < t.size(); i++){
@@ -710,6 +710,11 @@ void Hull::ApplyTransformation(const AffineTransformMatrix &matrix)
 			std::swap(t[i].eb, t[i].ec);
 		}
 	}
+}
+
+void Hull::Transform(std::function <Vector3(Vector3)> func)
+{
+	std::transform(v.begin(), v.end(), v.begin(), func);
 }
 
 void Hull::CalcNormals(void)
@@ -751,12 +756,16 @@ void Hull::CalcNormals(void)
 
 void Hull::FlipNormals(void)
 {
-	for(size_t i = 0; i < t.size(); ++i)
-		t[i].n = -t[i].n;
-	for(size_t i = 0; i < vn.size(); ++i)
-		vn[i] = -vn[i];
-	for(size_t i = 0; i < e.size(); ++i)
-		e[i].n = -e[i].n;
+//	for(size_t i = 0; i < t.size(); ++i)
+//		t[i].n = -t[i].n;
+//	for(size_t i = 0; i < vn.size(); ++i)
+//		vn[i] = -vn[i];
+//	for(size_t i = 0; i < e.size(); ++i)
+//		e[i].n = -e[i].n;
+	for(size_t i = 0; i < t.size(); i++){
+		std::swap(t[i].va, t[i].vb);
+		std::swap(t[i].eb, t[i].ec);
+	}
 }
 
 void Hull::ResetGroups(void)
@@ -906,6 +915,7 @@ Vector3& Hull::operator [](size_t index)
 {
 	return v[index];
 }
+
 Vector3 Hull::PlaneProjection(const Vector3& a, const Vector3& b, Vector3 n,
 		double d)
 {

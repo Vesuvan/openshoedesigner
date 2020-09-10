@@ -110,7 +110,8 @@ public:
 
 	// +++ Shoe +++
 	Shoe shoe;
-	Insole insole;
+	Insole insoleL;
+	Insole insoleR;
 
 	// Last to generate
 	Last lastL;

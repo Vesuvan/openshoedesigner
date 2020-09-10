@@ -88,7 +88,6 @@ public:
 
 private:
 	void PaintLast(void) const;
-	void PaintInsole(void) const;
 	void PaintSole(void) const;
 	void PaintUpper(void) const;
 	void PaintCutaway(void) const;

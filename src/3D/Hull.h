@@ -43,6 +43,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <set>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -133,8 +134,9 @@ public:
 	size_t UnselectByNormal(Vector3 n, double limit = 0.0);
 	size_t CountSelected(void) const;
 
-	void ApplyTransformation(const AffineTransformMatrix &matrix);
-	void ApplyTransformation(void);
+	void Transform(const AffineTransformMatrix &matrix);
+	void Transform(std::function <Vector3(Vector3)> func);
+	void ApplyTransformationMatrix(void);
 
 	void CopyFrom(const Geometry &geometry);
 	void AddTrianglesFrom(const Geometry &geometry);

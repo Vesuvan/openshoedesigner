@@ -45,20 +45,6 @@ class Shoe;
 
 class Insole {
 public:
-	void Construct(const Shoe & shoe, const FootMeasurements & measurements);
-	void FinishConstruction(const double dx);
-	void Paint(void) const;
-
-	void Transform(std::function <Vector3(Vector3)> func);
-	void Shape(const Shoe & shoe);
-
-	bool IsModified(void) const;
-	void Modify(bool modify = true);
-
-	Polygon3 inside;
-	Polygon3 outside;
-
-private:
 	struct Point {
 	public:
 		Vector3 p;
@@ -66,6 +52,7 @@ private:
 		void SetNormal(const Point & p0, const Point & p1);
 		void Transform(std::function <Vector3(Vector3)> func);
 	};
+private:
 	struct Line {
 	public:
 		// Bezier-Circle: sqrt(2) * f = 0.551915024494 --> f = 0.39
@@ -77,10 +64,26 @@ private:
 		Polynom z;
 	};
 
+public:
+	void Construct(const Shoe & shoe, const FootMeasurements & measurements);
+	void FinishConstruction(const double dx);
+	void Paint(void) const;
+
+	void Transform(std::function <Vector3(Vector3)> func);
+	void Shape(const Shoe & shoe, double legLengthDifference);
+	void Mirror(bool isleft = true);
+
+	bool IsModified(void) const;
+	void Modify(bool modify = true);
+
+	Polygon3 inside;
+	Polygon3 outside;
+
 	Point A, B, C, D, E, F, G, H, J, K, L, N, Z;
 
 private:
 	std::vector <Line> lines;
+	bool leftside = false;
 	bool modified = true;
 };
 

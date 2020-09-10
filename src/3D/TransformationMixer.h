@@ -58,6 +58,9 @@ public:
 	TransformationMixer() = default;
 	virtual ~TransformationMixer() = default;
 
+	void SetBackground(double strength = 1.0, AffineTransformMatrix matrix =
+			AffineTransformMatrix::Identity());
+
 	size_t AddSphere(Vector3 center,
 			const std::function <double(double)> kernel,
 			AffineTransformMatrix matrix = AffineTransformMatrix::Identity());
@@ -77,9 +80,11 @@ public:
 
 	Vector3 operator()(const Vector3 & v) const;
 
-	bool useNullFeld = true;
 private:
+	double background = 1e-6;
+	AffineTransformMatrix backgroundmatrix;
 	std::vector <Element> elements;
+
 	// Preallocated string for speedup
 	mutable std::valarray <double> mixing;
 };

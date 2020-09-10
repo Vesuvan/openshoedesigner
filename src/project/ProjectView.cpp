@@ -53,8 +53,8 @@ ProjectView::ProjectView()
 	showSkin = false;
 	showLeg = false;
 
-	showLastScan = true;
-	showLast = false;
+	showLastScan = false;
+	showLast = true;
 	showInsole = true;
 	showSole = false;
 	showUpper = false;
@@ -205,26 +205,26 @@ void ProjectView::Paint(bool usePicking) const
 			glPopName();
 		}
 
-		if(project->modeltype == Project::ModelType::lastBased && showLastScan){
+		if(project->modeltype == Project::ModelType::lastBased && showLast){
 			glPushName(3);
 			matScan.UseMaterial();
 			project->lastModelL.Paint();
 			glPopName();
 		}
 
-		if(showLast){
-			glPushName(3);
-			matLast.UseMaterial();
-			project->lastL.Paint();
-			glPopName();
-		}
+//		if(showLast){
+//			glPushName(3);
+//			matLast.UseMaterial();
+//			project->lastL.Paint();
+//			glPopName();
+//		}
 
 		if(showInsole){
 			glPushName(4);
-			matLines.UseMaterial();
-			project->bow.Paint();
+//			matLines.UseMaterial();
+//			project->bow.Paint();
 			matInsole.UseMaterial();
-			PaintInsole();
+			project->insoleL.Paint();
 			glPopName();
 		}
 
@@ -280,26 +280,24 @@ void ProjectView::Paint(bool usePicking) const
 			glPopName();
 		}
 
-		if(project->modeltype == Project::ModelType::lastBased && showLastScan){
+		if(project->modeltype == Project::ModelType::lastBased && showLast){
 			glPushName(3);
 			matScan.UseMaterial();
 			project->lastModelR.Paint();
 			glPopName();
 		}
 
-		if(showLast){
-			glPushName(3);
-			matLast.UseMaterial();
-			project->lastR.Paint();
-			glPopName();
-		}
+//		if(showLast){
+//			glPushName(3);
+//			matLast.UseMaterial();
+//			project->lastR.Paint();
+//			glPopName();
+//		}
 
 		if(showInsole){
 			glPushName(4);
-			matLines.UseMaterial();
-			project->bow.Paint();
 			matInsole.UseMaterial();
-			PaintInsole();
+			project->insoleR.Paint();
 			glPopName();
 		}
 
@@ -343,31 +341,6 @@ void ProjectView::PaintLast(void) const
 //	project->lastvol.PaintSurface();
 }
 
-void ProjectView::PaintInsole(void) const
-{
-	Project* project = wxStaticCast(this->GetDocument(), Project);
-
-	project->insole.Paint();
-
-//	project->lastModelL.Paint();
-
-//	glColor3f(0.0, 0.75, 0.0);
-//	glBegin(GL_LINES);
-//	for(unsigned int i = 0; i < bow.elements.GetCount() - 1; i++){
-//		Vector3 temp = bow.elements[i + 1] - bow.elements[i];
-//		temp.Normalize();
-//		glNormal3f(temp.x, temp.y, temp.z);
-//		temp = temp * Vector3(0, -1, 0);
-//		temp = lastvol.GetSurface(bow.elements[i], temp);
-//
-//		glVertex3f(bow.elements[i].x, bow.elements[i].y, bow.elements[i].z);
-//		glVertex3f(bow.elements[i].x + temp.x, bow.elements[i].y + temp.y,
-//				bow.elements[i].z + temp.z);
-//		glVertex3f(temp.x, temp.y, temp.z);
-//	}
-//	glEnd();
-}
-
 void ProjectView::PaintSole(void) const
 {
 //	Project* project = wxStaticCast(this->GetDocument(), Project);
@@ -379,7 +352,7 @@ void ProjectView::PaintUpper(void) const
 {
 	Project* project = wxStaticCast(this->GetDocument(), Project);
 	glColor3f(0.1, 0.4, 0.0);
-	project->lastModelL.Paint();
+	project->lastModelL.PaintAnalysis();
 
 }
 
