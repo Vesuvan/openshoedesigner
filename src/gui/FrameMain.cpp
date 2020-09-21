@@ -672,7 +672,9 @@ void FrameMain::OnTextEnter(wxCommandEvent& event)
 	case ID_MEASUREMENT_HEELWIDTH:
 	case ID_MEASUREMENT_ANGLEMIXING:
 	case ID_MEASUREMENT_LEGLENGTHDIFFERENCE:
-		m_panelPageFoot->Navigate();
+		m_panelPageFoot->Navigate(
+				wxNavigationKeyEvent::FromTab
+						| wxNavigationKeyEvent::IsForward);
 		break;
 	case ID_MEASUREMENT_BELOWCRUTCHGIRTH:
 	case ID_MEASUREMENT_BELOWCRUTCHLEVEL:
@@ -690,7 +692,9 @@ void FrameMain::OnTextEnter(wxCommandEvent& event)
 	case ID_MEASUREMENT_ABOVEANKLELEVEL:
 	case ID_MEASUREMENT_OVERANKLEBONEGIRTH:
 	case ID_MEASUREMENT_OVERANKLEBONELEVEL:
-		m_panelPageLeg->Navigate();
+		m_panelPageLeg->Navigate(
+				wxNavigationKeyEvent::FromTab
+						| wxNavigationKeyEvent::IsForward);
 		break;
 	case ID_HEELHEIGHT:
 	case ID_BALLHEIGHT:
@@ -699,7 +703,9 @@ void FrameMain::OnTextEnter(wxCommandEvent& event)
 	case ID_UPPERLEVEL:
 	case ID_EXTRALENGTH:
 	case ID_FOOTCOMPRESSION:
-		m_panelPageShoe->Navigate();
+		m_panelPageShoe->Navigate(
+				wxNavigationKeyEvent::FromTab
+						| wxNavigationKeyEvent::IsForward);
 		break;
 	}
 }

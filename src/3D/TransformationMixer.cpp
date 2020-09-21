@@ -133,16 +133,16 @@ Vector3 TransformationMixer::operator ()(const Vector3& v) const
 	double back = background - sum;
 	if(back < 0.0) back = 0.0;
 	sum += back;
-	if(fabs(sum) <= 1e-9) return v;
+	if(fabs(sum) <= 1e-12) return v;
 
 	mixing /= sum;
 	back /= sum;
 	Vector3 temp = backgroundmatrix(v) * back;
 	n = 0;
 	for(auto & e : elements){
-		if(fabs(mixing[n]) < 1e-9) continue;
-		temp += e.m.Transform(v) * mixing[n];
 		++n;
+		if(fabs(mixing[n - 1]) < 1e-12) continue;
+		temp += e.m(v) * mixing[n - 1];
 	}
 	return temp;
 }

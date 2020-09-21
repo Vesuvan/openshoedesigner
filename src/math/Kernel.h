@@ -85,7 +85,7 @@
  *
  * 		ke = @(x) 3/4*max((1-x.^2),0);
  *
- * * Gauss Kernel (standard normal distributed kernel)
+ * * Gaussian Kernel (standard normal distributed kernel)
  *
  * 		kg = @(x) exp(-(x.^2)/2)/sqrt(2*pi);
  *

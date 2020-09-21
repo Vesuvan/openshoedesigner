@@ -33,9 +33,12 @@
  * ...
  */
 
+#include <stddef.h>
+#include <functional>
+#include <vector>
+
 #include "BoundingBox.h"
 #include "Vector3.h"
-#include <vector>
 
 class TestGrid:public BoundingBox {
 public:
@@ -45,6 +48,8 @@ public:
 
 	void SetCellSize(double d);
 	void Reset(void);
+	void Transform(std::function <Vector3(Vector3)> func);
+
 	void PaintPoints(void) const;
 	void PaintLines(void) const;
 

@@ -50,7 +50,7 @@
 #include "../../3D/OpenGL.h"
 #include "../../3D/OpenGLText.h"
 #include "../../3D/TransformationMixer.h"
-#include "../../3D/TransformationMixerVector.h"
+#include "../../math/LinearOptimizer.h"
 #include "../../math/MEstimator.h"
 #include "../Insole.h"
 
@@ -152,6 +152,7 @@ bool LastModel::LoadModel(std::string filename)
 			std::cout << "Hull has open edges." << "\n";
 		}
 		AnalyseForm();
+		Modify(true);
 		return true;
 	}
 	if(extension.compare("stl") == 0){
@@ -165,15 +166,102 @@ bool LastModel::LoadModel(std::string filename)
 		}
 		raw.CalcNormals();
 		AnalyseForm();
+		Modify(true);
 		return true;
 	}
 	if(extension.compare("obj") == 0){
 		if(raw.LoadObj(filename)){
 			AnalyseForm();
+			Modify(true);
 			return true;
 		}
 	}
 	return false;
+}
+
+LastModel::Cut LastModel::CalculateCut(const Hull& hull, const Vector3& p0,
+		const Vector3& p1)
+{
+	Vector3 n = (p1 - p0).Normal();
+	Vector3 n2(-n.z, 0, n.x);
+	LastModel::Cut temp;
+	temp.p = hull.IntersectPlane(n2, n2.Dot(p0));
+	temp.m.SetOrigin(p0);
+	temp.m.SetEx(n);
+	temp.m.SetEy(Vector3(0, 1, 0));
+	temp.m.SetEz(n2);
+	return temp;
+}
+
+BoundingBox LastModel::CalculateBoundingBox(const Polygon3& polygon) const
+{
+	BoundingBox temp;
+	const size_t N = polygon.Size();
+	for(size_t n = 0; n < N; ++n)
+		temp.Insert(polygon[n]);
+	return temp;
+}
+
+AffineTransformMatrix LastModel::RotatedScale(const Cut& c, double target) const
+{
+	const Vector3 n = c.m.GetEx();
+	const double angle = atan2(-n.z, n.x);
+	const AffineTransformMatrix rotBack = AffineTransformMatrix::RotationXYZ(0,
+			-angle, 0);
+	const AffineTransformMatrix rotForward = AffineTransformMatrix::RotationXYZ(
+			0, angle, 0);
+
+	Polygon3 base = c.p;
+	base.Transform(rotBack);
+	BoundingBox bb = CalculateBoundingBox(base);
+	const double a = bb.GetSizeY() / 2.0;
+	const double b = bb.GetSizeX() / 2.0;
+	const double bTarget = target / M_PI - b;
+	const double bCurrent = c.p.GetLength() / M_PI - b;
+	const double scale = bTarget / bCurrent;
+
+	AffineTransformMatrix tr;
+
+	tr.ScaleGlobal(scale, 1.0, 1.0);
+	tr = rotForward * tr * rotBack;
+	Vector3 origin = c.m.GetOrigin();
+	tr.TranslateGlobal(-origin.x, -origin.y, -origin.z);
+	tr.TranslateLocal(origin.x, origin.y, origin.z);
+
+	base = c.p;
+	base.Transform(tr);
+	double L2 = base.GetLength();
+
+	Polynom p = Polynom::ByValue(1.0, c.p.GetLength(), scale, L2) - target;
+
+	double scale2 = p.FindZero(1.0);
+	tr.SetIdentity();
+	tr.ScaleGlobal(scale2, 1.0, 1.0);
+	tr = rotForward * tr * rotBack;
+	origin = c.m.GetOrigin();
+	tr.TranslateGlobal(-origin.x, -origin.y, -origin.z);
+	tr.TranslateLocal(origin.x, origin.y, origin.z);
+
+//	LinearOptimizer opt;
+//	opt.param = 1.0;
+//	opt.spread = 0.5;
+//	opt.Start();
+//	try {
+//		while (opt.IsRunning()) {
+//			opt.SetError(L2 - target);
+//		}
+//	} catch (const std::exception & ex) {
+//		std::cout << "Exception: " << ex.what() << "\n";
+//	}
+
+//
+//	BoundingBox bbRaw = CalculateBoundingBox(c.p);
+//	Vector3 nNew = base.GetRotationalAxis();
+//	Vector3 nRaw = c.p.GetRotationalAxis();
+//	auto U =
+//			[](double a, double b) {const double L = (a-b)*(a-b)/((a+b)*(a+b)); return M_PI*(a+b)*(1+3*L/(10+sqrt(4-3*L)));};
+
+	return tr;
 }
 
 void LastModel::UpdateForm(const Insole & insole,
@@ -181,6 +269,9 @@ void LastModel::UpdateForm(const Insole & insole,
 {
 	resized = raw;
 //	resized.smooth = true;
+	tg = TestGrid(Vector3(-0.1, -0.1, -0.2), Vector3(0.3, 0.1, 0.2));
+	tg.SetCellSize(0.01);
+	tg.Reset();
 
 	Polygon3 lastPlane = planeXZ;
 	Polygon3 lastLeft = bottomleft;
@@ -229,7 +320,6 @@ void LastModel::UpdateForm(const Insole & insole,
 		// Adjust last angles
 
 		Polynom pDistance = Polynom::ByValue(0, 0, 1, insoleCenter.GetLength());
-
 		Bender b;
 
 		Vector3 c0 = (lastPlane[idxHeelPoint] + lastPlane[idxTop]) / 2;
@@ -273,6 +363,7 @@ void LastModel::UpdateForm(const Insole & insole,
 //		lastRight.ApplyTransformation(b);
 //		lastPlane.ApplyTransformation(b);
 //		lastCenter.ApplyTransformation(b);
+//		tg.Transform(b);
 	}
 
 	{
@@ -320,22 +411,22 @@ void LastModel::UpdateForm(const Insole & insole,
 //			lastPlane.ApplyTransformation(b);
 //			lastCenter.ApplyTransformation(b);
 
+//			tg.Transform(b);
 		}
-
 	}
 
 	{
 		// Align centerlines
 
 		TransformationMixer m;
-		const size_t N = 20;
+		const size_t N = 10;
 		Polynom pDistance = Polynom::ByValue(0, -0.5, N - 1, 0.5);
 		pDistance.ScaleY(0.95);
 		pDistance.ShiftY(0.5);
 		pDistance.ScaleY(insoleCenter.GetLength());
 		Polynom dDistance = pDistance.Derivative();
-		const double width = dDistance(0);
-
+		const double width = measurements.footLength.value / N;
+		auto func = Kernel::Scale(Kernel::Cauchy, width);
 		for(size_t n = 0; n < N; ++n){
 			const double L0 = pDistance(n);
 			auto I0 = insoleCenter.At(L0);
@@ -344,28 +435,47 @@ void LastModel::UpdateForm(const Insole & insole,
 			Vector3 translate = I0.p - A0.p;
 			AffineTransformMatrix tr;
 			tr.TranslateGlobal(translate.x, translate.y, translate.z);
-//			m.AddPlane(A0.p, A0.d, Kernel::Scale(Kernel::Cauchy, width/10), tr);
-			m.AddCylinder(A0.p, Vector3(0, 1, 0),
-					Kernel::Scale(Kernel::Cauchy, width / 5), tr);
+			m.AddPlane(A0.p, A0.d, func, tr);
+//			m.AddCylinder(A0.p, Vector3(0, 1, 0), func, tr);
 		}
 		resized.Transform(m);
 		lastLeft.ApplyTransformation(m);
 		lastRight.ApplyTransformation(m);
 		lastPlane.ApplyTransformation(m);
 		lastCenter.ApplyTransformation(m);
+//		tg.Transform(m);
 	}
+	/*
+	 {
+	 TransformationMixer m;
+	 AffineTransformMatrix tr;
 
+	 m.SetBackground(1.0);
+
+	 auto func = Kernel::Scale(Kernel::Gaussian, 0.02,
+	 1.0 / Kernel::Gaussian(0));
+
+	 tr.TranslateGlobal(0, 0, 0.2);
+	 m.AddCylinder(Vector3(0.2, 0, 0), Vector3(0, 1, 0), func, tr);
+	 //		m.AddSphere(Vector3(0.2, 0, 0), func, tr);
+	 tr.TranslateGlobal(0, 0, -0.4);
+	 m.AddCylinder(Vector3(0.0, 0, 0), Vector3(0, 1, 0), func, tr);
+
+	 tg.Transform(m);
+	 }
+	 */
 	{
 		// Scale width of the last
 
 		TransformationMixer m;
-		const size_t N = 6;
+		const size_t N = 15;
 		Polynom pDistance = Polynom::ByValue(0, -0.5, N - 1, 0.5);
 		pDistance.ScaleY(0.95);
 		pDistance.ShiftY(0.5);
 		pDistance.ScaleY(insoleCenter.GetLength());
 		Polynom dDistance = pDistance.Derivative();
-		const double width = dDistance(0);
+		const double width = measurements.footLength.value / N;
+		auto func = Kernel::Scale(Kernel::Gaussian, width);
 
 		Polygon3 sideCenter = lastLeft;
 		for(size_t n = 0; n < sideCenter.Size(); ++n)
@@ -392,133 +502,87 @@ void LastModel::UpdateForm(const Insole & insole,
 			tr.ScaleGlobal(1, sc, 1);
 			tr.TranslateGlobal(0, (insoleR.y - lastR.y * sc), 0);
 
-//						m.AddPlane(A0.p, A0.d, Kernel::Scale(Kernel::Cauchy, width/10), tr);
-			m.AddCylinder(A0.p, Vector3(0, 1, 0),
-					Kernel::Scale(Kernel::Cauchy, width / 3), tr);
+			m.AddPlane(A0.p, A0.d, func, tr);
+//			m.AddCylinder(A0.p, Vector3(0, 1, 0), func, tr);
 		}
 		resized.Transform(m);
 		lastLeft.ApplyTransformation(m);
 		lastRight.ApplyTransformation(m);
 		lastPlane.ApplyTransformation(m);
 		lastCenter.ApplyTransformation(m);
-
+//		tg.Transform(m);
 	}
-
 	{
 		// Scale girth of the last
 		TransformationMixer m;
+//		m.SetBackground(1.0);
+		const double width = insoleCenter.GetLength() / 4;
+		auto func = Kernel::Scale(Kernel::NormalizeY(Kernel::Gaussian), width);
 
-		const double width = insoleCenter.GetLength() / 20;
+//		Polynom E;
+//		E.Resize(9);
+//		E[8] = 1.0;
+//		E[6] = 1.0 / 4.0;
+//		E[4] = 1.0 / 64.0;
+//		E[2] = 1.0 / 256.0;
+//		E[0] = 25.0 / 16384.0;
+//		E *= M_PI;
 
+//		std::cout << E << "\n";
 		{
-			Vector3 n = (lastPlane[idxTop] - lastPlane[idxHeelPoint]).Normal();
-			Vector3 n2(-n.z, 0, n.x);
-			Polygon3 resizedHeelGirth = resized.IntersectPlane(n2,
-					n2.Dot(lastPlane[idxHeelPoint]));
-
-			const double a = atan2(n.z, n.x);
-			const Vector3 origin = lastPlane[idxHeelPoint];
-			AffineTransformMatrix tr;
-			const double scale = measurements.heelGirth.value
-					/ resizedHeelGirth.GetLength();
-			tr.ScaleGlobal(scale, 1, 1);
-
-			tr = AffineTransformMatrix::RotationXYZ(0, -a, 0) * tr
-					* AffineTransformMatrix::RotationXYZ(0, a, 0);
-
-			tr.TranslateGlobal(-origin.x, -origin.y, -origin.z);
-			tr.TranslateLocal(origin.x, origin.y, origin.z);
-
-			m.AddPlane(origin, n2, Kernel::Scale(Kernel::Cauchy, width), tr);
-		}
-		{
-			Vector3 n =
-					(lastPlane[idxWaistTop] - lastPlane[idxWaistBottom]).Normal();
-			Vector3 n2(-n.z, 0, n.x);
-			Polygon3 resizedWaistGirth = resized.IntersectPlane(n2,
-					n2.Dot(lastPlane[idxWaistBottom]));
-
-			const double a = atan2(n.z, n.x);
-			const Vector3 origin = lastPlane[idxWaistBottom];
-			AffineTransformMatrix tr;
-			const double scale = measurements.waistGirth.value
-					/ resizedWaistGirth.GetLength();
-			tr.ScaleGlobal(scale, 1, 1);
-
-			tr = AffineTransformMatrix::RotationXYZ(0, -a, 0) * tr
-					* AffineTransformMatrix::RotationXYZ(0, a, 0);
-
-			tr.TranslateGlobal(-origin.x, -origin.y, -origin.z);
-			tr.TranslateLocal(origin.x, origin.y, origin.z);
-
-			m.AddPlane(origin, n2, Kernel::Scale(Kernel::Cauchy, width), tr);
-
-		}
-		{
-			Vector3 n = (lastPlane[idxLittleToeTop]
-					- lastPlane[idxLittleToeBottom]).Normal();
-			Vector3 n2(-n.z, 0, n.x);
-			Polygon3 resizedLittleToeGirth = resized.IntersectPlane(n2,
-					n2.Dot(lastPlane[idxLittleToeBottom]));
-
-			const double a = atan2(n.z, n.x);
-			const Vector3 origin = lastPlane[idxLittleToeBottom];
-			AffineTransformMatrix tr;
-			const double scale = measurements.littleToeGirth.value
-					/ resizedLittleToeGirth.GetLength();
-			tr.ScaleGlobal(scale, 1, 1);
-
-			tr = AffineTransformMatrix::RotationXYZ(0, -a, 0) * tr
-					* AffineTransformMatrix::RotationXYZ(0, a, 0);
-
-			tr.TranslateGlobal(-origin.x, -origin.y, -origin.z);
-			tr.TranslateLocal(origin.x, origin.y, origin.z);
-
-			m.AddPlane(origin, n2, Kernel::Scale(Kernel::Cauchy, width), tr);
-
-		}
-		{
-			Vector3 n =
-					(lastPlane[idxBigToeTop] - lastPlane[idxBigToeBottom]).Normal();
-			Vector3 n2(-n.z, 0, n.x);
-			Polygon3 resizedBigToeGirth = resized.IntersectPlane(n2,
-					n2.Dot(lastPlane[idxBigToeBottom]));
-
-			const double a = atan2(n.z, n.x);
-			const Vector3 origin = lastPlane[idxBigToeBottom];
-			AffineTransformMatrix tr;
-			const double scale = measurements.bigToeGirth.value
-					/ resizedBigToeGirth.GetLength();
-			tr.ScaleGlobal(scale, 1, 1);
-
-			tr = AffineTransformMatrix::RotationXYZ(0, -a, 0) * tr
-					* AffineTransformMatrix::RotationXYZ(0, a, 0);
-
-			tr.TranslateGlobal(-origin.x, -origin.y, -origin.z);
-			tr.TranslateLocal(origin.x, origin.y, origin.z);
-
-			m.AddPlane(origin, n2, Kernel::Scale(Kernel::Cauchy, width), tr);
+			LastModel::Cut cut = CalculateCut(resized, lastPlane[idxHeelPoint],
+					lastPlane[idxTop]);
+			const AffineTransformMatrix tr = RotatedScale(cut,
+					measurements.heelGirth.value);
+			m.AddPlane(cut.m.GetOrigin(), cut.m.GetEz(), func, tr);
 		}
 
+		{
+			LastModel::Cut cut = CalculateCut(resized,
+					lastPlane[idxWaistBottom], lastPlane[idxWaistTop]);
+			const AffineTransformMatrix tr = RotatedScale(cut,
+					measurements.waistGirth.value);
+			m.AddPlane(cut.m.GetOrigin(), cut.m.GetEz(), func, tr);
+		}
+		{
+			LastModel::Cut cut = CalculateCut(resized,
+					lastPlane[idxLittleToeBottom], lastPlane[idxLittleToeTop]);
+			const AffineTransformMatrix tr = RotatedScale(cut,
+					measurements.littleToeGirth.value);
+			m.AddPlane(cut.m.GetOrigin(), cut.m.GetEz(), func, tr);
+		}
+		{
+			LastModel::Cut cut = CalculateCut(resized,
+					lastPlane[idxBigToeBottom], lastPlane[idxBigToeTop]);
+			const AffineTransformMatrix tr = RotatedScale(cut,
+					measurements.bigToeGirth.value);
+			m.AddPlane(cut.m.GetOrigin(), cut.m.GetEz(), func, tr);
+		}
+
+//		m.SetBackground(1.0);
 		resized.Transform(m);
 		lastLeft.ApplyTransformation(m);
 		lastRight.ApplyTransformation(m);
 		lastPlane.ApplyTransformation(m);
 		lastCenter.ApplyTransformation(m);
+		tg.Transform(m);
+
 	}
 
 	{
 		// Align centerlines (again)
 
 		TransformationMixer m;
-		const size_t N = 20;
+		const size_t N = 10;
 		Polynom pDistance = Polynom::ByValue(0, -0.5, N - 1, 0.5);
-		pDistance.ScaleY(0.95);
+		pDistance.ScaleY(0.98);
 		pDistance.ShiftY(0.5);
 		pDistance.ScaleY(insoleCenter.GetLength());
 		Polynom dDistance = pDistance.Derivative();
-		const double width = dDistance(0);
+		const double width = measurements.footLength.value / N * 2.0;
 		const double scale = insoleCenter.GetLength() / lastCenter.GetLength();
+
+		auto func = Kernel::Scale(Kernel::NormalizeY(Kernel::Gaussian), width);
 
 		for(size_t n = 0; n < N; ++n){
 			const double L0 = pDistance(n);
@@ -528,15 +592,84 @@ void LastModel::UpdateForm(const Insole & insole,
 			Vector3 translate = I0.p - A0.p;
 			AffineTransformMatrix tr;
 			tr.TranslateGlobal(translate.x, translate.y, translate.z);
-			//			m.AddPlane(A0.p, A0.d, Kernel::Scale(Kernel::Cauchy, width/10), tr);
-			m.AddCylinder(A0.p, Vector3(0, 1, 0),
-					Kernel::Scale(Kernel::Cauchy, width / 5), tr);
+//			m.AddPlane(A0.p, A0.d, func, tr);
+			m.AddCylinder(A0.p, Vector3(0, 1, 0), func, tr);
 		}
 		resized.Transform(m);
 		lastLeft.ApplyTransformation(m);
 		lastRight.ApplyTransformation(m);
 		lastPlane.ApplyTransformation(m);
 		lastCenter.ApplyTransformation(m);
+//		tg.Transform(m);
+	}
+
+	{
+		// Scale width of the last (again)
+
+		TransformationMixer m;
+		const size_t N = 15;
+		Polynom pDistance = Polynom::ByValue(0, -0.5, N - 1, 0.5);
+		pDistance.ScaleY(0.95);
+		pDistance.ShiftY(0.5);
+		pDistance.ScaleY(insoleCenter.GetLength());
+		Polynom dDistance = pDistance.Derivative();
+		const double width = measurements.footLength.value;
+		auto func = Kernel::Scale(Kernel::Gaussian, width / N);
+		Polygon3 sideCenter = lastLeft;
+		for(size_t n = 0; n < sideCenter.Size(); ++n)
+			sideCenter[n] += lastRight[n];
+		sideCenter /= 2;
+
+		for(size_t n = 0; n < N; ++n){
+			const double L0 = pDistance(n);
+
+			auto I0 = insoleCenter.At(L0);
+			size_t idx = I0.idx;
+			if(I0.rel > 0.5) ++idx;
+			Vector3 insoleR = insole.inside[idx];
+			Vector3 insoleL = insole.outside[idx];
+
+			auto A0 = lastCenter.At(L0);
+			size_t lastIdx = sideCenter.ClosestPoint(A0.p);
+
+			Vector3 lastR = lastRight[lastIdx];
+			Vector3 lastL = lastLeft[lastIdx];
+
+			AffineTransformMatrix tr;
+			const double sc = (insoleR.y - insoleL.y) / (lastR.y - lastL.y);
+			tr.ScaleGlobal(1, sc, 1);
+			tr.TranslateGlobal(0, (insoleR.y - lastR.y * sc), 0);
+
+			m.AddPlane(A0.p, A0.d, func, tr);
+//			m.AddCylinder(A0.p, Vector3(0, 1, 0), func, tr);
+		}
+		resized.Transform(m);
+		lastLeft.ApplyTransformation(m);
+		lastRight.ApplyTransformation(m);
+		lastPlane.ApplyTransformation(m);
+		lastCenter.ApplyTransformation(m);
+		//		tg.Transform(m);
+	}
+
+	{
+		LastModel::Cut cutHeelGirth = CalculateCut(resized,
+				lastPlane[idxHeelPoint], lastPlane[idxTop]);
+		LastModel::Cut cutWaistGirth = CalculateCut(resized,
+				lastPlane[idxWaistBottom], lastPlane[idxWaistTop]);
+		LastModel::Cut cutLittleToeGirth = CalculateCut(resized,
+				lastPlane[idxLittleToeBottom], lastPlane[idxLittleToeTop]);
+		LastModel::Cut cutBigToeGirth = CalculateCut(resized,
+				lastPlane[idxBigToeBottom], lastPlane[idxBigToeTop]);
+
+		std::cout << "HeelGirth - " << measurements.heelGirth.value * 100
+				<< " cm -> " << cutHeelGirth.p.GetLength() * 100 << " cm\n";
+		std::cout << "WaistGirth - " << measurements.waistGirth.value * 100
+				<< " cm -> " << cutWaistGirth.p.GetLength() * 100 << " cm\n";
+		std::cout << "LittleToeGirth - "
+				<< measurements.littleToeGirth.value * 100 << " cm -> "
+				<< cutLittleToeGirth.p.GetLength() * 100 << " cm\n";
+		std::cout << "BigToeGirth - " << measurements.bigToeGirth.value * 100
+				<< " cm -> " << cutBigToeGirth.p.GetLength() * 100 << " cm\n";
 	}
 
 //	TransformationMixerVector mixervector;
@@ -885,6 +1018,7 @@ void LastModel::PaintAnalysis(void) const
 
 void LastModel::Paint(void) const
 {
+//	tg.PaintLines();
 	resized.Paint();
 }
 
@@ -931,16 +1065,13 @@ void LastModel::Transform(std::function <Vector3(Vector3)> func)
 
 	for(size_t n = 0; n < resized.Size(); ++n)
 		resized[n] = func(raw[n]);
-
 }
 
 void LastModel::Mirror(void)
 {
 	AffineTransformMatrix m;
 	m.ScaleGlobal(1, -1, 1);
-	for(size_t n = 0; n < resized.Size(); ++n)
-		resized[n] = m(resized[n]);
-	resized.FlipNormals();
+	resized.Transform(m);
 }
 
 bool LastModel::Vector3XLess(const Vector3 a, const Vector3 b)

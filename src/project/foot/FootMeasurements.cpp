@@ -30,6 +30,7 @@
 
 #include <cmath>
 
+#include "../../system/JSON.h"
 FootMeasurements::FootMeasurements()
 		: footLength("footLength"), ballWidth("ballWidth"), bigToeGirth(
 				"bigToeGirth"), littleToeGirth("littleToeGirth"), waistGirth(
@@ -380,3 +381,99 @@ const ParameterFormula& FootMeasurements::GetParameter(int id) const
 	}
 }
 
+bool FootMeasurements::LoadJSON(std::string filename)
+{
+	JSON js;
+	try{
+		js = JSON::Load(filename);
+	}
+	catch(std::exception & e){
+		std::cout << "While loading " << filename << " :\n";
+		std::cout << e.what() << "\n";
+		return false;
+	}
+	if(!js.IsObject()) return false;
+	if(js.HasKey("footLength")) footLength.formula = js["footLength"].GetString(
+			"");
+	if(js.HasKey("ballWidth")) ballWidth.formula = js["ballWidth"].GetString(
+			"");
+	if(js.HasKey("bigToeGirth")) bigToeGirth.formula =
+			js["bigToeGirth"].GetString("");
+	if(js.HasKey("littleToeGirth")) littleToeGirth.formula =
+			js["littleToeGirth"].GetString("");
+	if(js.HasKey("waistGirth")) waistGirth.formula = js["waistGirth"].GetString(
+			"");
+	if(js.HasKey("heelGirth")) heelGirth.formula = js["heelGirth"].GetString(
+			"");
+	if(js.HasKey("heelWidth")) heelWidth.formula = js["heelWidth"].GetString(
+			"");
+	if(js.HasKey("angleMixing")) angleMixing.formula =
+			js["angleMixing"].GetString("");
+	if(js.HasKey("belowCrutchGirth")) belowCrutchGirth.formula =
+			js["belowCrutchGirth"].GetString("");
+	if(js.HasKey("belowCrutchLevel")) belowCrutchLevel.formula =
+			js["belowCrutchLevel"].GetString("");
+	if(js.HasKey("middleOfCalfGirth")) middleOfCalfGirth.formula =
+			js["middleOfCalfGirth"].GetString("");
+	if(js.HasKey("middleOfCalfLevel")) middleOfCalfLevel.formula =
+			js["middleOfCalfLevel"].GetString("");
+	if(js.HasKey("aboveKneeGirth")) aboveKneeGirth.formula =
+			js["aboveKneeGirth"].GetString("");
+	if(js.HasKey("aboveKneeLevel")) aboveKneeLevel.formula =
+			js["aboveKneeLevel"].GetString("");
+	if(js.HasKey("overKneeCapGirth")) overKneeCapGirth.formula =
+			js["overKneeCapGirth"].GetString("");
+	if(js.HasKey("overKneeCapLevel")) overKneeCapLevel.formula =
+			js["overKneeCapLevel"].GetString("");
+	if(js.HasKey("belowKneeGirth")) belowKneeGirth.formula =
+			js["belowKneeGirth"].GetString("");
+	if(js.HasKey("belowKneeLevel")) belowKneeLevel.formula =
+			js["belowKneeLevel"].GetString("");
+	if(js.HasKey("middleOfShankGirth")) middleOfShankGirth.formula =
+			js["middleOfShankGirth"].GetString("");
+	if(js.HasKey("middleOfShankLevel")) middleOfShankLevel.formula =
+			js["middleOfShankLevel"].GetString("");
+	if(js.HasKey("aboveAnkleGirth")) aboveAnkleGirth.formula =
+			js["aboveAnkleGirth"].GetString("");
+	if(js.HasKey("aboveAnkleLevel")) aboveAnkleLevel.formula =
+			js["aboveAnkleLevel"].GetString("");
+	if(js.HasKey("overAnkleBoneGirth")) overAnkleBoneGirth.formula =
+			js["overAnkleBoneGirth"].GetString("");
+	if(js.HasKey("overAnkleBoneLevel")) overAnkleBoneLevel.formula =
+			js["overAnkleBoneLevel"].GetString("");
+
+	return true;
+}
+
+bool FootMeasurements::SaveJSON(std::string filename) const
+{
+	JSON js;
+	js.SetObject(true);
+	js["footLength"].SetString(footLength.formula);
+	js["ballWidth"].SetString(ballWidth.formula);
+	js["bigToeGirth"].SetString(bigToeGirth.formula);
+	js["littleToeGirth"].SetString(littleToeGirth.formula);
+	js["waistGirth"].SetString(waistGirth.formula);
+	js["heelGirth"].SetString(heelGirth.formula);
+	js["heelWidth"].SetString(heelWidth.formula);
+	js["angleMixing"].SetString(angleMixing.formula);
+	js["belowCrutchGirth"].SetString(belowCrutchGirth.formula);
+	js["belowCrutchLevel"].SetString(belowCrutchLevel.formula);
+	js["middleOfCalfGirth"].SetString(middleOfCalfGirth.formula);
+	js["middleOfCalfLevel"].SetString(middleOfCalfLevel.formula);
+	js["aboveKneeGirth"].SetString(aboveKneeGirth.formula);
+	js["aboveKneeLevel"].SetString(aboveKneeLevel.formula);
+	js["overKneeCapGirth"].SetString(overKneeCapGirth.formula);
+	js["overKneeCapLevel"].SetString(overKneeCapLevel.formula);
+	js["belowKneeGirth"].SetString(belowKneeGirth.formula);
+	js["belowKneeLevel"].SetString(belowKneeLevel.formula);
+	js["middleOfShankGirth"].SetString(middleOfShankGirth.formula);
+	js["middleOfShankLevel"].SetString(middleOfShankLevel.formula);
+	js["aboveAnkleGirth"].SetString(aboveAnkleGirth.formula);
+	js["aboveAnkleLevel"].SetString(aboveAnkleLevel.formula);
+	js["overAnkleBoneGirth"].SetString(overAnkleBoneGirth.formula);
+	js["overAnkleBoneLevel"].SetString(overAnkleBoneLevel.formula);
+
+	js.Save(filename);
+	return true;
+}

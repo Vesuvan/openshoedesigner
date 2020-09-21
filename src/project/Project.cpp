@@ -87,6 +87,14 @@ Project::Project()
 	lastModelL = lastModelR;
 	lastModelL.mirrored = true;
 
+	try{
+		measR.LoadJSON("test.json");
+	}
+	catch(std::exception & ex){
+		std::cout << "Exception: " << ex.what() << "\n";
+	}
+	measL = measR;
+
 	Bind(wxEVT_COMMAND_THREAD_COMPLETED, &Project::OnCalculationDone, this);
 	Bind(wxEVT_COMMAND_THREAD_UPDATE, &Project::OnRefreshViews, this);
 }
@@ -131,66 +139,58 @@ void Project::StopAllThreads(void)
 
 void Project::Update(void)
 {
-	{
-		// Update the left foot/shoe
-		MathParser parser;
-		parser.ignorecase = true;
-		parser.AddAllowedUnit("mm", 1e-3);
-		parser.AddAllowedUnit("cm", 1e-2);
-		parser.AddAllowedUnit("m", 1);
-		parser.AddAllowedUnit("in", 2.54e-2);
-		parser.AddAllowedUnit("ft", 0.3048);
-		parser.AddAllowedUnit("rad", 1);
-		parser.AddAllowedUnit("deg", 0.017453);
-		parser.AddAllowedUnit("gon", 0.015708);
-		measL.Update(parser);
-		legLengthDifference.Update(parser);
-		if(legLengthDifference.IsModified()){
-			measL.Modify(true);
-			measR.Modify(true);
-		}
-		shoe.Update(parser);
-		if(shoe.IsModified()){
-			shoe.Modify(false);
-			measL.Modify(true);
-			measR.Modify(true);
-		}
-		if(measL.IsModified()){
-			insoleL.Modify(true);
-			if(thread0 == NULL){
-				thread0 = new WorkerThread(this, 0);
-				if(thread0->Run() != wxTHREAD_NO_ERROR){
-					wxLogError
-					("Can't create the thread0!");
-					delete thread0;
-					thread0 = NULL;
-				}
+
+	// Update the left foot/shoe
+	MathParser parserR;
+	parserR.ignorecase = true;
+	parserR.AddAllowedUnit("mm", 1e-3);
+	parserR.AddAllowedUnit("cm", 1e-2);
+	parserR.AddAllowedUnit("m", 1);
+	parserR.AddAllowedUnit("in", 2.54e-2);
+	parserR.AddAllowedUnit("ft", 0.3048);
+	parserR.AddAllowedUnit("rad", 1);
+	parserR.AddAllowedUnit("deg", 0.017453);
+	parserR.AddAllowedUnit("gon", 0.015708);
+	MathParser parserL = parserR;
+
+	measR.Update(parserR);
+	measL.Update(parserL);
+	legLengthDifference.Update(parserR);
+	shoe.Update(parserR);
+
+	if(measR.IsModified() || legLengthDifference.IsModified()
+			|| shoe.IsModified() || lastModelR.IsModified()){
+
+		if(measR.IsModified()) footR.ModifyForm(true);
+		measR.Modify(false);
+		insoleR.Modify(true);
+
+		if(measR.IsModified()) footR.ModifyForm(true);
+		if(thread1 == NULL){
+			thread1 = new WorkerThread(this, 1);
+			if(thread1->Run() != wxTHREAD_NO_ERROR){
+				wxLogError
+				("Can't create the thread1!");
+				delete thread1;
+				thread1 = NULL;
 			}
 		}
 	}
-	{
-		// Update right foot/shoe
-		MathParser parser;
-		parser.ignorecase = true;
-		parser.AddAllowedUnit("mm", 1e-3);
-		parser.AddAllowedUnit("cm", 1e-2);
-		parser.AddAllowedUnit("m", 1);
-		parser.AddAllowedUnit("in", 2.54e-2);
-		parser.AddAllowedUnit("ft", 0.3048);
-		parser.AddAllowedUnit("rad", 1);
-		parser.AddAllowedUnit("deg", 0.017453);
-		parser.AddAllowedUnit("gon", 0.015708);
-		measR.Update(parser);
-		if(measR.IsModified()){
-			insoleR.Modify(true);
-			if(thread1 == NULL){
-				thread1 = new WorkerThread(this, 1);
-				if(thread1->Run() != wxTHREAD_NO_ERROR){
-					wxLogError
-					("Can't create the thread1!");
-					delete thread1;
-					thread1 = NULL;
-				}
+	if(measL.IsModified() || legLengthDifference.IsModified()
+			|| shoe.IsModified() || lastModelL.IsModified()){
+		if(measL.IsModified()) footL.ModifyForm(true);
+		measL.Modify(false);
+		legLengthDifference.Modify(false);
+		shoe.Modify(false);
+		insoleL.Modify(true);
+
+		if(thread0 == NULL){
+			thread0 = new WorkerThread(this, 0);
+			if(thread0->Run() != wxTHREAD_NO_ERROR){
+				wxLogError
+				("Can't create the thread0!");
+				delete thread0;
+				thread0 = NULL;
 			}
 		}
 	}
@@ -200,64 +200,64 @@ void Project::Update(void)
 bool Project::UpdateLeft(void)
 {
 	wxCriticalSectionLocker locker(CSLeft);
-	if(measL.IsModified()){
-		measL.Modify(false);
+	if(insoleL.IsModified()){
+		insoleL.Modify(false);
+		insoleL.Mirror(false);
+		insoleL.Construct(shoe, measL);
+		insoleL.Shape(shoe, fmax(legLengthDifference.value, 0));
+		insoleL.Mirror(true);
 		lastModelL.Modify(true);
-		footL.UpdateForm(measL);
+		footL.ModifyPosition(true);
 		return true;
 	}
 	if(footL.IsModifiedForm()){
 		footL.ModifyForm(false);
-		footL.UpdatePosition(shoe, fmax(legLengthDifference.value, 0),
-				measL.angleMixing.value);
+//		footL.UpdateForm(measL);
+		footL.ModifyPosition(true);
 		return true;
-	}
-	if(footL.IsModifiedPosition()){
-		footL.ModifyPosition(false);
-		footL.CalculateSkin();
-		return true;
-	}
-	if(insoleL.IsModified()){
-		insoleL.Modify(false);
-		insoleL.Mirror(false);
-		insoleL.Construct(shoe, measR);
-		insoleL.Shape(shoe, fmax(legLengthDifference.value, 0));
-		insoleL.Mirror(true);
-		lastModelL.Modify(true);
-		return true;
-	}
+	}/*
+	 if (footL.IsModifiedPosition()) {
+	 footL.ModifyPosition(false);
+	 footL.UpdatePosition(shoe, fmax(legLengthDifference.value, 0),
+	 measL.angleMixing.value);
+	 footL.ModifySkin(true);
+	 return true;
+	 }
+
+	 if (footL.IsModifiedSkin()) {
+	 footL.ModifySkin(false);
+	 footL.CalculateSkin();
+
+	 heightfield = footL.skin.SurfaceField();
+	 OrientedMatrix temp = heightfield.XRay(Volume::Method::MinValue);
+	 bow.Clear();
+	 for (unsigned int i = 0; i < temp.Numel(); i++) {
+	 if (temp[i] < DBL_MAX) {
+	 bow.InsertPoint(i * temp.dx + temp.origin.x, 0,
+	 temp[i] + temp.origin.z);
+	 }
+	 }
+	 xray = footL.skin.XRay(Volume::Method::MeanValue);
+	 bow = footL.GetCenterline();
+	 //	bow.elements[0] = lastvol.GetSurface(bow.elements[1],
+	 //			(bow.elements[0] - bow.elements[1]) * 2);
+	 //	size_t M = bow.elements.GetCount();
+	 //	bow.elements[M - 1] = lastvol.GetSurface(bow.elements[M - 2],
+	 //			(bow.elements[M - 1] - bow.elements[M - 2]) * 2);
+	 //
+	 bow.Resample(50);
+	 bow.Filter(20);
+
+	 return true;
+	 }*/
 	if(lastModelL.IsModified()){
 		lastModelL.Modify(false);
+		insoleL.Mirror(false);
 		lastModelL.UpdateForm(insoleL, measL);
 		lastModelL.Mirror();
+		insoleL.Mirror(true);
 		return true;
 	}
-
-	if(footL.IsModifiedSkin()){
-		footL.ModifySkin(false);
-		heightfield = footL.skin.SurfaceField();
-		OrientedMatrix temp = heightfield.XRay(Volume::Method::MinValue);
-		bow.Clear();
-		for(unsigned int i = 0; i < temp.Numel(); i++){
-			if(temp[i] < DBL_MAX){
-				bow.InsertPoint(i * temp.dx + temp.origin.x, 0,
-						temp[i] + temp.origin.z);
-			}
-		}
-		xray = footL.skin.XRay(Volume::Method::MeanValue);
-		bow = footL.GetCenterline();
-		//	bow.elements[0] = lastvol.GetSurface(bow.elements[1],
-		//			(bow.elements[0] - bow.elements[1]) * 2);
-		//	size_t M = bow.elements.GetCount();
-		//	bow.elements[M - 1] = lastvol.GetSurface(bow.elements[M - 2],
-		//			(bow.elements[M - 1] - bow.elements[M - 2]) * 2);
-		//
-		bow.Resample(50);
-		bow.Filter(20);
-
-		return true;
-	}
-
 	printf("Update L - done\n");
 	return false;
 }
@@ -265,31 +265,32 @@ bool Project::UpdateLeft(void)
 bool Project::UpdateRight(void)
 {
 	wxCriticalSectionLocker locker(CSRight);
-	if(measR.IsModified()){
-		measR.Modify(false);
-		lastModelR.Modify(true);
-		insoleR.Modify(true);
-		footR.UpdateForm(measR);
-		return true;
-	}
-	if(footR.IsModifiedForm()){
-		footR.ModifyForm(false);
-		footR.UpdatePosition(shoe, fmax(-legLengthDifference.value, 0),
-				measR.angleMixing.value);
-		return true;
-	}
-	if(footR.IsModifiedPosition()){
-		footR.ModifyPosition(false);
-		footR.CalculateSkin();
-		return true;
-	}
 	if(insoleR.IsModified()){
 		insoleR.Modify(false);
 		insoleR.Construct(shoe, measR);
 		insoleR.Shape(shoe, fmax(-legLengthDifference.value, 0));
 		lastModelR.Modify(true);
+		footR.ModifyPosition(true);
 		return true;
 	}
+	if(footR.IsModifiedForm()){
+		footR.ModifyForm(false);
+//		footR.UpdateForm(measR);
+		footR.ModifyPosition(true);
+		return true;
+	}/*
+	 if (footR.IsModifiedPosition()) {
+	 footR.ModifyPosition(false);
+	 footR.UpdatePosition(shoe, fmax(-legLengthDifference.value, 0),
+	 measR.angleMixing.value);
+	 footR.ModifySkin(true);
+	 return true;
+	 }
+	 if (footR.IsModifiedSkin()) {
+	 footR.ModifySkin(false);
+	 footR.CalculateSkin();
+	 return true;
+	 }*/
 	if(lastModelR.IsModified()){
 		lastModelR.Modify(false);
 		lastModelR.UpdateForm(insoleR, measR);
@@ -387,8 +388,15 @@ bool Project::LoadLastModel(wxString fileName)
 	catch(std::exception &exeption){
 		std::cout << "Exeption caught: " << exeption.what() << "\n";
 	}
+//	if (!lastModelR.AnalyseForm()) {
+//		std::cout << "Failed to analyse the form of the loaded model.\n";
+//		return false;
+//	}
 	lastModelL = lastModelR;
-	lastModelL.mirrored = true;
+	lastModelL.Mirror();
+	lastModelR.Modify(true);
+	lastModelL.Modify(true);
+	Update();
 	return true;
 }
 
@@ -396,6 +404,8 @@ bool Project::SaveLast(wxString fileName, bool left, bool right)
 {
 	if(left) lastModelL.resized.SaveObj(fileName.ToStdString());
 	if(right) lastModelR.resized.SaveObj(fileName.ToStdString());
+
+//	measR.SaveJSON("test.json");
 
 //	wxFFileOutputStream outStream(fileName);
 //	FileSTL temp;

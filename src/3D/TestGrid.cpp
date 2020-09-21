@@ -129,3 +129,9 @@ void TestGrid::PaintLines(void) const
 	}
 
 }
+
+void TestGrid::Transform(std::function <Vector3(Vector3)> func)
+{
+	for(auto & v : p)
+		v = func(v);
+}

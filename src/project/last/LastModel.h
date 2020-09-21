@@ -126,9 +126,16 @@ public:
 	bool mirrored = false;
 
 private:
+	struct Cut {
+		Polygon3 p;
+		AffineTransformMatrix m;
+	};
+
 	void PaintMarker(const size_t idx, const OpenGLText &font,
 			const std::string & text) const;
-
+	Cut CalculateCut(const Hull & hull, const Vector3 & p0, const Vector3 & p1);
+	AffineTransformMatrix RotatedScale(const Cut & c, double target) const;
+	BoundingBox CalculateBoundingBox(const Polygon3 & polygon) const;
 public:
 	LastModel();
 	virtual ~LastModel() = default;
@@ -137,7 +144,8 @@ public:
 
 	void Transform(std::function <Vector3(Vector3)> func);
 
-	void UpdateForm(const Insole & insole, const FootMeasurements & measurements);
+	void UpdateForm(const Insole & insole,
+			const FootMeasurements & measurements);
 
 	void Paint(void) const;
 	void PaintAnalysis(void) const;

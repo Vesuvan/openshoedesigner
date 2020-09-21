@@ -68,6 +68,8 @@ public:
 	void Modify(bool modify = true);
 
 	void SetDefaults(void);
+	bool LoadJSON(std::string filename);
+	bool SaveJSON(std::string filename) const;
 
 	void Update(void);
 	void Update(MathParser &parser);
@@ -111,7 +113,6 @@ public:
 	ParameterFormula aboveAnkleLevel;
 	ParameterFormula overAnkleBoneGirth;
 	ParameterFormula overAnkleBoneLevel;
-
 
 };
 
